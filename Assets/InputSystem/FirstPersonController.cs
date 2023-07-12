@@ -13,43 +13,45 @@ namespace StarterAssets
 	{
 		[Header("Player")]
 		[Tooltip("Move speed of the character in m/s")]
-		public float MoveSpeed = 4.0f;
+		[SerializeField] float MoveSpeed = 4.0f;
 		[Tooltip("Sprint speed of the character in m/s")]
-		public float SprintSpeed = 6.0f;
+		[SerializeField] float SprintSpeed = 6.0f;
+		[Tooltip("Crouch speed of the character in m/s")]
+		[SerializeField] float crouchSpeed = 0.6f;
 		[Tooltip("Rotation speed of the character")]
-		public float RotationSpeed = 1.0f;
+		[SerializeField] float RotationSpeed = 1.0f;
 		[Tooltip("Acceleration and deceleration")]
-		public float SpeedChangeRate = 10.0f;
+		[SerializeField] float SpeedChangeRate = 10.0f;
+		[Tooltip("Max slope that can be climed up")]
+		[SerializeField] float MaxSlopeAngle = 45.0f;
+		[Tooltip("height of the camera while in crouch state")]
+		[SerializeField] float crouchYScale = 0.5f;
 
 		[Space(10)]
-		[Tooltip("The height the player can jump")]
-		public float JumpHeight = 1.2f;
 		[Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
-		public float Gravity = -15.0f;
+		[SerializeField] float Gravity = -15.0f;
 
 		[Space(10)]
-		[Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
-		public float JumpTimeout = 0.1f;
 		[Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
-		public float FallTimeout = 0.15f;
+		[SerializeField] float FallTimeout = 0.15f;
 
 		[Header("Player Grounded")]
 		[Tooltip("If the character is grounded or not. Not part of the CharacterController built in grounded check")]
-		public bool Grounded = true;
+		[SerializeField] bool Grounded = true;
 		[Tooltip("Useful for rough ground")]
-		public float GroundedOffset = -0.14f;
+		[SerializeField] float GroundedOffset = -0.14f;
 		[Tooltip("The radius of the grounded check. Should match the radius of the CharacterController")]
-		public float GroundedRadius = 0.5f;
+		[SerializeField] float GroundedRadius = 0.5f;
 		[Tooltip("What layers the character uses as ground")]
-		public LayerMask GroundLayers;
+		[SerializeField] LayerMask GroundLayers;
 
 		[Header("Cinemachine")]
 		[Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
-		public GameObject CinemachineCameraTarget;
+		[SerializeField] GameObject CinemachineCameraTarget;
 		[Tooltip("How far in degrees can you move the camera up")]
-		public float TopClamp = 90.0f;
+		[SerializeField] float TopClamp = 90.0f;
 		[Tooltip("How far in degrees can you move the camera down")]
-		public float BottomClamp = -90.0f;
+		[SerializeField] float BottomClamp = -90.0f;
 
 		// cinemachine
 		private float _cinemachineTargetPitch;
@@ -59,9 +61,11 @@ namespace StarterAssets
 		private float _rotationVelocity;
 		private float _verticalVelocity;
 		private float _terminalVelocity = 53.0f;
+		private float startYScale;
+		private float targetSpeed;
+		private bool isCrouched = false;
 
 		// timeout deltatime
-		private float _jumpTimeoutDelta;
 		private float _fallTimeoutDelta;
 
 	
@@ -70,7 +74,6 @@ namespace StarterAssets
 #endif
 		private CharacterController _controller;
 		private StarterAssetsInputs _input;
-		private GameObject _mainCamera;
 
 		private const float _threshold = 0.01f;
 
@@ -86,15 +89,6 @@ namespace StarterAssets
 			}
 		}
 
-		private void Awake()
-		{
-			// get a reference to our main camera
-			if (_mainCamera == null)
-			{
-				_mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-			}
-		}
-
 		private void Start()
 		{
 			_controller = GetComponent<CharacterController>();
@@ -104,17 +98,26 @@ namespace StarterAssets
 #else
 			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
 #endif
+			startYScale = transform.localScale.y;
 
 			// reset our timeouts on start
-			_jumpTimeoutDelta = JumpTimeout;
 			_fallTimeoutDelta = FallTimeout;
 		}
 
 		private void Update()
 		{
-			JumpAndGravity();
 			GroundedCheck();
+			JumpAndGravity();
 			Move();
+
+			if (_input.crouch && !isCrouched)
+			{
+				Crouch(true);
+			}
+			else if (!_input.crouch && isCrouched)
+			{
+				Crouch(false);
+			}
 		}
 
 		private void LateUpdate()
@@ -154,7 +157,18 @@ namespace StarterAssets
 		private void Move()
 		{
 			// set target speed based on move speed, sprint speed and if sprint is pressed
-			float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+			if (_input.sprint && !_input.crouch)
+			{
+				targetSpeed = SprintSpeed;
+			}
+			else if (isCrouched)
+			{
+				targetSpeed = crouchSpeed;
+			}
+			else
+			{
+				targetSpeed = MoveSpeed;
+			}
 
 			// a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
@@ -198,6 +212,22 @@ namespace StarterAssets
 			_controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 		}
 
+		private void Crouch(bool crouchNow)
+		{
+			if (crouchNow)
+			{
+				transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
+				isCrouched = true;
+				Debug.Log("Crouching");
+			}
+			else if (!crouchNow)
+			{
+				transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
+				isCrouched = false;
+				Debug.Log("Standing");
+			}
+		}
+
 		private void JumpAndGravity()
 		{
 			if (Grounded)
@@ -210,33 +240,14 @@ namespace StarterAssets
 				{
 					_verticalVelocity = -2f;
 				}
-
-				// Jump
-				if (_input.jump && _jumpTimeoutDelta <= 0.0f)
-				{
-					// the square root of H * -2 * G = how much velocity needed to reach desired height
-					_verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
-				}
-
-				// jump timeout
-				if (_jumpTimeoutDelta >= 0.0f)
-				{
-					_jumpTimeoutDelta -= Time.deltaTime;
-				}
 			}
 			else
 			{
-				// reset the jump timeout timer
-				_jumpTimeoutDelta = JumpTimeout;
-
 				// fall timeout
 				if (_fallTimeoutDelta >= 0.0f)
 				{
 					_fallTimeoutDelta -= Time.deltaTime;
 				}
-
-				// if we are not grounded, do not jump
-				_input.jump = false;
 			}
 
 			// apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
@@ -251,18 +262,6 @@ namespace StarterAssets
 			if (lfAngle < -360f) lfAngle += 360f;
 			if (lfAngle > 360f) lfAngle -= 360f;
 			return Mathf.Clamp(lfAngle, lfMin, lfMax);
-		}
-
-		private void OnDrawGizmosSelected()
-		{
-			Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
-			Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
-
-			if (Grounded) Gizmos.color = transparentGreen;
-			else Gizmos.color = transparentRed;
-
-			// when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
-			Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
 		}
 	}
 }
