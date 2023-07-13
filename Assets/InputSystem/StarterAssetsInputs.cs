@@ -12,6 +12,7 @@ namespace StarterAssets
 		public Vector2 look;
 		public bool sprint;
 		public bool crouch;
+		public bool action;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -43,6 +44,11 @@ namespace StarterAssets
 		{
 			CrouchInput(value.isPressed);
 		}
+
+		public void OnAction(InputValue value)
+		{
+			ActionInput(value.isPressed);
+		}
 #endif
 
 
@@ -64,6 +70,11 @@ namespace StarterAssets
 		public void CrouchInput(bool newCrouchState)
 		{
 			crouch = !crouch;
+		}
+
+		public void ActionInput(bool newActionState)
+		{
+			action = newActionState;
 		}
 		
 		private void OnApplicationFocus(bool hasFocus)

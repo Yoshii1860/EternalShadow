@@ -22,8 +22,6 @@ namespace StarterAssets
 		[SerializeField] float RotationSpeed = 1.0f;
 		[Tooltip("Acceleration and deceleration")]
 		[SerializeField] float SpeedChangeRate = 10.0f;
-		[Tooltip("Max slope that can be climed up")]
-		[SerializeField] float MaxSlopeAngle = 45.0f;
 		[Tooltip("height of the camera while in crouch state")]
 		[SerializeField] float crouchYScale = 0.5f;
 
