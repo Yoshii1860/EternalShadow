@@ -13,6 +13,8 @@ namespace StarterAssets
 		public bool sprint;
 		public bool crouch;
 		public bool action;
+		public bool shoot;
+
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -22,6 +24,7 @@ namespace StarterAssets
 		public bool cursorInputForLook = true;
 
 #if ENABLE_INPUT_SYSTEM
+
 		public void OnMove(InputValue value)
 		{
 			MoveInput(value.Get<Vector2>());
@@ -49,6 +52,12 @@ namespace StarterAssets
 		{
 			ActionInput(value.isPressed);
 		}
+
+		public void OnShoot(InputValue value)
+		{
+			ShootInput(value.isPressed);
+		}
+
 #endif
 
 
@@ -75,6 +84,11 @@ namespace StarterAssets
 		public void ActionInput(bool newActionState)
 		{
 			action = newActionState;
+		}
+
+		public void ShootInput(bool newShootState)
+		{
+			shoot = newShootState;
 		}
 		
 		private void OnApplicationFocus(bool hasFocus)

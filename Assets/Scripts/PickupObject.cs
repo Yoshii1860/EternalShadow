@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PickupObject : MonoBehaviour
 {
+    [Tooltip("The type of item this object is.")]
     public ItemType type;
 
     public enum ItemType
