@@ -42,6 +42,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] GameObject weaponContainer;
     // The ObjectHandler script attached to the player.
     ObjectHandler objectHandler;
+    WeaponSwitcher weaponSwitcher;
 
     Rigidbody rb;
     float lookRotation;
@@ -53,6 +54,7 @@ public class PlayerController : MonoBehaviour
     // Input
     Vector2 move, look;
     bool sprint, crouch, aim, fire, interact;
+    float weaponSwitch;
 
     void Awake() {
         Cursor.lockState = CursorLockMode.Locked;
@@ -62,6 +64,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         objectHandler = GetComponent<ObjectHandler>();
+        weaponSwitcher = weaponContainer.transform.GetComponent<WeaponSwitcher>();
         startYScale = transform.localScale.y;
         startFocalLength = cmVirtualCamera.m_Lens.FieldOfView;
     }
@@ -71,6 +74,8 @@ public class PlayerController : MonoBehaviour
         Crouch();
         if (fire) Fire();
         else if (interact & !aim) Interact();
+
+        if (weaponSwitch != 0) WeaponSwitch();
     }
 
     void FixedUpdate() 
@@ -125,6 +130,11 @@ public class PlayerController : MonoBehaviour
     public void OnInteract(InputAction.CallbackContext context)
     {
         interact = context.ReadValueAsButton();
+    }
+
+    public void OnWeaponSwitch(InputAction.CallbackContext context)
+    {
+        weaponSwitch = context.ReadValue<float>();
     }
 
     void Move()
@@ -206,6 +216,12 @@ public class PlayerController : MonoBehaviour
         interact = false;
         
         objectHandler.Execute();
+    }
+
+    void WeaponSwitch()
+    {
+        Debug.Log("Weapon Switch");
+        weaponSwitcher.Execute(weaponSwitch);
     }
 
     private void OnDrawGizmos() 
