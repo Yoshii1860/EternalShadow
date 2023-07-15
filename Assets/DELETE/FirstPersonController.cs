@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Cinemachine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -46,13 +47,18 @@ namespace StarterAssets
 		[Header("Cinemachine")]
 		[Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
 		[SerializeField] GameObject CinemachineCameraTarget;
+		[Tooltip("The the player follow camera set in Cinemachine Brain")]
+		[SerializeField] CinemachineVirtualCamera cmVirtualCamera;
 		[Tooltip("How far in degrees can you move the camera up")]
 		[SerializeField] float TopClamp = 90.0f;
 		[Tooltip("How far in degrees can you move the camera down")]
 		[SerializeField] float BottomClamp = -90.0f;
+		[Tooltip("Additional degress to override the camera.")]
+		[SerializeField] float focalLength = 33f;
 
 		// cinemachine
 		private float _cinemachineTargetPitch;
+		private float startFocalLength;
 
 		// player
 		private float _speed;
@@ -98,6 +104,10 @@ namespace StarterAssets
 #endif
 			startYScale = transform.localScale.y;
 
+			// zoom settings for focalLength
+			startFocalLength = cmVirtualCamera.m_Lens.FieldOfView;
+			Debug.Log(startFocalLength);
+
 			// reset our timeouts on start
 			_fallTimeoutDelta = FallTimeout;
 		}
@@ -107,6 +117,15 @@ namespace StarterAssets
 			GroundedCheck();
 			JumpAndGravity();
 			Move();
+			Zoom();
+			if (_input.zoom)
+			{
+				Shoot();
+			}
+			else
+			{
+				Action();
+			}
 
 			if (_input.crouch && !isCrouched)
 			{
@@ -208,6 +227,27 @@ namespace StarterAssets
 
 			// move the player
 			_controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+		}
+		
+		private void Zoom()
+		{
+			cmVirtualCamera.m_Lens.FieldOfView = _input.zoom ? focalLength : startFocalLength;
+		}
+
+		private void Shoot()
+		{
+			if(_input.shoot)
+			{
+				Debug.Log("Shooting");
+			}
+		}
+
+		private void Action()
+		{
+			if (_input.action)
+			{
+				Debug.Log("Action");
+			}
 		}
 
 		private void Crouch(bool crouchNow)

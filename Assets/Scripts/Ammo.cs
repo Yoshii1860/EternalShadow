@@ -10,6 +10,7 @@ public class Ammo : MonoBehaviour
     {
         Bullets,
         Shells,
+        Infinite
     }
 
     [System.Serializable]
@@ -26,7 +27,10 @@ public class Ammo : MonoBehaviour
 
     public void ReduceCurrentAmmo(AmmoType ammoType)
     {
-        GetAmmoSlot(ammoType).ammoAmount--;
+        if (ammoType != AmmoType.Infinite)
+        {
+            GetAmmoSlot(ammoType).ammoAmount--;
+        }
     }
 
     public void IncreaseCurrentAmmo(AmmoType ammoType, int ammoAmount)

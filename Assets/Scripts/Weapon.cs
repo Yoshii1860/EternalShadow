@@ -14,35 +14,22 @@ public class Weapon : MonoBehaviour
     [SerializeField] float damage = 10f;
     [Space(10)]
 
-    [Header("Input Settings")]
-    [Tooltip("The input action for shooting.")]
-    [SerializeField] private InputActionReference input;
-    [Space(10)]
-
     [Header("Ammo Settings")]
     [Tooltip("The type of ammo this weapon uses.")]
     [SerializeField] Ammo.AmmoType ammoType;
-    [Tooltip("The ammo slot this weapon uses. Should be the same as the ammo slot in the player.")]
+    [Tooltip("The ammo slot this weapon uses. Should be on the player.")]
     [SerializeField] Ammo ammoSlot;
 
     bool canShoot = true;
-
-    void Start() 
-    {
-        ammoSlot = transform.parent.parent.parent.GetComponent<Ammo>();
-    }
 
     void OnEnable()
     {
         canShoot = true;
     }
 
-    void Update()
+    public void Execute()
     {
-        if(input.shoot.triggered && canShoot == true)
-        {
-            StartCoroutine(Shoot());
-        }
+        StartCoroutine(Shoot());
     }
 
     IEnumerator Shoot()
@@ -50,9 +37,13 @@ public class Weapon : MonoBehaviour
         canShoot = false;
         if(ammoSlot.GetCurrentAmmo(ammoType) >= 1)
         {
-            Debug.Log("Shot");
+            Debug.Log("Shooting");
             ProcessRaycast();
             ammoSlot.ReduceCurrentAmmo(ammoType);
+        }
+        else
+        {
+            Debug.Log("Out of ammo");
         }
         yield return new WaitForSeconds(timeBetweenShots);
         canShoot = true;
@@ -63,7 +54,7 @@ public class Weapon : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, range))
         {
-            Debug.Log(hit.transform.name);
+            Debug.Log(hit.transform.gameObject.name);
         }
         else
         {

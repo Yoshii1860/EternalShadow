@@ -14,6 +14,7 @@ namespace StarterAssets
 		public bool crouch;
 		public bool action;
 		public bool shoot;
+		public bool zoom;
 
 
 		[Header("Movement Settings")]
@@ -58,8 +59,12 @@ namespace StarterAssets
 			ShootInput(value.isPressed);
 		}
 
-#endif
+		public void OnZoom(InputValue value)
+		{
+			ZoomInput(value.isPressed);
+		}
 
+#endif
 
 		public void MoveInput(Vector2 newMoveDirection)
 		{
@@ -89,6 +94,11 @@ namespace StarterAssets
 		public void ShootInput(bool newShootState)
 		{
 			shoot = newShootState;
+		}
+
+		public void ZoomInput(bool newZoomState)
+		{
+			zoom = newZoomState;
 		}
 		
 		private void OnApplicationFocus(bool hasFocus)

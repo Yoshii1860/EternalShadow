@@ -5,15 +5,12 @@ using UnityEngine.InputSystem;
 
 public class ObjectHandler : MonoBehaviour
 {
-    [SerializeField] private InputActionReference input;
+    // [SerializeField] private InputActionReference input;
     [SerializeField] private float pickupDistance = 5f;
 
-    void Update()
+    public void Execute()
     {
-        if (input.action.triggered)
-        {
-            DetectObjects();
-        }
+        DetectObjects();
     }
 
     private void DetectObjects()
