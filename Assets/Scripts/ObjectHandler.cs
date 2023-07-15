@@ -7,6 +7,12 @@ public class ObjectHandler : MonoBehaviour
 {
     // [SerializeField] private InputActionReference input;
     [SerializeField] private float pickupDistance = 5f;
+    ItemActions action;
+
+    void Start() 
+    {
+        action = GetComponent<ItemActions>();
+    }
 
     public void Execute()
     {
@@ -15,14 +21,16 @@ public class ObjectHandler : MonoBehaviour
 
     private void DetectObjects()
     {
+        Debug.Log("Detecting objects");
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, pickupDistance))
         {
-            PickupObject pickupObject = hit.collider.gameObject.GetComponent<PickupObject>();
-            if (pickupObject != null)
+            Debug.Log("Hit: " + hit.collider.gameObject.name);
+            if (hit.collider.gameObject.GetComponent<ItemController>() != null)
             {
-                // use PickUp() method from Item class
-                pickupObject.PickUp();
+                Debug.Log("Item found");
+                // Use PickUp() method from ItemActions class
+                action.PickUp(hit);
             }
         }
     }

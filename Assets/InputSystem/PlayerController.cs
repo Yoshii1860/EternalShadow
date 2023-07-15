@@ -37,11 +37,14 @@ public class PlayerController : MonoBehaviour
 	[SerializeField] float focalLength = 33f;
 
     [Space(10)]
-    [Header("Execution Scripts")]
+    [Header("Execution Scripts/Objects")]
     [Tooltip("The weapon container attached to the player.")]
     [SerializeField] GameObject weaponContainer;
-    // The ObjectHandler script attached to the player.
-    ObjectHandler objectHandler;
+    [Tooltip("The inventory object attached to the canvas.")]
+    [SerializeField] GameObject inventoryObject;
+    [Tooltip("The ObjectHandler script attached to the InventoryManager.")]
+    [SerializeField] ObjectHandler objectHandler;
+    // The weaponSwitcher script attached to the weapon container.
     WeaponSwitcher weaponSwitcher;
 
     Rigidbody rb;
@@ -53,7 +56,7 @@ public class PlayerController : MonoBehaviour
 
     // Input
     Vector2 move, look;
-    bool sprint, crouch, aim, fire, interact;
+    bool sprint, crouch, aim, fire, interact, reload, inventory, menu;
     float weaponSwitch;
 
     void Awake() {
@@ -63,8 +66,8 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        objectHandler = GetComponent<ObjectHandler>();
         weaponSwitcher = weaponContainer.transform.GetComponent<WeaponSwitcher>();
+        inventoryObject.SetActive(false);
         startYScale = transform.localScale.y;
         startFocalLength = cmVirtualCamera.m_Lens.FieldOfView;
     }
@@ -72,20 +75,24 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         Crouch();
-        if (fire) Fire();
-        else if (interact & !aim) Interact();
+
+        if (fire && !inventoryObject.activeSelf) Fire();
+        else if (interact & !aim & !inventoryObject.activeSelf) Interact();
 
         if (weaponSwitch != 0) WeaponSwitch();
+        if (reload) Reload();
+        if (inventory) Inventory();
+        if (menu) Menu();
     }
 
     void FixedUpdate() 
     {
-        Move();
+        if (!inventoryObject.activeSelf) Move();
     }
 
     private void LateUpdate() {
-        Look();
-        Aim();
+        if (!inventoryObject.activeSelf) Look();
+        if (!inventoryObject.activeSelf) Aim();
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -135,6 +142,21 @@ public class PlayerController : MonoBehaviour
     public void OnWeaponSwitch(InputAction.CallbackContext context)
     {
         weaponSwitch = context.ReadValue<float>();
+    }
+
+    public void OnReload(InputAction.CallbackContext context)
+    {
+        reload = context.ReadValueAsButton();
+    }
+
+    public void OnInventory(InputAction.CallbackContext context)
+    {
+        inventory = context.ReadValueAsButton();
+    }
+
+    public void OnMenu(InputAction.CallbackContext context)
+    {
+        menu = context.ReadValueAsButton();
     }
 
     void Move()
@@ -208,13 +230,12 @@ public class PlayerController : MonoBehaviour
                 child.GetComponent<Weapon>().Execute();
             }
         }
-
     }
 
     void Interact()
     {
         interact = false;
-        
+        Debug.Log("Interact");
         objectHandler.Execute();
     }
 
@@ -222,6 +243,59 @@ public class PlayerController : MonoBehaviour
     {
         Debug.Log("Weapon Switch");
         weaponSwitcher.Execute(weaponSwitch);
+    }
+
+    void Reload()
+    {
+        reload = false;
+
+        // loop through weapons and execute the Weapon script that is on the active object
+        foreach (Transform child in weaponContainer.transform)
+        {
+            if (child.gameObject.activeSelf)
+            {
+                child.GetComponent<Weapon>().ExecuteReload();
+            }
+        }
+    }
+
+    void Inventory()
+    {
+        inventory = false;
+
+        inventoryObject.SetActive(!inventoryObject.activeSelf);
+
+        if (inventoryObject.activeSelf)
+        {
+            GameManager.Instance.PauseGame();
+            InventoryManager.Instance.ListItems();
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            GameManager.Instance.ResumeGame();
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+    }
+
+    void Menu()
+    {
+        menu = false;
+
+        if (GameManager.Instance.isPaused)
+        {
+            GameManager.Instance.ResumeGame();
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else
+        {
+            GameManager.Instance.PauseGame();
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 
     private void OnDrawGizmos() 

@@ -4,5 +4,6 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    [Tooltip("The health of the player.")]
     public int health = 100;
 }
