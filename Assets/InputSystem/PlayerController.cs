@@ -6,6 +6,11 @@ using Cinemachine;
 
 public class PlayerController : MonoBehaviour
 {
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Variables
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     [Header("Movement")]
 	[Tooltip("Move speed of the character in m/s")]
 	[SerializeField] float moveSpeed = 4.0f;
@@ -54,15 +59,15 @@ public class PlayerController : MonoBehaviour
     float startYScale;
     float startFocalLength;
 
-    // Input
+    // Player Input
     Vector2 move, look;
     bool sprint, crouch, aim, fire, interact, reload, inventory, menu;
     float weaponSwitch;
 
-    void Awake() {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Event Functions
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -74,26 +79,38 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        Crouch();
-
-        if (fire && !inventoryObject.activeSelf) Fire();
-        else if (interact & !aim & !inventoryObject.activeSelf) Interact();
-
-        if (weaponSwitch != 0) WeaponSwitch();
-        if (reload) Reload();
-        if (inventory) Inventory();
-        if (menu) Menu();
+        if (GameManager.Instance.CurrentGameState == GameManager.GameState.Gameplay)
+        {
+                                        Crouch();
+            if (fire)                   Fire();
+            else if (interact & !aim)   Interact();
+            if (weaponSwitch != 0)      WeaponSwitch();
+            if (reload)                 Reload();
+            if (inventory)              Inventory();
+            if (menu)                   Menu();
+        }
     }
 
     void FixedUpdate() 
     {
-        if (!inventoryObject.activeSelf) Move();
+        if (GameManager.Instance.CurrentGameState == GameManager.GameState.Gameplay)
+        {
+            Move();
+        }
     }
 
-    private void LateUpdate() {
-        if (!inventoryObject.activeSelf) Look();
-        if (!inventoryObject.activeSelf) Aim();
+    private void LateUpdate() 
+    {
+        if (GameManager.Instance.CurrentGameState == GameManager.GameState.Gameplay)
+        {
+            Look();
+            Aim();
+        }
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Input Functions
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     public void OnMove(InputAction.CallbackContext context)
     {
@@ -158,6 +175,10 @@ public class PlayerController : MonoBehaviour
     {
         menu = context.ReadValueAsButton();
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Gameplay Functions
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     void Move()
     {
@@ -262,22 +283,7 @@ public class PlayerController : MonoBehaviour
     void Inventory()
     {
         inventory = false;
-
-        inventoryObject.SetActive(!inventoryObject.activeSelf);
-
-        if (inventoryObject.activeSelf)
-        {
-            GameManager.Instance.PauseGame();
-            InventoryManager.Instance.ListItems();
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else
-        {
-            GameManager.Instance.ResumeGame();
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
+        GameManager.Instance.Inventory();
     }
 
     void Menu()
@@ -287,14 +293,10 @@ public class PlayerController : MonoBehaviour
         if (GameManager.Instance.isPaused)
         {
             GameManager.Instance.ResumeGame();
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
         }
         else
         {
             GameManager.Instance.PauseGame();
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
         }
     }
 

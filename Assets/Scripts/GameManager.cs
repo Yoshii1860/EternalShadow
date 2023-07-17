@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
@@ -18,6 +19,9 @@ public class GameManager : MonoBehaviour
     }
 
     public GameState CurrentGameState { get; private set; }
+
+    [SerializeField] GameObject inventoryObject;
+    [SerializeField] PlayerInput playerInput;
 
     public bool isPaused = false;
 
@@ -42,18 +46,28 @@ public class GameManager : MonoBehaviour
     {
         // Initialize the game
         SetGameState(GameState.Gameplay);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     public void StartGame()
     {
         SetGameState(GameState.Gameplay);
         // Add code to initialize the gameplay
+        playerInput.SwitchCurrentActionMap("Player");
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     public void Inventory()
     {
         SetGameState(GameState.Inventory);
         // Add code to display the inventory
+        playerInput.SwitchCurrentActionMap("Inventory");
+        inventoryObject.SetActive(true);
+        InventoryManager.Instance.ListItems();
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void PauseGame()
@@ -62,20 +76,29 @@ public class GameManager : MonoBehaviour
         // Add code to pause the game
         Time.timeScale = 0;
         isPaused = true;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void ResumeGame()
     {
         SetGameState(GameState.Gameplay);
         // Add code to resume the game
+        if (inventoryObject.activeSelf) inventoryObject.SetActive(false);
+        playerInput.SwitchCurrentActionMap("Player");
         Time.timeScale = 1;
         isPaused = false;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        
     }
 
     public void GameOver()
     {
         SetGameState(GameState.GameOver);
         // Add code for game over logic and display game over screen
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     private void SetGameState(GameState newState)

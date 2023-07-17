@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
+  m_Name: PistolAmmo
+  m_EditorClassIdentifier: 
+  displayName: .40 S&W
+  description: The .40 S&W is a rimless pistol cartridge for the Glock 22.
+  icon: {fileID: 21300000, guid: aba2ceb05cbf5e040ab84748ead0bce6, type: 3}
+  unique: 0
+  quantity: 5
+  type: 1
+  prefab: {fileID: 2240932926847244716, guid: 71d5e360c9423a34e9ac020da23e337c, type: 3}

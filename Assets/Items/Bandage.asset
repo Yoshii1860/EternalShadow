@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
+  m_Name: Bandage
+  m_EditorClassIdentifier: 
+  displayName: Bandage
+  description: Bandages can be used to support injured joints, secure dressings and
+    control bleeding.
+  icon: {fileID: 21300000, guid: 812bca0bf33f3854497bfe46ceb97d15, type: 3}
+  unique: 0
+  quantity: 1
+  type: 2
+  prefab: {fileID: 3843195161043321567, guid: 81885fc93eb8a4e4ea54e7bc3e0e48dd, type: 3}

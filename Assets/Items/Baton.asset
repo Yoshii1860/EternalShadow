@@ -10,11 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
-  m_Name: Weapon
+  m_Name: Baton
   m_EditorClassIdentifier: 
-  displayName: Weapon
-  description: This is a weapon
-  icon: {fileID: 21300000, guid: 5990f716d22d4d94988bf93e36dd1b96, type: 3}
+  displayName: Police Baton
+  description: The baton is a simple striking weapon and probably one of the oldest
+    close combat weapons ever.
+  icon: {fileID: 21300000, guid: 0b26d888a8305734dab169a2f29493bb, type: 3}
+  unique: 1
   quantity: 1
   type: 0
-  prefab: {fileID: 5085494215452219224, guid: bc5eecbd6100e964fb533370f81b94ef, type: 3}
+  prefab: {fileID: 2787483661243840907, guid: 514b81a3433ee42419ad82a9d5d8cf7c, type: 3}
