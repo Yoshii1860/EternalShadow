@@ -17,6 +17,15 @@ public class InventoryManager : MonoBehaviour
     public Transform itemPreview;
     [Tooltip("The prefab that will be used to display the inventory items")]
     public GameObject itemDisplay;
+    [Tooltip("The transform that will be the parent of the weapons")]
+    public GameObject weapons;
+
+    [Space(10)]
+    public Color selectedColor;
+    public Color unselectedColor;
+
+    public Item selectedItem;
+    public int selectedItemNumber;
 
     private void Awake()
     {
@@ -97,10 +106,17 @@ public class InventoryManager : MonoBehaviour
             }
             obj.GetComponentInChildren<ItemController>().item = item;
         }
+        selectedItemNumber = 0;
+        selectedItem = Items[selectedItemNumber];
+        ShowItemDisplay();
     }
 
-    public void ShowItemDisplay(Item item)
+    public void ShowItemDisplay()
     {
+        ChangeSelectedColor(false);
+        selectedItem = Items[selectedItemNumber];
+        ChangeSelectedColor(true);
+
         GameObject obj;
         // Instantiate ItemDisplay UI if it doesn't exist
         if (itemPreview.childCount == 0)
@@ -125,7 +141,7 @@ public class InventoryManager : MonoBehaviour
         {
             if (itemCanvasIcon.gameObject != obj)
             {
-                itemCanvasIcon.sprite = item.icon;
+                itemCanvasIcon.sprite = selectedItem.icon;
                 break;
             }
         }
@@ -137,23 +153,67 @@ public class InventoryManager : MonoBehaviour
             // Change name and description of ItemDisplay
             if (itemCanvasText.gameObject.name == "ItemName")
             {
-                itemCanvasText.text = item.displayName;
+                itemCanvasText.text = selectedItem.displayName;
             }
             else if (itemCanvasText.gameObject.name == "ItemDescription")
             {
-                itemCanvasText.text = item.description;
+                itemCanvasText.text = selectedItem.description;
             }
             // If item is unique we hide the quantity display
-            else if (itemCanvasText.gameObject.name == "ItemCountText" && item.unique)
+            else if (itemCanvasText.gameObject.name == "ItemCountText" && selectedItem.unique)
             {
                 itemCanvasText.gameObject.SetActive(false);
             }
             // If item is not unique, get its child object and change the quantity
-            else if (itemCanvasText.gameObject.name == "ItemCountText" && !item.unique)
+            else if (itemCanvasText.gameObject.name == "ItemCountText" && !selectedItem.unique)
             {
-                itemCanvasText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = item.quantity.ToString();
+                itemCanvasText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = selectedItem.quantity.ToString();
+            }
+            // If item is not a weapon, hide the stats display
+            if (itemCanvasText.gameObject.name == "ItemStatsText" && selectedItem.type != ItemType.Weapon)
+            {
+                itemCanvasText.gameObject.SetActive(false);
+            }
+            else if (itemCanvasText.gameObject.name == "ItemStatsText" && selectedItem.type == ItemType.Weapon)
+            {
+                // loop through all the childs of weapons, check if item is the same item as the one displayed
+                foreach (Transform weapon in weapons.transform)
+                {
+                    if (weapon.GetComponent<ItemController>().item == selectedItem)
+                    {
+                        // If it is, get the weapon stats and display them
+                        string weaponStats = weapon.GetComponent<Weapon>().GetWeaponStats();
+                        itemCanvasText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = weaponStats;
+                        break;
+                    }
+                }
             }
         }
         
     }
+
+    public void ChangeSelectedItem()
+    {
+        ChangeSelectedColor(false);
+        selectedItem = Items[selectedItemNumber];
+        ChangeSelectedColor(true);
+    }
+
+    private void ChangeSelectedColor(bool newSelected)
+    {
+        ItemController itemController;
+        Image itemImage;
+        foreach (Transform item in itemContent)
+        {
+            itemController = item.GetComponentInChildren<ItemController>();
+            if (itemController != null && itemController.item == selectedItem)
+            {
+                itemImage = item.GetComponentInChildren<Image>();
+                if (itemImage != null)
+                {
+                    itemImage.color = newSelected ? selectedColor : unselectedColor;
+                }
+            }
+        }
+    }   
 }

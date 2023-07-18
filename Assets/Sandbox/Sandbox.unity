@@ -135,8 +135,9 @@ GameObject:
   - component: {fileID: 57032712}
   - component: {fileID: 57032711}
   - component: {fileID: 57032713}
+  - component: {fileID: 57032714}
   m_Layer: 0
-  m_Name: Knife
+  m_Name: Baton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -219,14 +220,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20db1181f4ff10a498a0239bbebdb2ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeBetweenShots: 0.5
-  timeOfReload: 1
-  range: 100
-  damage: 10
-  magazine: 10
+  timeBetweenShots: 1
+  timeOfReload: 0
+  range: 5
+  damage: 5
+  magazine: 0
   magazineCount: 0
   ammoType: 2
   ammoSlot: {fileID: 299581095}
+--- !u!114 &57032714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 57032709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3933c0825e904a3478f5d3c4b326382f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  item: {fileID: 11400000, guid: 30a100123d6fea341aafd54ca4f30975, type: 2}
 --- !u!1 &66796592
 GameObject:
   m_ObjectHideFlags: 0
@@ -727,6 +741,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 43fb2353-a23a-4e36-bdf5-93103bdb898f
     m_ActionName: Inventory/Exit[/Keyboard/i]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 299581096}
+        m_TargetAssemblyTypeName: InventoryController, Assembly-CSharp
+        m_MethodName: OnMove
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: b32b01fd-72dd-458f-bf89-e31c65e53efe
+    m_ActionName: Inventory/Move[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -903,6 +933,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1485647abcc80b3488f4a39b9a8a7e24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveDebounceTime: 0.3
 --- !u!1001 &335461275
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1167,6 +1198,11 @@ MonoBehaviour:
   inventoryItem: {fileID: 6429501284592972107, guid: 0ab2dac880d4d514a84a277419e00169, type: 3}
   itemPreview: {fileID: 384542152}
   itemDisplay: {fileID: 5569306157089177766, guid: 12a9cad07df9e13459a9d4668e866116, type: 3}
+  weapons: {fileID: 66796592}
+  selectedColor: {r: 0, g: 0.7058824, b: 1, a: 1}
+  unselectedColor: {r: 1, g: 1, b: 0.50980395, a: 1}
+  selectedItem: {fileID: 0}
+  selectedItemNumber: 0
 --- !u!4 &540868773
 Transform:
   m_ObjectHideFlags: 0
@@ -1266,6 +1302,7 @@ GameObject:
   - component: {fileID: 828088507}
   - component: {fileID: 828088506}
   - component: {fileID: 828088508}
+  - component: {fileID: 828088509}
   m_Layer: 0
   m_Name: Shotgun
   m_TagString: Untagged
@@ -1350,14 +1387,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20db1181f4ff10a498a0239bbebdb2ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeBetweenShots: 0.5
-  timeOfReload: 1
-  range: 100
-  damage: 10
-  magazine: 10
+  timeBetweenShots: 1.5
+  timeOfReload: 3
+  range: 50
+  damage: 50
+  magazine: 2
   magazineCount: 0
   ammoType: 0
   ammoSlot: {fileID: 299581095}
+--- !u!114 &828088509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 828088504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3933c0825e904a3478f5d3c4b326382f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  item: {fileID: 11400000, guid: eb7463f2d84d4cd49b5184399b521452, type: 2}
 --- !u!4 &839759648 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4723766163332694016, guid: b312818d8d0739a4eba009106e9f2a1d, type: 3}
@@ -1528,6 +1578,7 @@ GameObject:
   - component: {fileID: 1458568334}
   - component: {fileID: 1458568333}
   - component: {fileID: 1458568335}
+  - component: {fileID: 1458568336}
   m_Layer: 0
   m_Name: Pistol
   m_TagString: Untagged
@@ -1620,6 +1671,19 @@ MonoBehaviour:
   magazineCount: 0
   ammoType: 0
   ammoSlot: {fileID: 299581095}
+--- !u!114 &1458568336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458568330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3933c0825e904a3478f5d3c4b326382f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  item: {fileID: 11400000, guid: dfbdf96ea365f614c9aa1403aa3b3af7, type: 2}
 --- !u!4 &1655772482 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6765891792580707001, guid: 025247dba9f946c42b2cb108d584b7d3, type: 3}

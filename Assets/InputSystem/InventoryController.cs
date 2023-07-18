@@ -3,11 +3,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
 using Cinemachine;
+using UnityEngine.UI;
 
 public class InventoryController : MonoBehaviour
 {
-    private List<RaycastResult> m_RaycastResults = new List<RaycastResult>();
+    public float moveDebounceTime = 0.3f;
+
     bool interact, exit;
+    Vector2 move;
 
     void Update()
     {
@@ -28,51 +31,25 @@ public class InventoryController : MonoBehaviour
         exit = context.ReadValueAsButton();
     }
 
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        move = context.ReadValue<Vector2>();
+
+        // Debounce the move input
+        float deltaTime = Time.deltaTime;
+        if (Time.time - moveDebounceTime > deltaTime)
+        {
+            moveDebounceTime = Time.time;
+            Move();
+        }
+    }
+
     void Interact()
     {
         interact = false;
         Debug.Log("Interact");
 
-        // Check if the current pointer event is over a UI element
-        if (EventSystem.current.IsPointerOverGameObject())
-        {
-            // Retrieve information about the object under the pointer
-            PointerEventData pointerData = new PointerEventData(EventSystem.current);
-            pointerData.position = Mouse.current.position.ReadValue();
-            EventSystem.current.RaycastAll(pointerData, m_RaycastResults);
-
-            // Retrieve the root element of the UI element under the pointer
-            if (m_RaycastResults.Count > 0)
-            {
-                GameObject pointerTarget = m_RaycastResults[0].gameObject;
-                Item item = null;
-                // If pointerTarget has no component called ItemController, get the parent object
-                if (pointerTarget.GetComponent<ItemController>() == null)
-                {
-                    pointerTarget = pointerTarget.transform.parent.gameObject;
-                    // Get the ItemController component from child object
-                    foreach (Transform child in pointerTarget.transform)
-                    {
-                        if (child.GetComponent<ItemController>() != null)
-                        {
-                            pointerTarget = child.gameObject;
-                            // Get item from ItemController
-                            item = pointerTarget.GetComponent<ItemController>().item;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    // Get item from ItemController
-                    item = pointerTarget.GetComponent<ItemController>().item;
-                }
-                // Send item to InventoryManager to handle display
-                InventoryManager.Instance.ShowItemDisplay(item);
-            }
-
-            m_RaycastResults.Clear();
-        }
+        InventoryManager.Instance.ShowItemDisplay();
     }
 
     void Exit()
@@ -81,5 +58,47 @@ public class InventoryController : MonoBehaviour
         Debug.Log("Exit");
 
         GameManager.Instance.ResumeGame();
+    }
+
+    void Move()
+    {
+        Debug.Log(InventoryManager.Instance.selectedItemNumber);
+        if (move.y > 0.5f)
+        {
+            Debug.Log("Up");
+            if (InventoryManager.Instance.selectedItemNumber - 3 >= 0)
+            {
+                InventoryManager.Instance.selectedItemNumber -= 3;
+                InventoryManager.Instance.ChangeSelectedItem();
+            }
+        }
+        else if (move.y < -0.5f)
+        {
+            Debug.Log("Down");
+            if(InventoryManager.Instance.selectedItemNumber + 3 < InventoryManager.Instance.Items.Count)
+            {
+                InventoryManager.Instance.selectedItemNumber += 3;
+                InventoryManager.Instance.ChangeSelectedItem();
+            }
+        }
+        else if (move.x > 0.5f)
+        {
+            Debug.Log("Right");
+            if (InventoryManager.Instance.selectedItemNumber + 1 < InventoryManager.Instance.Items.Count)
+            {
+                InventoryManager.Instance.selectedItemNumber += 1;
+                InventoryManager.Instance.ChangeSelectedItem();
+            }
+        }
+        else if (move.x < -0.5f)
+        {
+            Debug.Log("Left");
+            if (InventoryManager.Instance.selectedItemNumber - 1 >= 0)
+            {
+                InventoryManager.Instance.selectedItemNumber -= 1;
+                InventoryManager.Instance.ChangeSelectedItem();
+            }
+        }
+        Debug.Log(InventoryManager.Instance.selectedItemNumber);
     }
 }

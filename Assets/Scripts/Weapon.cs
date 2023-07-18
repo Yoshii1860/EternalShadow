@@ -47,6 +47,13 @@ public class Weapon : MonoBehaviour
     {
         if(canShoot) StartCoroutine(Reload());
     }
+    
+    public string GetWeaponStats()
+    {
+        // Order - Firepower: Reload Speed: Shoot Delay: Range: Capacity: (separated with \n)
+        // Used for InventoryManager
+        return damage.ToString() + "\n" + timeOfReload.ToString() + "\n" + timeBetweenShots.ToString() + "\n" + range.ToString() + "\n" + magazine.ToString();
+    }
 
     IEnumerator Shoot()
     {
