@@ -256,13 +256,13 @@ public class PlayerController : MonoBehaviour
     void Interact()
     {
         interact = false;
-        Debug.Log("Interact");
+        Debug.Log("Player Controller: Interact");
         objectHandler.Execute();
     }
 
     void WeaponSwitch()
     {
-        Debug.Log("Weapon Switch");
+        Debug.Log("Player Controller: Weapon Switch");
         weaponSwitcher.Execute(weaponSwitch);
     }
 

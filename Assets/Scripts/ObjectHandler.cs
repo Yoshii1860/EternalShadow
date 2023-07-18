@@ -21,14 +21,12 @@ public class ObjectHandler : MonoBehaviour
 
     private void DetectObjects()
     {
-        Debug.Log("Detecting objects");
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, pickupDistance))
         {
-            Debug.Log("Hit: " + hit.collider.gameObject.name);
+            Debug.Log("RaycastHit: " + hit.collider.gameObject.name);
             if (hit.collider.gameObject.GetComponent<ItemController>() != null)
             {
-                Debug.Log("Item found");
                 // Use PickUp() method from ItemActions class
                 action.PickUp(hit);
             }

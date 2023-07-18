@@ -21,11 +21,25 @@ public class InventoryManager : MonoBehaviour
     public GameObject weapons;
 
     [Space(10)]
+    [Header("Colors")]
+    [Tooltip("The color of the selected item")]
     public Color selectedColor;
+    [Tooltip("The color of the unselected item")]
     public Color unselectedColor;
+    [Tooltip("The color of the highlighted item")]
+    public Color highlightedColor;
 
+    [Space(10)]
+    [Header("Only for Debugging)")]
     public Item selectedItem;
-    public int selectedItemNumber;
+    public int highlightNumber;
+    public int selectedActionNumber;
+    public int itemActionNumber;
+    public bool itemActionsOpen;
+    public int actionsChildCount;
+
+    // The Image components of the item actions
+    Image[] itemCanvasActions;
 
     private void Awake()
     {
@@ -106,16 +120,17 @@ public class InventoryManager : MonoBehaviour
             }
             obj.GetComponentInChildren<ItemController>().item = item;
         }
-        selectedItemNumber = 0;
-        selectedItem = Items[selectedItemNumber];
-        ShowItemDisplay();
+        highlightNumber = 0;
+        ChangeSelectedItemColor(true, true);
     }
 
     public void ShowItemDisplay()
     {
-        ChangeSelectedColor(false);
-        selectedItem = Items[selectedItemNumber];
-        ChangeSelectedColor(true);
+        selectedItem = Items[highlightNumber];
+        ChangeSelectedItemColor(false, false);
+
+        itemActionNumber = 0;
+        itemActionsOpen = true;
 
         GameObject obj;
         // Instantiate ItemDisplay UI if it doesn't exist
@@ -190,17 +205,23 @@ public class InventoryManager : MonoBehaviour
             }
         }
         
+        // Get all children objects of obj and find the one named ItemActions
+        foreach (RectTransform child in obj.GetComponentsInChildren<RectTransform>())
+        {
+            if (child.gameObject.name == "ItemActions")
+            {
+                // Get all image children of child and add them to itemCanvasActions
+                itemCanvasActions = child.GetComponentsInChildren<Image>();
+                actionsChildCount = child.childCount;
+                ChangeSelectedActionColor(true);
+            }
+        }
     }
 
-    public void ChangeSelectedItem()
+    public void ChangeSelectedItemColor(bool highlight, bool newSelected)
     {
-        ChangeSelectedColor(false);
-        selectedItem = Items[selectedItemNumber];
-        ChangeSelectedColor(true);
-    }
+        selectedItem = Items[highlightNumber];
 
-    private void ChangeSelectedColor(bool newSelected)
-    {
         ItemController itemController;
         Image itemImage;
         foreach (Transform item in itemContent)
@@ -211,9 +232,25 @@ public class InventoryManager : MonoBehaviour
                 itemImage = item.GetComponentInChildren<Image>();
                 if (itemImage != null)
                 {
-                    itemImage.color = newSelected ? selectedColor : unselectedColor;
+                    if (highlight) itemImage.color = newSelected ? highlightedColor : unselectedColor;
+                    else itemImage.color = selectedColor;
                 }
             }
+        }
+    }
+
+    public void ChangeSelectedActionColor(bool newHighlight)
+    {
+        itemCanvasActions[itemActionNumber].color = newHighlight ? highlightedColor : unselectedColor;
+    }
+
+    public void BackToSelection()
+    {
+        itemActionsOpen = false;
+        ChangeSelectedItemColor(true, true);
+        foreach (Transform child in itemPreview)
+        {
+            Destroy(child.gameObject);
         }
     }   
 }

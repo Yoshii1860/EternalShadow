@@ -16,22 +16,21 @@ public class ItemActions : MonoBehaviour
 
     public void Use(Item item)
     {
-        // Logic for using the potion
-        // Logic for using the weapon
+        Debug.Log("Used: " + item.name);
     }
 
-    public void Combine(ItemActions otherItem, Item item)
+    public void Combine(Item item)
     {
-        // Logic for combining this item with another item
+        Debug.Log("Combined: " + item.name);
     }
 
     public void Inspect(Item item)
     {
-         // Logic for inspecting the item (for riddles)
+        Debug.Log("Inspected: " + item.name);
     }
 
     public void ThrowAway(Item item)
     {
-        // Logic for throwing away the item
+        Debug.Log("Threw away: " + item.name);
     }
 }
