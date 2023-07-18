@@ -9,6 +9,8 @@ public class InventoryManager : MonoBehaviour
     public static InventoryManager Instance;
     public List<Item> Items = new List<Item>();
 
+    [Space(10)]
+    [Header("Inventory Settings")]
     [Tooltip("The transform that will be the parent of the inventory items")]
     public Transform itemContent;
     [Tooltip("The prefab that will be used to display the inventory items")]
@@ -19,6 +21,10 @@ public class InventoryManager : MonoBehaviour
     public GameObject itemDisplay;
     [Tooltip("The transform that will be the parent of the weapons")]
     public GameObject weapons;
+    [Tooltip("The player GameObject")]
+    public GameObject player;
+    //
+    Ammo ammo;
 
     [Space(10)]
     [Header("Colors")]
@@ -58,15 +64,30 @@ public class InventoryManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    void Start()
+    {
+        ammo = player.GetComponent<Ammo>();
+    }
+
     public void AddItem(Item item)
     {
         if (Items.Contains(item))
         {
+            if (item.type == ItemType.Ammo)
+            {
+                // Increase the current ammo amount of the player
+                ammo.IncreaseCurrentAmmo(item.AmmoType, item.quantity);
+            }
             // Increase quantity of existing item by quantity of added item;
             Items[Items.IndexOf(item)].quantity += item.quantity;
         }
         else
         {
+            if (item.type == ItemType.Ammo)
+            {
+                // Increase the current ammo amount of the player
+                ammo.IncreaseCurrentAmmo(item.AmmoType, item.quantity);
+            }
             Items.Add(item);
         }
     }

@@ -5,7 +5,7 @@ using UnityEngine;
 public enum ItemType
 {
     Weapon,
-    Bullet,
+    Ammo,
     Potion,
     Object
 }
@@ -18,7 +18,26 @@ public class Item : ScriptableObject
     public Sprite icon;
     public bool unique;
     public int quantity;
-    public ItemType type;
     public GameObject prefab;
+    public ItemType type;
+
+    // Additional field for AmmoType, only visible when ItemType is Ammo
+    [SerializeField]
+    private Ammo.AmmoType ammoType;
+
+    public Ammo.AmmoType AmmoType
+    {
+        get
+        {
+            if (type == ItemType.Ammo)
+                return ammoType;
+            else
+                return Ammo.AmmoType.Infinite; // Return a default value for non-Bullet items
+        }
+        set
+        {
+            ammoType = value;
+        }
+    }
 }
 

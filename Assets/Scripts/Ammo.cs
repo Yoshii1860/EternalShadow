@@ -8,6 +8,7 @@ public class Ammo : MonoBehaviour
 
     public enum AmmoType
     {
+        None,
         Bullets,
         Shells,
         Infinite

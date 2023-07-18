@@ -18,5 +18,6 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: c4bcba390e4c3134fb8e2c654eccb69d, type: 3}
   unique: 1
   quantity: 1
-  type: 0
   prefab: {fileID: 5085494215452219224, guid: bc5eecbd6100e964fb533370f81b94ef, type: 3}
+  type: 0
+  ammoType: 0
