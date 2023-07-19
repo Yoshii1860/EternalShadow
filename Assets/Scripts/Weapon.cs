@@ -6,6 +6,8 @@ using UnityEngine.InputSystem;
 public class Weapon : MonoBehaviour
 {
     [Header("Weapon Settings")]
+    [Tooltip("If the weapon can be used.")]
+    public bool isAvailable = false;
     [Tooltip("The time between shots in seconds.")]
     [SerializeField] float timeBetweenShots = 0.5f;
     [Tooltip("The time it takes to reload the weapon in seconds.")]
@@ -18,8 +20,8 @@ public class Weapon : MonoBehaviour
     [SerializeField] int magazine = 10;
     [Tooltip("The amount of ammo a magazine currently has.")]
     [SerializeField] int magazineCount = 0;
-    [Space(10)]
 
+    [Space(10)]
     [Header("Ammo Settings")]
     [Tooltip("The type of ammo this weapon uses.")]
     [SerializeField] Ammo.AmmoType ammoType;

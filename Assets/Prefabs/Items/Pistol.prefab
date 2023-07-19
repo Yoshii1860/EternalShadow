@@ -13,13 +13,14 @@ GameObject:
   - component: {fileID: 1992975004011356933}
   - component: {fileID: 1992975004011356932}
   - component: {fileID: 473499417770971697}
+  - component: {fileID: 8027429370405654393}
   m_Layer: 0
   m_Name: Pistol
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1992975004011356938
 Transform:
   m_ObjectHideFlags: 0
@@ -111,3 +112,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   item: {fileID: 11400000, guid: dfbdf96ea365f614c9aa1403aa3b3af7, type: 2}
+--- !u!114 &8027429370405654393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1992975004011356937}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20db1181f4ff10a498a0239bbebdb2ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isAvailable: 1
+  timeBetweenShots: 0.5
+  timeOfReload: 1
+  range: 100
+  damage: 10
+  magazine: 10
+  magazineCount: 0
+  ammoType: 0
+  ammoSlot: {fileID: 0}

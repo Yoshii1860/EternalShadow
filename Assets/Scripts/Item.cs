@@ -32,11 +32,30 @@ public class Item : ScriptableObject
             if (type == ItemType.Ammo)
                 return ammoType;
             else
-                return Ammo.AmmoType.Infinite; // Return a default value for non-Bullet items
+                return Ammo.AmmoType.None; // Return a default value for non-Bullet items
         }
         set
         {
             ammoType = value;
+        }
+    }
+
+    // Additional field for PotionType, only visible when ItemType is Potion
+    [SerializeField]
+    private Potion.PotionType potionType;
+
+    public Potion.PotionType PotionType
+    {
+        get
+        {
+            if (type == ItemType.Potion)
+                return potionType;
+            else
+                return Potion.PotionType.None; // Return a default value for non-Potion items
+        }
+        set
+        {
+            potionType = value;
         }
     }
 }

@@ -21,3 +21,4 @@ MonoBehaviour:
   prefab: {fileID: 6200164740777521001, guid: b312818d8d0739a4eba009106e9f2a1d, type: 3}
   type: 2
   ammoType: 0
+  potionType: 1

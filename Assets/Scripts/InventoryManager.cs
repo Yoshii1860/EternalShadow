@@ -88,6 +88,18 @@ public class InventoryManager : MonoBehaviour
                 // Increase the current ammo amount of the player
                 ammo.IncreaseCurrentAmmo(item.AmmoType, item.quantity);
             }
+            else if (item.type == ItemType.Weapon)
+            {
+                foreach (Transform weapon in weapons.transform)
+                {
+                    weapon.gameObject.SetActive(false);
+                    if (weapon.GetComponent<ItemController>().item == item)
+                    {
+                        weapon.GetComponent<Weapon>().isAvailable = true;
+                        weapon.gameObject.SetActive(true);
+                    }
+                }
+            }
             Items.Add(item);
         }
     }
@@ -96,7 +108,17 @@ public class InventoryManager : MonoBehaviour
     {
         if (Items.Contains(item))
         {
-            Items.Remove(item);
+            if (Items[Items.IndexOf(item)].quantity > 1)
+            {
+                Items[Items.IndexOf(item)].quantity -= 1;
+                BackToSelection();
+            }
+            else
+            {
+                Items.Remove(item);
+                BackToSelection();
+                ListItems();
+            }
         }
     }
 
