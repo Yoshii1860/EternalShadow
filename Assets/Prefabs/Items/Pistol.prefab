@@ -20,7 +20,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1992975004011356938
 Transform:
   m_ObjectHideFlags: 0
@@ -131,5 +131,5 @@ MonoBehaviour:
   damage: 10
   magazine: 10
   magazineCount: 0
-  ammoType: 0
+  ammoType: 1
   ammoSlot: {fileID: 0}

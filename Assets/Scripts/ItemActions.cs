@@ -44,5 +44,6 @@ public class ItemActions : MonoBehaviour
     public void ThrowAway(Item item)
     {
         Debug.Log("Threw away: " + item.name);
+        InventoryManager.Instance.DropItem(item);
     }
 }

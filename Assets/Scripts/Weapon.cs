@@ -63,9 +63,12 @@ public class Weapon : MonoBehaviour
         if(ammoSlot.GetCurrentAmmo(ammoType) >= 1 && magazineCount >= 1)
         {
             Debug.Log("Shooting");
-            magazineCount--;
             ProcessRaycast();
-            ammoSlot.ReduceCurrentAmmo(ammoType);
+            if(ammoType != Ammo.AmmoType.Infinite)
+            {
+                magazineCount--;
+                ammoSlot.ReduceCurrentAmmo(ammoType);
+            }
         }
         else
         {

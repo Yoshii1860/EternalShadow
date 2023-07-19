@@ -131,5 +131,5 @@ MonoBehaviour:
   damage: 50
   magazine: 2
   magazineCount: 0
-  ammoType: 0
+  ammoType: 2
   ammoSlot: {fileID: 0}

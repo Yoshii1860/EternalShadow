@@ -87,7 +87,7 @@ public class PlayerController : MonoBehaviour
             if (weaponSwitch != 0)      WeaponSwitch();
             if (reload)                 Reload();
             if (inventory)              Inventory();
-            if (menu)                   Menu();
+            //if (menu)                   Menu();
         }
     }
 

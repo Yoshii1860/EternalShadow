@@ -23,6 +23,10 @@ public class InventoryManager : MonoBehaviour
     public GameObject weapons;
     [Tooltip("The player GameObject")]
     public GameObject player;
+    [Tooltip("The object pool that will be used to drop items")]
+    public Transform objectPool;
+    [Tooltip("The force that will be applied to the dropped item")]
+    public float dropForce;
     //
     Ammo ammo;
 
@@ -91,12 +95,14 @@ public class InventoryManager : MonoBehaviour
             else if (item.type == ItemType.Weapon)
             {
                 foreach (Transform weapon in weapons.transform)
-                {
-                    weapon.gameObject.SetActive(false);
+                {                    
                     if (weapon.GetComponent<ItemController>().item == item)
                     {
                         weapon.GetComponent<Weapon>().isAvailable = true;
-                        weapon.gameObject.SetActive(true);
+                        while (weapon.gameObject.activeSelf == false)
+                        {
+                            weapons.GetComponent<WeaponSwitcher>().SwitchWeapon(true);
+                        }
                     }
                 }
             }
@@ -112,6 +118,7 @@ public class InventoryManager : MonoBehaviour
             {
                 Items[Items.IndexOf(item)].quantity -= 1;
                 BackToSelection();
+                ListItems();
             }
             else
             {
@@ -163,8 +170,14 @@ public class InventoryManager : MonoBehaviour
             }
             obj.GetComponentInChildren<ItemController>().item = item;
         }
-        highlightNumber = 0;
-        ChangeSelectedItemColor(true, true);
+
+        // check if Items list is empty
+        if (Items.Count > 0)
+        {
+            highlightNumber = 0;
+            selectedItem = Items[highlightNumber];
+            ChangeSelectedItemColor(true, true);
+        }
     }
 
     public void ShowItemDisplay()
@@ -290,10 +303,36 @@ public class InventoryManager : MonoBehaviour
     public void BackToSelection()
     {
         itemActionsOpen = false;
-        ChangeSelectedItemColor(true, true);
+        if (Items.Count > 0) ChangeSelectedItemColor(true, true);
         foreach (Transform child in itemPreview)
         {
             Destroy(child.gameObject);
         }
+    }
+
+    public void DropItem(Item item)
+    {
+        GameObject obj = Instantiate(item.prefab, player.transform.position + player.transform.forward, Quaternion.identity, objectPool);
+        Rigidbody itemRigidbody = obj.AddComponent<Rigidbody>();
+        itemRigidbody.AddForce(player.transform.forward * dropForce, ForceMode.Impulse);
+        Destroy(itemRigidbody, 1.5f);
+
+        if(item.type == ItemType.Weapon)
+        {
+            Weapon childWeapon = weapons.GetComponentInChildren<Weapon>();
+            childWeapon.isAvailable = false;
+
+            weapons.GetComponent<WeaponSwitcher>().SwitchWeapon(true);
+        }
+        else if(item.type == ItemType.Ammo)
+        {
+            for (int i = 0; i < item.quantity; i++)
+            {
+                ammo.ReduceCurrentAmmo(item.AmmoType);
+            }
+        }
+        Items.Remove(item);
+        ListItems();
+        BackToSelection();
     }   
 }

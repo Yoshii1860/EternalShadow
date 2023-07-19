@@ -64,7 +64,7 @@ public class InventoryController : MonoBehaviour
         {
             if (InventoryManager.Instance.itemActionNumber ==       0)  itemActions.Use(InventoryManager.Instance.selectedItem);
             else if (InventoryManager.Instance.itemActionNumber ==  1)  itemActions.Inspect(InventoryManager.Instance.selectedItem);
-            else if (InventoryManager.Instance.itemActionNumber ==   2)  itemActions.Combine(InventoryManager.Instance.selectedItem);
+            else if (InventoryManager.Instance.itemActionNumber ==  2)  itemActions.Combine(InventoryManager.Instance.selectedItem);
             else if (InventoryManager.Instance.itemActionNumber ==  3)  itemActions.ThrowAway(InventoryManager.Instance.selectedItem);
 
             InventoryManager.Instance.BackToSelection();

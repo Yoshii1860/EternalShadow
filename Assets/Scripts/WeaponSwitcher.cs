@@ -20,7 +20,7 @@ public class WeaponSwitcher : MonoBehaviour
         }
     }
 
-    private void SwitchWeapon(bool upOrDown)
+    public void SwitchWeapon(bool upOrDown)
     {
         int nextWeaponIndex = upOrDown ? currentWeaponIndex - 1 : currentWeaponIndex + 1;
 
@@ -31,6 +31,7 @@ public class WeaponSwitcher : MonoBehaviour
         }
 
         Transform nextWeapon = transform.GetChild(nextWeaponIndex);
+        Transform currentWeapon = transform.GetChild(currentWeaponIndex);
         Weapon nextWeaponComponent = nextWeapon.GetComponent<Weapon>();
 
         // Check if the next weapon is available
@@ -49,7 +50,6 @@ public class WeaponSwitcher : MonoBehaviour
         }
 
         // Deactivate the current weapon
-        Transform currentWeapon = transform.GetChild(currentWeaponIndex);
         currentWeapon.gameObject.SetActive(false);
 
         // Activate the next weapon

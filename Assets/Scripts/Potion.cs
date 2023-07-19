@@ -18,7 +18,7 @@ public class Potion: MonoBehaviour
     // Called by ItemActions.cs
     // If the player is poisoned/bleeding/dizzy, remove the poison
     // Remove the item from the inventory
-    
+
     public void Antibiotics(Item item)
     {
         if (player.isPoisoned == true)
