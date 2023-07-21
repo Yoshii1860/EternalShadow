@@ -15,7 +15,7 @@ public class Weapon : MonoBehaviour
     [Tooltip("The range of the weapon in meters.")]
     [SerializeField] float range = 100f;
     [Tooltip("The damage of the weapon.")]
-    [SerializeField] float damage = 10f;
+    [SerializeField] int damage = 10;
     [Tooltip("The amount of ammo in the magazine.")]
     [SerializeField] int magazine = 10;
     [Tooltip("The amount of ammo a magazine currently has.")]
@@ -63,11 +63,16 @@ public class Weapon : MonoBehaviour
         if(ammoSlot.GetCurrentAmmo(ammoType) >= 1 && magazineCount >= 1)
         {
             Debug.Log("Shooting");
-            ProcessRaycast();
+            GameObject target = ProcessRaycast();
             if(ammoType != Ammo.AmmoType.Infinite)
             {
                 magazineCount--;
                 ammoSlot.ReduceCurrentAmmo(ammoType);
+            }
+
+            if (target.GetComponent<Enemy>() != null)
+            {
+                target.GetComponent<Enemy>().TakeDamage(damage);
             }
         }
         else
@@ -102,16 +107,17 @@ public class Weapon : MonoBehaviour
         canShoot = true;
     }
 
-    void ProcessRaycast()
+    GameObject ProcessRaycast()
     {
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, range))
         {
-            Debug.Log(hit.transform.gameObject.name);
+
+            return hit.transform.gameObject;
         }
         else
         {
-            return;
+            return null;
         }
     }
 }

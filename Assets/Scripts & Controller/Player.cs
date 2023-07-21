@@ -87,6 +87,21 @@ public class Player : MonoBehaviour
         }
     }
 
+    public bool TakeDamage()
+    {
+        health -= 10;
+        healthText.text = health.ToString();
+        bool isDead = health <= 0;
+        if (isDead) Die();
+        return isDead;
+    }
+
+    private void Die()
+    {
+        Destroy(transform.GetComponent<CapsuleCollider>());
+        Debug.Log("Player died.");
+    }
+
     public void IncreaseStamina() 
     {
         if (stamina > maxStamina)
