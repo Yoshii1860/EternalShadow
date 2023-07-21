@@ -5,10 +5,8 @@ using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
-    // Singleton pattern to ensure only one instance exists
     public static GameManager Instance { get; private set; }
 
-    // Game state
     public enum GameState
     {
         MainMenu,
@@ -18,7 +16,15 @@ public class GameManager : MonoBehaviour
         GameOver
     }
 
+    public enum SubGameState
+    {
+        Default,
+        Substate1,
+        Substate2
+    }
+
     public GameState CurrentGameState { get; private set; }
+    public SubGameState CurrentSubGameState { get; private set; }
 
     [SerializeField] GameObject inventoryObject;
     [SerializeField] PlayerInput playerInput;
@@ -101,9 +107,10 @@ public class GameManager : MonoBehaviour
         Cursor.visible = true;
     }
 
-    private void SetGameState(GameState newState)
+    private void SetGameState(GameState newState, SubGameState newSubGameState = SubGameState.Default)
     {
         CurrentGameState = newState;
+        CurrentSubGameState = newSubGameState;
 
         // Handle state-specific actions
         switch (CurrentGameState)
@@ -113,7 +120,22 @@ public class GameManager : MonoBehaviour
                 break;
 
             case GameState.Gameplay:
-                // Add code for gameplay behavior
+                // Add code for common gameplay behavior (for SubGameState.Default)
+                // This will be executed for all variations unless overridden in substates.
+                switch (CurrentSubGameState)
+                {
+                    case SubGameState.Default:
+                        // Add code for default gameplay behavior
+                        break;
+
+                    case SubGameState.Substate1:
+                        // Add code for modified gameplay behavior 1
+                        break;
+
+                    case SubGameState.Substate2:
+                        // Add code for modified gameplay behavior 2
+                        break;
+                }
                 break;
 
             case GameState.Inventory:

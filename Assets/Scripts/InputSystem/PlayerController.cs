@@ -51,6 +51,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] ObjectHandler objectHandler;
     // The weaponSwitcher script attached to the weapon container.
     WeaponSwitcher weaponSwitcher;
+    Player player;
 
     Rigidbody rb;
     float lookRotation;
@@ -58,6 +59,8 @@ public class PlayerController : MonoBehaviour
     bool crouchReleased = true;
     float startYScale;
     float startFocalLength;
+    bool isOutOfStamina = false;
+    bool isDizzy = false;
 
     // Player Input
     Vector2 move, look;
@@ -71,6 +74,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        player = GetComponent<Player>();
         weaponSwitcher = weaponContainer.transform.GetComponent<WeaponSwitcher>();
         inventoryObject.SetActive(false);
         startYScale = transform.localScale.y;
@@ -95,7 +99,7 @@ public class PlayerController : MonoBehaviour
     {
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.Gameplay)
         {
-            Move();
+            Move();            
         }
     }
 
@@ -182,9 +186,40 @@ public class PlayerController : MonoBehaviour
 
     void Move()
     {
-        if (sprint && !crouch) speed = sprintSpeed;
-        else if (crouch) speed = crouchSpeed;
-        else speed = moveSpeed;
+        // Make Player move slower for 3 seconds
+        if (player.isOutOfStamina && !isOutOfStamina)   
+        {
+            MoveOutOfStamina();
+        }
+        // Make Player stop once every 3 minutes
+        else if (player.isDizzy)
+        {
+            MoveDizzy();
+            MoveDefault();
+        }
+        else
+        {   
+            MoveDefault();
+        }
+    }
+
+    void MoveDefault()
+    {
+        if (sprint && !crouch && !player.isOutOfStamina) 
+        {
+            speed = sprintSpeed;
+            player.ReduceStamina();
+        }
+        else if (crouch) 
+        {
+            speed = crouchSpeed;
+            player.IncreaseStamina();
+        }
+        else 
+        {
+            speed = moveSpeed;
+            player.IncreaseStamina();
+        }
 
         // Find target velocity
         Vector3 currentVelocity = rb.velocity;
@@ -202,6 +237,61 @@ public class PlayerController : MonoBehaviour
 
         // Move rigidbody with acceleration instead of force
         rb.AddForce(velocityChange * SpeedChangeRate, ForceMode.Acceleration);
+    }
+
+    void MoveOutOfStamina()
+    {
+        Debug.Log("Out of Stamina!");
+        isOutOfStamina = true;
+        // Disable sprint and slow down movement for 3 seconds
+        sprint = false;
+        moveSpeed *= 0.5f;
+
+        // Timer to reset the isOutOfStamina state after 3 seconds
+        StartCoroutine(ResetOutOfStamina());
+    }
+
+    IEnumerator ResetOutOfStamina()
+    {
+        Debug.Log("Resetting Out of Stamina");
+        yield return new WaitForSeconds(3f);
+        moveSpeed *= 2f;
+        player.isOutOfStamina = false;
+        isOutOfStamina = false;
+    }
+
+    void MovePoisoned()
+    {
+        player.isPoisoned = true;
+    }
+
+    void MoveDizzy()
+    {
+        // Randomly slow down the player by 80% once every 3 minutes
+        if (Time.time % 120f < Time.fixedDeltaTime && !isDizzy)
+        {
+            Debug.Log("Dizzy! Stop moving!");
+            moveSpeed = 1f;
+            sprintSpeed = 1.5f;
+            isDizzy = true;
+        }
+        // Reset the speed to default when not dizzy
+        else if (isDizzy)
+        {
+            StartCoroutine(Dizzy());
+        }
+        else if (!isDizzy)
+        {
+            moveSpeed = 4f;
+            sprintSpeed = 7f;
+        }
+    }
+
+    IEnumerator Dizzy()
+    {
+        yield return new WaitForSeconds(3f);
+        isDizzy = false;
+        Debug.Log("Not Dizzy anymore!");
     }
 
     void Look()
