@@ -14,8 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: Glock 22
   description: The Glock 22 is a self-loading pistol  in .40 S&W caliber.
-  icon: {fileID: 21300000, guid: 90699037ee3b7754586611d759a119a4, type: 3}
+  icon: {fileID: 21300000, guid: 32c70542df507804399aca1e77462fad, type: 3}
+  iconPath: VFX/ItemIcons/Pistol
   unique: 1
   quantity: 1
-  type: 0
   prefab: {fileID: 1992975004011356937, guid: 86cea8363b043b64982fe48a97486c74, type: 3}
+  prefabPath: Prefabs/Items/Pistol
+  type: 0
+  ammoType: 0
+  potionType: 0

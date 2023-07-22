@@ -14,8 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: Master Key
   description: A key for every door
-  icon: {fileID: 21300000, guid: 50d6d81e91b52a54896e7df46838d734, type: 3}
+  icon: {fileID: 21300000, guid: c6c47d72561b95c4f839da73dff93eb1, type: 3}
+  iconPath: VFX/ItemIcons/Key
   unique: 1
   quantity: 1
-  type: 3
   prefab: {fileID: 9210013823100501605, guid: 025247dba9f946c42b2cb108d584b7d3, type: 3}
+  prefabPath: Prefabs/Items/Object
+  type: 3
+  ammoType: 0
+  potionType: 0

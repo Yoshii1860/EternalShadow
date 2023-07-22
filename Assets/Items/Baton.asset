@@ -15,8 +15,12 @@ MonoBehaviour:
   displayName: Police Baton
   description: The baton is a simple striking weapon and probably one of the oldest
     close combat weapons ever.
-  icon: {fileID: 21300000, guid: 0b26d888a8305734dab169a2f29493bb, type: 3}
+  icon: {fileID: 21300000, guid: dcf6c23fde7d0aa4bb234cd0c3cc634d, type: 3}
+  iconPath: VFX/ItemIcons/Baton
   unique: 1
   quantity: 1
-  type: 0
   prefab: {fileID: 2787483661243840907, guid: 514b81a3433ee42419ad82a9d5d8cf7c, type: 3}
+  prefabPath: Prefabs/Items/Baton
+  type: 0
+  ammoType: 0
+  potionType: 0

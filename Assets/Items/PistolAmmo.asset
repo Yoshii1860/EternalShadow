@@ -14,9 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: .40 S&W
   description: The .40 S&W is a rimless pistol cartridge for the Glock 22.
-  icon: {fileID: 21300000, guid: aba2ceb05cbf5e040ab84748ead0bce6, type: 3}
+  icon: {fileID: 21300000, guid: 8f634accfc570ee4193ea1076b42dc1e, type: 3}
+  iconPath: VFX/ItemIcons/Bullets
   unique: 0
   quantity: 5
   prefab: {fileID: 2240932926847244716, guid: 71d5e360c9423a34e9ac020da23e337c, type: 3}
+  prefabPath: Prefabs/Items/Bullets
   type: 1
   ammoType: 1
+  potionType: 0

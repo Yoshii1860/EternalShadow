@@ -107,6 +107,55 @@ public class GameManager : MonoBehaviour
         Cursor.visible = true;
     }
 
+    public void SaveData(Player player)
+    {
+        SaveSystem.SavePlayer(player);
+        Debug.Log("Player data saved!");
+    }
+
+    public void LoadData(Player player)
+    {
+        SaveData data = SaveSystem.LoadPlayer();
+        if (data != null)
+        {
+            ////////////////////////////
+            // Load Player Stats
+            ////////////////////////////
+            player.health = data.health;
+            Vector3 position = new Vector3(data.position[0], data.position[1], data.position[2]);
+            player.transform.position = position;
+
+            ////////////////////////////
+            // Load Inventory
+            ////////////////////////////
+            InventoryManager.Instance.Items.Clear();
+            foreach (ItemData itemData in data.items)
+            {
+                // Convert ItemData back to Item and add it to the inventory
+                Item item = CreateItemFromData(itemData);
+                InventoryManager.Instance.AddItem(item);
+            }
+
+            Debug.Log("Player data loaded!");
+        }
+    }
+
+    private Item CreateItemFromData(ItemData itemData)
+    {
+        Item newItem = ScriptableObject.CreateInstance<Item>();
+        newItem.displayName = itemData.displayName;
+        newItem.description = itemData.description;
+        newItem.unique = itemData.unique;
+        newItem.quantity = itemData.quantity;
+        newItem.type = (ItemType)System.Enum.Parse(typeof(ItemType), itemData.type);
+        newItem.AmmoType = (Ammo.AmmoType)System.Enum.Parse(typeof(Ammo.AmmoType), itemData.ammoType);
+        newItem.PotionType = (Potion.PotionType)System.Enum.Parse(typeof(Potion.PotionType), itemData.potionType);
+        newItem.icon = Resources.Load<Sprite>(itemData.iconPath);
+        newItem.prefab = Resources.Load<GameObject>(itemData.prefabPath);
+
+        return newItem;
+    }
+
     private void SetGameState(GameState newState, SubGameState newSubGameState = SubGameState.Default)
     {
         CurrentGameState = newState;

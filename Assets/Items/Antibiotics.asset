@@ -15,10 +15,12 @@ MonoBehaviour:
   displayName: Antibiotics
   description: Antibiotics are medicines that fight infections caused by bacteria
     in humans
-  icon: {fileID: 21300000, guid: 1a733f63d746db64f8b68fe9f379ea6e, type: 3}
+  icon: {fileID: 21300000, guid: 0d23e8c4847f0dd48a9f7377e4370d27, type: 3}
+  iconPath: VFX/ItemIcons/Antibiotics
   unique: 0
   quantity: 1
   prefab: {fileID: 6200164740777521001, guid: b312818d8d0739a4eba009106e9f2a1d, type: 3}
+  prefabPath: Prefabs/Items/Antibiotics
   type: 2
   ammoType: 0
   potionType: 1

@@ -6,8 +6,9 @@ using UnityEngine.InputSystem;
 public class ObjectHandler : MonoBehaviour
 {
     // [SerializeField] private InputActionReference input;
-    [SerializeField] private float pickupDistance = 5f;
+    [SerializeField] float pickupDistance = 5f;
     ItemActions action;
+    
 
     void Start() 
     {
@@ -29,6 +30,14 @@ public class ObjectHandler : MonoBehaviour
             {
                 // Use PickUp() method from ItemActions class
                 action.PickUp(hit);
+            }
+            else if (hit.collider.gameObject.GetComponent<SaveObject>() != null)
+            {
+                hit.collider.gameObject.GetComponent<SaveObject>().Save();
+            }
+            else if (hit.collider.gameObject.tag == "Load")
+            {
+                GameManager.Instance.LoadData(InventoryManager.Instance.player.GetComponent<Player>());
             }
         }
     }

@@ -12,12 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: Shotgun
   m_EditorClassIdentifier: 
-  displayName: Remington 870 Shotgun
+  displayName: Remington 870
   description: The Remington Model 870 is a pump-action shotgun. It is widely used
     by the public for shooting sports, hunting and self-defense,
-  icon: {fileID: 21300000, guid: c4bcba390e4c3134fb8e2c654eccb69d, type: 3}
+  icon: {fileID: 21300000, guid: 7ec16394286938a48ad01cacde2710ff, type: 3}
+  iconPath: VFX/ItemIcons/Shotgun
   unique: 1
   quantity: 1
   prefab: {fileID: 5085494215452219224, guid: bc5eecbd6100e964fb533370f81b94ef, type: 3}
+  prefabPath: Prefabs/Items/Shotgun
   type: 0
   ammoType: 0
+  potionType: 0

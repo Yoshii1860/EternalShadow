@@ -96,7 +96,7 @@ public class InventoryManager : MonoBehaviour
             {
                 foreach (Transform weapon in weapons.transform)
                 {                    
-                    if (weapon.GetComponent<ItemController>().item == item)
+                    if (weapon.GetComponent<ItemController>().item.displayName == item.displayName)
                     {
                         weapon.GetComponent<Weapon>().isAvailable = true;
                         while (weapon.gameObject.activeSelf == false)
@@ -250,7 +250,7 @@ public class InventoryManager : MonoBehaviour
                 // loop through all the childs of weapons, check if item is the same item as the one displayed
                 foreach (Transform weapon in weapons.transform)
                 {
-                    if (weapon.GetComponent<ItemController>().item == selectedItem)
+                    if (weapon.GetComponent<ItemController>().item.displayName == selectedItem.displayName)
                     {
                         // If it is, get the weapon stats and display them
                         string weaponStats = weapon.GetComponent<Weapon>().GetWeaponStats();
@@ -283,7 +283,7 @@ public class InventoryManager : MonoBehaviour
         foreach (Transform item in itemContent)
         {
             itemController = item.GetComponentInChildren<ItemController>();
-            if (itemController != null && itemController.item == selectedItem)
+            if (itemController != null && itemController.item.displayName == selectedItem.displayName)
             {
                 itemImage = item.GetComponentInChildren<Image>();
                 if (itemImage != null)
