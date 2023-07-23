@@ -48,6 +48,12 @@ public class InventoryManager : MonoBehaviour
     public bool itemActionsOpen;
     public int actionsChildCount;
 
+    [Space(10)]
+    [Header("Items for starting the game")]
+    [SerializeField] Item baton;
+    [SerializeField] Item pistol;
+    [SerializeField] Item pistolAmmo;
+
     // The Image components of the item actions
     Image[] itemCanvasActions;
 
@@ -71,41 +77,95 @@ public class InventoryManager : MonoBehaviour
     void Start()
     {
         ammo = player.GetComponent<Ammo>();
+        AddItem(baton);
+        AddItem(pistol);
+        AddItem(pistolAmmo);
     }
 
     public void AddItem(Item item)
     {
-        if (Items.Contains(item))
+        if (item.type == ItemType.Ammo || item.type == ItemType.Potion)
         {
-            if (item.type == ItemType.Ammo)
+            Item existingItem = Items.Find(existingItem => existingItem.displayName == item.displayName);
+            if (existingItem != null)
             {
-                // Increase the current ammo amount of the player
-                ammo.IncreaseCurrentAmmo(item.AmmoType, item.quantity);
-            }
-            // Increase quantity of existing item by quantity of added item;
-            Items[Items.IndexOf(item)].quantity += item.quantity;
-        }
-        else
-        {
-            if (item.type == ItemType.Ammo)
-            {
-                // Increase the current ammo amount of the player
-                ammo.IncreaseCurrentAmmo(item.AmmoType, item.quantity);
-            }
-            else if (item.type == ItemType.Weapon)
-            {
-                foreach (Transform weapon in weapons.transform)
-                {                    
-                    if (weapon.GetComponent<ItemController>().item.displayName == item.displayName)
+                // Increase quantity of existing item by quantity of added item;
+                existingItem.quantity += item.quantity;
+
+                if (item.type == ItemType.Ammo)
+                {
+                    // INCREASE AMMO SLOT
+                    ammo.IncreaseCurrentAmmo(item.AmmoType, item.quantity);
+
+                    // SET UI FOR BULLETS
+                    foreach(Transform weapon in weapons.transform)
                     {
-                        weapon.GetComponent<Weapon>().isAvailable = true;
-                        while (weapon.gameObject.activeSelf == false)
+                        Debug.Log("EXISTING ITEM - Inside FOREACH of AddItem UI Bullets");
+                        if (weapon.GetComponent<Weapon>().ammoType == existingItem.AmmoType)
                         {
-                            weapons.GetComponent<WeaponSwitcher>().SwitchWeapon(true);
+                            Debug.Log("EXISTING ITEM - Inside IF STATEMENT of AddItem UI Bullets");
+                            Weapon weaponScript = weapon.GetComponent<Weapon>();
+                            player.GetComponent<Player>().SetBulletsUI(weaponScript.magazineCount, existingItem.quantity);
+                            break;
                         }
                     }
                 }
+
+                return;
             }
+            else
+            {
+                Item newItem = Instantiate(item);
+                Items.Add(newItem);
+
+                // If the item is not unique, create a copy to not change the original
+                if (item.type == ItemType.Ammo)
+                {
+                    // Increase the current ammo amount of the player
+                    ammo.IncreaseCurrentAmmo(item.AmmoType, item.quantity);
+
+                    // SET UI FOR BULLETS
+                    foreach(Transform weapon in weapons.transform)
+                    {
+                        Debug.Log("NEW ITEM - Inside FOREACH of AddItem UI Bullets");
+                        if (weapon.GetComponent<Weapon>().ammoType == item.AmmoType)
+                        {
+                            Debug.Log("NEW ITEM - Inside IF STATEMENT of AddItem UI Bullets");
+                            Weapon weaponScript = weapon.GetComponent<Weapon>();
+                            int inventoryAmmoAmount = GetInventoryAmmo(weaponScript.ammoType);
+                            player.GetComponent<Player>().SetBulletsUI(weaponScript.magazineCount, inventoryAmmoAmount);
+                            break;
+                        }
+                    }
+
+                }
+                return;
+            }
+        }
+        else if (item.type == ItemType.Weapon)
+        {
+            Items.Add(item);
+            foreach (Transform weapon in weapons.transform)
+            {                    
+                if (weapon.GetComponent<ItemController>().item.displayName == item.displayName)
+                {
+                    Weapon weaponScript = weapon.GetComponent<Weapon>();
+                    weaponScript.isAvailable = true;
+
+                    // SET UI FOR BULLETS
+                    int inventoryAmmo = GetInventoryAmmo(weaponScript.ammoType);
+                    player.GetComponent<Player>().SetBulletsUI(weaponScript.magazineCount, inventoryAmmo);
+
+                    ammo.IncreaseCurrentAmmo(weaponScript.ammoType, weaponScript.magazineCount);
+                    while (weapon.gameObject.activeSelf == false)
+                    {
+                        weapons.GetComponent<WeaponSwitcher>().SwitchWeapon(true);
+                    }
+                }
+            }
+        }
+        else
+        {
             Items.Add(item);
         }
     }
@@ -129,6 +189,42 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    public void RemoveAmmo(Ammo.AmmoType ammotype, int amount)
+    {
+        foreach (Item item in Items)
+        {
+            if (item.AmmoType == ammotype)
+            {
+                if (item.quantity > amount)
+                {
+                    item.quantity -= amount;
+                    break;
+                }
+                else if (item.quantity == amount)
+                {
+                    Items.Remove(item);
+                    break;
+                }
+                else
+                {
+                    Debug.Log("Remove Ammo FAILED!");
+                }
+            }
+        }
+    }
+
+    public int GetInventoryAmmo(Ammo.AmmoType ammotype)
+    {
+        foreach (Item item in Items)
+        {
+            if (item.AmmoType == ammotype)
+            {
+                return item.quantity;
+            }
+        }
+        return 0;
+    }
+
     public void ListItems()
     {
         // Clear list before showing items
@@ -148,17 +244,42 @@ public class InventoryManager : MonoBehaviour
             Image[] itemCanvasIcons = obj.GetComponentsInChildren<Image>();
             TextMeshProUGUI itemCanvasText = obj.GetComponentInChildren<TextMeshProUGUI>();
 
-            if (item.unique)
+            if (item.unique && item.type != ItemType.Weapon)
             {
                 // If the item is unique, hide the quantity
+                Debug.Log("Set to false: " + item.displayName);
                 itemCanvasText.enabled = false;
+            }
+            else if (item.type == ItemType.Weapon)
+            {
+                // If item is weapon, show current ammo in magazine
+                // loop through weapons to find the weapon with the same name as the item
+                foreach (Transform weapon in weapons.transform)
+                {
+                    if (weapon.GetComponent<ItemController>().item.displayName == item.displayName)
+                    {   
+                        Weapon weaponScript = weapon.GetComponent<Weapon>();
+                        if (weaponScript.ammoType == Ammo.AmmoType.Infinite)
+                        {
+                            itemCanvasText.enabled = false;
+                            break;
+                        }
+                        
+                        // If it is, get the weapon stats and display them
+                        string weaponAmmo = weaponScript.magazineCount.ToString();
+                        Debug.Log(item.displayName);
+                        Debug.Log(weaponAmmo);
+                        itemCanvasText.text = weaponAmmo;
+                        break;
+                    }
+                }
             }
             else
             {
                 // If the item is not unique, show the quantity
                 itemCanvasText.text = item.quantity.ToString();
             }
-            itemCanvasText.text = item.quantity.ToString();
+
             // Iterate through the Image components and find the desired one
             foreach (Image itemCanvasIcon in itemCanvasIcons)
             {

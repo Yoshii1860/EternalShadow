@@ -29,6 +29,7 @@ public class Player : MonoBehaviour
     [Header("References")]
     [SerializeField] TextMeshProUGUI healthText;
     [SerializeField] TextMeshProUGUI staminaText;
+    [SerializeField] TextMeshProUGUI bulletsText;
 
     private int reducedStamina;
     private int maxHealth = 100;
@@ -143,5 +144,10 @@ public class Player : MonoBehaviour
         if (stamina < maxStamina) stamina += 1;
         staminaText.text = stamina.ToString();
         increasingStamina = false;
+    }
+
+    public void SetBulletsUI(int currentBullets, int bulletsInInventory)
+    {
+        bulletsText.text = currentBullets + "/" + bulletsInInventory;
     }
 }

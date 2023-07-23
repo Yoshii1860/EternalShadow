@@ -17,13 +17,23 @@ public class ItemData
 }
 
 [System.Serializable]
+public class WeaponData
+{
+    public int index;
+    public int magazineCount;
+    public bool isAvailable;
+    public bool isEquipped;
+}
+
+[System.Serializable]
 public class SaveData
 {
     public int health;
     public float[] position;
     public List<ItemData> items;
+    public List<WeaponData> weapons;
 
-    public SaveData (Player player)
+    public SaveData (Player player, Transform weaponPool)
     {
         ////////////////////////////
         // Save Player Stats
@@ -52,9 +62,26 @@ public class SaveData
             itemData.ammoType = item.AmmoType.ToString();
             itemData.potionType = item.PotionType.ToString();
             itemData.iconPath = item.iconPath;
+            Debug.Log("SAVE: " + item.iconPath);
             itemData.prefabPath = item.prefabPath;
 
             items.Add(itemData);
+        }
+
+        ////////////////////////////
+        // Save Weapons
+        ////////////////////////////
+
+        weapons = new List<WeaponData>();
+        for (int i = 0; i < weaponPool.childCount; i++)
+        {
+            WeaponData weaponData = new WeaponData();
+            weaponData.index = i;
+            weaponData.magazineCount = weaponPool.GetChild(i).GetComponent<Weapon>().magazineCount;
+            weaponData.isAvailable = weaponPool.GetChild(i).GetComponent<Weapon>().isAvailable;
+            weaponData.isEquipped = weaponPool.GetChild(i).GetComponent<Weapon>().isEquipped;
+
+            weapons.Add(weaponData);
         }
     }
 }

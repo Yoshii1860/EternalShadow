@@ -65,11 +65,9 @@ public class Item : ScriptableObject
     private void OnValidate()
     {
         // Update the iconPath and prefabPath whenever the icon or prefab is set in the Inspector.
-        if (icon != null)
-            iconPath = GetResourcePath(icon);
+        if (icon != null) iconPath = GetResourcePath(icon);
 
-        if (prefab != null)
-            prefabPath = GetResourcePath(prefab);
+        if (prefab != null) prefabPath = GetResourcePath(prefab);
     }
 
     // Helper method to get the resource path of an object.

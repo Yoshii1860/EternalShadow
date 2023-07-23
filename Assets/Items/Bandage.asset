@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: Bandage
   description: Bandages can be used to support injured joints, secure dressings and
     control bleeding.
-  icon: {fileID: 21300000, guid: 40dd911d9909ebb44ad3462e7d6cf895, type: 3}
+  icon: {fileID: 21300000, guid: d60ec07df7820234789fa0f6d8efdbb6, type: 3}
   iconPath: VFX/ItemIcons/Bandage
   unique: 0
   quantity: 1

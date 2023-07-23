@@ -109,7 +109,7 @@ public class GameManager : MonoBehaviour
 
     public void SaveData(Player player)
     {
-        SaveSystem.SavePlayer(player);
+        SaveSystem.SavePlayer(player, InventoryManager.Instance.weapons.transform);
         Debug.Log("Player data saved!");
     }
 
@@ -129,11 +129,36 @@ public class GameManager : MonoBehaviour
             // Load Inventory
             ////////////////////////////
             InventoryManager.Instance.Items.Clear();
+            Ammo ammoSlot = player.GetComponent<Ammo>();
+
             foreach (ItemData itemData in data.items)
             {
                 // Convert ItemData back to Item and add it to the inventory
                 Item item = CreateItemFromData(itemData);
+                if (item.type == ItemType.Ammo)
+                {
+                    ammoSlot.SetAmmoOnLoad(item.AmmoType, 0);
+                }
                 InventoryManager.Instance.AddItem(item);
+            }
+
+            ////////////////////////////
+            // Load Weapons
+            ////////////////////////////
+            foreach (WeaponData weaponData in data.weapons)
+            {
+                // Convert WeaponData back to Weapon and add it to the inventory
+                Weapon weapon = InventoryManager.Instance.weapons.transform.GetChild(weaponData.index).GetComponent<Weapon>();
+                weapon.magazineCount = weaponData.magazineCount;
+                weapon.isAvailable = weaponData.isAvailable;
+                if (weaponData.isEquipped)
+                {
+                    weapon.gameObject.SetActive(true);
+                }
+                else
+                {
+                    weapon.gameObject.SetActive(false);
+                }
             }
 
             Debug.Log("Player data loaded!");
@@ -150,7 +175,9 @@ public class GameManager : MonoBehaviour
         newItem.type = (ItemType)System.Enum.Parse(typeof(ItemType), itemData.type);
         newItem.AmmoType = (Ammo.AmmoType)System.Enum.Parse(typeof(Ammo.AmmoType), itemData.ammoType);
         newItem.PotionType = (Potion.PotionType)System.Enum.Parse(typeof(Potion.PotionType), itemData.potionType);
+        newItem.iconPath = itemData.iconPath;
         newItem.icon = Resources.Load<Sprite>(itemData.iconPath);
+        newItem.prefabPath = itemData.prefabPath;
         newItem.prefab = Resources.Load<GameObject>(itemData.prefabPath);
 
         return newItem;

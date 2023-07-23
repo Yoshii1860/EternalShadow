@@ -19,25 +19,29 @@ public class Weapon : MonoBehaviour
     [Tooltip("The amount of ammo in the magazine.")]
     [SerializeField] int magazine = 10;
     [Tooltip("The amount of ammo a magazine currently has.")]
-    [SerializeField] int magazineCount = 0;
+    public int magazineCount = 5;
+    public bool isEquipped = false;
 
     [Space(10)]
     [Header("Ammo Settings")]
     [Tooltip("The type of ammo this weapon uses.")]
-    [SerializeField] Ammo.AmmoType ammoType;
+    public Ammo.AmmoType ammoType;
     [Tooltip("The ammo slot this weapon uses. Should be on the player.")]
     [SerializeField] Ammo ammoSlot;
 
     bool canShoot = true;
+    bool canReload = true;
 
     void OnEnable()
     {
         canShoot = true;
+        canReload = true;
+        isEquipped = true;
     }
 
-    void Start()
+    void OnDisable()
     {
-        magazineCount = magazine;
+        isEquipped = false;
     }
 
     public void Execute()
@@ -47,7 +51,7 @@ public class Weapon : MonoBehaviour
 
     public void ExecuteReload()
     {
-        if(canShoot) StartCoroutine(Reload());
+        if(canReload) StartCoroutine(Reload());
     }
     
     public string GetWeaponStats()
@@ -64,15 +68,35 @@ public class Weapon : MonoBehaviour
         {
             Debug.Log("Shooting");
             GameObject target = ProcessRaycast();
-            if(ammoType != Ammo.AmmoType.Infinite)
+            if (target != null)
+            {
+                if (ammoType != Ammo.AmmoType.Infinite)
+                {
+                    magazineCount--;
+
+                    // SET UI FOR BULLETS
+                    int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
+                    InventoryManager.Instance.player.GetComponent<Player>().SetBulletsUI(magazineCount, inventoryAmmo);
+
+                    ammoSlot.ReduceCurrentAmmo(ammoType);
+                    // Hit animation
+                }
+
+                if (target.GetComponent<Enemy>() != null)
+                {
+                    target.GetComponent<Enemy>().TakeDamage(damage);
+                    // Hit animation
+                }
+            }
+            else
             {
                 magazineCount--;
-                ammoSlot.ReduceCurrentAmmo(ammoType);
-            }
+                
+                // SET UI FOR BULLETS
+                int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
+                InventoryManager.Instance.player.GetComponent<Player>().SetBulletsUI(magazineCount, inventoryAmmo);
 
-            if (target.GetComponent<Enemy>() != null)
-            {
-                target.GetComponent<Enemy>().TakeDamage(damage);
+                ammoSlot.ReduceCurrentAmmo(ammoType);
             }
         }
         else
@@ -86,25 +110,40 @@ public class Weapon : MonoBehaviour
     IEnumerator Reload()
     {
         canShoot = false;
-        int currentAmmo = ammoSlot.GetCurrentAmmo(ammoType);
-        if(magazineCount < magazine && currentAmmo - magazineCount >= 1)
+        canReload = false;
+        int currentInventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
+        if(currentInventoryAmmo >= 1 && magazineCount < magazine)
         {
             Debug.Log("Reloading");
-            if(currentAmmo >= magazine)
+            if(currentInventoryAmmo <= magazine - magazineCount)
             {
-                magazineCount = magazine;
+                magazineCount += currentInventoryAmmo;
+                InventoryManager.Instance.RemoveAmmo(ammoType, currentInventoryAmmo);
+
+                Debug.Log("Reloading Ammount: " + currentInventoryAmmo);
             }
             else
             {
-                magazineCount = currentAmmo;
+                int ammoNeeded = magazine - magazineCount;
+                magazineCount += ammoNeeded;
+                InventoryManager.Instance.RemoveAmmo(ammoType, ammoNeeded);
+
+                Debug.Log("Reloading Ammount: " + ammoNeeded);
             }
+
+            // SET UI FOR BULLETS
+            int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
+            Debug.Log("Inventory Ammo: " + inventoryAmmo);
+            InventoryManager.Instance.player.GetComponent<Player>().SetBulletsUI(magazineCount, inventoryAmmo);
+
         }
         else
         {
-            Debug.Log("Reload: Out of ammo");
+            Debug.Log("Reload failed.");
         }
         yield return new WaitForSeconds(timeOfReload);
         canShoot = true;
+        canReload = true;
     }
 
     GameObject ProcessRaycast()

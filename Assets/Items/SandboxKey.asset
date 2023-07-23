@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: Master Key
   description: A key for every door
-  icon: {fileID: 21300000, guid: c6c47d72561b95c4f839da73dff93eb1, type: 3}
+  icon: {fileID: 21300000, guid: 1fc307e34f31e6e40804312b87e60be4, type: 3}
   iconPath: VFX/ItemIcons/Key
   unique: 1
   quantity: 1
