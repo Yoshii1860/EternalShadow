@@ -28,4 +28,13 @@ public class EnemyBT : Tree
 
         return root;
     }
+
+    // Reset data of all nodes recursively
+    public void ResetTree()
+    {
+        if (_root != null)
+        {
+            ClearNodeDataRecursive(_root);
+        }
+    }
 }

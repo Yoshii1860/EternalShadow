@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] GameObject inventoryObject;
     [SerializeField] PlayerInput playerInput;
+    [SerializeField] Transform objectPool;
+    [SerializeField] Transform enemyPool;
 
     public bool isPaused = false;
 
@@ -109,8 +111,8 @@ public class GameManager : MonoBehaviour
 
     public void SaveData(Player player)
     {
-        SaveSystem.SavePlayer(player, InventoryManager.Instance.weapons.transform);
-        Debug.Log("Player data saved!");
+        SaveSystem.SavePlayer(player, InventoryManager.Instance.weapons.transform, objectPool, enemyPool);
+        Debug.Log("GameManager.cs: Player data saved!");
     }
 
     public void LoadData(Player player)
@@ -129,16 +131,11 @@ public class GameManager : MonoBehaviour
             // Load Inventory
             ////////////////////////////
             InventoryManager.Instance.Items.Clear();
-            Ammo ammoSlot = player.GetComponent<Ammo>();
 
             foreach (ItemData itemData in data.items)
             {
                 // Convert ItemData back to Item and add it to the inventory
                 Item item = CreateItemFromData(itemData);
-                if (item.type == ItemType.Ammo)
-                {
-                    ammoSlot.SetAmmoOnLoad(item.AmmoType, 0);
-                }
                 InventoryManager.Instance.AddItem(item);
             }
 
@@ -151,17 +148,95 @@ public class GameManager : MonoBehaviour
                 Weapon weapon = InventoryManager.Instance.weapons.transform.GetChild(weaponData.index).GetComponent<Weapon>();
                 weapon.magazineCount = weaponData.magazineCount;
                 weapon.isAvailable = weaponData.isAvailable;
-                if (weaponData.isEquipped)
+                if (weaponData.isEquipped) weapon.gameObject.SetActive(true);
+                else weapon.gameObject.SetActive(false);
+            }
+
+            ////////////////////////////
+            // Set Ammo
+            ////////////////////////////
+            Ammo ammoSlot = player.GetComponent<Ammo>();
+            ammoSlot.ResetAmmo();
+
+            foreach (Item item in InventoryManager.Instance.Items)
+            {
+                if (item.type == ItemType.Ammo)
                 {
-                    weapon.gameObject.SetActive(true);
-                }
-                else
-                {
-                    weapon.gameObject.SetActive(false);
+                    ammoSlot.IncreaseCurrentAmmo(item.AmmoType, item.quantity);
                 }
             }
 
-            Debug.Log("Player data loaded!");
+            foreach (Weapon weapon in InventoryManager.Instance.weapons.transform.GetComponentsInChildren<Weapon>(true))
+            {
+                if (weapon.isAvailable)
+                {
+                    ammoSlot.IncreaseCurrentAmmo(weapon.ammoType, weapon.magazineCount);
+                }
+
+                if (weapon.isEquipped)
+                {
+                    // Set the UI for the current weapon
+                    int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(weapon.ammoType);
+                    player.SetBulletsUI(weapon.magazineCount, inventoryAmmo);
+                }
+            }
+
+
+            ////////////////////////////
+            // Load Interactable Objects
+            ////////////////////////////
+            ItemController[] interactableObjectsPool = objectPool.GetComponentsInChildren<ItemController>();
+
+            foreach (InteractableObjectData interactableObjectData in data.interactableObjects)
+            {
+                foreach (ItemController interactableObject in interactableObjectsPool)
+                {
+                    if (interactableObject.uniqueID == interactableObjectData.uniqueID)
+                    {
+                        interactableObject.isPickedUp = interactableObjectData.isPickedUp;
+                        if (interactableObject.isPickedUp)
+                        {
+                            // Move the object to a position far away
+                            interactableObject.transform.position = new Vector3(0, -1000f, 0);
+                        }
+                        else
+                        {
+                            // If it's not picked up, reset its position to its initial position.
+                            interactableObject.transform.position = interactableObject.originalPosition;
+                        }
+                    }
+                }
+            }
+
+            ////////////////////////////
+            // Load Enemies
+            ////////////////////////////
+            Enemy[] enemiesPool = enemyPool.GetComponentsInChildren<Enemy>(true);
+
+            foreach (EnemyData enemyData in data.enemies)
+            {
+                foreach (Enemy enemy in enemiesPool)
+                {
+                    if (enemy.uniqueID == enemyData.uniqueID)
+                    {
+                        enemy.health = enemyData.health;
+                        enemy.isDead = enemyData.isDead;
+                        enemy.transform.position = new Vector3(enemyData.position[0], enemyData.position[1], enemyData.position[2]);
+                        enemy.transform.rotation = Quaternion.Euler(enemyData.rotation[0], enemyData.rotation[1], enemyData.rotation[2]);
+                        if (enemy.isDead)
+                        {
+                            enemy.gameObject.SetActive(false);
+                        }
+                        else
+                        {
+                            enemy.gameObject.SetActive(true);
+                        }
+                        enemy.GetComponent<EnemyBT>().ResetTree();
+                    }
+                }
+            }
+
+            Debug.Log("GameManager.cs: Player data loaded!");
         }
     }
 

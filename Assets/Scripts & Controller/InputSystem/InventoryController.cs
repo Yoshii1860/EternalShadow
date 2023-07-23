@@ -54,7 +54,6 @@ public class InventoryController : MonoBehaviour
     void Interact()
     {
         interact = false;
-        Debug.Log("InventoryController: Interact");
 
         if (!InventoryManager.Instance.itemActionsOpen)
         {
@@ -74,7 +73,6 @@ public class InventoryController : MonoBehaviour
     void Exit()
     {
         exit = false;
-        Debug.Log("InventoryController: Exit");
 
         GameManager.Instance.ResumeGame();
     }
@@ -100,7 +98,6 @@ public class InventoryController : MonoBehaviour
     {
         if (move.y > 0.5f)
         {
-            Debug.Log("InventoryController: Up");
             if (InventoryManager.Instance.highlightNumber - 3 >= 0)
             {
                 InventoryManager.Instance.ChangeSelectedItemColor(true, false);
@@ -110,7 +107,6 @@ public class InventoryController : MonoBehaviour
         }
         else if (move.y < -0.5f)
         {
-            Debug.Log("InventoryController: Down");
             if(InventoryManager.Instance.highlightNumber + 3 < InventoryManager.Instance.Items.Count)
             {
                 InventoryManager.Instance.ChangeSelectedItemColor(true, false);
@@ -120,7 +116,6 @@ public class InventoryController : MonoBehaviour
         }
         else if (move.x > 0.5f)
         {
-            Debug.Log("InventoryController: Right");
             if (InventoryManager.Instance.highlightNumber + 1 < InventoryManager.Instance.Items.Count)
             {
                 InventoryManager.Instance.ChangeSelectedItemColor(true, false);
@@ -130,7 +125,6 @@ public class InventoryController : MonoBehaviour
         }
         else if (move.x < -0.5f)
         {
-            Debug.Log("InventoryController: Left");
             if (InventoryManager.Instance.highlightNumber - 1 >= 0)
             {
                 InventoryManager.Instance.ChangeSelectedItemColor(true, false);
@@ -144,7 +138,6 @@ public class InventoryController : MonoBehaviour
     {
         if (move.y > 0.5f)
         {
-            Debug.Log("InventoryController: Actions Up");
             if (InventoryManager.Instance.itemActionNumber - 1 >= 0)
             {
                 InventoryManager.Instance.ChangeSelectedActionColor(false);
@@ -154,7 +147,6 @@ public class InventoryController : MonoBehaviour
         }
         else if (move.y < -0.5f)
         {
-            Debug.Log("InventoryController: Actions Down");
             if(InventoryManager.Instance.itemActionNumber + 1 < InventoryManager.Instance.actionsChildCount)
             {
                 InventoryManager.Instance.ChangeSelectedActionColor(false);

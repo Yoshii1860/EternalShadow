@@ -84,6 +84,7 @@ public class InventoryManager : MonoBehaviour
 
     public void AddItem(Item item)
     {
+        Debug.Log("InventoryManager.AddItem(" + item.displayName + ")");
         if (item.type == ItemType.Ammo || item.type == ItemType.Potion)
         {
             Item existingItem = Items.Find(existingItem => existingItem.displayName == item.displayName);
@@ -100,10 +101,8 @@ public class InventoryManager : MonoBehaviour
                     // SET UI FOR BULLETS
                     foreach(Transform weapon in weapons.transform)
                     {
-                        Debug.Log("EXISTING ITEM - Inside FOREACH of AddItem UI Bullets");
                         if (weapon.GetComponent<Weapon>().ammoType == existingItem.AmmoType)
                         {
-                            Debug.Log("EXISTING ITEM - Inside IF STATEMENT of AddItem UI Bullets");
                             Weapon weaponScript = weapon.GetComponent<Weapon>();
                             player.GetComponent<Player>().SetBulletsUI(weaponScript.magazineCount, existingItem.quantity);
                             break;
@@ -127,10 +126,8 @@ public class InventoryManager : MonoBehaviour
                     // SET UI FOR BULLETS
                     foreach(Transform weapon in weapons.transform)
                     {
-                        Debug.Log("NEW ITEM - Inside FOREACH of AddItem UI Bullets");
                         if (weapon.GetComponent<Weapon>().ammoType == item.AmmoType)
                         {
-                            Debug.Log("NEW ITEM - Inside IF STATEMENT of AddItem UI Bullets");
                             Weapon weaponScript = weapon.GetComponent<Weapon>();
                             int inventoryAmmoAmount = GetInventoryAmmo(weaponScript.ammoType);
                             player.GetComponent<Player>().SetBulletsUI(weaponScript.magazineCount, inventoryAmmoAmount);
@@ -191,6 +188,7 @@ public class InventoryManager : MonoBehaviour
 
     public void RemoveAmmo(Ammo.AmmoType ammotype, int amount)
     {
+        Debug.Log("InventoryManager.RemoveAmmo(" + ammotype + ", " + amount + ")");
         foreach (Item item in Items)
         {
             if (item.AmmoType == ammotype)
@@ -207,7 +205,7 @@ public class InventoryManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("Remove Ammo FAILED!");
+                    Debug.Log("InventoryManager.RemoveAmmo() - FAILED");
                 }
             }
         }
@@ -247,7 +245,6 @@ public class InventoryManager : MonoBehaviour
             if (item.unique && item.type != ItemType.Weapon)
             {
                 // If the item is unique, hide the quantity
-                Debug.Log("Set to false: " + item.displayName);
                 itemCanvasText.enabled = false;
             }
             else if (item.type == ItemType.Weapon)
@@ -267,8 +264,6 @@ public class InventoryManager : MonoBehaviour
                         
                         // If it is, get the weapon stats and display them
                         string weaponAmmo = weaponScript.magazineCount.ToString();
-                        Debug.Log(item.displayName);
-                        Debug.Log(weaponAmmo);
                         itemCanvasText.text = weaponAmmo;
                         break;
                     }
@@ -433,6 +428,7 @@ public class InventoryManager : MonoBehaviour
 
     public void DropItem(Item item)
     {
+        Debug.Log("InventoryManager.DropItem(" + item.displayName + ")");
         GameObject obj = Instantiate(item.prefab, player.transform.position + player.transform.forward, Quaternion.identity, objectPool);
         Rigidbody itemRigidbody = obj.AddComponent<Rigidbody>();
         itemRigidbody.AddForce(player.transform.forward * dropForce, ForceMode.Impulse);

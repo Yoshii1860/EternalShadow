@@ -4,19 +4,32 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    [SerializeField] int health = 100;
+    public int uniqueID;
+    public int health = 100;
+    public bool isDead;
+
+    void Awake()
+    {
+        uniqueID = GetInstanceID();
+    }
+
+    void Start() 
+    {
+        isDead = false;
+    }
 
     public void TakeDamage(int damage)
     {
         health -= damage;
         if (health <= 0)
         {
+            isDead = true;
             Die();
         }
     }
 
     void Die()
     {
-        Destroy(transform.gameObject);
+        transform.gameObject.SetActive(false);
     }
 }

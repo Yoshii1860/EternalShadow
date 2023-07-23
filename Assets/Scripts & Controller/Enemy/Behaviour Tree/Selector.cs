@@ -9,6 +9,8 @@ namespace BehaviorTree
         public Selector() : base() { }
         public Selector(List<Node> children) : base(children) { }
 
+        // iterate through all children and check the state after evaluating
+        // If any child succeeds or runs, stop and return success/running
         public override NodeState Evaluate()
         {
             foreach (Node node in children)
@@ -27,6 +29,7 @@ namespace BehaviorTree
                         continue;
                 }
             }
+
             state = NodeState.FAILURE;
             return state;
         }

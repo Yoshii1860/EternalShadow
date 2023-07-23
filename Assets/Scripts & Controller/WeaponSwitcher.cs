@@ -63,4 +63,26 @@ public class WeaponSwitcher : MonoBehaviour
         // Update the current weapon index
         currentWeaponIndex = nextWeaponIndex;
     }
+
+    public void SelectWeapon(Item item)
+    {
+        foreach (ItemController weapon in transform.gameObject.GetComponentsInChildren<ItemController>(true))
+        {
+            if (weapon.item.displayName == item.displayName)
+            {
+                // Deactivate the current weapon
+                transform.GetChild(currentWeaponIndex).gameObject.SetActive(false);
+
+                // Activate the next weapon
+                weapon.gameObject.SetActive(true);
+
+                // Set the UI to magazine Count + inventory ammo
+                int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(weapon.GetComponent<Weapon>().ammoType);
+                transform.parent.parent.GetComponent<Player>().SetBulletsUI(weapon.GetComponent<Weapon>().magazineCount, inventoryAmmo);
+
+                // Update the current weapon index
+                currentWeaponIndex = weapon.transform.GetSiblingIndex();
+            }
+        }
+    }
 }

@@ -44,6 +44,14 @@ public class Ammo : MonoBehaviour
         GetAmmoSlot(ammoType).ammoAmount = newAmmoAmount;
     }
 
+    public void ResetAmmo()
+    {
+        foreach (AmmoSlot slot in ammoSlots)
+        {
+            slot.ammoAmount = 0;
+        }
+    }
+
     private AmmoSlot GetAmmoSlot(AmmoType ammoType)
     {
         foreach (AmmoSlot slot in ammoSlots)

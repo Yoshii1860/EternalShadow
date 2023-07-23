@@ -25,7 +25,7 @@ public class ObjectHandler : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, pickupDistance))
         {
-            Debug.Log("RaycastHit: " + hit.collider.gameObject.name);
+            Debug.Log("ObjectHandler.DetectObjects: " + hit.collider.gameObject.name);
             if (hit.collider.gameObject.GetComponent<ItemController>() != null)
             {
                 // Use PickUp() method from ItemActions class

@@ -15,20 +15,22 @@ public class ItemActions : MonoBehaviour
 
     public void PickUp(RaycastHit item)
     {
-        Item itemData = item.collider.gameObject.GetComponent<ItemController>().item;
-        Debug.Log("Picked up: " + itemData.name);
+        ItemController itemController = item.collider.gameObject.GetComponent<ItemController>();
+        Item itemData = itemController.item;
+        Debug.Log("ItemActions.PickUp(" + itemData.name + ")");
 
         // Add the Item instance to the inventory
         InventoryManager.Instance.AddItem(itemData);
-        Destroy(item.collider.gameObject);
+        itemController.isPickedUp = true;
     }
 
     public void Use(Item item)
     {
-        Debug.Log("Used: " + item.name);
+        Debug.Log("ItemActions.Use(" + item.name + ")");
         if (item.PotionType == Potion.PotionType.Antibiotics)       potion.Antibiotics(item);
         else if (item.PotionType == Potion.PotionType.Bandage)      potion.Bandage(item);
         else if (item.PotionType == Potion.PotionType.Painkillers)  potion.Painkillers(item);
+        else if (item.type == ItemType.Weapon)                      InventoryManager.Instance.weapons.GetComponent<WeaponSwitcher>().SelectWeapon(item);
     }   
 
     public void Combine(Item item)
@@ -43,7 +45,7 @@ public class ItemActions : MonoBehaviour
 
     public void ThrowAway(Item item)
     {
-        Debug.Log("Threw away: " + item.name);
+        Debug.Log("ItemActions.ThrowAway(" + item.name + ")");
         InventoryManager.Instance.DropItem(item);
     }
 }
