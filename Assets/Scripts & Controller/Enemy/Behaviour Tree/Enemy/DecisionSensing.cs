@@ -5,7 +5,8 @@ using BehaviorTree;
 
 public class DecisionSensing : Node
 {
-    static int characterLayerMask = 1 << 7;
+    // When remove debug "No Attack Mode", make int static
+    int characterLayerMask = 1 << 7;
 
     Transform transform;
     Animator animator;
@@ -14,6 +15,12 @@ public class DecisionSensing : Node
     {
         this.transform = transform;
         animator = transform.GetComponent<Animator>();
+
+        // No Attack Mode Code
+        if(GameManager.Instance.noAttackMode)
+            characterLayerMask = 1 << 2;
+        else
+            characterLayerMask = 1 << 7;
     }
 
     public override NodeState Evaluate()

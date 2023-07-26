@@ -26,7 +26,7 @@ public class WeaponData
 }
 
 [System.Serializable]
-public class InteractableObjectData
+public class PickupObjectData
 {
     public int uniqueID;
     public bool isPickedUp;
@@ -44,16 +44,24 @@ public class EnemyData
 }
 
 [System.Serializable]
+public class InteractableObjectData
+{
+    public int uniqueID;
+    public bool active;
+}
+
+[System.Serializable]
 public class SaveData
 {
     public int health;
     public float[] position;
     public List<ItemData> items;
     public List<WeaponData> weapons;
-    public List<InteractableObjectData> interactableObjects;
+    public List<PickupObjectData> pickupObjects;
     public List<EnemyData> enemies;
+    public List<InteractableObjectData> interactableObjects;
 
-    public SaveData (Player player, Transform weaponPool, Transform objectPool, Transform enemyPool)
+    public SaveData (Player player, Transform weaponPool, Transform objectPool, Transform enemyPool, Transform interactableObjectsPool)
     {
         ////////////////////////////
         // Save Player Stats
@@ -104,17 +112,17 @@ public class SaveData
         }
 
         ////////////////////////////
-        // Save Interactable Objects
+        // Save Pickup Objects
         ////////////////////////////
 
-        interactableObjects = new List<InteractableObjectData>();
-        foreach (ItemController interactableObject in objectPool.GetComponentsInChildren<ItemController>())
+        pickupObjects = new List<PickupObjectData>();
+        foreach (ItemController pickupObject in objectPool.GetComponentsInChildren<ItemController>())
         {
-            InteractableObjectData objectData = new InteractableObjectData();
-            objectData.uniqueID = interactableObject.uniqueID;
-            objectData.isPickedUp = interactableObject.isPickedUp;
+            PickupObjectData objectData = new PickupObjectData();
+            objectData.uniqueID = pickupObject.uniqueID;
+            objectData.isPickedUp = pickupObject.isPickedUp;
 
-            interactableObjects.Add(objectData);
+            pickupObjects.Add(objectData);
         }
 
         ////////////////////////////
@@ -139,6 +147,20 @@ public class SaveData
             enemyData.rotation[2] = enemy.transform.rotation.z;
 
             enemies.Add(enemyData);
+        }
+
+        ////////////////////////////
+        // Save Interactable Objects
+        ////////////////////////////
+
+        interactableObjects = new List<InteractableObjectData>();
+        foreach (InteractableObject intObj in interactableObjectsPool.GetComponentsInChildren<InteractableObject>())
+        {
+            InteractableObjectData intObjData = new InteractableObjectData();
+            intObjData.uniqueID = intObj.uniqueID;
+            intObjData.active = intObj.active;
+
+            interactableObjects.Add(intObjData);
         }
     }
 }

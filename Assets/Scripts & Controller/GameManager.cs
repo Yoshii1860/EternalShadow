@@ -30,8 +30,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] PlayerInput playerInput;
     [SerializeField] Transform objectPool;
     [SerializeField] Transform enemyPool;
+    [SerializeField] Transform interactableObjectsPool;
 
     public bool isPaused = false;
+
+    [Header("Debug")]
+    [Tooltip("Debug mode for the enemy. If true, the enemy will not attack the player.")]
+    public bool noAttackMode = false;
 
     private void Awake()
     {
@@ -111,7 +116,7 @@ public class GameManager : MonoBehaviour
 
     public void SaveData(Player player)
     {
-        SaveSystem.SavePlayer(player, InventoryManager.Instance.weapons.transform, objectPool, enemyPool);
+        SaveSystem.SavePlayer(player, InventoryManager.Instance.weapons.transform, objectPool, enemyPool, interactableObjectsPool);
         Debug.Log("GameManager.cs: Player data saved!");
     }
 
@@ -183,26 +188,26 @@ public class GameManager : MonoBehaviour
 
 
             ////////////////////////////
-            // Load Interactable Objects
+            // Load Pickup Objects
             ////////////////////////////
-            ItemController[] interactableObjectsPool = objectPool.GetComponentsInChildren<ItemController>();
+            ItemController[] pickupObjectsPool = objectPool.GetComponentsInChildren<ItemController>();
 
-            foreach (InteractableObjectData interactableObjectData in data.interactableObjects)
+            foreach (PickupObjectData pickupObjectData in data.pickupObjects)
             {
-                foreach (ItemController interactableObject in interactableObjectsPool)
+                foreach (ItemController pickupObject in pickupObjectsPool)
                 {
-                    if (interactableObject.uniqueID == interactableObjectData.uniqueID)
+                    if (pickupObject.uniqueID == pickupObjectData.uniqueID)
                     {
-                        interactableObject.isPickedUp = interactableObjectData.isPickedUp;
-                        if (interactableObject.isPickedUp)
+                        pickupObject.isPickedUp = pickupObjectData.isPickedUp;
+                        if (pickupObject.isPickedUp)
                         {
                             // Move the object to a position far away
-                            interactableObject.transform.position = new Vector3(0, -1000f, 0);
+                            pickupObject.transform.position = new Vector3(0, -1000f, 0);
                         }
                         else
                         {
                             // If it's not picked up, reset its position to its initial position.
-                            interactableObject.transform.position = interactableObject.originalPosition;
+                            pickupObject.transform.position = pickupObject.originalPosition;
                         }
                     }
                 }
@@ -235,6 +240,27 @@ public class GameManager : MonoBehaviour
                     }
                 }
             }
+
+            ////////////////////////////
+            // Load Interactable Objects
+            ////////////////////////////
+            InteractableObject[] interactableObjectPool = interactableObjectsPool.GetComponentsInChildren<InteractableObject>(true);
+
+            foreach (InteractableObjectData intObjData in data.interactableObjects)
+            {
+                foreach (InteractableObject intObj in interactableObjectPool)
+                {
+                    if (intObj.uniqueID == intObjData.uniqueID)
+                    {
+                        if (intObj.active != intObjData.active)
+                        {
+                            intObj.Interact();
+                        }
+                    }
+                }
+            }
+
+
 
             Debug.Log("GameManager.cs: Player data loaded!");
         }

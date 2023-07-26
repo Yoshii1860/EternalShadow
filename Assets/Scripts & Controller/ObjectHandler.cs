@@ -39,6 +39,20 @@ public class ObjectHandler : MonoBehaviour
             {
                 GameManager.Instance.LoadData(InventoryManager.Instance.player.GetComponent<Player>());
             }
+            else if (hit.collider.gameObject.layer == 6)
+            {
+                Debug.Log("Layer Mask = " + hit.collider.gameObject.layer);
+                InteractableObject intObj = hit.collider.gameObject.GetComponent<InteractableObject>();
+                if (intObj != null)
+                {
+                    intObj.Interact();
+                }
+                else
+                {
+                    intObj = hit.collider.gameObject.GetComponentInParent<InteractableObject>();
+                    intObj.Interact();
+                }
+            }
         }
     }
 
