@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7053864821066393414
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7053864821066393408}
+  - component: {fileID: 7053864821066393409}
+  - component: {fileID: 7053864821066393411}
+  - component: {fileID: 7053864821066393410}
+  - component: {fileID: 7053864821066393421}
+  m_Layer: 0
+  m_Name: InventoryManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7053864821066393408
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7053864821066393414}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.033519, y: -3.680061, z: 11.828364}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7053864821066393409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7053864821066393414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7294f6394e8c144a83074628c4ca2c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Items: []
+  itemContent: {fileID: 0}
+  inventoryItem: {fileID: 6429501284592972107, guid: 0ab2dac880d4d514a84a277419e00169, type: 3}
+  itemPreview: {fileID: 0}
+  itemDisplay: {fileID: 5569306157089177766, guid: 12a9cad07df9e13459a9d4668e866116, type: 3}
+  weapons: {fileID: 0}
+  player: {fileID: 0}
+  objectPool: {fileID: 0}
+  dropForce: 2
+  selectedColor: {r: 0, g: 0.7058824, b: 1, a: 1}
+  unselectedColor: {r: 1, g: 1, b: 0.50980395, a: 1}
+  highlightedColor: {r: 0, g: 1, b: 0, a: 1}
+  selectedItem: {fileID: 0}
+  highlightNumber: 0
+  selectedActionNumber: 0
+  itemActionNumber: 0
+  itemActionsOpen: 0
+  actionsChildCount: 0
+  baton: {fileID: 11400000, guid: 30a100123d6fea341aafd54ca4f30975, type: 2}
+  pistol: {fileID: 11400000, guid: dfbdf96ea365f614c9aa1403aa3b3af7, type: 2}
+  pistolAmmo: {fileID: 11400000, guid: 191b025959321df40a98664800251674, type: 2}
+--- !u!114 &7053864821066393411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7053864821066393414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edc255f405c58644b94aa7898be9ff32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+--- !u!114 &7053864821066393410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7053864821066393414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b343c4691808044e9a76ba4e681aaeb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pickupDistance: 5
+  saveCanvas: {fileID: 0}
+  loadCanvas: {fileID: 0}
+--- !u!114 &7053864821066393421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7053864821066393414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54d44b1ee6e02bd4294cb29144f95197, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}

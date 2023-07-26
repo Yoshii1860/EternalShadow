@@ -9,7 +9,7 @@ public class AutoSave : MonoBehaviour
         if(other.gameObject.tag == "Player")
         {
             Debug.Log("AutoSave");
-            GameManager.Instance.SaveData(other.gameObject.GetComponent<Player>());
+            GameManager.Instance.SaveData();
         }   
     }
 }

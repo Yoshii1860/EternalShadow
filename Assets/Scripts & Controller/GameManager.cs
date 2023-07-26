@@ -27,10 +27,12 @@ public class GameManager : MonoBehaviour
     public SubGameState CurrentSubGameState { get; private set; }
 
     [SerializeField] GameObject inventoryObject;
-    [SerializeField] PlayerInput playerInput;
+    [SerializeField] Player player;
     [SerializeField] Transform objectPool;
     [SerializeField] Transform enemyPool;
     [SerializeField] Transform interactableObjectsPool;
+
+    PlayerInput playerInput;
 
     public bool isPaused = false;
 
@@ -58,6 +60,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         // Initialize the game
+        playerInput = player.GetComponent<PlayerInput>();
         SetGameState(GameState.Gameplay);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -114,15 +117,15 @@ public class GameManager : MonoBehaviour
         Cursor.visible = true;
     }
 
-    public void SaveData(Player player)
+    public void SaveData(string filename = "autosave")
     {
-        SaveSystem.SavePlayer(player, InventoryManager.Instance.weapons.transform, objectPool, enemyPool, interactableObjectsPool);
+        SaveSystem.SaveGameFile(filename, player, InventoryManager.Instance.weapons.transform, objectPool, enemyPool, interactableObjectsPool);
         Debug.Log("GameManager.cs: Player data saved!");
     }
 
-    public void LoadData(Player player)
+    public void LoadData(string filename = "autosave")
     {
-        SaveData data = SaveSystem.LoadPlayer();
+        SaveData data = SaveSystem.LoadGameFile(filename);
         if (data != null)
         {
             ////////////////////////////

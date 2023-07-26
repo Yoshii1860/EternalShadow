@@ -7,8 +7,9 @@ public class ObjectHandler : MonoBehaviour
 {
     // [SerializeField] private InputActionReference input;
     [SerializeField] float pickupDistance = 5f;
+    [SerializeField] GameObject saveCanvas;
+    [SerializeField] GameObject loadCanvas;
     ItemActions action;
-    
 
     void Start() 
     {
@@ -33,11 +34,15 @@ public class ObjectHandler : MonoBehaviour
             }
             else if (hit.collider.gameObject.GetComponent<SaveObject>() != null)
             {
-                hit.collider.gameObject.GetComponent<SaveObject>().Save();
+                // Open UI to save game
+                saveCanvas.SetActive(true);
+                GameManager.Instance.PauseGame();
             }
             else if (hit.collider.gameObject.tag == "Load")
             {
-                GameManager.Instance.LoadData(InventoryManager.Instance.player.GetComponent<Player>());
+                // Open UI with saved files
+                loadCanvas.SetActive(true);
+                GameManager.Instance.PauseGame();
             }
             else if (hit.collider.gameObject.layer == 6)
             {

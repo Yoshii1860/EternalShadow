@@ -4,21 +4,25 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 public static class SaveSystem 
 {
-    public static void SavePlayer(Player player, Transform weaponPool, Transform objectPool, Transform enemyPool, Transform interactableObjectsPool)
+    public static void SaveGameFile(string filename, Player player, Transform weaponPool, Transform objectPool, Transform enemyPool, Transform interactableObjectsPool)
     {
+        Debug.Log("SaveSystem.cs - SAVE - filename: " + filename);
         BinaryFormatter formatter = new BinaryFormatter();
-        string path = Application.persistentDataPath + "/player.shadow";
+        string path = Application.persistentDataPath + "/" + filename + ".shadow";
         FileStream stream = new FileStream(path, FileMode.Create);
 
         SaveData data = new SaveData(player, weaponPool, objectPool, enemyPool, interactableObjectsPool);
 
         formatter.Serialize(stream, data);
         stream.Close();
+        GameManager.Instance.ResumeGame();
     }
 
-    public static SaveData LoadPlayer()
+    public static SaveData LoadGameFile(string filename)
     {
-        string path = Application.persistentDataPath + "/player.shadow";
+        Debug.Log("SaveSystem.cs - LOAD - filename: " + filename);
+        string path = Application.persistentDataPath + "/" + filename + ".shadow";
+        GameManager.Instance.ResumeGame();
         if (File.Exists(path))
         {
             BinaryFormatter formatter = new BinaryFormatter();
