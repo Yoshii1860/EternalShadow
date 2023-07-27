@@ -84,12 +84,12 @@ public class InventoryManager : MonoBehaviour
 
     public void AddItem(Item item)
     {
-        Debug.Log("InventoryManager.AddItem(" + item.displayName + ")");
         if (item.type == ItemType.Ammo || item.type == ItemType.Potion)
         {
             Item existingItem = Items.Find(existingItem => existingItem.displayName == item.displayName);
             if (existingItem != null)
             {
+                Debug.Log("InventoryManager - Add Existing Ammo/Potion (" + item.displayName + ")");
                 // Increase quantity of existing item by quantity of added item;
                 existingItem.quantity += item.quantity;
 
@@ -101,7 +101,8 @@ public class InventoryManager : MonoBehaviour
                     // SET UI FOR BULLETS
                     foreach(Transform weapon in weapons.transform)
                     {
-                        if (weapon.GetComponent<Weapon>().ammoType == existingItem.AmmoType)
+                        if (weapon.GetComponent<Weapon>().ammoType == existingItem.AmmoType &&
+                            weapon.GetComponent<Weapon>().gameObject.activeSelf == true)
                         {
                             Weapon weaponScript = weapon.GetComponent<Weapon>();
                             player.GetComponent<Player>().SetBulletsUI(weaponScript.magazineCount, existingItem.quantity);
@@ -114,6 +115,8 @@ public class InventoryManager : MonoBehaviour
             }
             else
             {
+                Debug.Log("InventoryManager - Add New Ammo/Potion (" + item.displayName + ")");
+
                 Item newItem = Instantiate(item);
                 Items.Add(newItem);
 
@@ -141,6 +144,8 @@ public class InventoryManager : MonoBehaviour
         }
         else if (item.type == ItemType.Weapon)
         {
+            Debug.Log("InventoryManager - Add New Weapon (" + item.displayName + ")");
+
             Items.Add(item);
             foreach (Transform weapon in weapons.transform)
             {                    

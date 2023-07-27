@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 680142433834871537}
   - component: {fileID: 6693784889141673575}
   m_Layer: 5
-  m_Name: File
+  m_Name: SaveFile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -122,8 +122,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6752183367910696175, guid: 01d0c0f3649a18a4ea6295c3a3fb5739, type: 3}
-        m_TargetAssemblyTypeName: LoadObject, Assembly-CSharp
+      - m_Target: {fileID: 1537832814, guid: 3b502de967e0afa45bf54b1e926c1f21, type: 3}
+        m_TargetAssemblyTypeName: SaveObject, Assembly-CSharp
         m_MethodName: OnButtonClick
         m_Mode: 1
         m_Arguments:

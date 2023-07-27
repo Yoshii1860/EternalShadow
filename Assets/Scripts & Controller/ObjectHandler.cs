@@ -30,23 +30,26 @@ public class ObjectHandler : MonoBehaviour
             if (hit.collider.gameObject.GetComponent<ItemController>() != null)
             {
                 // Use PickUp() method from ItemActions class
+                Debug.Log("ObjectHandler - PickUp");
                 action.PickUp(hit);
             }
-            else if (hit.collider.gameObject.GetComponent<SaveObject>() != null)
+            else if (hit.collider.gameObject.tag == "Save")
             {
                 // Open UI to save game
+                Debug.Log("ObjectHandler - Save");
                 saveCanvas.SetActive(true);
                 GameManager.Instance.PauseGame();
             }
             else if (hit.collider.gameObject.tag == "Load")
             {
                 // Open UI with saved files
+                Debug.Log("ObjectHandler - Load");
                 loadCanvas.SetActive(true);
                 GameManager.Instance.PauseGame();
             }
             else if (hit.collider.gameObject.layer == 6)
             {
-                Debug.Log("Layer Mask = " + hit.collider.gameObject.layer);
+                Debug.Log("ObjectHandler - Interact");
                 InteractableObject intObj = hit.collider.gameObject.GetComponent<InteractableObject>();
                 if (intObj != null)
                 {
