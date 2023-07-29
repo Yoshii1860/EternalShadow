@@ -122,7 +122,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6752183367910696175, guid: 01d0c0f3649a18a4ea6295c3a3fb5739, type: 3}
+      - m_Target: {fileID: 6829414451979715394, guid: 01d0c0f3649a18a4ea6295c3a3fb5739, type: 3}
         m_TargetAssemblyTypeName: LoadObject, Assembly-CSharp
         m_MethodName: OnButtonClick
         m_Mode: 1

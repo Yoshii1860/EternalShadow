@@ -2,16 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(UniqueIDComponent))]
 public class Enemy : MonoBehaviour
 {
-    public int uniqueID;
     public int health = 100;
     public bool isDead;
-
-    void Awake()
-    {
-        uniqueID = GetInstanceID();
-    }
 
     void Start() 
     {

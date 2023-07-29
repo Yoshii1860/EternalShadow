@@ -39,26 +39,28 @@ public class LoadObject : MonoBehaviour
     {
         // Get the file name from the button text
         string filename = EventSystem.current.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
-        // Delete all children of the parent canvas to prevent duplicates
-        foreach (Transform child in EventSystem.current.currentSelectedGameObject.transform.parent.transform)
+
+        GameManager.Instance.LoadNewScene(filename);
+    }
+
+    public void OnReturnClick()
+    {
+        // Get the parent of the clicked object
+        RectTransform parentTransform = EventSystem.current.currentSelectedGameObject.transform.parent.GetComponent<RectTransform>();;
+
+        // Loop through the children of the parent to find siblings with GridLayoutGroup
+        foreach (Transform siblingTransform in parentTransform)
         {
-            Destroy(child.gameObject);
-        }
-        // Load the game data from the file
-        GameManager.Instance.LoadData(filename);
-        // Disable the parent canvas
-        GameObject parentCanvas = EventSystem.current.currentSelectedGameObject.transform.gameObject;
-        while (parentCanvas != null)
-        {
-            if (parentCanvas.transform.parent != null)
+            GridLayoutGroup gridLayout = siblingTransform.GetComponent<GridLayoutGroup>();
+            if (gridLayout != null)
             {
-                parentCanvas = parentCanvas.transform.parent.gameObject;
-            }
-            else
-            {
-                parentCanvas.SetActive(false);
-                break;
+                foreach (Transform child in siblingTransform)
+                {
+                    Destroy(child.gameObject);
+                }
             }
         }
+        GameManager.Instance.ResumeGame();
+        this.gameObject.SetActive(false);
     }
 }

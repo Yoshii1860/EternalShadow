@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.IO;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -26,20 +29,52 @@ public class GameManager : MonoBehaviour
     public GameState CurrentGameState { get; private set; }
     public SubGameState CurrentSubGameState { get; private set; }
 
-    [SerializeField] GameObject inventoryObject;
-    [SerializeField] Player player;
-    [SerializeField] Transform objectPool;
-    [SerializeField] Transform enemyPool;
-    [SerializeField] Transform interactableObjectsPool;
+    public GameObject inventoryCanvas;
+    public GameObject inventory;
+    public Player player;
+    public Transform objectPool;
+    public Transform enemyPool;
+    public Transform interactObjectPool;
+    public GameObject saveCanvas;
+    public GameObject loadCanvas;
+    [SerializeField] Image progressBar;
 
     PlayerInput playerInput;
 
     public bool isPaused = false;
 
-    [Header("Debug")]
-    [Tooltip("Debug mode for the enemy. If true, the enemy will not attack the player.")]
-    public bool noAttackMode = false;
 
+
+/////////////////////////////////////
+// DEBUG STATEMENT - Delete Files  //
+/////////////////////////////////////
+    [Header("Debug")]
+    [Tooltip("Debug mode for the enemy. If true, the enemy will not attack the player. Set during gamplay.")]
+    public bool noAttackMode = false;
+    [Tooltip("When set to true, all saved files will be deleted and the bool sets back to false. Set during gameplay.")]
+    [SerializeField] bool _deleteSaveFiles = false;
+
+    // Public property for isPoisoned
+    public bool deleteSaveFiles
+    {
+        get => _deleteSaveFiles;
+        set
+        {
+            if (_deleteSaveFiles != value)
+            {
+                _deleteSaveFiles = value;
+            }
+        }
+    }
+/////////////////////////////////////
+/////////////////////////////////////
+/////////////////////////////////////
+
+
+
+/////////////////////////////////////
+// Singleton Pattern               //
+/////////////////////////////////////
     private void Awake()
     {
         // Singleton pattern to ensure only one instance exists
@@ -55,17 +90,96 @@ public class GameManager : MonoBehaviour
 
         // Keep the GameManager between scene changes
         DontDestroyOnLoad(gameObject);
-    }
 
+        // Initialize the game
+        UpdateReferences();
+    }
+/////////////////////////////////////
+/////////////////////////////////////
+/////////////////////////////////////
+
+
+
+/////////////////////////////////////
+// Reference Management            //
+/////////////////////////////////////
+    private void UpdateReferences()
+    {
+        Debug.Log("Reference will be updated!");
+
+        player = FindObjectOfType<Player>();
+        playerInput = FindObjectOfType<PlayerInput>();
+
+        inventory = GameObject.FindWithTag("Inventory");
+        inventoryCanvas = inventory.transform.GetChild(0).gameObject;
+        objectPool = GameObject.FindWithTag("ObjectPool").transform;
+        enemyPool = GameObject.FindWithTag("EnemyPool").transform;
+        interactObjectPool = GameObject.FindWithTag("InteractObjectPool").transform;
+
+        GameObject parent = GameObject.FindWithTag("SaveLoad");
+        saveCanvas = parent.GetComponentInChildren<SaveObject>(true).transform.gameObject;
+        loadCanvas = parent.GetComponentInChildren<LoadObject>(true).transform.gameObject;
+
+        if(InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.UpdateReferences();
+        }
+    }
+/////////////////////////////////////
+/////////////////////////////////////
+/////////////////////////////////////
+
+
+
+/////////////////////////////////////
+// Start Game                      //
+/////////////////////////////////////
     private void Start()
     {
-        // Initialize the game
-        playerInput = player.GetComponent<PlayerInput>();
         SetGameState(GameState.Gameplay);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+/////////////////////////////////////
+/////////////////////////////////////
+/////////////////////////////////////
 
+
+
+/////////////////////////////////////
+// DEBUG STATEMENT - Delete Files //
+/////////////////////////////////////
+    private void Update()
+    {
+        if (deleteSaveFiles)
+        {
+            DeleteAllSaveFiles();
+            deleteSaveFiles = false;
+        }
+    }
+
+    public void DeleteAllSaveFiles()
+    {
+        string[] saveFiles = Directory.GetFiles(Application.persistentDataPath, "*.shadow");
+
+        foreach (string saveFile in saveFiles)
+        {
+            File.Delete(saveFile);
+        }
+
+        Debug.Log("##############################");
+        Debug.Log("##### All Save Files Deleted");
+        Debug.Log("##############################");
+    }
+/////////////////////////////////////
+/////////////////////////////////////
+/////////////////////////////////////
+
+
+
+/////////////////////////////////////
+// Game State Management           //
+/////////////////////////////////////
     public void StartGame()
     {
         SetGameState(GameState.Gameplay);
@@ -80,7 +194,7 @@ public class GameManager : MonoBehaviour
         SetGameState(GameState.Inventory);
         // Add code to display the inventory
         playerInput.SwitchCurrentActionMap("Inventory");
-        inventoryObject.SetActive(true);
+        inventoryCanvas.SetActive(true);
         InventoryManager.Instance.ListItems();
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -100,13 +214,12 @@ public class GameManager : MonoBehaviour
     {
         SetGameState(GameState.Gameplay);
         // Add code to resume the game
-        if (inventoryObject.activeSelf) inventoryObject.SetActive(false);
+        if (inventoryCanvas.activeSelf) inventoryCanvas.SetActive(false);
         playerInput.SwitchCurrentActionMap("Player");
         Time.timeScale = 1;
         isPaused = false;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        
     }
 
     public void GameOver()
@@ -117,9 +230,62 @@ public class GameManager : MonoBehaviour
         Cursor.visible = true;
     }
 
+    private void SetGameState(GameState newState, SubGameState newSubGameState = SubGameState.Default)
+    {
+        CurrentGameState = newState;
+        CurrentSubGameState = newSubGameState;
+
+        // Handle state-specific actions
+        switch (CurrentGameState)
+        {
+            case GameState.MainMenu:
+                // Add code for main menu behavior
+                break;
+
+            case GameState.Gameplay:
+                // Add code for common gameplay behavior (for SubGameState.Default)
+                // This will be executed for all variations unless overridden in substates.
+                switch (CurrentSubGameState)
+                {
+                    case SubGameState.Default:
+                        // Add code for default gameplay behavior
+                        break;
+
+                    case SubGameState.Substate1:
+                        // Add code for modified gameplay behavior 1
+                        break;
+
+                    case SubGameState.Substate2:
+                        // Add code for modified gameplay behavior 2
+                        break;
+                }
+                break;
+
+            case GameState.Inventory:
+                // Add code for inventory behavior
+                break;
+
+            case GameState.Paused:
+                // Add code for paused behavior
+                break;
+
+            case GameState.GameOver:
+                // Add code for game over behavior
+                break;
+        }
+    }
+/////////////////////////////////////
+/////////////////////////////////////
+/////////////////////////////////////
+
+
+
+/////////////////////////////////////
+// Save/Load Game                  //
+/////////////////////////////////////
     public void SaveData(string filename = "autosave")
     {
-        SaveSystem.SaveGameFile(filename, player, InventoryManager.Instance.weapons.transform, objectPool, enemyPool, interactableObjectsPool);
+        SaveSystem.SaveGameFile(filename, player, InventoryManager.Instance.weapons.transform, objectPool, enemyPool, interactObjectPool);
         Debug.Log("GameManager.cs: Player data saved!");
     }
 
@@ -199,7 +365,7 @@ public class GameManager : MonoBehaviour
             {
                 foreach (ItemController pickupObject in pickupObjectsPool)
                 {
-                    if (pickupObject.uniqueID == pickupObjectData.uniqueID)
+                    if (pickupObject.GetComponent<UniqueIDComponent>().UniqueID == pickupObjectData.uniqueID)
                     {
                         pickupObject.isPickedUp = pickupObjectData.isPickedUp;
                         if (pickupObject.isPickedUp)
@@ -225,10 +391,15 @@ public class GameManager : MonoBehaviour
             {
                 foreach (Enemy enemy in enemiesPool)
                 {
-                    if (enemy.uniqueID == enemyData.uniqueID)
+                    Debug.Log("GM.cs - enemy: " + enemy.transform.gameObject.name);
+                    if (enemy.GetComponent<UniqueIDComponent>().UniqueID == enemyData.uniqueID)
                     {
                         enemy.health = enemyData.health;
                         enemy.isDead = enemyData.isDead;
+                        Debug.Log("GM.cs - position: " + enemy.transform.position);
+                        Debug.Log("GM.cs - new position: " + enemyData.position[0] + ", " + enemyData.position[1] + ", " + enemyData.position[2]);
+                        Debug.Log("GM.cs - rotation: " + enemy.transform.rotation);
+                        Debug.Log("GM.cs - new rotation: " + enemyData.rotation[0] + ", " + enemyData.rotation[1] + ", " + enemyData.rotation[2]);
                         enemy.transform.position = new Vector3(enemyData.position[0], enemyData.position[1], enemyData.position[2]);
                         enemy.transform.rotation = Quaternion.Euler(enemyData.rotation[0], enemyData.rotation[1], enemyData.rotation[2]);
                         if (enemy.isDead)
@@ -247,13 +418,13 @@ public class GameManager : MonoBehaviour
             ////////////////////////////
             // Load Interactable Objects
             ////////////////////////////
-            InteractableObject[] interactableObjectPool = interactableObjectsPool.GetComponentsInChildren<InteractableObject>(true);
+            InteractableObject[] intObjPool = interactObjectPool.GetComponentsInChildren<InteractableObject>(true);
 
             foreach (InteractableObjectData intObjData in data.interactableObjects)
             {
-                foreach (InteractableObject intObj in interactableObjectPool)
+                foreach (InteractableObject intObj in intObjPool)
                 {
-                    if (intObj.uniqueID == intObjData.uniqueID)
+                    if (intObj.GetComponent<UniqueIDComponent>().UniqueID == intObjData.uniqueID)
                     {
                         if (intObj.active != intObjData.active)
                         {
@@ -287,48 +458,54 @@ public class GameManager : MonoBehaviour
         return newItem;
     }
 
-    private void SetGameState(GameState newState, SubGameState newSubGameState = SubGameState.Default)
+    public void LoadNewScene(string filename)
     {
-        CurrentGameState = newState;
-        CurrentSubGameState = newSubGameState;
+        Debug.Log("Scene 0: " + SceneManager.GetSceneByBuildIndex(0).name);
+        Debug.Log("Scene 1: " + SceneManager.GetSceneByBuildIndex(1).name);
 
-        // Handle state-specific actions
-        switch (CurrentGameState)
-        {
-            case GameState.MainMenu:
-                // Add code for main menu behavior
-                break;
+        string sceneNameToLoad = filename.Split('-')[0];
 
-            case GameState.Gameplay:
-                // Add code for common gameplay behavior (for SubGameState.Default)
-                // This will be executed for all variations unless overridden in substates.
-                switch (CurrentSubGameState)
-                {
-                    case SubGameState.Default:
-                        // Add code for default gameplay behavior
-                        break;
-
-                    case SubGameState.Substate1:
-                        // Add code for modified gameplay behavior 1
-                        break;
-
-                    case SubGameState.Substate2:
-                        // Add code for modified gameplay behavior 2
-                        break;
-                }
-                break;
-
-            case GameState.Inventory:
-                // Add code for inventory behavior
-                break;
-
-            case GameState.Paused:
-                // Add code for paused behavior
-                break;
-
-            case GameState.GameOver:
-                // Add code for game over behavior
-                break;
-        }
+        Debug.Log("sceneNameToLoad: " + sceneNameToLoad);
+        StartCoroutine(LoadSceneAsync(sceneNameToLoad, filename));
     }
+
+    IEnumerator LoadSceneAsync(string sceneName, string filename)
+    {
+        // Start loading the LoadingScreen scene asynchronously
+        AsyncOperation asyncLoadLoadingScreen = SceneManager.LoadSceneAsync("LoadingScreen");
+
+        // Wait until the LoadingScreen scene is fully loaded
+        while (!asyncLoadLoadingScreen.isDone)
+        {
+            yield return null;
+        }
+
+        progressBar = GameObject.Find("ProgressBar").GetComponent<Image>();
+
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Sandbox");
+
+        while (!asyncLoad.isDone)
+        {
+            progressBar.fillAmount = asyncLoad.progress;
+
+            if (asyncLoad.progress >= 0.92f)
+            {
+                progressBar.fillAmount = 1f;
+                asyncLoad.allowSceneActivation = true;
+            }
+            yield return null;
+        }
+        UpdateReferences();
+
+        LoadData(filename);
+
+        // Scene is fully loaded
+        Debug.Log("Scene " + sceneName + " is fully loaded!");
+    }
+/////////////////////////////////////
+/////////////////////////////////////
+/////////////////////////////////////
+
+
+
 }

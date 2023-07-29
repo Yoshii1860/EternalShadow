@@ -76,7 +76,7 @@ public class Weapon : MonoBehaviour
 
                     // SET UI FOR BULLETS
                     int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
-                    InventoryManager.Instance.player.GetComponent<Player>().SetBulletsUI(magazineCount, inventoryAmmo);
+                    GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
 
                     ammoSlot.ReduceCurrentAmmo(ammoType);
                     // Hit animation
@@ -94,7 +94,7 @@ public class Weapon : MonoBehaviour
                 
                 // SET UI FOR BULLETS
                 int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
-                InventoryManager.Instance.player.GetComponent<Player>().SetBulletsUI(magazineCount, inventoryAmmo);
+                GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
 
                 ammoSlot.ReduceCurrentAmmo(ammoType);
             }
@@ -134,7 +134,7 @@ public class Weapon : MonoBehaviour
             // SET UI FOR BULLETS
             int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
             Debug.Log("Inventory Ammo: " + inventoryAmmo);
-            InventoryManager.Instance.player.GetComponent<Player>().SetBulletsUI(magazineCount, inventoryAmmo);
+           GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
 
         }
         else

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public class ItemData
@@ -28,14 +29,14 @@ public class WeaponData
 [System.Serializable]
 public class PickupObjectData
 {
-    public int uniqueID;
+    public string uniqueID;
     public bool isPickedUp;
 }
 
 [System.Serializable]
 public class EnemyData
 {
-    public int uniqueID;
+    public string uniqueID;
     public int health;
     public bool isDead;
     public float[] position;
@@ -46,13 +47,14 @@ public class EnemyData
 [System.Serializable]
 public class InteractableObjectData
 {
-    public int uniqueID;
+    public string uniqueID;
     public bool active;
 }
 
 [System.Serializable]
 public class SaveData
 {
+    public string sceneName;
     public int health;
     public float[] position;
     public List<ItemData> items;
@@ -63,6 +65,12 @@ public class SaveData
 
     public SaveData (Player player, Transform weaponPool, Transform objectPool, Transform enemyPool, Transform interactableObjectsPool)
     {
+        ////////////////////////////
+        // Save Scene Name
+        ////////////////////////////
+
+        sceneName = SceneManager.GetActiveScene().name;
+
         ////////////////////////////
         // Save Player Stats
         ////////////////////////////
@@ -119,7 +127,7 @@ public class SaveData
         foreach (ItemController pickupObject in objectPool.GetComponentsInChildren<ItemController>())
         {
             PickupObjectData objectData = new PickupObjectData();
-            objectData.uniqueID = pickupObject.uniqueID;
+            objectData.uniqueID = pickupObject.GetComponent<UniqueIDComponent>().UniqueID;
             objectData.isPickedUp = pickupObject.isPickedUp;
 
             pickupObjects.Add(objectData);
@@ -133,7 +141,7 @@ public class SaveData
         foreach (Enemy enemy in enemyPool.GetComponentsInChildren<Enemy>())
         {
             EnemyData enemyData = new EnemyData();
-            enemyData.uniqueID = enemy.uniqueID;
+            enemyData.uniqueID = enemy.GetComponent<UniqueIDComponent>().UniqueID;
             enemyData.health = enemy.health;
             enemyData.isDead = enemy.isDead;
             Debug.Log("SAVE Enemy is Dead? " + enemy.isDead);
@@ -157,7 +165,7 @@ public class SaveData
         foreach (InteractableObject intObj in interactableObjectsPool.GetComponentsInChildren<InteractableObject>())
         {
             InteractableObjectData intObjData = new InteractableObjectData();
-            intObjData.uniqueID = intObj.uniqueID;
+            intObjData.uniqueID = intObj.GetComponent<UniqueIDComponent>().UniqueID;
             intObjData.active = intObj.active;
 
             interactableObjects.Add(intObjData);

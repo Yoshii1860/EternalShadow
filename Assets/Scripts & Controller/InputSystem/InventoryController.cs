@@ -8,10 +8,15 @@ using UnityEngine.UI;
 public class InventoryController : MonoBehaviour
 {
     public float moveDebounceTime = 0.3f;
-    public ItemActions itemActions;
+    ItemActions itemActions;
 
     bool interact, exit, back;
     Vector2 move;
+
+    void Start() 
+    {
+        itemActions = InventoryManager.Instance.GetComponent<ItemActions>();
+    }
 
     void Update()
     {

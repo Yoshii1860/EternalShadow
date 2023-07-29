@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(UniqueIDComponent))]
 public class ItemController : MonoBehaviour
 {
     public Item item;
-    public int uniqueID;
     public Vector3 originalPosition;
     bool pickedUpState;
 
@@ -27,11 +27,6 @@ public class ItemController : MonoBehaviour
                 transform.position = originalPosition;
             }
         }
-    }
-
-    void Awake()
-    {
-        uniqueID = GetInstanceID();
     }
 
     void Start() 

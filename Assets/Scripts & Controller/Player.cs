@@ -51,7 +51,6 @@ public class Player : MonoBehaviour
         {
             isPoisoned = false;
         }
-/////////////////////////////////////
     }
 
     // Private backing field for isPoisoned property
@@ -70,6 +69,7 @@ public class Player : MonoBehaviour
             }
         }
     }
+/////////////////////////////////////
 
     void OnIsPoisonedChanged()
     {

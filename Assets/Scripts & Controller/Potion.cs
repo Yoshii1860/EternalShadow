@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class Potion: MonoBehaviour
 {
-    [Tooltip("The player game object.")]
-    [SerializeField] Player player;
+    Player player;
 
     public enum PotionType
     {
@@ -18,6 +17,16 @@ public class Potion: MonoBehaviour
     // Called by ItemActions.cs
     // If the player is poisoned/bleeding/dizzy, remove the poison
     // Remove the item from the inventory
+
+    void Start() 
+    {
+        UpdateReferences();
+    }
+
+    public void UpdateReferences()
+    {
+        player = GameManager.Instance.player;
+    }
 
     public void Antibiotics(Item item)
     {

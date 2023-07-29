@@ -7,18 +7,25 @@ public class ObjectHandler : MonoBehaviour
 {
     // [SerializeField] private InputActionReference input;
     [SerializeField] float pickupDistance = 5f;
-    [SerializeField] GameObject saveCanvas;
-    [SerializeField] GameObject loadCanvas;
+    GameObject saveCanvas;
+    GameObject loadCanvas;
     ItemActions action;
 
     void Start() 
     {
-        action = GetComponent<ItemActions>();
+        UpdateReferences();
     }
 
     public void Execute()
     {
         DetectObjects();
+    }
+
+    public void UpdateReferences()
+    {
+        action = GetComponent<ItemActions>();
+        saveCanvas = GameManager.Instance.saveCanvas;
+        loadCanvas = GameManager.Instance.loadCanvas;
     }
 
     private void DetectObjects()

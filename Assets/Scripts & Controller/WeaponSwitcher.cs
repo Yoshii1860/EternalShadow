@@ -58,7 +58,7 @@ public class WeaponSwitcher : MonoBehaviour
         // Get ammo from inventory
         int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(nextWeapon.GetComponent<Weapon>().ammoType);
         // Set the UI to magazine Count + inventory ammo
-        transform.parent.parent.GetComponent<Player>().SetBulletsUI(nextWeapon.GetComponent<Weapon>().magazineCount, inventoryAmmo);
+        GameManager.Instance.player.SetBulletsUI(nextWeapon.GetComponent<Weapon>().magazineCount, inventoryAmmo);
 
         // Update the current weapon index
         currentWeaponIndex = nextWeaponIndex;

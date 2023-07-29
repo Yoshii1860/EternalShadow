@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -11,23 +12,18 @@ public class InventoryManager : MonoBehaviour
 
     [Space(10)]
     [Header("Inventory Settings")]
-    [Tooltip("The transform that will be the parent of the inventory items")]
-    public Transform itemContent;
     [Tooltip("The prefab that will be used to display the inventory items")]
     public GameObject inventoryItem;
-    [Tooltip("The transform that will be the parent of the item preview")]
-    public Transform itemPreview;
-    [Tooltip("The prefab that will be used to display the inventory items")]
+    [Tooltip("The prefab that will be used to display the inventory item display")]
     public GameObject itemDisplay;
-    [Tooltip("The transform that will be the parent of the weapons")]
-    public GameObject weapons;
-    [Tooltip("The player GameObject")]
-    public GameObject player;
-    [Tooltip("The object pool that will be used to drop items")]
-    public Transform objectPool;
     [Tooltip("The force that will be applied to the dropped item")]
     public float dropForce;
-    //
+    // 
+    Transform[] gridLayouts;
+    public Transform itemContent;
+    public Transform itemPreview;
+    public GameObject weapons;
+    GameObject player;
     Ammo ammo;
 
     [Space(10)]
@@ -76,10 +72,59 @@ public class InventoryManager : MonoBehaviour
 
     void Start()
     {
-        ammo = player.GetComponent<Ammo>();
+        gridLayouts = FindGridLayoutGroups();
+        itemContent = gridLayouts[1]; 
+        itemPreview = gridLayouts[2];
+
+        UpdateReferences();
+
+        // Start new game with these items
         AddItem(baton);
         AddItem(pistol);
         AddItem(pistolAmmo);
+    }
+
+    public void UpdateReferences()
+    {
+        player = GameManager.Instance.player.gameObject;
+        weapons = FindObjectOfType<WeaponSwitcher>().gameObject;
+        ammo = player.GetComponent<Ammo>();
+
+        GetComponent<ItemActions>().UpdateReferences();
+        GetComponent<ObjectHandler>().UpdateReferences();
+        GetComponent<Potion>().UpdateReferences();
+    }
+
+    private Transform[] FindGridLayoutGroups(Transform parent = null)
+    {
+        if (parent == null)
+        {
+            parent = transform;
+        }
+
+        // Check if the current GameObject has a GridLayoutGroup component
+        GridLayoutGroup gridLayoutGroup = parent.GetComponent<GridLayoutGroup>();
+        if (gridLayoutGroup != null)
+        {
+            Transform viewport = gridLayoutGroup.transform.parent;
+
+            // The target GridLayoutGroup is found!
+            Transform[] gridLayoutGroups = viewport.GetComponentsInChildren<Transform>(true);
+
+            return gridLayoutGroups;
+        }
+        else
+        {
+            Transform child = parent.GetChild(0);
+            Transform[] result = FindGridLayoutGroups(child);
+            if (result != null && result.Length > 0)
+            {
+                return result;
+            }
+        }
+
+        // If no GridLayoutGroup was found, return null
+        return null;
     }
 
     public void AddItem(Item item)
@@ -434,7 +479,7 @@ public class InventoryManager : MonoBehaviour
     public void DropItem(Item item)
     {
         Debug.Log("InventoryManager.DropItem(" + item.displayName + ")");
-        GameObject obj = Instantiate(item.prefab, player.transform.position + player.transform.forward, Quaternion.identity, objectPool);
+        GameObject obj = Instantiate(item.prefab, player.transform.position + player.transform.forward, Quaternion.identity, GameManager.Instance.objectPool);
         Rigidbody itemRigidbody = obj.AddComponent<Rigidbody>();
         itemRigidbody.AddForce(player.transform.forward * dropForce, ForceMode.Impulse);
         Destroy(itemRigidbody, 1.5f);

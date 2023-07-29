@@ -4,13 +4,18 @@ using UnityEngine;
 
 public class ItemActions : MonoBehaviour
 {
-    [Tooltip("The player game object.")]
-    [SerializeField] Player player;
+    Player player;
     Potion potion;
 
     void Start() 
     {
+        UpdateReferences();
+    }
+
+    public void UpdateReferences()
+    {
         potion = GetComponent<Potion>();
+        player = GameManager.Instance.player;
     }
 
     public void PickUp(RaycastHit item)

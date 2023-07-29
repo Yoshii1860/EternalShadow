@@ -15,17 +15,21 @@ public class DecisionSensing : Node
     {
         this.transform = transform;
         animator = transform.GetComponent<Animator>();
-
-        // No Attack Mode Code
-        if(GameManager.Instance.noAttackMode)
-            characterLayerMask = 1 << 2;
-        else
-            characterLayerMask = 1 << 7;
     }
 
     public override NodeState Evaluate()
     {
         object obj = GetData("target");
+        
+        ///////////////////////////
+        // DEBUG FUNCTION
+        if(GameManager.Instance.noAttackMode)
+        {
+            state = NodeState.FAILURE;
+            return state;
+        }    
+        ///////////////////////////
+
         if (obj == null)
         {
             Collider[] colliders = Physics.OverlapSphere(transform.position, EnemyBT.fovRange, characterLayerMask);

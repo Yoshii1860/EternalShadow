@@ -2,16 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(UniqueIDComponent))]
 public class InteractableObject : MonoBehaviour
 {
     protected Animator anim;
     public bool active = false;
-    public int uniqueID;
-
-    void Awake()
-    {
-        uniqueID = GetInstanceID();
-    }
 
     void Start()
     {

@@ -122,7 +122,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1537832814, guid: 3b502de967e0afa45bf54b1e926c1f21, type: 3}
+      - m_Target: {fileID: 1645231253132619973, guid: 3b502de967e0afa45bf54b1e926c1f21, type: 3}
         m_TargetAssemblyTypeName: SaveObject, Assembly-CSharp
         m_MethodName: OnButtonClick
         m_Mode: 1

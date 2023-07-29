@@ -56,22 +56,9 @@ public class SaveObject : MonoBehaviour
         }
         // Get Scene Name and Date/Time
         Scene scene = SceneManager.GetActiveScene();
-        filename = scene.name + " - " + System.DateTime.Now.ToString("dd-MM-yyy HH-mm");
+        filename = scene.name + " - " + System.DateTime.Now.ToString("dd-MM-yyy HH-mm-ss");
         Debug.Log("SaveObject.OnButtonClick: " + filename);
-        // Delete all children of the parent canvas to prevent duplicates
-        foreach (Transform child in EventSystem.current.currentSelectedGameObject.transform.parent.transform)
-        {
-            Destroy(child.gameObject);
-        }
-        // Save the game data
-        GameManager.Instance.SaveData(filename);
-        // Disable the parent canvas
-        CloseCanvas();
-    }
-
-    void CloseCanvas()
-    {
-        // Disable the parent canvas
+        // Save the parent canvas of clicked button
         GameObject parentCanvas = EventSystem.current.currentSelectedGameObject.transform.gameObject;
         while (parentCanvas != null)
         {
@@ -81,9 +68,38 @@ public class SaveObject : MonoBehaviour
             }
             else
             {
-                parentCanvas.SetActive(false);
+                parentCanvas = parentCanvas.GetComponentInChildren<SaveObject>().gameObject;
                 break;
             }
         }
+        // Delete all children of the parent canvas to prevent duplicates
+        foreach (Transform child in EventSystem.current.currentSelectedGameObject.transform.parent.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        // Save the game data
+        GameManager.Instance.SaveData(filename);
+        parentCanvas.SetActive(false);
+    }
+
+    public void OnReturnClick()
+    {
+        // Get the parent of the clicked object
+        RectTransform parentTransform = EventSystem.current.currentSelectedGameObject.transform.parent.GetComponent<RectTransform>();;
+
+        // Loop through the children of the parent to find siblings with GridLayoutGroup
+        foreach (Transform siblingTransform in parentTransform)
+        {
+            GridLayoutGroup gridLayout = siblingTransform.GetComponent<GridLayoutGroup>();
+            if (gridLayout != null)
+            {
+                foreach (Transform child in siblingTransform)
+                {
+                    Destroy(child.gameObject);
+                }
+            }
+        }
+        GameManager.Instance.ResumeGame();
+        this.gameObject.SetActive(false);
     }
 }

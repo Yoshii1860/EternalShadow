@@ -36,19 +36,16 @@ public class PlayerController : MonoBehaviour
 	[Tooltip("How far in degrees can you move the camera down")]
 	[SerializeField] float bottomClamp = -90.0f;
     [Tooltip("The the player follow camera set in Cinemachine Brain")]
+
     [Space(10)]
 	[SerializeField] CinemachineVirtualCamera cmVirtualCamera;
     [Tooltip("Additional degress to override the camera when aiming.")]
 	[SerializeField] float focalLength = 33f;
 
-    [Space(10)]
-    [Header("Execution Scripts/Objects")]
-    [Tooltip("The weapon container attached to the player.")]
-    [SerializeField] GameObject weaponContainer;
-    [Tooltip("The inventory object attached to the canvas.")]
-    [SerializeField] GameObject inventoryObject;
-    [Tooltip("The ObjectHandler script attached to the InventoryManager.")]
-    [SerializeField] ObjectHandler objectHandler;
+    // The weapon container attached to the player.
+    GameObject weaponContainer;
+    // The ObjectHandler script attached to the InventoryManager.
+    ObjectHandler objectHandler;
     // The weaponSwitcher script attached to the weapon container.
     WeaponSwitcher weaponSwitcher;
     Player player;
@@ -75,8 +72,10 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         player = GetComponent<Player>();
+        weaponContainer = player.transform.GetChild(0).GetChild(0).gameObject;
         weaponSwitcher = weaponContainer.transform.GetComponent<WeaponSwitcher>();
-        inventoryObject.SetActive(false);
+        objectHandler = InventoryManager.Instance.GetComponent<ObjectHandler>();
+
         startYScale = transform.localScale.y;
         startFocalLength = cmVirtualCamera.m_Lens.FieldOfView;
     }
