@@ -32,15 +32,38 @@ public class DecisionSensing : Node
 
         if (obj == null)
         {
-            Collider[] colliders = Physics.OverlapSphere(transform.position, EnemyBT.fovRange, characterLayerMask);
+            // Use OverlapSphereNonAlloc to get colliders in the sphere
+            Collider[] colliders = new Collider[10]; // You can adjust the size of this array based on the expected number of nearby colliders
+            int count = Physics.OverlapSphereNonAlloc(transform.position, EnemyBT.fovRange, colliders, characterLayerMask);
 
-            if (colliders.Length > 0)
+            // Filter the colliders based on their direction from the enemy
+            for (int i = 0; i < count; i++)
             {
-                parent.parent.SetData("target", colliders[0].transform);
-                animator.SetBool("Walking", true);
+                Transform target = colliders[i].transform;
+                Vector3 directionToTarget = target.position - transform.position;
 
-                state = NodeState.SUCCESS;
-                return state;
+                // Calculate the angle between the enemy's forward direction and the direction to the target
+                float angleToTarget = Vector3.Angle(directionToTarget, transform.forward);
+
+                // Check if the angle to the target is within the FOV angle
+                if (angleToTarget < EnemyBT.fovAngle * 0.5f)
+                {
+                    // Check if the player is in the enemy's line of sight
+                    RaycastHit hit;
+                    if (Physics.Raycast(transform.position, directionToTarget, out hit, EnemyBT.fovRange))
+                    {
+                        // Make sure the raycast hits the player and not any other object in the way
+                        if (hit.transform.CompareTag("Player"))
+                        {
+                            // Player is in sight, store the player as the target
+                            parent.parent.SetData("target", target);
+                            animator.SetBool("Walking", true);
+
+                            state = NodeState.SUCCESS;
+                            return state;
+                        }
+                    }
+                }
             }
 
             state = NodeState.FAILURE;

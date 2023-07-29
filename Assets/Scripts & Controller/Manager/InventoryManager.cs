@@ -44,12 +44,6 @@ public class InventoryManager : MonoBehaviour
     public bool itemActionsOpen;
     public int actionsChildCount;
 
-    [Space(10)]
-    [Header("Items for starting the game")]
-    [SerializeField] Item baton;
-    [SerializeField] Item pistol;
-    [SerializeField] Item pistolAmmo;
-
     // The Image components of the item actions
     Image[] itemCanvasActions;
 
@@ -75,13 +69,6 @@ public class InventoryManager : MonoBehaviour
         gridLayouts = FindGridLayoutGroups();
         itemContent = gridLayouts[1]; 
         itemPreview = gridLayouts[2];
-
-        UpdateReferences();
-
-        // Start new game with these items
-        AddItem(baton);
-        AddItem(pistol);
-        AddItem(pistolAmmo);
     }
 
     public void UpdateReferences()

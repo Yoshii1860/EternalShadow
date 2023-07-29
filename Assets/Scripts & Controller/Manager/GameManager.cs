@@ -37,7 +37,9 @@ public class GameManager : MonoBehaviour
     public Transform interactObjectPool;
     public GameObject saveCanvas;
     public GameObject loadCanvas;
+    public GameObject blackScreen;
     [SerializeField] Image progressBar;
+    [SerializeField] Item[] startGameItems;
 
     PlayerInput playerInput;
 
@@ -91,8 +93,8 @@ public class GameManager : MonoBehaviour
         // Keep the GameManager between scene changes
         DontDestroyOnLoad(gameObject);
 
-        // Initialize the game
-        UpdateReferences();
+        // Get the black screen reference
+        blackScreen = transform.GetChild(0).gameObject;
     }
 /////////////////////////////////////
 /////////////////////////////////////
@@ -109,6 +111,7 @@ public class GameManager : MonoBehaviour
 
         player = FindObjectOfType<Player>();
         playerInput = FindObjectOfType<PlayerInput>();
+        Debug.Log("Player. " + player);
 
         inventory = GameObject.FindWithTag("Inventory");
         inventoryCanvas = inventory.transform.GetChild(0).gameObject;
@@ -136,9 +139,21 @@ public class GameManager : MonoBehaviour
 /////////////////////////////////////
     private void Start()
     {
-        SetGameState(GameState.Gameplay);
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        if (SceneManager.GetActiveScene().name == "MainMenu")
+        {
+            Debug.Log("GameManager - Start - MainMenu: " + SceneManager.GetActiveScene().name);
+            SetGameState(GameState.MainMenu);
+        }
+        else
+        {
+            Debug.Log("GameManager - Start - Gameplay: " + SceneManager.GetActiveScene().name);
+            UpdateReferences();
+            SetGameState(GameState.Gameplay);
+            foreach (Item item in startGameItems)
+            {
+                InventoryManager.Instance.AddItem(item);
+            }
+        }
     }
 /////////////////////////////////////
 /////////////////////////////////////
@@ -182,52 +197,65 @@ public class GameManager : MonoBehaviour
 /////////////////////////////////////
     public void StartGame()
     {
-        SetGameState(GameState.Gameplay);
         // Add code to initialize the gameplay
-        playerInput.SwitchCurrentActionMap("Player");
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        StartCoroutine(StartGameWithBlackScreen());
+    }
+
+    private IEnumerator StartGameWithBlackScreen()
+    {
+        // Set the black screen to active
+        blackScreen.SetActive(true);
+
+        // Wait for 2 seconds before starting the fade-out
+        yield return new WaitForSecondsRealtime(2f);
+
+        // Start the fade-out process
+        float duration = 2f; // You can adjust the duration of the fade-out here
+        float elapsedTime = 0f;
+        Color startColor = Color.black;
+        Color targetColor = new Color(0f, 0f, 0f, 0f); // Fully transparent
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsedTime / duration);
+            Color newColor = Color.Lerp(startColor, targetColor, t);
+            blackScreen.GetComponent<Image>().color = newColor;
+            yield return null;
+        }
+
+        // Deactivate the black screen once the fade-out is complete
+        blackScreen.SetActive(false);
+
+        // Set the game state to Gameplay after the fade-out
+        SetGameState(GameState.Gameplay);
     }
 
     public void Inventory()
     {
         SetGameState(GameState.Inventory);
         // Add code to display the inventory
-        playerInput.SwitchCurrentActionMap("Inventory");
-        inventoryCanvas.SetActive(true);
-        InventoryManager.Instance.ListItems();
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
     }
 
     public void PauseGame()
     {
+        if (CurrentGameState == GameState.MainMenu) return;
         SetGameState(GameState.Paused);
         // Add code to pause the game
-        Time.timeScale = 0;
-        isPaused = true;
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
     }
 
     public void ResumeGame()
     {
+        if (CurrentGameState == GameState.MainMenu) return;
         SetGameState(GameState.Gameplay);
         // Add code to resume the game
         if (inventoryCanvas.activeSelf) inventoryCanvas.SetActive(false);
-        playerInput.SwitchCurrentActionMap("Player");
-        Time.timeScale = 1;
-        isPaused = false;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 
     public void GameOver()
     {
         SetGameState(GameState.GameOver);
         // Add code for game over logic and display game over screen
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
     }
 
     private void SetGameState(GameState newState, SubGameState newSubGameState = SubGameState.Default)
@@ -240,11 +268,20 @@ public class GameManager : MonoBehaviour
         {
             case GameState.MainMenu:
                 // Add code for main menu behavior
+                playerInput.SwitchCurrentActionMap("Menu");
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 break;
 
             case GameState.Gameplay:
                 // Add code for common gameplay behavior (for SubGameState.Default)
                 // This will be executed for all variations unless overridden in substates.
+                Debug.Log("Gameplay state set.");
+                playerInput.SwitchCurrentActionMap("Player");
+                Time.timeScale = 1;
+                isPaused = false;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
                 switch (CurrentSubGameState)
                 {
                     case SubGameState.Default:
@@ -263,14 +300,25 @@ public class GameManager : MonoBehaviour
 
             case GameState.Inventory:
                 // Add code for inventory behavior
+                playerInput.SwitchCurrentActionMap("Inventory");
+                inventoryCanvas.SetActive(true);
+                InventoryManager.Instance.ListItems();
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 break;
 
             case GameState.Paused:
                 // Add code for paused behavior
+                Time.timeScale = 0;
+                isPaused = true;
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 break;
 
             case GameState.GameOver:
                 // Add code for game over behavior
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 break;
         }
     }
@@ -283,6 +331,12 @@ public class GameManager : MonoBehaviour
 /////////////////////////////////////
 // Save/Load Game                  //
 /////////////////////////////////////
+    public void LoadNewGame()
+    {
+        // Add code to initialize a new game
+        LoadNewScene("Sandbox", true); // Load the Sandbox scene and set "new Game" flag to new    
+    }
+
     public void SaveData(string filename = "autosave")
     {
         SaveSystem.SaveGameFile(filename, player, InventoryManager.Instance.weapons.transform, objectPool, enemyPool, interactObjectPool);
@@ -458,18 +512,19 @@ public class GameManager : MonoBehaviour
         return newItem;
     }
 
-    public void LoadNewScene(string filename)
+    public void LoadNewScene(string filename, bool newGame = false) // Hardcoded for now
     {
         Debug.Log("Scene 0: " + SceneManager.GetSceneByBuildIndex(0).name);
         Debug.Log("Scene 1: " + SceneManager.GetSceneByBuildIndex(1).name);
+        Debug.Log("Filename: " + filename);
 
-        string sceneNameToLoad = filename.Split('-')[0];
+        string sceneNameToLoad = filename.Split('-')[0].Trim();
 
         Debug.Log("sceneNameToLoad: " + sceneNameToLoad);
-        StartCoroutine(LoadSceneAsync(sceneNameToLoad, filename));
+        StartCoroutine(LoadSceneAsync(sceneNameToLoad, filename, newGame));
     }
 
-    IEnumerator LoadSceneAsync(string sceneName, string filename)
+    IEnumerator LoadSceneAsync(string sceneName, string filename, bool newGame = false)
     {
         // Start loading the LoadingScreen scene asynchronously
         AsyncOperation asyncLoadLoadingScreen = SceneManager.LoadSceneAsync("LoadingScreen");
@@ -482,7 +537,7 @@ public class GameManager : MonoBehaviour
 
         progressBar = GameObject.Find("ProgressBar").GetComponent<Image>();
 
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Sandbox");
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
 
         while (!asyncLoad.isDone)
         {
@@ -495,9 +550,22 @@ public class GameManager : MonoBehaviour
             }
             yield return null;
         }
+
         UpdateReferences();
 
-        LoadData(filename);
+        StartGame();
+
+        if (!newGame)
+        {
+            LoadData(filename);
+        }
+        else
+        {
+            foreach (Item item in startGameItems)
+            {
+                InventoryManager.Instance.AddItem(item);
+            }
+        }
 
         // Scene is fully loaded
         Debug.Log("Scene " + sceneName + " is fully loaded!");

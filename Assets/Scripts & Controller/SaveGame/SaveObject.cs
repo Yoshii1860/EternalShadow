@@ -9,6 +9,28 @@ using UnityEngine.SceneManagement;
 
 public class SaveObject : MonoBehaviour
 {
+    public class SaveFileComparer : IComparer<string>
+    {
+        public int Compare(string x, string y)
+        {
+            string format = "dd-MM-yyyy HH-mm-ss";
+            System.DateTime xDate, yDate;
+
+            // Try parsing the date and time from filenames
+            if (System.DateTime.TryParseExact(x, format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out xDate) &&
+                System.DateTime.TryParseExact(y, format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out yDate))
+            {
+                // Compare the parsed dates to determine the order
+                return yDate.CompareTo(xDate); // Sorting in descending order (newest first)
+            }
+            else
+            {
+                // If parsing fails, just compare the original filenames
+                return y.CompareTo(x);
+            }
+        }
+    }
+
     [SerializeField] GameObject filePrefab;
     [SerializeField] Transform contentCanvas;
     [SerializeField] int maxFiles = 8;
@@ -16,13 +38,17 @@ public class SaveObject : MonoBehaviour
     void OnEnable()
     {
         string[] savedFiles = GetSavedFiles();
+
+        // Sort the savedFiles array based on the date and time in filenames
+        System.Array.Sort(savedFiles, new SaveFileComparer());
+
         int fileCount = 0;
 
         foreach (string file in savedFiles)
         {
             GameObject fileObject = Instantiate(filePrefab, contentCanvas);
             fileObject.GetComponentInChildren<TextMeshProUGUI>().text = file;
-            fileCount ++;
+            fileCount++;
         }
 
         for (int i = fileCount; i < maxFiles; i++)
@@ -52,7 +78,7 @@ public class SaveObject : MonoBehaviour
         if (filename != " ")
         {
             // Delete File
-            File.Delete(Application.persistentDataPath + filename + ".shadow");
+            File.Delete(Path.Combine(Application.persistentDataPath, filename + ".shadow"));
         }
         // Get Scene Name and Date/Time
         Scene scene = SceneManager.GetActiveScene();
