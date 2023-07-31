@@ -4,10 +4,12 @@ using BehaviorTree;
 public class EnemyBT : Tree
 {
     public UnityEngine.Transform[] waypoints;
+    public UnityEngine.AI.NavMeshAgent agent;
 
-    public static float speed = 2f;
+    public static float walkSpeed = 2f;
+    public static float runSpeed = 3.5f;
     public static float fovRange = 12f;
-    public static float attackRange = 2f;
+    public static float attackRange = 3f;
     public static float rotationSpeed = 2f;
     public static float fovAngle = 140f;
 
@@ -23,9 +25,9 @@ public class EnemyBT : Tree
             new Sequence(new List<Node>
             {
                 new DecisionSensing(transform),
-                new ActionGoToTarget(transform)
+                new ActionGoToTarget(transform, agent)
             }),
-            new ActionPatrol(transform, waypoints)
+            new ActionPatrol(transform, waypoints, agent)
         });
 
         return root;

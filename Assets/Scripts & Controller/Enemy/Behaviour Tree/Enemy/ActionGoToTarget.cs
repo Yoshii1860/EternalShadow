@@ -1,26 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using BehaviorTree;
 
 public class ActionGoToTarget : Node
 {
     Transform transform;
+    NavMeshAgent agent;
 
-    public ActionGoToTarget(Transform transform)
+    public ActionGoToTarget(Transform transform, NavMeshAgent agent)
     {
         this.transform = transform;
+        this.agent = agent;
     }
 
     public override NodeState Evaluate()
     {
         Transform target = (Transform)GetData("target");
 
-        if (Vector3.Distance(transform.position, target.position) > 0.01f)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, target.position, EnemyBT.speed * Time.deltaTime);
-            transform.LookAt(target.position);
-        }
+        agent.speed = EnemyBT.runSpeed;
+        agent.SetDestination(target.position);
 
         state = NodeState.RUNNING;
         return state;

@@ -207,16 +207,19 @@ public class PlayerController : MonoBehaviour
         if (sprint && !crouch && !player.isOutOfStamina) 
         {
             speed = sprintSpeed;
+            GameManager.Instance.noiseLevel = GameManager.Instance.currentNoiseData * GameManager.Instance.noiseData.runModifier;
             player.ReduceStamina();
         }
         else if (crouch) 
         {
             speed = crouchSpeed;
+            GameManager.Instance.noiseLevel = GameManager.Instance.currentNoiseData * GameManager.Instance.noiseData.crouchModifier;
             player.IncreaseStamina();
         }
         else 
         {
             speed = moveSpeed;
+            GameManager.Instance.noiseLevel = GameManager.Instance.currentNoiseData;
             player.IncreaseStamina();
         }
 

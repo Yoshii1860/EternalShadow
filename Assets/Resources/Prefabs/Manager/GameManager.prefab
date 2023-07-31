@@ -185,7 +185,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1764e8c1cd3732f4bbedd0303bfc98a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  previousGameState: 0
+  noiseData: {fileID: 11400000, guid: 8a360fcebb34b374caad6ac2a4859d8a, type: 2}
+  noiseLevel: 0
   inventoryCanvas: {fileID: 0}
   inventory: {fileID: 0}
   player: {fileID: 0}

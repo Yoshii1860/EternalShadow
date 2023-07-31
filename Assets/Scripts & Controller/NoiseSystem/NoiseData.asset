@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 290fd5ed8e1a7b545918f0676da99a37, type: 3}
+  m_Name: NoiseData
+  m_EditorClassIdentifier: 
+  walkModifier: 1
+  runModifier: 1.5
+  crouchModifier: 0.5
+  shootModifier: 2.5
+  grassNoiseLevel: 5
+  concreteNoiseLevel: 8
+  woodenPlanksNoiseLevel: 7
+  carpetNoiseLevel: 4
+  trashNoiseLevel: 10
+  glassNoiseLevel: 14
+  plasticNoiseLevel: 12
+  brokenWoodenPlankNoiseLevel: 15

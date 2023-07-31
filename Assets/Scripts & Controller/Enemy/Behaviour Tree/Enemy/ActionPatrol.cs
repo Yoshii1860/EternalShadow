@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using BehaviorTree;
 
 public class ActionPatrol : Node
@@ -8,6 +9,7 @@ public class ActionPatrol : Node
     Transform transform;
     Animator animator;
     Transform[] waypoints;
+    NavMeshAgent agent;
 
     int currentWaypointIndex = 0;
 
@@ -15,11 +17,15 @@ public class ActionPatrol : Node
     float waitCounter = 0f;
     bool isWaiting = true;
 
-    public ActionPatrol(Transform transform, Transform[] waypoints)
+    Vector3 lastKnownPosition;
+    bool temporaryWaypoint = false;
+
+    public ActionPatrol(Transform transform, Transform[] waypoints, NavMeshAgent agent)
     {
         this.transform = transform;
         animator = transform.GetComponent<Animator>();
         this.waypoints = waypoints;
+        this.agent = agent;
     }
 
     public override NodeState Evaluate()
@@ -27,7 +33,7 @@ public class ActionPatrol : Node
         if (isWaiting)
         {
             waitCounter += Time.deltaTime;
-            if (waitCounter >= waitTime) 
+            if (waitCounter >= waitTime)
             {
                 isWaiting = false;
                 animator.SetBool("Walking", true);
@@ -35,30 +41,52 @@ public class ActionPatrol : Node
         }
         else
         {
-            Transform wp = waypoints[currentWaypointIndex];
-            if (Vector3.Distance(transform.position, wp.position) < 0.01f)
+            Transform wp;
+            if (GetData("lastKnownPosition") != null)
             {
-                transform.position = wp.position;
-                waitCounter = 0f;
-                isWaiting = true;
-
-                currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
-                animator.SetBool("Walking", false);
+                animator.SetBool("Walking", true);
+                lastKnownPosition = (Vector3)GetData("lastKnownPosition");
+                temporaryWaypoint = true;
             }
             else
             {
-                // Move the enemy towards the waypoint
-                transform.position = Vector3.MoveTowards(transform.position, wp.position, EnemyBT.speed * Time.deltaTime);
+                wp = waypoints[currentWaypointIndex];
+                lastKnownPosition = wp.position;
+            }
 
-                // Calculate the direction from the enemy to the waypoint
-                Vector3 directionToWaypoint = wp.position - transform.position;
-                directionToWaypoint.y = 0f; // Set the Y-component to 0 to ensure the enemy does not tilt up or down.
-
-                if (directionToWaypoint != Vector3.zero)
+            if (temporaryWaypoint)
+            {
+                if (Vector3.Distance(transform.position, lastKnownPosition) < 0.01f)
                 {
-                    // Rotate the enemy to face the waypoint direction
-                    Quaternion targetRotation = Quaternion.LookRotation(directionToWaypoint);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, EnemyBT.rotationSpeed * Time.deltaTime);
+                    transform.position = lastKnownPosition;
+                    waitCounter = 0f;
+                    isWaiting = true;
+
+                    animator.SetBool("Walking", false);
+                    temporaryWaypoint = false;
+                    ClearData("lastKnownPosition");
+                }
+                else
+                {
+                    agent.speed = EnemyBT.walkSpeed;
+                    agent.SetDestination(lastKnownPosition);
+                }
+            }
+            else
+            {
+                if (Vector3.Distance(transform.position, lastKnownPosition) < 0.01f)
+                {
+                    transform.position = lastKnownPosition;
+                    waitCounter = 0f;
+                    isWaiting = true;
+
+                    currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
+                    animator.SetBool("Walking", false);
+                }
+                else
+                {
+                    agent.speed = EnemyBT.walkSpeed;
+                    agent.SetDestination(lastKnownPosition);
                 }
             }
         }

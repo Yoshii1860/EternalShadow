@@ -67,6 +67,7 @@ public class Weapon : MonoBehaviour
         if(ammoSlot.GetCurrentAmmo(ammoType) >= 1 && magazineCount >= 1)
         {
             Debug.Log("Shooting");
+            GameManager.Instance.noiseLevel = GameManager.Instance.noiseData.shootNoiseLevel;
             GameObject target = ProcessRaycast();
             if (target != null)
             {

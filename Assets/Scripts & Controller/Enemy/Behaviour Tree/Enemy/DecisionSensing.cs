@@ -7,6 +7,7 @@ public class DecisionSensing : Node
 {
     // When remove debug "No Attack Mode", make int static
     int characterLayerMask = 1 << 7;
+    float maxChaseRange = 15f;
 
     Transform transform;
     Animator animator;
@@ -56,6 +57,7 @@ public class DecisionSensing : Node
                         if (hit.transform.CompareTag("Player"))
                         {
                             // Player is in sight, store the player as the target
+                            ClearData("lastKnownPosition");
                             parent.parent.SetData("target", target);
                             animator.SetBool("Walking", true);
 
@@ -68,6 +70,21 @@ public class DecisionSensing : Node
 
             state = NodeState.FAILURE;
             return state;
+        }
+        else
+        {
+            Transform target = (Transform)obj;
+            float distanceToTarget = Vector3.Distance(transform.position, target.position);
+            if (distanceToTarget > maxChaseRange)
+            {
+                ClearData("target");
+                if (GetData("lastKnownPosition") == null)
+                {
+                    parent.parent.SetData("lastKnownPosition", target.position);
+                }
+                state = NodeState.FAILURE;
+                return state;
+            }
         }
 
         state = NodeState.SUCCESS;

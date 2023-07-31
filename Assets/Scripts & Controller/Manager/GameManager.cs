@@ -29,6 +29,10 @@ public class GameManager : MonoBehaviour
     public GameState CurrentGameState { get; private set; }
     public SubGameState CurrentSubGameState { get; private set; }
 
+    public NoiseData noiseData;
+    public float currentNoiseData = 0f;
+    public float noiseLevel = 0f;
+
     public GameObject inventoryCanvas;
     public GameObject inventory;
     public Player player;
@@ -186,6 +190,17 @@ public class GameManager : MonoBehaviour
         Debug.Log("##### All Save Files Deleted");
         Debug.Log("##############################");
     }
+/////////////////////////////////////
+/////////////////////////////////////
+/////////////////////////////////////
+
+
+
+/////////////////////////////////////
+// Noise Management                //
+/////////////////////////////////////
+
+
 /////////////////////////////////////
 /////////////////////////////////////
 /////////////////////////////////////
