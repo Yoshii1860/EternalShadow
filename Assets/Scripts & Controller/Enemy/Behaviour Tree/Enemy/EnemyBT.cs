@@ -19,6 +19,11 @@ public class EnemyBT : Tree
         {
             new Sequence(new List<Node>
             {
+                new DecisionIsShot(transform),
+                new ActionChaseTarget(transform, agent)
+            }),
+            new Sequence(new List<Node>
+            {
                 new DecisionAttackRange(transform),
                 new ActionAttack(transform)
             }),

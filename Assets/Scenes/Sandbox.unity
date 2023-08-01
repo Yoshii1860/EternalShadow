@@ -297,65 +297,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7781419322125612704, guid: 468df444361dbaa43b29fe7611549185, type: 3}
   m_PrefabInstance: {fileID: 7781419322350946856}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &315389471
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 315389473}
-  - component: {fileID: 315389472}
-  - component: {fileID: 315389474}
-  m_Layer: 0
-  m_Name: GizmosVisualizer
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &315389472
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315389471}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d7960c5f300f0947a62cb2a24b74226, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gizmoColor: {r: 1, g: 0, b: 0, a: 1}
---- !u!4 &315389473
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315389471}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.059957, y: 13.939851, z: 6.2404203}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 15
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &315389474
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315389471}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uniqueID: 
 --- !u!1001 &335461275
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1257,6 +1198,10 @@ PrefabInstance:
       propertyPath: m_Speed
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 5665561590207619368, guid: db6a207272af43040b534999ddb0f89b, type: 3}
+      propertyPath: uniqueID
+      value: 1000
+      objectReference: {fileID: 0}
     - target: {fileID: 8918032438728324418, guid: db6a207272af43040b534999ddb0f89b, type: 3}
       propertyPath: waypoints.Array.data[0]
       value: 
@@ -1448,10 +1393,14 @@ PrefabInstance:
       propertyPath: m_Speed
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 5665561590207619368, guid: db6a207272af43040b534999ddb0f89b, type: 3}
+      propertyPath: uniqueID
+      value: 1010
+      objectReference: {fileID: 0}
     - target: {fileID: 8918032438728324417, guid: db6a207272af43040b534999ddb0f89b, type: 3}
       propertyPath: fovVisualizer
       value: 
-      objectReference: {fileID: 315389472}
+      objectReference: {fileID: 0}
     - target: {fileID: 8918032438728324418, guid: db6a207272af43040b534999ddb0f89b, type: 3}
       propertyPath: waypoints.Array.data[0]
       value: 

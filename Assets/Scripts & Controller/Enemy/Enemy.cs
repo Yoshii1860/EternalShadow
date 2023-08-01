@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
 {
     public int health = 100;
     public bool isDead;
+    [SerializeField] float chaseTimer = 10f;
 
     void Start() 
     {
@@ -21,11 +22,20 @@ public class Enemy : MonoBehaviour
             isDead = true;
             Die();
         }
+        StartCoroutine(EnemyShot());
     }
 
     void Die()
     {
         transform.gameObject.SetActive(false);
+    }
+
+    IEnumerator EnemyShot()
+    {
+        GameManager.Instance.enemyShot = true;
+        GameManager.Instance.shotTarget = transform;
+        yield return new WaitForSeconds(chaseTimer);
+        GameManager.Instance.enemyShot = false;
     }
 
      private void OnDrawGizmos()

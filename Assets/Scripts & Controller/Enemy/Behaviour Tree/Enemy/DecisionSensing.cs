@@ -31,7 +31,8 @@ public class DecisionSensing : Node
         }    
         ///////////////////////////
 
-        if (obj == null)
+        if (obj == null && !GameManager.Instance.enemyShot || // No one is shot
+            obj == null && GameManager.Instance.enemyShot && GameManager.Instance.shotTarget != transform) // Someone is shot but not this enemy
         {
             // Use OverlapSphereNonAlloc to get colliders in the sphere
             Collider[] colliders = new Collider[10]; // You can adjust the size of this array based on the expected number of nearby colliders
@@ -71,12 +72,14 @@ public class DecisionSensing : Node
             state = NodeState.FAILURE;
             return state;
         }
-        else
+        else if (obj != null && !GameManager.Instance.enemyShot || // No one is shot
+                obj != null && GameManager.Instance.enemyShot && GameManager.Instance.shotTarget != transform) // Someone is shot but not this enemy
         {
             Transform target = (Transform)obj;
             float distanceToTarget = Vector3.Distance(transform.position, target.position);
             if (distanceToTarget > maxChaseRange)
             {
+                Debug.Log("DecisionSensing: Got Last Known Position");
                 ClearData("target");
                 if (GetData("lastKnownPosition") == null)
                 {
