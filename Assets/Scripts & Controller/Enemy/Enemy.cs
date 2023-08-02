@@ -6,13 +6,9 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     public int health = 100;
-    public bool isDead;
+    public bool isDead = false;
+    public bool isShot = false;
     [SerializeField] float chaseTimer = 10f;
-
-    void Start() 
-    {
-        isDead = false;
-    }
 
     public void TakeDamage(int damage)
     {
@@ -32,10 +28,9 @@ public class Enemy : MonoBehaviour
 
     IEnumerator EnemyShot()
     {
-        GameManager.Instance.enemyShot = true;
-        GameManager.Instance.shotTarget = transform;
+        isShot = true;
         yield return new WaitForSeconds(chaseTimer);
-        GameManager.Instance.enemyShot = false;
+        isShot = false;
     }
 
      private void OnDrawGizmos()

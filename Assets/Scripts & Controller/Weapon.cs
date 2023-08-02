@@ -20,6 +20,7 @@ public class Weapon : MonoBehaviour
     [SerializeField] int magazine = 10;
     [Tooltip("The amount of ammo a magazine currently has.")]
     public int magazineCount = 5;
+    [Tooltip("If the weapon is currently equipped.")]
     public bool isEquipped = false;
 
     [Space(10)]
@@ -64,10 +65,18 @@ public class Weapon : MonoBehaviour
     IEnumerator Shoot()
     {
         canShoot = false;
+
         if(ammoSlot.GetCurrentAmmo(ammoType) >= 1 && magazineCount >= 1)
         {
             Debug.Log("Shooting");
-            GameManager.Instance.noiseLevel = GameManager.Instance.noiseData.shootNoiseLevel;
+            
+            // if weapon has a NoiseController, make noise
+            NoiseController noiseController = GetComponent<NoiseController>();
+            if (noiseController != null)
+            {
+                noiseController.ShootNoise();
+            }
+
             GameObject target = ProcessRaycast();
             if (target != null)
             {

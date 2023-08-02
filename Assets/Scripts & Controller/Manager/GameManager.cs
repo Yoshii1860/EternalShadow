@@ -29,10 +29,6 @@ public class GameManager : MonoBehaviour
     public GameState CurrentGameState { get; private set; }
     public SubGameState CurrentSubGameState { get; private set; }
 
-    public NoiseData noiseData;
-    public float currentNoiseData = 0f;
-    public float noiseLevel = 0f;
-
     public GameObject inventoryCanvas;
     public GameObject inventory;
     public Player player;
@@ -49,16 +45,6 @@ public class GameManager : MonoBehaviour
 
     public bool isPaused = false;
 
-/////////////////////////////////////
-// Enemy states                    //
-/////////////////////////////////////
-    public bool enemyShot = false;
-    public Transform shotTarget;
-
-/////////////////////////////////////
-/////////////////////////////////////
-/////////////////////////////////////
-
 
 
 /////////////////////////////////////
@@ -67,6 +53,8 @@ public class GameManager : MonoBehaviour
     [Header("Debug")]
     [Tooltip("Debug mode for the enemy. If true, the enemy will not attack the player. Set during gamplay.")]
     public bool noAttackMode = false;
+    [Tooltip("Debug mode for the enemy. If true, the enemy will not hear. Set during gamplay.")]
+    public bool noNoiseMode = false;
     [Tooltip("When set to true, all saved files will be deleted and the bool sets back to false. Set during gameplay.")]
     [SerializeField] bool _deleteSaveFiles = false;
 

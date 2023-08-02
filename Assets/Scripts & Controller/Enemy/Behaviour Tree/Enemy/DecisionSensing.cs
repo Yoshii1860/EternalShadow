@@ -31,8 +31,17 @@ public class DecisionSensing : Node
         }    
         ///////////////////////////
 
-        if (obj == null && !GameManager.Instance.enemyShot || // No one is shot
-            obj == null && GameManager.Instance.enemyShot && GameManager.Instance.shotTarget != transform) // Someone is shot but not this enemy
+        bool isShot = false;
+
+
+        // Check if the enemy is shot by accessing the EnemyManager
+        Enemy enemyData;
+        if (EnemyManager.Instance.TryGetEnemy(transform, out enemyData))
+        {
+            isShot = enemyData.isShot;
+        }
+
+        if (obj == null && !isShot)
         {
             // Use OverlapSphereNonAlloc to get colliders in the sphere
             Collider[] colliders = new Collider[10]; // You can adjust the size of this array based on the expected number of nearby colliders
@@ -72,8 +81,7 @@ public class DecisionSensing : Node
             state = NodeState.FAILURE;
             return state;
         }
-        else if (obj != null && !GameManager.Instance.enemyShot || // No one is shot
-                obj != null && GameManager.Instance.enemyShot && GameManager.Instance.shotTarget != transform) // Someone is shot but not this enemy
+        else if (obj != null && !isShot)
         {
             Transform target = (Transform)obj;
             float distanceToTarget = Vector3.Distance(transform.position, target.position);

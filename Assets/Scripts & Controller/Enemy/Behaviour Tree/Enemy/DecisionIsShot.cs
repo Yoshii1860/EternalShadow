@@ -20,7 +20,17 @@ public class DecisionIsShot : Node
     public override NodeState Evaluate()
     {
         object obj = GetData("target");
-        if (obj == null && GameManager.Instance.enemyShot && GameManager.Instance.shotTarget == transform)
+
+        bool isShot = false;
+
+        // Check if the enemy is shot by accessing the EnemyManager
+        Enemy enemyData;
+        if (EnemyManager.Instance.TryGetEnemy(transform, out enemyData))
+        {
+            isShot = enemyData.isShot;
+        }
+
+        if (obj == null && isShot)
         {
             // Use OverlapSphereNonAlloc to get colliders in the sphere
             Collider[] colliders = new Collider[10]; // You can adjust the size of this array based on the expected number of nearby colliders
@@ -48,7 +58,7 @@ public class DecisionIsShot : Node
             state = NodeState.FAILURE;
             return state;
         }
-        else if (obj != null && GameManager.Instance.enemyShot && GameManager.Instance.shotTarget == transform)
+        else if (obj != null && isShot)
         {
             state = NodeState.SUCCESS;
             return state;
