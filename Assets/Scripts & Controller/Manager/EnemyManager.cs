@@ -40,14 +40,25 @@ public class EnemyManager : MonoBehaviour
 /////////////////////////////////////
     void Start()
     {
-        foreach (Transform enemyTransform in GameManager.Instance.enemyPool)
+        if (GameManager.Instance.enemyPool != null)
+        {
+            FillEnemyArray(GameManager.Instance.enemyPool);
+        }
+        else
+        {
+            Transform enemyPool = GameObject.FindGameObjectWithTag("EnemyPool").transform;
+            FillEnemyArray(enemyPool);
+        }
+    }
+
+    private void FillEnemyArray(Transform enemyPool)
+    {
+        foreach (Transform enemyTransform in enemyPool)
         {
             Enemy enemyData = enemyTransform.GetComponent<Enemy>();
             AddOrUpdateEnemy(enemyTransform, enemyData);
         }
     }
-
-
 
     // Function to add or update enemy data
     public void AddOrUpdateEnemy(Transform enemyTransform, Enemy enemyData)

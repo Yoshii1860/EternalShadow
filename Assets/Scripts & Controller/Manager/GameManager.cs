@@ -29,14 +29,14 @@ public class GameManager : MonoBehaviour
     public GameState CurrentGameState { get; private set; }
     public SubGameState CurrentSubGameState { get; private set; }
 
+    public GameState LastGameState;
+
     public GameObject inventoryCanvas;
     public GameObject inventory;
     public Player player;
     public Transform objectPool;
     public Transform enemyPool;
     public Transform interactObjectPool;
-    public GameObject saveCanvas;
-    public GameObject loadCanvas;
     public GameObject blackScreen;
     [SerializeField] Image progressBar;
     [SerializeField] Item[] startGameItems;
@@ -121,10 +121,6 @@ public class GameManager : MonoBehaviour
         enemyPool = GameObject.FindWithTag("EnemyPool").transform;
         interactObjectPool = GameObject.FindWithTag("InteractObjectPool").transform;
 
-        GameObject parent = GameObject.FindWithTag("SaveLoad");
-        saveCanvas = parent.GetComponentInChildren<SaveObject>(true).transform.gameObject;
-        loadCanvas = parent.GetComponentInChildren<LoadObject>(true).transform.gameObject;
-
         if(InventoryManager.Instance != null)
         {
             InventoryManager.Instance.UpdateReferences();
@@ -195,17 +191,6 @@ public class GameManager : MonoBehaviour
 
 
 /////////////////////////////////////
-// Noise Management                //
-/////////////////////////////////////
-
-
-/////////////////////////////////////
-/////////////////////////////////////
-/////////////////////////////////////
-
-
-
-/////////////////////////////////////
 // Game State Management           //
 /////////////////////////////////////
     public void StartGame()
@@ -217,7 +202,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator StartGameWithBlackScreen()
     {
         // Set the black screen to active
-        blackScreen.SetActive(true);
+        if (!blackScreen.activeSelf) blackScreen.SetActive(true);
 
         // Wait for 2 seconds before starting the fade-out
         yield return new WaitForSecondsRealtime(2f);
@@ -239,6 +224,7 @@ public class GameManager : MonoBehaviour
 
         // Deactivate the black screen once the fade-out is complete
         blackScreen.SetActive(false);
+        blackScreen.GetComponent<Image>().color = Color.black;
 
         // Set the game state to Gameplay after the fade-out
         SetGameState(GameState.Gameplay);
@@ -250,6 +236,19 @@ public class GameManager : MonoBehaviour
         // Add code to display the inventory
     }
 
+    public void OpenSaveScreen()
+    {
+        MenuController.Instance.menuCanvas.SetActive(true);
+        MenuController.Instance.SaveGame();
+        SetGameState(GameState.MainMenu);
+    }
+
+    public void OpenMenu()
+    {
+        MenuController.Instance.menuCanvas.SetActive(true);
+        SetGameState(GameState.MainMenu);
+    }
+
     public void PauseGame()
     {
         if (CurrentGameState == GameState.MainMenu) return;
@@ -259,7 +258,6 @@ public class GameManager : MonoBehaviour
 
     public void ResumeGame()
     {
-        if (CurrentGameState == GameState.MainMenu) return;
         SetGameState(GameState.Gameplay);
         // Add code to resume the game
         if (inventoryCanvas.activeSelf) inventoryCanvas.SetActive(false);
@@ -273,6 +271,7 @@ public class GameManager : MonoBehaviour
 
     private void SetGameState(GameState newState, SubGameState newSubGameState = SubGameState.Default)
     {
+        LastGameState = CurrentGameState;
         CurrentGameState = newState;
         CurrentSubGameState = newSubGameState;
 
@@ -281,9 +280,13 @@ public class GameManager : MonoBehaviour
         {
             case GameState.MainMenu:
                 // Add code for main menu behavior
-                playerInput.SwitchCurrentActionMap("Menu");
+                if (playerInput == null)
+                {
+                    playerInput = FindObjectOfType<PlayerInput>();
+                }
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
+                playerInput.SwitchCurrentActionMap("Menu");
                 break;
 
             case GameState.Gameplay:
@@ -458,15 +461,10 @@ public class GameManager : MonoBehaviour
             {
                 foreach (Enemy enemy in enemiesPool)
                 {
-                    Debug.Log("GM.cs - enemy: " + enemy.transform.gameObject.name);
                     if (enemy.GetComponent<UniqueIDComponent>().UniqueID == enemyData.uniqueID)
                     {
                         enemy.health = enemyData.health;
                         enemy.isDead = enemyData.isDead;
-                        Debug.Log("GM.cs - position: " + enemy.transform.position);
-                        Debug.Log("GM.cs - new position: " + enemyData.position[0] + ", " + enemyData.position[1] + ", " + enemyData.position[2]);
-                        Debug.Log("GM.cs - rotation: " + enemy.transform.rotation);
-                        Debug.Log("GM.cs - new rotation: " + enemyData.rotation[0] + ", " + enemyData.rotation[1] + ", " + enemyData.rotation[2]);
                         enemy.transform.position = new Vector3(enemyData.position[0], enemyData.position[1], enemyData.position[2]);
                         enemy.transform.rotation = Quaternion.Euler(enemyData.rotation[0], enemyData.rotation[1], enemyData.rotation[2]);
                         if (enemy.isDead)
@@ -527,13 +525,8 @@ public class GameManager : MonoBehaviour
 
     public void LoadNewScene(string filename, bool newGame = false) // Hardcoded for now
     {
-        Debug.Log("Scene 0: " + SceneManager.GetSceneByBuildIndex(0).name);
-        Debug.Log("Scene 1: " + SceneManager.GetSceneByBuildIndex(1).name);
-        Debug.Log("Filename: " + filename);
-
         string sceneNameToLoad = filename.Split('-')[0].Trim();
 
-        Debug.Log("sceneNameToLoad: " + sceneNameToLoad);
         StartCoroutine(LoadSceneAsync(sceneNameToLoad, filename, newGame));
     }
 
@@ -564,9 +557,9 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
-        UpdateReferences();
-
         StartGame();
+
+        UpdateReferences();
 
         if (!newGame)
         {

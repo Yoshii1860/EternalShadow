@@ -10,8 +10,20 @@ TagManager:
   - ObjectPool
   - EnemyPool
   - InteractObjectPool
-  - SaveLoad
   - Inventory
+  - LoadGameButton
+  - NewGameButton
+  - LoadFileButton
+  - SaveFileButton
+  - MainMenu
+  - LoadMenu
+  - SaveMenu
+  - MenuCanvas
+  - FileContainer
+  - LoadReturnButton
+  - SaveReturnButton
+  - ReturnButton
+  - ExitButton
   layers:
   - Default
   - TransparentFX

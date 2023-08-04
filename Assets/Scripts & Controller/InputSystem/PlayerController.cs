@@ -90,7 +90,7 @@ public class PlayerController : MonoBehaviour
             if (weaponSwitch != 0)      WeaponSwitch();
             if (reload)                 Reload();
             if (inventory)              Inventory();
-            //if (menu)                   Menu();
+            if (menu)                   Menu();
         }
     }
 
@@ -153,6 +153,7 @@ public class PlayerController : MonoBehaviour
     {
         fire = context.ReadValueAsButton();
     }
+
 
     public void OnInteract(InputAction.CallbackContext context)
     {
@@ -388,15 +389,7 @@ public class PlayerController : MonoBehaviour
     void Menu()
     {
         menu = false;
-
-        if (GameManager.Instance.isPaused)
-        {
-            GameManager.Instance.ResumeGame();
-        }
-        else
-        {
-            GameManager.Instance.PauseGame();
-        }
+        GameManager.Instance.OpenMenu();
     }
 
     private void OnDrawGizmos() 

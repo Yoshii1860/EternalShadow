@@ -22,9 +22,9 @@ public class InventoryController : MonoBehaviour
     {
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.Inventory)
         {
-            if (interact) Interact();
-            if (exit) Exit();
-            if (back) Back();
+            if (interact)   Interact();
+            if (exit)       Exit();
+            if (back)       Back();
         }
     }
 
