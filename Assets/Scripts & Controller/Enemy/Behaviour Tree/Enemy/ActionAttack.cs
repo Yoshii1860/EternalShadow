@@ -1,49 +1,56 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using BehaviorTree;
+    using System.Collections;
+    using System.Collections.Generic;
+    using UnityEngine;
+    using BehaviorTree;
 
-public class ActionAttack : Node
-{
-    Animator animator;
-
-    Transform lastTarget;
-    Player player;
-
-    float attackTime = 1f;
-    float attackCounter = 0f;
-
-    public ActionAttack(Transform transform)
+    public class ActionAttack : Node
     {
-        animator = transform.GetComponent<Animator>();
-    }
+        Animator animator;
+        Player player = GameManager.Instance.player;
 
-    public override NodeState Evaluate()
-    {
-        Transform target = (Transform)GetData("target");
-        if (target != lastTarget)
+        float attackCounter = 0f;
+
+        public ActionAttack(Transform transform)
         {
-            player = target.GetComponent<Player>();
-            lastTarget = target;
+            animator = transform.GetComponent<Animator>();
         }
 
-        attackCounter += Time.deltaTime;
-        if (attackCounter >= attackTime)
+        public override NodeState Evaluate()
         {
-            bool playerIsDead = player.TakeDamage();
-            if (playerIsDead)
-            {
-                ClearData("target");
-                animator.SetBool("Attacking", false);
-                animator.SetBool("Walking", true);
-            }
-            else
-            {
-                attackCounter = 0f;
-            }
-        }
+            if (GameManager.Instance.isPaused) return NodeState.RUNNING;
+            
+            object obj = GetData("target");
 
-        state = NodeState.RUNNING;
-        return state;
+            if (obj == null)
+            {
+                state = NodeState.FAILURE;
+                return state;
+            }
+
+            Transform target = (Transform)obj;
+
+            attackCounter += Time.deltaTime;
+            if (attackCounter >= EnemyBT.attackIntervall)
+            {
+                Debug.Log("ActionAttack: Attack");
+                bool playerIsDead = player.TakeDamage();
+                if (playerIsDead)
+                {
+                    ClearData("target");
+                    animator.SetBool("Attacking", false);
+                    animator.SetBool("Walking", true);
+                    attackCounter = 0f;
+
+                    state = NodeState.SUCCESS;
+                    return state;
+                }
+                else
+                {
+                    attackCounter = 0f;
+                }
+            }
+
+            state = NodeState.RUNNING;
+            return state;
+        }
     }
-}

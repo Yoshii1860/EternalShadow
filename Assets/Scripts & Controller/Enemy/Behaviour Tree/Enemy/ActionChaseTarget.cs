@@ -6,27 +6,42 @@ using BehaviorTree;
 
 public class ActionChaseTarget : Node
 {
-    Transform transform;
     NavMeshAgent agent;
+    float chaseTimer = 0f;
+    float chaseDuration = 10f; // same as in Enemy.cs
 
-    public ActionChaseTarget(Transform transform, NavMeshAgent agent)
-    {
-        this.transform = transform;
+    public ActionChaseTarget(NavMeshAgent agent)
+    {        
         this.agent = agent;
     }
 
     public override NodeState Evaluate()
     {
-        Transform target = (Transform)GetData("target");
+        if (GameManager.Instance.isPaused) return NodeState.RUNNING;
+        
+        object obj = GetData("target");
 
-        if(target == null)
+        if(obj == null)
         {
             state = NodeState.FAILURE;
             return state;
         }
 
+        Transform target = (Transform)obj;
+
+        Debug.Log("ChaseTarget: Chasing!");
         agent.speed = EnemyBT.runSpeed;
         agent.SetDestination(target.position);
+
+        chaseTimer += Time.deltaTime;
+        if (chaseTimer >= chaseDuration)
+        {
+            Debug.Log("ChaseTarget: Time over!");
+            ClearData("target");
+            chaseTimer = 0f;
+            state = NodeState.SUCCESS;
+            return state;
+        }
 
         state = NodeState.RUNNING;
         return state;

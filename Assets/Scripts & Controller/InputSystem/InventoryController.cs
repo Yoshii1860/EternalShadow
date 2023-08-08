@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using Cinemachine;
 using UnityEngine.UI;
 
-public class InventoryController : MonoBehaviour
+public class InventoryController : MonoBehaviour, ICustomUpdatable
 {
     public float moveDebounceTime = 0.3f;
     ItemActions itemActions;
@@ -18,7 +18,7 @@ public class InventoryController : MonoBehaviour
         itemActions = InventoryManager.Instance.GetComponent<ItemActions>();
     }
 
-    void Update()
+    public void CustomUpdate(float deltaTime)
     {
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.Inventory)
         {

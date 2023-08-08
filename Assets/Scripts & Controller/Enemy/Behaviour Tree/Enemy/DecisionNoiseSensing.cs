@@ -5,20 +5,21 @@ using BehaviorTree;
 
 public class DecisionNoiseSensing : Node
 {
-    // When remove debug "No Attack Mode", make int static
-    int characterLayerMask = 1 << 7;
-
     Transform transform;
     Animator animator;
+    AISensor aiSensor;
 
     public DecisionNoiseSensing(Transform transform)
     {
         this.transform = transform;
         animator = transform.GetComponent<Animator>();
+        aiSensor = transform.GetComponent<AISensor>();
     }
 
     public override NodeState Evaluate()
     {
+        if (GameManager.Instance.isPaused) return NodeState.FAILURE;
+        
         ///////////////////////////
         // DEBUG FUNCTION
         if(GameManager.Instance.noNoiseMode)
@@ -28,23 +29,45 @@ public class DecisionNoiseSensing : Node
         }    
         ///////////////////////////
 
-        // Use OverlapSphereNonAlloc to get colliders in the sphere
-        Collider[] colliders = new Collider[10]; // You can adjust the size of this array based on the expected number of nearby colliders
-        int count = Physics.OverlapSphereNonAlloc(transform.position, NoiseManager.Instance.noiseLevel, colliders, characterLayerMask);
+        object obj = GetData("target");
 
-        // Filter the colliders based on their direction from the enemy
-        for (int i = 0; i < count; i++)
+        if (obj != null || aiSensor.playerInSight)
         {
-            if(colliders[i].transform.CompareTag("Player"))
-            {
-                // Player is in sight, store the player as the target
-                parent.parent.SetData("lastKnownPosition", colliders[i].transform.position);
-                animator.SetBool("Walking", true);
-
-                state = NodeState.SUCCESS;
-                return state;
-            }
+            ClearData("noiseLevel");
+            state = NodeState.FAILURE;
+            return state;
         }
+
+        // save noise Level as the original noise level is always changing
+        object obj2 = GetData("noiseLevel");
+        float? noiseLevel = (float?)obj2;
+
+        if (noiseLevel == null)
+        {
+            parent.parent.SetData("noiseLevel", NoiseManager.Instance.noiseLevel);
+            noiseLevel = NoiseManager.Instance.noiseLevel;
+        }
+        else
+        {
+            state = NodeState.SUCCESS;
+            return state;
+        }
+
+        if (Vector3.Distance(transform.position, GameManager.Instance.player.transform.position) <= noiseLevel)
+        {
+            Debug.Log("DecisionNoiseSensing: Noise heard!");
+
+            // Player is in sight, store the player as the target
+            Vector3 noisePosition = GameManager.Instance.player.transform.position;
+            parent.parent.SetData("noisePosition", noisePosition);
+            animator.SetBool("Walking", true);
+
+            state = NodeState.SUCCESS;
+            return state;
+        }
+
+        ClearData("noiseLevel");
+
         state = NodeState.FAILURE;
         return state;
     }

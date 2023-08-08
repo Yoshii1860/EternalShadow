@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(UniqueIDComponent))]
+[RequireComponent(typeof(AISensor))]
 public class Enemy : MonoBehaviour
 {
     public int health = 100;
@@ -31,16 +32,5 @@ public class Enemy : MonoBehaviour
         isShot = true;
         yield return new WaitForSeconds(chaseTimer);
         isShot = false;
-    }
-
-     private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-
-        // Calculate the forward direction of the enemy
-        Vector3 forwardDirection = transform.forward;
-
-        // Draw the ray in the forward direction with the desired fovRange
-        Gizmos.DrawRay(transform.position, forwardDirection * EnemyBT.fovRange);
     }
 }

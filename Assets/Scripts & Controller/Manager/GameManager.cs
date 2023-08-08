@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 using System.IO;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Timers;
 
 public class GameManager : MonoBehaviour
 {
@@ -43,7 +44,9 @@ public class GameManager : MonoBehaviour
 
     PlayerInput playerInput;
 
-    public bool isPaused = false;
+    CustomUpdateManager customUpdateManager;
+
+    public bool isPaused;
 
 
 
@@ -97,6 +100,9 @@ public class GameManager : MonoBehaviour
 
         // Get the black screen reference
         blackScreen = transform.GetChild(0).gameObject;
+
+        // Get the CustomUpdateManager instance
+        customUpdateManager = GetComponent<CustomUpdateManager>();
     }
 /////////////////////////////////////
 /////////////////////////////////////
@@ -107,13 +113,12 @@ public class GameManager : MonoBehaviour
 /////////////////////////////////////
 // Reference Management            //
 /////////////////////////////////////
-    private void UpdateReferences()
+    void UpdateReferences()
     {
         Debug.Log("Reference will be updated!");
 
         player = FindObjectOfType<Player>();
         playerInput = FindObjectOfType<PlayerInput>();
-        Debug.Log("Player. " + player);
 
         inventory = GameObject.FindWithTag("Inventory");
         inventoryCanvas = inventory.transform.GetChild(0).gameObject;
@@ -124,6 +129,25 @@ public class GameManager : MonoBehaviour
         if(InventoryManager.Instance != null)
         {
             InventoryManager.Instance.UpdateReferences();
+        }
+
+        // Update CustomUpdatable references
+        UpdateCustomUpdatables();
+    }
+
+    void UpdateCustomUpdatables()
+    {
+        customUpdateManager.AddCustomUpdatable(MenuController.Instance);
+        if (player != null) 
+            customUpdateManager.AddCustomUpdatable(player.GetComponent<InventoryController>());
+            customUpdateManager.AddCustomUpdatable(player.GetComponent<PlayerController>());
+            
+        if (enemyPool != null)
+        {
+            foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
+            {
+                customUpdateManager.AddCustomUpdatable(enemy);
+            } 
         }
     }
 /////////////////////////////////////
@@ -139,6 +163,7 @@ public class GameManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
+            UpdateCustomUpdatables();
             Debug.Log("GameManager - Start - MainMenu: " + SceneManager.GetActiveScene().name);
             SetGameState(GameState.MainMenu);
         }
@@ -245,6 +270,8 @@ public class GameManager : MonoBehaviour
 
     public void OpenMenu()
     {
+        MenuController.Instance.customTimer = 0f;
+        MenuController.Instance.canCloseMenu = false;
         MenuController.Instance.menuCanvas.SetActive(true);
         SetGameState(GameState.MainMenu);
     }
@@ -254,6 +281,10 @@ public class GameManager : MonoBehaviour
         if (CurrentGameState == GameState.MainMenu) return;
         SetGameState(GameState.Paused);
         // Add code to pause the game
+        foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
+        {
+            customUpdateManager.RemoveCustomUpdatable(enemy);
+        } 
     }
 
     public void ResumeGame()
@@ -261,6 +292,10 @@ public class GameManager : MonoBehaviour
         SetGameState(GameState.Gameplay);
         // Add code to resume the game
         if (inventoryCanvas.activeSelf) inventoryCanvas.SetActive(false);
+        foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
+        {
+            customUpdateManager.AddCustomUpdatable(enemy);
+        } 
     }
 
     public void GameOver()
@@ -284,6 +319,14 @@ public class GameManager : MonoBehaviour
                 {
                     playerInput = FindObjectOfType<PlayerInput>();
                 }
+                if (enemyPool != null)
+                {
+                    foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
+                    {
+                        agent.isStopped = true;
+                    }
+                }
+                isPaused = true;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 playerInput.SwitchCurrentActionMap("Menu");
@@ -292,10 +335,13 @@ public class GameManager : MonoBehaviour
             case GameState.Gameplay:
                 // Add code for common gameplay behavior (for SubGameState.Default)
                 // This will be executed for all variations unless overridden in substates.
-                Debug.Log("Gameplay state set.");
+                foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
+                {
+                    agent.isStopped = false;
+                }
+                isPaused = false;
                 playerInput.SwitchCurrentActionMap("Player");
                 Time.timeScale = 1;
-                isPaused = false;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 switch (CurrentSubGameState)
@@ -316,6 +362,11 @@ public class GameManager : MonoBehaviour
 
             case GameState.Inventory:
                 // Add code for inventory behavior
+                foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
+                {
+                    agent.isStopped = true;
+                }
+                isPaused = true;
                 playerInput.SwitchCurrentActionMap("Inventory");
                 inventoryCanvas.SetActive(true);
                 InventoryManager.Instance.ListItems();
@@ -325,7 +376,10 @@ public class GameManager : MonoBehaviour
 
             case GameState.Paused:
                 // Add code for paused behavior
-                Time.timeScale = 0;
+                foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
+                {
+                    agent.isStopped = true;
+                }
                 isPaused = true;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
@@ -333,6 +387,7 @@ public class GameManager : MonoBehaviour
 
             case GameState.GameOver:
                 // Add code for game over behavior
+                isPaused = true;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 break;

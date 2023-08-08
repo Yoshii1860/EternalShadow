@@ -8,7 +8,7 @@ using TMPro;
 using System.IO;
 using UnityEngine.SceneManagement;
 
-public class MenuController : MonoBehaviour
+public class MenuController : MonoBehaviour, ICustomUpdatable
 {
     public static MenuController Instance { get; private set; }
 
@@ -62,12 +62,12 @@ public class MenuController : MonoBehaviour
 
     [SerializeField] int maxFiles = 8;
 
-    private Dictionary<Transform, Vector3> initialButtonPositions = new Dictionary<Transform, Vector3>();
+    Dictionary<Transform, Vector3> initialButtonPositions = new Dictionary<Transform, Vector3>();
     Button[] buttons;
     Button selectedButton;
     int buttonNumber;
-    float waitingTimeToCloseMenu = 0f;
-    bool canCloseMenu = true;
+    public bool canCloseMenu = true;
+    public float customTimer = 0f;
 
     [SerializeField] Color selectedColor;
     [SerializeField] Color unselectedColor;
@@ -118,20 +118,34 @@ public class MenuController : MonoBehaviour
 
     void Start() 
     {
-        ActivateMenu(mainMenu, true);
+        if (SceneManager.GetActiveScene().name == "MainMenu")
+        {
+            ActivateMenu(mainMenu, true);
+        }
+        else
+        {
+            ActivateMenu(mainMenu, false);
+            menuCanvas.SetActive(false);
+        }
     }
 
-    void Update()
+    public void CustomUpdate(float deltaTime)
     {
+        if (customTimer < .5f)
+        {
+            customTimer += deltaTime;
+        }
+        else
+        {
+            canCloseMenu = true;
+        }
+
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.MainMenu)
         {
             if (interact)   Interact();
             if (back)       Back();
         }
-        if (waitingTimeToCloseMenu > .5 && !canCloseMenu) canCloseMenu = true;
-        else if (waitingTimeToCloseMenu <= .5) waitingTimeToCloseMenu += Time.deltaTime;
     }
-    
     /////////////////////////////////
     /////////////////////////////////
     /////////////////////////////////
@@ -244,6 +258,8 @@ public class MenuController : MonoBehaviour
     void Back()
     {
         back = false;
+        if (!canCloseMenu) return;
+
         bool mainMenuActive = SceneManager.GetActiveScene().name == "MainMenu";
 
         if (mainMenu.gameObject.activeSelf && canCloseMenu)         
@@ -304,19 +320,12 @@ public class MenuController : MonoBehaviour
         // Reset the buttons array and color
         ResetButtonColor();
         List <Button> buttonList = new List<Button>(buttons);
-        foreach (Button b in buttonList) Debug.Log(b.name);
         buttonList.Remove(returnFromLoadButton);
         buttonList.Remove(returnFromSaveButton);
         if (!mainMenuState)   buttonList.Remove(newGameButton.GetComponent<Button>());
         buttons = buttonList.ToArray();
         selectedButton = null;
         buttonNumber = 0;
-    }
-
-    public void WaitToCloseMenu()
-    {
-        waitingTimeToCloseMenu = 0;
-        canCloseMenu = false;
     }
 
     void ResetButtonColor()

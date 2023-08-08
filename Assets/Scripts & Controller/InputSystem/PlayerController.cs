@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Cinemachine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, ICustomUpdatable
 {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ public class PlayerController : MonoBehaviour
         startFocalLength = cmVirtualCamera.m_Lens.FieldOfView;
     }
 
-    void Update()
+    public void CustomUpdate(float deltaTime)
     {
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.Gameplay)
         {

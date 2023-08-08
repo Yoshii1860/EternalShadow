@@ -17,9 +17,6 @@ public class ActionPatrol : Node
     float waitCounter = 0f;
     bool isWaiting = true;
 
-    Vector3 lastKnownPosition;
-    bool temporaryWaypoint = false;
-
     public ActionPatrol(Transform transform, Transform[] waypoints, NavMeshAgent agent)
     {
         this.transform = transform;
@@ -30,6 +27,15 @@ public class ActionPatrol : Node
 
     public override NodeState Evaluate()
     {
+        if (GameManager.Instance.isPaused) return NodeState.RUNNING;
+
+        object obj = GetData("lastKnownPosition");
+        if (obj != null)
+        {
+            state = NodeState.FAILURE;
+            return state;
+        }
+
         if (isWaiting)
         {
             waitCounter += Time.deltaTime;
@@ -42,52 +48,20 @@ public class ActionPatrol : Node
         else
         {
             Transform wp;
-            if (GetData("lastKnownPosition") != null)
+            wp = waypoints[currentWaypointIndex];
+            if (Vector3.Distance(transform.position, wp.position) < 0.01f)
             {
-                animator.SetBool("Walking", true);
-                lastKnownPosition = (Vector3)GetData("lastKnownPosition");
-                temporaryWaypoint = true;
+                transform.position = wp.position;
+                waitCounter = 0f;
+                isWaiting = true;
+
+                currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
+                animator.SetBool("Walking", false);
             }
             else
             {
-                wp = waypoints[currentWaypointIndex];
-                lastKnownPosition = wp.position;
-            }
-
-            if (temporaryWaypoint)
-            {
-                if (Vector3.Distance(transform.position, lastKnownPosition) < 0.01f)
-                {
-                    transform.position = lastKnownPosition;
-                    waitCounter = 0f;
-                    isWaiting = true;
-
-                    animator.SetBool("Walking", false);
-                    temporaryWaypoint = false;
-                    ClearData("lastKnownPosition");
-                }
-                else
-                {
-                    agent.speed = EnemyBT.walkSpeed;
-                    agent.SetDestination(lastKnownPosition);
-                }
-            }
-            else
-            {
-                if (Vector3.Distance(transform.position, lastKnownPosition) < 0.01f)
-                {
-                    transform.position = lastKnownPosition;
-                    waitCounter = 0f;
-                    isWaiting = true;
-
-                    currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
-                    animator.SetBool("Walking", false);
-                }
-                else
-                {
-                    agent.speed = EnemyBT.walkSpeed;
-                    agent.SetDestination(lastKnownPosition);
-                }
+                agent.speed = EnemyBT.walkSpeed;
+                agent.SetDestination(wp.position);
             }
         }
 

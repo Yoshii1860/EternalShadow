@@ -8,10 +8,9 @@ public class EnemyBT : Tree
 
     public static float walkSpeed = 2f;
     public static float runSpeed = 3.5f;
-    public static float fovRange = 12f;
     public static float attackRange = 3f;
-    public static float rotationSpeed = 2f;
-    public static float fovAngle = 140f;
+    public static float attackIntervall = 1f;
+    public static float chaseRange = 30f;
 
     protected override Node SetupTree()
     {
@@ -19,18 +18,23 @@ public class EnemyBT : Tree
         {
             new Sequence(new List<Node>
             {
+                new DecisionAttackRange(transform),
+                new ActionAttack(transform)
+            }),
+            new Sequence(new List<Node>
+            {
+                new DecisionIsShot(transform),
+                new ActionChaseTarget(agent)
+            }),
+            new Sequence(new List<Node>
+            {
                 new DecisionNoiseSensing(transform),
                 new ActionCheckNoise(transform, agent)
             }),
             new Sequence(new List<Node>
             {
-                new DecisionIsShot(transform),
-                new ActionChaseTarget(transform, agent)
-            }),
-            new Sequence(new List<Node>
-            {
-                new DecisionAttackRange(transform),
-                new ActionAttack(transform)
+                new DecisionLastKnownPosition(transform),
+                new ActionLastKnownPosition(transform, agent)
             }),
             new Sequence(new List<Node>
             {

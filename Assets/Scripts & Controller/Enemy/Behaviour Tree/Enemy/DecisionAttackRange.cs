@@ -17,6 +17,8 @@ public class DecisionAttackRange : Node
 
     public override NodeState Evaluate()
     {
+        if (GameManager.Instance.isPaused) return NodeState.RUNNING;
+        
         object obj = GetData("target");
         if (obj == null)
         {
@@ -27,6 +29,7 @@ public class DecisionAttackRange : Node
         Transform target = (Transform)obj;
         if (Vector3.Distance(transform.position, target.position) <= EnemyBT.attackRange)
         {
+            Debug.Log("DecisionAttackRange: AttackRange");
             animator.SetBool("Attacking", true);
             animator.SetBool("Walking", false);
             state = NodeState.SUCCESS;

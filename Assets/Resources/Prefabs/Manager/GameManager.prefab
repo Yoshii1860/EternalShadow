@@ -150,6 +150,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3473485398056292320}
   - component: {fileID: 3473485398056292321}
+  - component: {fileID: 929486092}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -185,16 +186,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1764e8c1cd3732f4bbedd0303bfc98a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  noiseData: {fileID: 11400000, guid: 8a360fcebb34b374caad6ac2a4859d8a, type: 2}
-  noiseLevel: 0
+  LastGameState: 0
   inventoryCanvas: {fileID: 0}
   inventory: {fileID: 0}
   player: {fileID: 0}
   objectPool: {fileID: 0}
   enemyPool: {fileID: 0}
   interactObjectPool: {fileID: 0}
-  saveCanvas: {fileID: 0}
-  loadCanvas: {fileID: 0}
   blackScreen: {fileID: 0}
   progressBar: {fileID: 0}
   startGameItems:
@@ -202,6 +200,18 @@ MonoBehaviour:
   - {fileID: 11400000, guid: dfbdf96ea365f614c9aa1403aa3b3af7, type: 2}
   - {fileID: 11400000, guid: 191b025959321df40a98664800251674, type: 2}
   - {fileID: 11400000, guid: 5578ebbaf6f38cd488ea2970400be3ad, type: 2}
-  isPaused: 0
   noAttackMode: 0
+  noNoiseMode: 0
   _deleteSaveFiles: 0
+--- !u!114 &929486092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3473485398056292327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ccb4c89576c1c245bfad1f2eb1608e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

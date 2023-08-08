@@ -6,99 +6,75 @@ using BehaviorTree;
 public class DecisionSensing : Node
 {
     // When remove debug "No Attack Mode", make int static
-    int characterLayerMask = 1 << 7;
-    float maxChaseRange = 15f;
+    float maxChaseRange = 15f; // Same as in AISensor.cs
 
     Transform transform;
     Animator animator;
+    AISensor aiSensor;
 
     public DecisionSensing(Transform transform)
     {
         this.transform = transform;
         animator = transform.GetComponent<Animator>();
+        aiSensor = transform.GetComponent<AISensor>();
     }
 
     public override NodeState Evaluate()
     {
-        object obj = GetData("target");
-        
+        if (GameManager.Instance.isPaused) return NodeState.FAILURE;
+
         ///////////////////////////
         // DEBUG FUNCTION
-        if(GameManager.Instance.noAttackMode)
+        if (GameManager.Instance.noAttackMode)
         {
             state = NodeState.FAILURE;
             return state;
-        }    
+        }
         ///////////////////////////
 
-        bool isShot = false;
+        object obj = GetData("target");
+        object obj2 = GetData("lastKnownPosition");
 
-
-        // Check if the enemy is shot by accessing the EnemyManager
-        Enemy enemyData;
-        if (EnemyManager.Instance.TryGetEnemy(transform, out enemyData))
+        if (obj == null)
         {
-            isShot = enemyData.isShot;
-        }
-
-        if (obj == null && !isShot)
-        {
-            // Use OverlapSphereNonAlloc to get colliders in the sphere
-            Collider[] colliders = new Collider[10]; // You can adjust the size of this array based on the expected number of nearby colliders
-            int count = Physics.OverlapSphereNonAlloc(transform.position, EnemyBT.fovRange, colliders, characterLayerMask);
-
-            // Filter the colliders based on their direction from the enemy
-            for (int i = 0; i < count; i++)
+            if (aiSensor.playerInSight)
             {
-                Transform target = colliders[i].transform;
-                Vector3 directionToTarget = target.position - transform.position;
+                Debug.Log("DecisionSensing: Player in sight!");
+                ClearData("lastKnownPosition");
+                parent.parent.SetData("target", GameManager.Instance.player.transform);
+                animator.SetBool("Walking", true);
 
-                // Calculate the angle between the enemy's forward direction and the direction to the target
-                float angleToTarget = Vector3.Angle(directionToTarget, transform.forward);
-
-                // Check if the angle to the target is within the FOV angle
-                if (angleToTarget < EnemyBT.fovAngle * 0.5f)
-                {
-                    // Check if the player is in the enemy's line of sight
-                    RaycastHit hit;
-                    if (Physics.Raycast(transform.position, directionToTarget, out hit, EnemyBT.fovRange))
-                    {
-                        // Make sure the raycast hits the player and not any other object in the way
-                        if (hit.transform.CompareTag("Player"))
-                        {
-                            // Player is in sight, store the player as the target
-                            ClearData("lastKnownPosition");
-                            parent.parent.SetData("target", target);
-                            animator.SetBool("Walking", true);
-
-                            state = NodeState.SUCCESS;
-                            return state;
-                        }
-                    }
-                }
+                state = NodeState.SUCCESS;
+                return state;
             }
-
-            state = NodeState.FAILURE;
-            return state;
+            else if (obj2 == null)
+            {
+                state = NodeState.FAILURE;
+                return state;
+            }
         }
-        else if (obj != null && !isShot)
+        else if (obj != null)
         {
             Transform target = (Transform)obj;
             float distanceToTarget = Vector3.Distance(transform.position, target.position);
             if (distanceToTarget > maxChaseRange)
             {
-                Debug.Log("DecisionSensing: Got Last Known Position");
+                Debug.Log("DecisionSensing: Player out of range!");
+                Vector3 lastKnownPosition = GameManager.Instance.player.transform.position;
+                parent.parent.SetData("lastKnownPosition", lastKnownPosition);
                 ClearData("target");
-                if (GetData("lastKnownPosition") == null)
-                {
-                    parent.parent.SetData("lastKnownPosition", target.position);
-                }
+
                 state = NodeState.FAILURE;
+                return state;
+            }
+            else
+            {
+                state = NodeState.SUCCESS;
                 return state;
             }
         }
 
-        state = NodeState.SUCCESS;
+        state = NodeState.FAILURE;
         return state;
     }
 }

@@ -17,7 +17,19 @@ public class ActionGoToTarget : Node
 
     public override NodeState Evaluate()
     {
-        Transform target = (Transform)GetData("target");
+        if (GameManager.Instance.isPaused) return NodeState.FAILURE;
+
+        object obj = GetData("target");
+
+        if (obj == null)
+        {
+            state = NodeState.FAILURE;
+            return state;
+        }
+        
+        Transform target = (Transform)obj;
+
+        Debug.Log("ActionGoToTarget: " + target.name);
 
         agent.speed = EnemyBT.runSpeed;
         agent.SetDestination(target.position);
