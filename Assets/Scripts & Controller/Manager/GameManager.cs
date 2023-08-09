@@ -122,6 +122,7 @@ public class GameManager : MonoBehaviour
 
         inventory = GameObject.FindWithTag("Inventory");
         inventoryCanvas = inventory.transform.GetChild(0).gameObject;
+
         objectPool = GameObject.FindWithTag("ObjectPool").transform;
         enemyPool = GameObject.FindWithTag("EnemyPool").transform;
         interactObjectPool = GameObject.FindWithTag("InteractObjectPool").transform;
@@ -138,9 +139,12 @@ public class GameManager : MonoBehaviour
     void UpdateCustomUpdatables()
     {
         customUpdateManager.AddCustomUpdatable(MenuController.Instance);
+        Debug.Log("Added MenuController to CustomUpdateManager");
         if (player != null) 
             customUpdateManager.AddCustomUpdatable(player.GetComponent<InventoryController>());
             customUpdateManager.AddCustomUpdatable(player.GetComponent<PlayerController>());
+            Debug.Log("Added PlayerController to CustomUpdateManager");
+            Debug.Log("Added InventoryController to CustomUpdateManager");
             
         if (enemyPool != null)
         {
@@ -148,6 +152,7 @@ public class GameManager : MonoBehaviour
             {
                 customUpdateManager.AddCustomUpdatable(enemy);
             } 
+            Debug.Log("Added Enemies to CustomUpdateManager");
         }
     }
 /////////////////////////////////////
@@ -341,7 +346,6 @@ public class GameManager : MonoBehaviour
                 }
                 isPaused = false;
                 playerInput.SwitchCurrentActionMap("Player");
-                Time.timeScale = 1;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 switch (CurrentSubGameState)

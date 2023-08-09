@@ -10,6 +10,10 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     public float moveDebounceTime = 0.3f;
     ItemActions itemActions;
 
+    public bool inventoryClosing = false;
+    float inventoryCounter = 0f;
+    float inventoryTimer = 0.5f;
+
     bool interact, exit, back;
     Vector2 move;
 
@@ -25,6 +29,15 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
             if (interact)   Interact();
             if (exit)       Exit();
             if (back)       Back();
+        }
+        if (inventoryClosing)
+        {
+            inventoryCounter += deltaTime;
+            if (inventoryCounter >= inventoryTimer)
+            {
+                inventoryCounter = 0f;
+                inventoryClosing = false;
+            }
         }
     }
 
@@ -78,6 +91,7 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     void Exit()
     {
         exit = false;
+        inventoryClosing = true;
 
         GameManager.Instance.ResumeGame();
     }

@@ -383,6 +383,11 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     void Inventory()
     {
         inventory = false;
+
+        if (GameManager.Instance.player.GetComponent<InventoryController>().inventoryClosing)
+        {
+            return;
+        }
         GameManager.Instance.Inventory();
     }
 

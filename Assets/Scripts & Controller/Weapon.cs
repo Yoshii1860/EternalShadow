@@ -100,13 +100,16 @@ public class Weapon : MonoBehaviour
             }
             else
             {
-                magazineCount--;
-                
-                // SET UI FOR BULLETS
-                int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
-                GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
+                if (ammoType != Ammo.AmmoType.Infinite)
+                {
+                    magazineCount--;
+                    
+                    // SET UI FOR BULLETS
+                    int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
+                    GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
 
-                ammoSlot.ReduceCurrentAmmo(ammoType);
+                    ammoSlot.ReduceCurrentAmmo(ammoType);
+                }
             }
         }
         else
