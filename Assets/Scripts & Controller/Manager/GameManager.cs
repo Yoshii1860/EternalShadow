@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
     public GameObject inventoryCanvas;
     public GameObject inventory;
     public Player player;
+    public PlayerAnimController playerAnimController;
     public Transform objectPool;
     public Transform enemyPool;
     public Transform interactObjectPool;
@@ -119,6 +120,7 @@ public class GameManager : MonoBehaviour
 
         player = FindObjectOfType<Player>();
         playerInput = FindObjectOfType<PlayerInput>();
+        playerAnimController = FindObjectOfType<PlayerAnimController>();
 
         inventory = GameObject.FindWithTag("Inventory");
         inventoryCanvas = inventory.transform.GetChild(0).gameObject;
@@ -139,21 +141,23 @@ public class GameManager : MonoBehaviour
     void UpdateCustomUpdatables()
     {
         customUpdateManager.AddCustomUpdatable(MenuController.Instance);
-        Debug.Log("Added MenuController to CustomUpdateManager");
+        
         if (player != null) 
+        {
             customUpdateManager.AddCustomUpdatable(player.GetComponent<InventoryController>());
             customUpdateManager.AddCustomUpdatable(player.GetComponent<PlayerController>());
-            Debug.Log("Added PlayerController to CustomUpdateManager");
-            Debug.Log("Added InventoryController to CustomUpdateManager");
-            
+        }
+        
         if (enemyPool != null)
         {
             foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
             {
                 customUpdateManager.AddCustomUpdatable(enemy);
             } 
-            Debug.Log("Added Enemies to CustomUpdateManager");
         }
+        
+        string debugLog = customUpdateManager.GetCustomUpdatables();
+        Debug.Log("GameManager.cs: CustomUpdatables: " + debugLog);
     }
 /////////////////////////////////////
 /////////////////////////////////////
@@ -249,6 +253,9 @@ public class GameManager : MonoBehaviour
             float t = Mathf.Clamp01(elapsedTime / duration);
             Color newColor = Color.Lerp(startColor, targetColor, t);
             blackScreen.GetComponent<Image>().color = newColor;
+
+            if (elapsedTime >= 1f) playerAnimController.StartAnimation();
+
             yield return null;
         }
 

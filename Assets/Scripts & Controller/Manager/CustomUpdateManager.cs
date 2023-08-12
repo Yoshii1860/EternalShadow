@@ -34,4 +34,18 @@ public class CustomUpdateManager : MonoBehaviour
             updatable.CustomUpdate(deltaTime);
         }
     }
+
+    public string GetCustomUpdatables()
+    {
+        string customUpdatablesString = "";
+
+        foreach (var updatable in customUpdatables)
+        {
+            customUpdatablesString += updatable.ToString() + ", ";
+        }
+
+        customUpdatablesString = customUpdatablesString.Substring(0, customUpdatablesString.Length - 2);
+
+        return customUpdatablesString;
+    }
 }

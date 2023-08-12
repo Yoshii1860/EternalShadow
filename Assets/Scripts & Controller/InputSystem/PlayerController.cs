@@ -87,6 +87,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
                                         Crouch();
             if (fire)                   Fire();
             else if (interact & !aim)   Interact();
+            if (!aim)                   GameManager.Instance.playerAnimController.AimAnimation(false);
             if (weaponSwitch != 0)      WeaponSwitch();
             if (reload)                 Reload();
             if (inventory)              Inventory();
@@ -337,6 +338,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     void Aim()
     {
+        GameManager.Instance.playerAnimController.AimAnimation(true);
+
         // Increase camera FOV smoothly when aiming
         cmVirtualCamera.m_Lens.FieldOfView = Mathf.Lerp(cmVirtualCamera.m_Lens.FieldOfView, aim ? focalLength : startFocalLength, Time.deltaTime * 10f);
     }
@@ -344,6 +347,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     void Fire()
     {
         fire = false;
+
+        GameManager.Instance.playerAnimController.ShootAnimation();
 
         // loop through weapons and execute the Weapon script that is on the active object
         foreach (Transform child in weaponContainer.transform)

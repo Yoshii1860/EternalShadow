@@ -181,7 +181,7 @@ public class InventoryManager : MonoBehaviour
             Items.Add(item);
             foreach (Transform weapon in weapons.transform)
             {                    
-                if (weapon.GetComponent<ItemController>().item.displayName == item.displayName)
+                if (weapon.GetComponent<ItemController>() != null && weapon.GetComponent<ItemController>().item.displayName == item.displayName)
                 {
                     Weapon weaponScript = weapon.GetComponent<Weapon>();
                     weaponScript.isAvailable = true;
