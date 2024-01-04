@@ -15,12 +15,15 @@ MonoBehaviour:
   walkModifier: 1
   runModifier: 1.5
   crouchModifier: 0.5
-  shootModifier: 2.5
-  grassNoiseLevel: 5
-  concreteNoiseLevel: 8
-  woodenPlanksNoiseLevel: 7
-  carpetNoiseLevel: 4
+  grassNoiseLevel: 3
+  concreteNoiseLevel: 6
+  woodenPlanksNoiseLevel: 9
+  carpetNoiseLevel: 2
   trashNoiseLevel: 10
   glassNoiseLevel: 14
   plasticNoiseLevel: 12
   brokenWoodenPlankNoiseLevel: 15
+  shootNoiseLevel: 25
+  lowPriority: 1
+  mediumPriority: 2
+  highPriority: 3
