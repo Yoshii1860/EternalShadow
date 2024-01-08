@@ -53,7 +53,7 @@ namespace BehaviorTree
         public void SetData(string key, object value)
         {
             _dataContext[key] = value;
-            Debug.Log("Saving " + key + " in " + this.GetType().Name);
+            // Debug.Log("Saving " + key + " in " + this.GetType().Name);
         }
 
         // get data with key recursively

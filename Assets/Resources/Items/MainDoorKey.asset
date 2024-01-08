@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
+  m_Name: MainDoorKey
+  m_EditorClassIdentifier: 
+  displayName: Main Door Key
+  description: This key might open the main entrance door
+  icon: {fileID: 21300000, guid: 0506ca7bf949b5e429e1ac87774d535f, type: 3}
+  iconPath: VFX/ItemIcons/MainDoorKey
+  unique: 1
+  quantity: 1
+  prefab: {fileID: 6202248377633566000, guid: 609cad5eb478dd849beaf2705286bdf7, type: 3}
+  prefabPath: Assets/Keys/Prefabs/Key2
+  type: 3
+  ammoType: 0
+  potionType: 0

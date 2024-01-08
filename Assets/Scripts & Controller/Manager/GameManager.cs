@@ -155,6 +155,24 @@ public class GameManager : MonoBehaviour
                 customUpdateManager.AddCustomUpdatable(enemy);
             } 
         }
+
+        Door[] doors = FindObjectsOfType<Door>();
+        if (doors != null)
+        {
+            foreach (Door door in doors)
+            {
+                customUpdateManager.AddCustomUpdatable(door);
+            }
+        }
+
+        FlickeringLight[] flickeringLights = FindObjectsOfType<FlickeringLight>();
+        if (flickeringLights != null)
+        {
+            foreach (FlickeringLight flickeringLight in flickeringLights)
+            {
+                customUpdateManager.AddCustomUpdatable(flickeringLight);
+            }
+        }
         
         string debugLog = customUpdateManager.GetCustomUpdatables();
         Debug.Log("GameManager.cs: CustomUpdatables: " + debugLog);
