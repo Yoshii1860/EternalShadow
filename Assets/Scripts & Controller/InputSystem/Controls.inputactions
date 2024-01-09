@@ -405,6 +405,17 @@
                 },
                 {
                     "name": "",
+                    "id": "af73a3ea-7fc0-4392-b0e3-8d8267f44d59",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "03ba2cb7-3d6d-4ad7-8d1c-39bfe47705f4",
                     "path": "<Mouse>/scroll/y",
                     "interactions": "",

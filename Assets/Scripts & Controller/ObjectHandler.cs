@@ -46,9 +46,14 @@ public class ObjectHandler : MonoBehaviour
             {
                 Debug.Log("ObjectHandler - Interact");
                 InteractableObject intObj = hit.collider.gameObject.GetComponent<InteractableObject>();
+                Door door = hit.collider.gameObject.GetComponent<Door>();
                 if (intObj != null)
                 {
                     intObj.Interact();
+                }
+                else if (door != null)
+                {
+                    door.Interact();
                 }
                 else
                 {

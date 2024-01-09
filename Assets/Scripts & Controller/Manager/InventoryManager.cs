@@ -248,6 +248,18 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    public Item FindItem(string itemDisplayName)
+    {
+        foreach (Item inventoryItem in Items)
+        {
+            if (inventoryItem.displayName == itemDisplayName)
+            {
+                return inventoryItem;
+            }
+        }
+        return null;
+    }
+
     public int GetInventoryAmmo(Ammo.AmmoType ammotype)
     {
         foreach (Item item in Items)

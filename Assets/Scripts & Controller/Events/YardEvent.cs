@@ -26,9 +26,7 @@ public class YardEvent : MonoBehaviour
         girl.GetComponent<AISensor>().enabled = true;
         girl.GetComponent<Animator>().SetBool("Walking", true);
         yield return new WaitForSeconds(3f);
-        Debug.Log("Door state: " + door.open);
-        door.open = !door.open;
-        Debug.Log("Door state: " + door.open);
+        door.CloseDoor();
         yield return new WaitForSeconds(1.5f);
         light.SetActive(false); 
         girl.GetComponent<Animator>().SetBool("Walking", false);

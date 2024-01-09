@@ -156,15 +156,6 @@ public class GameManager : MonoBehaviour
             } 
         }
 
-        Door[] doors = FindObjectsOfType<Door>();
-        if (doors != null)
-        {
-            foreach (Door door in doors)
-            {
-                customUpdateManager.AddCustomUpdatable(door);
-            }
-        }
-
         FlickeringLight[] flickeringLights = FindObjectsOfType<FlickeringLight>();
         if (flickeringLights != null)
         {
