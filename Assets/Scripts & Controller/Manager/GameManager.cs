@@ -23,8 +23,8 @@ public class GameManager : MonoBehaviour
     public enum SubGameState
     {
         Default,
-        Substate1,
-        Substate2
+        EventScene,
+        Substate
     }
 
     public GameState CurrentGameState { get; private set; }
@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
     public GameObject inventoryCanvas;
     public GameObject inventory;
     public Player player;
+    public PlayerController playerController;
     public PlayerAnimController playerAnimController;
     public Transform objectPool;
     public Transform enemyPool;
@@ -121,6 +122,7 @@ public class GameManager : MonoBehaviour
         player = FindObjectOfType<Player>();
         playerInput = FindObjectOfType<PlayerInput>();
         playerAnimController = FindObjectOfType<PlayerAnimController>();
+        playerController = FindObjectOfType<PlayerController>();
 
         inventory = GameObject.FindWithTag("Inventory");
         inventoryCanvas = inventory.transform.GetChild(0).gameObject;
@@ -308,9 +310,15 @@ public class GameManager : MonoBehaviour
         } 
     }
 
+    public void GameplayEvent()
+    {
+        SetGameState(GameState.Gameplay, SubGameState.EventScene);
+        // Add code for gameplay event
+    }
+
     public void ResumeGame()
     {
-        SetGameState(GameState.Gameplay);
+        SetGameState(GameState.Gameplay, SubGameState.Default);
         // Add code to resume the game
         if (inventoryCanvas.activeSelf) inventoryCanvas.SetActive(false);
         foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
@@ -361,20 +369,21 @@ public class GameManager : MonoBehaviour
                     agent.isStopped = false;
                 }
                 isPaused = false;
-                playerInput.SwitchCurrentActionMap("Player");
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 switch (CurrentSubGameState)
                 {
                     case SubGameState.Default:
-                        // Add code for default gameplay behavior
+                        playerInput.SwitchCurrentActionMap("Player");
+                        playerController.rotationSpeed = playerController.standardRotationSpeed;
                         break;
 
-                    case SubGameState.Substate1:
-                        // Add code for modified gameplay behavior 1
+                    case SubGameState.EventScene:
+                        playerInput.SwitchCurrentActionMap("Event");
+                        playerController.rotationSpeed = playerController.eventRotationSpeed;
                         break;
 
-                    case SubGameState.Substate2:
+                    case SubGameState.Substate:
                         // Add code for modified gameplay behavior 2
                         break;
                 }

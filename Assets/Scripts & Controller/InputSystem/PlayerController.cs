@@ -21,7 +21,11 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 	[Tooltip("Crouch speed of the character in m/s")]
 	[SerializeField] float crouchSpeed = 0.6f;
 	[Tooltip("Rotation speed of the character")]
-	[SerializeField] float rotationSpeed = 1.0f;
+	public float rotationSpeed = 1.0f;
+    [Tooltip("Rotation speed of the character during Gameplay")]
+    public float standardRotationSpeed = 1.0f;
+    [Tooltip("Rotation speed of the character during an event")]
+    public float eventRotationSpeed = 0.1f;
 	[Tooltip("Acceleration and deceleration")]
 	[SerializeField] float SpeedChangeRate = 10.0f;
 	[Tooltip("height of the camera while in crouch state")]

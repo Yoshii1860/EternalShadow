@@ -15,6 +15,7 @@ public class YardEvent : MonoBehaviour
         if (unique)
         {
             unique = false;
+            GameManager.Instance.GameplayEvent();
             gate.transform.eulerAngles = new Vector3(0, 0, 0);
             StartCoroutine(RotateDoor());
         }
@@ -31,5 +32,6 @@ public class YardEvent : MonoBehaviour
         light.SetActive(false); 
         girl.GetComponent<Animator>().SetBool("Walking", false);
         girl.SetActive(false);
+        GameManager.Instance.ResumeGame();
     }
 }
