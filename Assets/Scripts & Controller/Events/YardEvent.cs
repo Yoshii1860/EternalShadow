@@ -20,12 +20,18 @@ public class YardEvent : MonoBehaviour
         {
             unique = false;
             GameManager.Instance.GameplayEvent();
+
+            GameManager.Instance.playerController.LookAtDirection(girl.transform);
+
             foreach (FlickeringLight fl in yardLights.GetComponentsInChildren<FlickeringLight>())
             {
                 fl.enabled = true;
             }
+
             light.GetComponent<FlickeringLight>().smoothing = 5;
+
             gate.transform.eulerAngles = new Vector3(0, 0, 0);
+
             StartCoroutine(RotateDoor());
         }
     }
@@ -41,6 +47,7 @@ public class YardEvent : MonoBehaviour
         Lightning();
         girl.GetComponent<Animator>().SetBool("Walking", false);
         girl.SetActive(false);
+        GameManager.Instance.playerController.LookAtReset();
         GameManager.Instance.ResumeGame();
     }
 

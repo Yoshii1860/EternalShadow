@@ -386,12 +386,10 @@ public class GameManager : MonoBehaviour
                 {
                     case SubGameState.Default:
                         playerInput.SwitchCurrentActionMap("Player");
-                        playerController.rotationSpeed = playerController.standardRotationSpeed;
                         break;
 
                     case SubGameState.EventScene:
                         playerInput.SwitchCurrentActionMap("Event");
-                        playerController.rotationSpeed = playerController.eventRotationSpeed;
                         break;
 
                     case SubGameState.PickUp:

@@ -24,8 +24,6 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 	public float rotationSpeed = 1.0f;
     [Tooltip("Rotation speed of the character during Gameplay")]
     public float standardRotationSpeed = 1.0f;
-    [Tooltip("Rotation speed of the character during an event")]
-    public float eventRotationSpeed = 0.1f;
 	[Tooltip("Acceleration and deceleration")]
 	[SerializeField] float SpeedChangeRate = 10.0f;
 	[Tooltip("height of the camera while in crouch state")]
@@ -45,6 +43,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 	[SerializeField] CinemachineVirtualCamera cmVirtualCamera;
     [Tooltip("Additional degress to override the camera when aiming.")]
 	[SerializeField] float focalLength = 33f;
+    [Tooltip("The default target for LookAt")]
+    [SerializeField] Transform defaultTarget;
 
     // The weapon container attached to the player.
     GameObject weaponContainer;
@@ -67,7 +67,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     // Player Input
     Vector2 move, look;
-    bool sprint, crouch, aim, fire, interact, reload, inventory, menu, light;
+    bool sprint, crouch, aim, fire, interact, reload, inventory, menu;
     float weaponSwitch;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,6 +115,23 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             Look();
             Aim();
         }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Camera Functions
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Set this function to be called when you want to make the camera look at a specific direction
+    public void LookAtDirection(Transform direction)
+    {
+        cmVirtualCamera.LookAt = direction;
+    }
+
+    // Set this function to be called when you want to make the camera look at a specific direction
+    public void LookAtReset()
+    {
+        transform.rotation = cmVirtualCamera.transform.rotation;
+        cmVirtualCamera.LookAt = defaultTarget;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
