@@ -24,6 +24,10 @@ public class Player : MonoBehaviour
     public float staminaConsumptionTimer = 0.1f;
     [Tooltip("The stamina regeneration timer of the player.")]
     public float staminaReg = 0.4f;
+    [Tooltip("The flashlight of the player.")]
+    [SerializeField] Light flashlight;
+    [Tooltip("If the player has a light source.")]
+    public bool lightAvail = false;
 
     [Space(10)]
     [Header("References")]
@@ -71,6 +75,11 @@ public class Player : MonoBehaviour
     }
 /////////////////////////////////////
 
+    void Start()
+    {
+        flashlight.enabled = false;
+    }
+
     void OnIsPoisonedChanged()
     {
         if (isPoisoned)
@@ -85,6 +94,19 @@ public class Player : MonoBehaviour
             maxStamina = 100;
             staminaReg = 0.4f;
             staminaText.text = stamina.ToString();
+        }
+    }
+
+    public void LightSwitch()
+    {
+        if (lightAvail)
+        {
+            flashlight.enabled = !flashlight.enabled;
+            Debug.Log("Light is available");
+        }
+        else
+        {
+            Debug.Log("Light is not available");
         }
     }
 

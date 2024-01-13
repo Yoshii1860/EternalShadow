@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
     {
         Default,
         EventScene,
-        Substate
+        PickUp
     }
 
     public GameState CurrentGameState { get; private set; }
@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviour
 
     public GameObject inventoryCanvas;
     public GameObject inventory;
+    public GameObject pickupCanvas;
     public Player player;
     public PlayerController playerController;
     public PlayerAnimController playerAnimController;
@@ -316,6 +317,16 @@ public class GameManager : MonoBehaviour
         // Add code for gameplay event
     }
 
+    public void PickUp()
+    {
+        SetGameState(GameState.Gameplay, SubGameState.PickUp);
+        // Add code for picking up an item
+        foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
+        {
+            customUpdateManager.RemoveCustomUpdatable(enemy);
+        }
+    }
+
     public void ResumeGame()
     {
         SetGameState(GameState.Gameplay, SubGameState.Default);
@@ -383,8 +394,9 @@ public class GameManager : MonoBehaviour
                         playerController.rotationSpeed = playerController.eventRotationSpeed;
                         break;
 
-                    case SubGameState.Substate:
-                        // Add code for modified gameplay behavior 2
+                    case SubGameState.PickUp:
+                        isPaused = true;
+                        playerInput.SwitchCurrentActionMap("PickUp");
                         break;
                 }
                 break;

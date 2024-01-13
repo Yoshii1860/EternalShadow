@@ -30,8 +30,12 @@ public class ObjectHandler : MonoBehaviour
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, pickupDistance))
         {
             Debug.Log("ObjectHandler.DetectObjects: " + hit.collider.gameObject.name);
-            if (hit.collider.gameObject.GetComponent<ItemController>() != null)
+            ItemController itemController = hit.collider.gameObject.GetComponent<ItemController>();
+            InteractableObject intObj = hit.collider.gameObject.GetComponent<InteractableObject>();
+            Door door = hit.collider.gameObject.GetComponent<Door>();
+            if (itemController != null)
             {
+                intObj.Interact();
                 // Use PickUp() method from ItemActions class
                 Debug.Log("ObjectHandler - PickUp");
                 action.PickUp(hit);
@@ -45,8 +49,6 @@ public class ObjectHandler : MonoBehaviour
             else if (hit.collider.gameObject.layer == 6)
             {
                 Debug.Log("ObjectHandler - Interact");
-                InteractableObject intObj = hit.collider.gameObject.GetComponent<InteractableObject>();
-                Door door = hit.collider.gameObject.GetComponent<Door>();
                 if (intObj != null)
                 {
                     intObj.Interact();

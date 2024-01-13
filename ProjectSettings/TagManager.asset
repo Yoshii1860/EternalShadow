@@ -24,6 +24,8 @@ TagManager:
   - SaveReturnButton
   - ReturnButton
   - ExitButton
+  - NameTag
+  - DescriptionTag
   layers:
   - Default
   - TransparentFX
@@ -60,4 +62,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Last
+    uniqueID: 3846743987
     locked: 0

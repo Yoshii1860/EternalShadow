@@ -333,6 +333,7 @@ public class InventoryManager : MonoBehaviour
                     break;
                 }
             }
+            
             obj.GetComponentInChildren<ItemController>().item = item;
         }
 

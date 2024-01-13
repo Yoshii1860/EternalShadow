@@ -53,6 +53,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     // The weaponSwitcher script attached to the weapon container.
     WeaponSwitcher weaponSwitcher;
     Player player;
+    // Canvas used for showing items that are picked up.
+    [SerializeField] GameObject pickupCanvas;
 
     Rigidbody rb;
     float lookRotation;
@@ -65,7 +67,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     // Player Input
     Vector2 move, look;
-    bool sprint, crouch, aim, fire, interact, reload, inventory, menu;
+    bool sprint, crouch, aim, fire, interact, reload, inventory, menu, light;
     float weaponSwitch;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,9 +90,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     {
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.Gameplay)
         {
-                                        Crouch();
             if (fire)                   Fire();
-            else if (interact & !aim)   Interact();
+            else if (interact && !aim)  Interact();
             if (!aim)                   GameManager.Instance.playerAnimController.AimAnimation(false);
             if (weaponSwitch != 0)      WeaponSwitch();
             if (reload)                 Reload();
@@ -137,15 +138,10 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     public void OnCrouch(InputAction.CallbackContext context)
     {
-        if (context.started && crouchReleased)
+        if (context.performed)
         {
-            crouch = true;
-            crouchReleased = false;
-        }
-        else if (context.started && !crouchReleased)
-        {
-            crouch = false;
-            crouchReleased = true;
+            crouch = !crouch;
+            Crouch();
         }
     }
 
@@ -183,6 +179,14 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     public void OnMenu(InputAction.CallbackContext context)
     {
         menu = context.ReadValueAsButton();
+    }
+
+    public void OnLight(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            Light();
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -324,14 +328,17 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     void Crouch()
     {
-        // Avoid scaling the player while in air
-        if (!Physics.Raycast(transform.position, Vector3.down, 2f))
+        /* Avoid scaling the player while in air
+        if (!Physics.Raycast(transform.position, Vector3.down, 3f))
         {
+            Debug.Log("Crouch: Not on ground");
             return;
         }
+        */
 
         if (crouch)
         {
+            Debug.Log("Crouch: crouch");
             transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
         }
         else if (!crouch)
@@ -367,7 +374,14 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     void Interact()
     {
         interact = false;
-        objectHandler.Execute();
+        if (GameManager.Instance.pickupCanvas.activeSelf)
+        {
+            GameManager.Instance.ResumeGame();
+        }
+        else
+        {
+            objectHandler.Execute();
+        }
     }
 
     void WeaponSwitch()
@@ -404,6 +418,11 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     {
         menu = false;
         GameManager.Instance.OpenMenu();
+    }
+
+    void Light()
+    {
+        GameManager.Instance.player.LightSwitch();
     }
 
     private void OnDrawGizmos() 
