@@ -152,13 +152,15 @@ MonoBehaviour:
   sprintSpeed: 7
   crouchSpeed: 2
   rotationSpeed: 25
+  standardRotationSpeed: 1
   SpeedChangeRate: 10
   crouchYScale: 0.5
-  camRoot: {fileID: 4537080898305191537}
   topClamp: 80
   bottomClamp: -80
   cmVirtualCamera: {fileID: 0}
   focalLength: 31
+  defaultTarget: {fileID: 0}
+  pickupCanvas: {fileID: 0}
 --- !u!114 &4537080897701218956
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -450,6 +452,18 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 1ad2ae35-1a56-4274-8e72-7a288d176632
     m_ActionName: Inventory/Back[/Keyboard/escape]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: d653e869-c470-423a-a3c5-2dea3b68ae8b
+    m_ActionName: Player/Light[/Keyboard/f,/XInputControllerWindows/dpad/down]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 439fc5b2-a8aa-4dc5-bade-d7b31c157495
+    m_ActionName: Pickup/Interact[/Mouse/leftButton,/XInputControllerWindows/buttonWest,/Keyboard/e]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 05e752a0-4476-470d-80bf-d0f7f10b6889
+    m_ActionName: Event/New action
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -515,6 +529,8 @@ MonoBehaviour:
   isOutOfStamina: 0
   staminaConsumptionTimer: 0.1
   staminaReg: 0.5
+  flashlight: {fileID: 0}
+  lightAvail: 0
   healthText: {fileID: 4537080898419297038}
   staminaText: {fileID: 4537080898162351869}
   bulletsText: {fileID: 4537080898219962140}
@@ -1310,15 +1326,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4482763863499901131, guid: 2a84aeff07497234191e3c5403fd7161, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4482763863499901131, guid: 2a84aeff07497234191e3c5403fd7161, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4482763863499901131, guid: 2a84aeff07497234191e3c5403fd7161, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4482763863499901131, guid: 2a84aeff07497234191e3c5403fd7161, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1460,15 +1476,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2251203311683836779, guid: 609da4cfce6f75f449591dbfd321eb35, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.122559965
+      value: -0.12256001
       objectReference: {fileID: 0}
     - target: {fileID: 2251203311683836779, guid: 609da4cfce6f75f449591dbfd321eb35, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.1658424
+      value: -0.16584265
       objectReference: {fileID: 0}
     - target: {fileID: 2251203311683836779, guid: 609da4cfce6f75f449591dbfd321eb35, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.2828
+      value: 0.28280073
       objectReference: {fileID: 0}
     - target: {fileID: 2251203311683836779, guid: 609da4cfce6f75f449591dbfd321eb35, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1476,7 +1492,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2251203311683836779, guid: 609da4cfce6f75f449591dbfd321eb35, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2251203311683836779, guid: 609da4cfce6f75f449591dbfd321eb35, type: 3}
       propertyPath: m_LocalRotation.y
@@ -1484,7 +1500,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2251203311683836779, guid: 609da4cfce6f75f449591dbfd321eb35, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 2251203311683836779, guid: 609da4cfce6f75f449591dbfd321eb35, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

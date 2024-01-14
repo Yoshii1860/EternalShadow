@@ -127,10 +127,9 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         cmVirtualCamera.LookAt = direction;
     }
 
-    // Set this function to be called when you want to make the camera look at a specific direction
+    // Set this function to be called when you want to reset the camera to look at the default target
     public void LookAtReset()
     {
-        transform.rotation = cmVirtualCamera.transform.rotation;
         cmVirtualCamera.LookAt = defaultTarget;
     }
 
@@ -334,13 +333,38 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     void Look()
     {
-        // Turn
-        transform.Rotate(Vector3.up * look.x * rotationSpeed * Time.deltaTime);
+        // If the player is in an event scene, use the camera's rotation directly
+        if (GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.EventScene)
+        {
+            rotationSpeed = 15f;
+            // Use the camera's rotation directly
+            Vector3 camRotation = cmVirtualCamera.transform.eulerAngles;
 
-        // Look
-        lookRotation -= look.y * rotationSpeed * Time.deltaTime;
-        lookRotation = Mathf.Clamp(lookRotation, bottomClamp, topClamp);
-        camRoot.transform.eulerAngles = new Vector3(lookRotation, camRoot.transform.eulerAngles.y, camRoot.transform.eulerAngles.z);
+            // Turn
+            transform.rotation = Quaternion.Euler(0f, camRotation.y, 0f);
+
+            // Look only on the x-axis until aligned
+            float xRotationDifference = Mathf.DeltaAngle(camRotation.x, camRoot.transform.eulerAngles.x);
+            
+            if (Mathf.Abs(xRotationDifference) > 1f)
+            {
+                lookRotation -= xRotationDifference * rotationSpeed * Time.deltaTime;
+                lookRotation = Mathf.Clamp(lookRotation, bottomClamp, topClamp);
+                camRoot.transform.eulerAngles = new Vector3(lookRotation, camRoot.transform.eulerAngles.y, camRoot.transform.eulerAngles.z);
+            }
+        }
+        else
+        {
+            rotationSpeed = standardRotationSpeed;
+
+            // Turn
+            transform.Rotate(Vector3.up * look.x * rotationSpeed * Time.deltaTime);
+
+            // Look
+            lookRotation -= look.y * rotationSpeed * Time.deltaTime;
+            lookRotation = Mathf.Clamp(lookRotation, bottomClamp, topClamp);
+            camRoot.transform.eulerAngles = new Vector3(lookRotation, camRoot.transform.eulerAngles.y, camRoot.transform.eulerAngles.z);
+        }
     }
 
     void Crouch()

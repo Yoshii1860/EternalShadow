@@ -34,4 +34,14 @@ public class PlayerAnimController : MonoBehaviour
         animator.SetBool("LeftOrRight", leftOrRight);
         leftOrRight = !leftOrRight;
     }
+
+    public void BlindnessAnimation()
+    {
+        animator.SetBool("Blinded", true);
+    }
+
+    public void StopBlindnessAnimation()
+    {
+        animator.SetBool("Blinded", false);
+    }
 }
