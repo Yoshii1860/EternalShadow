@@ -245,7 +245,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(StartGameWithBlackScreen());
     }
 
-    private IEnumerator StartGameWithBlackScreen()
+    public IEnumerator StartGameWithBlackScreen()
     {
         // Set the black screen to active
         if (!blackScreen.activeSelf) blackScreen.SetActive(true);
@@ -276,7 +276,7 @@ public class GameManager : MonoBehaviour
         blackScreen.GetComponent<Image>().color = Color.black;
 
         // Set the game state to Gameplay after the fade-out
-        SetGameState(GameState.Gameplay);
+        SetGameState(GameState.Gameplay, SubGameState.Default);
     }
 
     public void Inventory()

@@ -22,29 +22,51 @@ public class YardEvent : MonoBehaviour
     [SerializeField] ReflectionProbe[] reflectionProbes;
     [Tooltip("All red lights inside and outside the house")]
     [SerializeField] GameObject[] alertLights;
+    [Tooltip("The target the player should look at after getting blinded")]
+    [SerializeField] Transform lookAtTarget;
+    [Tooltip("The head object of the girl")]
+    [SerializeField] Transform girlHead;
 
     [Space(10)]
-    [Header("Event Settings")]
+    [Header("Event - Increase Light Intensity")]
     [Tooltip("Intensity increase of the light over time in milliseconds")]
     [SerializeField] int intensityInMS = 40;
     [Tooltip("The intensity of the light when the player gets blinded")]
     [SerializeField] int startBlindness = 20;
     [Tooltip("The time it takes for the player to look away after getting blinded")]
-    [SerializeField] float fromBlindToLookAt = 3f;
+    [SerializeField] float blindedTime = 3f;
+
+    [Space(10)]
+    [Header("Event - Lights off")]
+    [Tooltip("The speed of the player looking back at the girl")]
+    [SerializeField] float translationSpeed = 1f;
+    [Tooltip("The pause between being unblinded and looking back")]
+    [SerializeField] float lookBackTime = 2f;
+
+    [Space(10)]
+    [Header("Event - End Event")]
+    [Tooltip("The position the player should be moved to after the event")]
+    [SerializeField] Vector3 playerPositionAfterEvent = new Vector3(0f, -6f, -1f);
+    [Tooltip("The rotation the player should be moved to after the event")]
+    [SerializeField] Vector3 playerRotationAfterEvent = new Vector3(0f, -90f, 0f);
 
     int counter = 0;
-    [SerializeField] Transform lookAtTarget;
-    [SerializeField] Transform girlHead;
     Transform girlTransform;
-    float translationSpeed = 1f;
-
-    bool unique = true;
+    bool firstTime = true;
+    bool secondTime = true;
+    bool endEvent = false;
 
     void OnTriggerExit(Collider other) 
     {
-        if (unique)
+        if (firstTime)
         {
-            unique = false;
+            firstTime = false;
+            girl.SetActive(true);
+            door.OpenDoor();
+        }
+        else if (secondTime)
+        {
+            secondTime = false;
             GameManager.Instance.GameplayEvent();
 
             GameManager.Instance.playerController.LookAtDirection(girl.transform);
@@ -52,6 +74,8 @@ public class YardEvent : MonoBehaviour
             StartCoroutine(IncreaseIntensityGradually());
 
             StartCoroutine(LightsOff());
+
+            StartCoroutine(EndEvent());
         }
     }
 
@@ -100,7 +124,7 @@ public class YardEvent : MonoBehaviour
         girlTransform.position = lookAtTarget.position;
         girlTransform.rotation = lookAtTarget.rotation;
 
-        yield return new WaitForSeconds(fromBlindToLookAt);
+        yield return new WaitForSeconds(blindedTime);
         GameManager.Instance.playerController.LookAtDirection(lookAwayTarget);
     }
 
@@ -116,10 +140,10 @@ public class YardEvent : MonoBehaviour
         //////////////////////////////////////////////////////////////////
         // manually calculated where the girl should be - BETTER SOLUTION?
         //////////////////////////////////////////////////////////////////
-        girl.transform.position = new Vector3(girlTransform.position.x, girlTransform.position.y - 1.44398f, girlTransform.position.z);
-        girl.transform.rotation = Quaternion.Euler(0f, girlTransform.rotation.eulerAngles.y + 180f, 0f);
+        girl.transform.position = new Vector3(girlTransform.position.x, girlTransform.position.y - 1.3847f, girlTransform.position.z);
+        girl.transform.rotation = Quaternion.Euler(0f, girlTransform.rotation.eulerAngles.y - 180f, 0f);
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(lookBackTime);
 
         // move targetLookAt slowly to girl
         float elapsedTime = 0f;
@@ -138,14 +162,15 @@ public class YardEvent : MonoBehaviour
             if (elapsedTime >= 6f)
             {
                 // finish the movement faster
-                translationSpeed = 100f;
+                translationSpeed = 10f;
+            }
+
+            if (elapsedTime >= 9f)
+            {
+                endEvent = true;
             }
             yield return null;
         }
-
-        // door.CloseDoor();
-        // GameManager.Instance.playerController.LookAtReset();
-        // GameManager.Instance.ResumeGame();
     }
 
     // turn off all lights and reset the reflectionProbes to adjust to darkness
@@ -160,6 +185,35 @@ public class YardEvent : MonoBehaviour
             alertLights[i].GetComponent<Light>().enabled = true;
         }
         StartCoroutine(ActivateProbesGradually());
+    }
+
+    IEnumerator EndEvent()
+    {
+        yield return new WaitUntil(() => endEvent);
+        GameManager.Instance.blackScreen.SetActive(true);
+        
+        // stop all audios
+        // GameManager.Instance.audioManager.StopAll();
+        // Play Heartbeat sound
+
+        // close door
+        door.CloseDoor();
+
+        yield return new WaitForSeconds(1f);
+
+        // deactivate girl
+        girl.SetActive(false);
+
+        // default targetLookAt
+        GameManager.Instance.playerController.LookAtReset();
+        // move player to the inside
+        GameManager.Instance.playerController.transform.position = playerPositionAfterEvent;
+        GameManager.Instance.playerController.transform.rotation = Quaternion.Euler(playerRotationAfterEvent);
+
+        yield return new WaitForSeconds(1f);
+
+        // fade in blackscreen
+        GameManager.Instance.StartCoroutine(GameManager.Instance.StartGameWithBlackScreen());
     }
 
     IEnumerator ActivateProbesGradually()
