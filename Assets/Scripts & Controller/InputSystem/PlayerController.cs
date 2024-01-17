@@ -28,6 +28,22 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 	[SerializeField] float SpeedChangeRate = 10.0f;
 	[Tooltip("height of the camera while in crouch state")]
 	[SerializeField] float crouchYScale = 0.5f;
+    
+    [Space(10)]
+    [Header("Movement Sounds")]
+    [Tooltip("The pitch of the footstep sound")]
+    [SerializeField] float normalPitch = 1f;
+    [Tooltip("The volume of the footstep sound")]
+    [SerializeField] float normalVolume = 1f;
+    [Tooltip("The pitch of the footstep sound while sprinting")]
+    [SerializeField] float sprintPitch = 1.25f;
+    [Tooltip("The volume of the footstep sound while sprinting")]
+    [SerializeField] float sprintVolume = 1.1f;
+    [Tooltip("The pitch of the footstep sound while crouching")]
+    [SerializeField] float crouchPitch = 0.75f;
+    [Tooltip("The volume of the footstep sound while crouching")]
+    [SerializeField] float crouchVolume = 0.9f;
+
 
     [Space(10)]
     [Header("Cinemachine")]
@@ -230,6 +246,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     void MoveDefault()
     {
+        int audioSourceID = transform.gameObject.GetInstanceID();
+
         if (sprint && !crouch && !player.isOutOfStamina) 
         {
             speed = sprintSpeed;
@@ -238,6 +256,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
                 NoiseManager.Instance.noiseLevelMultiplier = NoiseManager.Instance.noiseData.runModifier;
             }
             player.ReduceStamina();
+
+            AudioManager.Instance.SetAudioClip(audioSourceID, "stone step", sprintVolume, sprintPitch, true);
         }
         else if (crouch) 
         {
@@ -247,6 +267,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
                 NoiseManager.Instance.noiseLevelMultiplier = NoiseManager.Instance.noiseData.crouchModifier;
             }
             player.IncreaseStamina();
+
+            AudioManager.Instance.SetAudioClip(audioSourceID, "stone step", crouchVolume, crouchPitch, true);
         }
         else 
         {
@@ -256,6 +278,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
                 NoiseManager.Instance.noiseLevelMultiplier = NoiseManager.Instance.noiseData.walkModifier;
             }
             player.IncreaseStamina();
+
+            AudioManager.Instance.SetAudioClip(audioSourceID, "stone step", normalVolume, normalPitch, true);
         }
 
         // Find target velocity
@@ -268,6 +292,18 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         // Calculate forces
         Vector3 velocityChange = targetVelocity - currentVelocity;
         velocityChange = new Vector3(velocityChange.x, 0, velocityChange.z);
+
+        if (rb.velocity.magnitude < 0.1f)
+        {
+            AudioManager.Instance.StopAudio(audioSourceID);
+        }
+        else
+        {
+            if (!AudioManager.Instance.IsPlaying(audioSourceID))
+            {
+                AudioManager.Instance.PlayAudio(audioSourceID);
+            }
+        }
 
         // Limit Force
         Vector3.ClampMagnitude(velocityChange, maxForce);

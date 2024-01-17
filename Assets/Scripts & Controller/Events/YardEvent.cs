@@ -50,11 +50,17 @@ public class YardEvent : MonoBehaviour
     [Tooltip("The rotation the player should be moved to after the event")]
     [SerializeField] Vector3 playerRotationAfterEvent = new Vector3(0f, -90f, 0f);
 
+    [Space(10)]
+    [Header("Sounds")]
+
+
     int counter = 0;
     Transform girlTransform;
     bool firstTime = true;
     bool secondTime = true;
     bool endEvent = false;
+
+    List<int> audioSourceIDList = new List<int>();
 
     void OnTriggerExit(Collider other) 
     {
@@ -62,6 +68,8 @@ public class YardEvent : MonoBehaviour
         {
             firstTime = false;
             girl.SetActive(true);
+            AudioManager.Instance.SetAudioClip(girl.GetInstanceID(), "weeping ghost woman", 0.6f, 1f, true);
+            AudioManager.Instance.FadeIn(girl.GetInstanceID(), 5f, 0.6f);
             door.OpenDoor();
         }
         else if (secondTime)
@@ -86,12 +94,25 @@ public class YardEvent : MonoBehaviour
         foreach (Light l in yardLights.GetComponentsInChildren<Light>())
         {
             l.enabled = true;
+            float volume = Random.Range(0.3f, 0.8f);
+            float pitch = Random.Range(0.8f, 1.2f);
+            // play audio with delay
+            bool availableSource = AudioManager.Instance.PlayAudio(l.gameObject.GetInstanceID(), volume, pitch, true);
+            if (availableSource)
+            {
+                audioSourceIDList.Add(l.gameObject.GetInstanceID());
+            }
+            // random delay between each light sound to make it sound more natural
+            yield return new WaitForSeconds(Random.Range(0.1f, 0.5f));
         }
 
         Light mainLight = light.GetComponent<Light>();
 
         FlickeringLight flickeringLight = light.GetComponent<FlickeringLight>();
         flickeringLight.smoothing = 5;
+        AudioManager.Instance.PlayAudio(light.gameObject.GetInstanceID(), 0.6f, 1f, true);
+        audioSourceIDList.Add(light.gameObject.GetInstanceID());
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.environment.GetInstanceID(), "dark piano tension", 1f, 1f, false);
 
         for (int i = 0; i < intensityInMS; i++)
         {
@@ -101,6 +122,10 @@ public class YardEvent : MonoBehaviour
                 l.range += 0.1f;
                 l.GetComponent<FlickeringLight>().minIntensity += 0.03f;
                 l.GetComponent<FlickeringLight>().maxIntensity += 0.1f;
+                if (l.GetComponent<AudioSource>() != null)
+                {
+                    l.GetComponent<AudioSource>().volume += 0.05f;
+                }
             }
             mainLight.intensity += 0.1f;
             mainLight.range += 0.1f;
@@ -150,25 +175,30 @@ public class YardEvent : MonoBehaviour
         Vector3 startingPosition = lookAwayTarget.position;
         Vector3 targetPosition = girlHead.position;
 
+        bool oneShot = false;
+
         while (elapsedTime < 10f)
         {
             // Interpolate the position between starting and target positions over time
             lookAwayTarget.position = Vector3.Lerp(startingPosition, targetPosition, elapsedTime);
-            
+        
             // Increment the elapsed time based on delta time
             elapsedTime += Time.deltaTime * translationSpeed;
 
-            // Wait for the next frame
-            if (elapsedTime >= 6f)
+            if (elapsedTime >= 1f && !oneShot)
             {
-                // finish the movement faster
-                translationSpeed = 10f;
+                oneShot = true;
+                AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment.GetInstanceID(), "jumpscare", 1.5f, 1f, false);
+                AudioManager.Instance.PlayAudio(AudioManager.Instance.environment.GetInstanceID());
             }
 
-            if (elapsedTime >= 9f)
+            if (elapsedTime >= 3f)
             {
+                AudioManager.Instance.StopAllExcept(AudioManager.Instance.environment.GetInstanceID());
                 endEvent = true;
             }
+
+            // Wait for the next frame
             yield return null;
         }
     }
@@ -176,14 +206,23 @@ public class YardEvent : MonoBehaviour
     // turn off all lights and reset the reflectionProbes to adjust to darkness
     void Lightning()
     {
+        foreach (int audioSourceID in audioSourceIDList)
+        {
+            AudioManager.Instance.StopAudio(audioSourceID);
+        }
+
         foreach (Light l in allLights.GetComponentsInChildren<Light>())
         {
             l.enabled = false;
         }
+
         for (int i = 0; i < alertLights.Length; i++)
         {
             alertLights[i].GetComponent<Light>().enabled = true;
         }
+
+        AudioManager.Instance.FadeOut(girl.GetInstanceID(), 0.5f);
+
         StartCoroutine(ActivateProbesGradually());
     }
 
@@ -214,6 +253,11 @@ public class YardEvent : MonoBehaviour
 
         // fade in blackscreen
         GameManager.Instance.StartCoroutine(GameManager.Instance.StartGameWithBlackScreen());
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment.GetInstanceID(), "hospital music", 0.15f, 1f, true);
+
+        yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(AudioManager.Instance.environment.GetInstanceID()));
+
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment.GetInstanceID(), 0.1f, 1f, true);
     }
 
     IEnumerator ActivateProbesGradually()
