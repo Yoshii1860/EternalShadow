@@ -14,6 +14,7 @@ public class AudioManager : MonoBehaviour
     List<AudioClip> audioFilesList = new List<AudioClip>();
 
     public GameObject environment;
+    public GameObject playerSpeaker;
 
     // Create a static reference to the instance
     public static AudioManager Instance
@@ -75,6 +76,7 @@ public class AudioManager : MonoBehaviour
             audioSource.pitch = pitch;
             audioSource.loop = loop;
             audioSource.Play();
+            Debug.Log("AudioManager: Playing " + audioSource.clip.name + " on " + audioSource.gameObject.name);
             return true;
         }
         else
@@ -89,14 +91,20 @@ public class AudioManager : MonoBehaviour
     {
         AudioSource audioSource = GetAudioSource(gameObjectID);
         AudioClip audioFile = GetAudioClip(clipName);
+        audioFile.LoadAudioData();
 
         if (audioSource != null && audioFile != null)
         {
             audioSource.volume = volume;
             audioSource.pitch = pitch;
             audioSource.loop = loop;
-            audioSource.PlayOneShot(audioFile);
-            Debug.Log("AudioManager: Playing " + clipName + " on " + transform.gameObject.name);
+            if (audioFile.isReadyToPlay) audioSource.PlayOneShot(audioFile);
+            else 
+            {
+                Debug.LogWarning("AudioManager: AudioClip not ready to play - " + clipName);
+                return;
+            }
+            Debug.Log("AudioManager: Playing " + audioFile.name + " on " + audioSource.gameObject.name);
         }
         else
         {
@@ -204,6 +212,18 @@ public class AudioManager : MonoBehaviour
         audioSource.volume = maxVolume;
     }
 
+    public void PlayAudioWithDelay(int gameObjectID, float delay)
+    {
+        StartCoroutine(PlayAudioDelayed(gameObjectID, delay));
+    }
+
+    IEnumerator PlayAudioDelayed(int gameObjectID, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        AudioSource audioSource = GetAudioSource(gameObjectID);
+        audioSource.Play();
+    }
+
     public void StopAudioWithDelay(int gameObjectID)
     {
         StartCoroutine(StopAudioDelayed(gameObjectID));
@@ -225,6 +245,7 @@ public class AudioManager : MonoBehaviour
         {
             audioSource.Stop();
         }
+        Debug.Log("AudioManager: Stopping all AudioSources.");
     }
 
     public void StopAllExcept(int gameObjectID)

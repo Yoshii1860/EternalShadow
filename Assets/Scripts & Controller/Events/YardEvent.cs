@@ -257,7 +257,13 @@ public class YardEvent : MonoBehaviour
 
         yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(AudioManager.Instance.environment.GetInstanceID()));
 
+        AudioManager.Instance.StopAll();
         AudioManager.Instance.PlayAudio(AudioManager.Instance.environment.GetInstanceID(), 0.1f, 1f, true);
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.playerSpeaker.GetInstanceID(), "player3", 0.8f, 1f, false);
+
+        yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
+
+        AudioManager.Instance.PlayAudioWithDelay(AudioManager.Instance.playerSpeaker.GetInstanceID(), 2f);
     }
 
     IEnumerator ActivateProbesGradually()

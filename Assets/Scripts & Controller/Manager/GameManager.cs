@@ -122,8 +122,8 @@ public class GameManager : MonoBehaviour
 
         player = FindObjectOfType<Player>();
         playerInput = FindObjectOfType<PlayerInput>();
-        playerAnimController = FindObjectOfType<PlayerAnimController>();
-        playerController = FindObjectOfType<PlayerController>();
+        if (playerAnimController == null) playerAnimController = FindObjectOfType<PlayerAnimController>();
+        if (playerController == null)  playerController = FindObjectOfType<PlayerController>();
 
         inventory = GameObject.FindWithTag("Inventory");
         inventoryCanvas = inventory.transform.GetChild(0).gameObject;
@@ -247,6 +247,7 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator StartGameWithBlackScreen()
     {
+        Debug.Log("BlackScreen Start");
         // Set the black screen to active
         if (!blackScreen.activeSelf) blackScreen.SetActive(true);
 
@@ -258,6 +259,7 @@ public class GameManager : MonoBehaviour
         float elapsedTime = 0f;
         Color startColor = Color.black;
         Color targetColor = new Color(0f, 0f, 0f, 0f); // Fully transparent
+        bool unique = false;
 
         while (elapsedTime < duration)
         {
@@ -266,7 +268,11 @@ public class GameManager : MonoBehaviour
             Color newColor = Color.Lerp(startColor, targetColor, t);
             blackScreen.GetComponent<Image>().color = newColor;
 
-            if (elapsedTime >= 1f) playerAnimController.StartAnimation();
+            if (elapsedTime >= 1f && !unique) 
+            {
+                playerAnimController.StartAnimation();
+                unique = true;
+            }
 
             yield return null;
         }
@@ -277,6 +283,7 @@ public class GameManager : MonoBehaviour
 
         // Set the game state to Gameplay after the fade-out
         SetGameState(GameState.Gameplay, SubGameState.Default);
+        Debug.Log("BlackScreen Stop");
     }
 
     public void Inventory()

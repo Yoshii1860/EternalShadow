@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerAnimController : MonoBehaviour
 {
     PlayerController playerController;
-    [SerializeField] Animator animator;
+    public Animator animator;
     bool leftOrRight = true;
 
     // Start is called before the first frame update
@@ -38,6 +38,7 @@ public class PlayerAnimController : MonoBehaviour
     public void BlindnessAnimation()
     {
         animator.SetBool("Blinded", true);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker.GetInstanceID(), "player2", .8f, 1f, false);
     }
 
     public void StopBlindnessAnimation()
