@@ -149,6 +149,7 @@ public class GameManager : MonoBehaviour
         {
             customUpdateManager.AddCustomUpdatable(player.GetComponent<InventoryController>());
             customUpdateManager.AddCustomUpdatable(player.GetComponent<PlayerController>());
+            customUpdateManager.AddCustomUpdatable(player.GetComponent<Player>());
         }
         
         if (enemyPool != null)
@@ -248,6 +249,7 @@ public class GameManager : MonoBehaviour
     public IEnumerator StartGameWithBlackScreen()
     {
         Debug.Log("BlackScreen Start");
+        if (CurrentSubGameState != SubGameState.EventScene) GameplayEvent();
         // Set the black screen to active
         if (!blackScreen.activeSelf) blackScreen.SetActive(true);
 
@@ -321,6 +323,7 @@ public class GameManager : MonoBehaviour
     public void GameplayEvent()
     {
         SetGameState(GameState.Gameplay, SubGameState.EventScene);
+        playerController.GamePlayEvent();
         // Add code for gameplay event
     }
 

@@ -220,6 +220,23 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             Light();
         }
     }
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // GameManager Functions
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void GamePlayEvent()
+    {
+        // Disable player movement
+        if (crouch) 
+        {
+            crouch = false;
+            Crouch();
+        }
+        aim = false;
+        fire = false;
+        interact = false;
+        reload = false;
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Gameplay Functions

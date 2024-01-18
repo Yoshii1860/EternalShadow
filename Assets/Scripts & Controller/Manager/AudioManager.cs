@@ -194,11 +194,11 @@ public class AudioManager : MonoBehaviour
         StartCoroutine(FadeInCo(audioSource, fadeInDuration, maxVolume));
     }
 
-    IEnumerator FadeInCo(AudioSource audioSource, float fadeInDuration, float maxVolume = 1f)
+    IEnumerator FadeInCo(AudioSource audioSource, float fadeInDuration, float maxVolume = 1f, float startVolume = 0f)
     {
         float elapsedTime = 0f;
 
-        audioSource.volume = 0f;
+        audioSource.volume = startVolume;
         audioSource.Play();
 
         while (elapsedTime < fadeInDuration)
@@ -278,6 +278,51 @@ public class AudioManager : MonoBehaviour
         {
             Debug.LogWarning("AudioManager: AudioSource not found - " + gameObjectID);
             return false;
+        }
+    }
+
+    public void SetAudioVolume(int gameObjectID, float volume)
+    {
+        AudioSource audioSource = GetAudioSource(gameObjectID);
+
+        if (audioSource != null)
+        {
+            // gradually set audio volume
+            StartCoroutine(SetAudioVolumeCo(audioSource, 0.5f, volume));
+        }
+        else
+        {
+            Debug.LogWarning("AudioManager: AudioSource not found - " + gameObjectID);
+        }
+    }
+
+    IEnumerator SetAudioVolumeCo(AudioSource audioSource, float duration, float endVolume)
+    {
+        float startVolume = audioSource.volume;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            audioSource.volume = Mathf.Lerp(startVolume, endVolume, elapsedTime / duration);
+            yield return null;
+        }
+
+        // Ensure the volume is set to 1 at the end of the fade-in
+        audioSource.volume = endVolume;
+    }
+
+    public string GetAudioClip(int gameObjectID)
+    {
+        AudioSource audioSource = GetAudioSource(gameObjectID);
+
+        if (audioSource != null && audioSource.clip != null)
+        {
+            return audioSource.clip.name;
+        }
+        else
+        {
+            return null;
         }
     }
 

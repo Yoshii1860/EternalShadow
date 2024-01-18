@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, ICustomUpdatable
 {
     [Tooltip("The health of the player.")]
     public int health = 100;
@@ -34,6 +34,7 @@ public class Player : MonoBehaviour
     [SerializeField] TextMeshProUGUI healthText;
     [SerializeField] TextMeshProUGUI staminaText;
     [SerializeField] TextMeshProUGUI bulletsText;
+    [SerializeField] GameObject playerSpeaker;
 
     private int reducedStamina;
     private int maxHealth = 100;
@@ -41,6 +42,13 @@ public class Player : MonoBehaviour
 
     bool reducingStamina = false;
     bool increasingStamina = false;
+
+    bool isPlaying = false;
+    int speakerID;
+    bool breath = false;
+    bool breathLouder = false;
+    bool breathLoudest = false;
+
 
     void Update() 
     {
@@ -78,6 +86,64 @@ public class Player : MonoBehaviour
     void Start()
     {
         flashlight.enabled = false;
+        speakerID = playerSpeaker.GetInstanceID();
+    }
+
+    public void CustomUpdate(float deltaTime)
+    {
+        Breathing();
+    }
+
+    void Breathing()
+    {
+        if (stamina > 60)
+        {
+            return;
+        }
+        else if (   stamina < 60 
+                &&  stamina > 30
+                &&  !breath)
+        {
+            AudioManager.Instance.SetAudioClip(speakerID, "breathing");
+            AudioManager.Instance.PlayAudio(speakerID, 0.4f, 1f, true);
+            Debug.Log("Playing breathing");
+            breath = true;
+            breathLouder = false;
+            breathLoudest = false;
+            StartCoroutine(StopBreathing());
+            return;
+        }
+        else if (   stamina < 30 
+                &&  !isOutOfStamina
+                &&  !breathLouder)
+        {
+            AudioManager.Instance.SetAudioVolume(speakerID, 0.7f);
+            Debug.Log("Playing breathing louder");
+            breath = false;
+            breathLouder = true;
+            breathLoudest = false;
+            return;
+        }
+        else if (   isOutOfStamina
+                &&  !breathLoudest)
+        {
+            AudioManager.Instance.SetAudioVolume(speakerID, 1.1f);
+            Debug.Log("Playing breathing loudest");
+            breath = false;
+            breathLouder = false;
+            breathLoudest = true;
+            return;
+        }
+    }
+
+    IEnumerator StopBreathing()
+    {
+        yield return new WaitUntil(() => stamina > 60);
+        AudioManager.Instance.StopAudioWithDelay(speakerID);
+        Debug.Log("Stopping breathing");
+        breath = false;
+        breathLouder = false;
+        breathLoudest = false;
     }
 
     void OnIsPoisonedChanged()
