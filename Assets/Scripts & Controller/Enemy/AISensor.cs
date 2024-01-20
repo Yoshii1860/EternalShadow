@@ -27,7 +27,9 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
 
     public void CustomUpdate(float deltaTime)
     {
-        Debug.Log("PlayerInSight: " + playerInSight);
+        if (!gameObject.activeSelf) return;
+        
+        Debug.Log("PlayerInSight: " + playerInSight + " from " + gameObject.name);
         scanTimer -= deltaTime;
         if (scanTimer < 0) 
         {

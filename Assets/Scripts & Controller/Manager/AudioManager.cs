@@ -8,13 +8,16 @@ public class AudioManager : MonoBehaviour
     static AudioManager instance;
 
     // Array to store AudioSources
-    AudioSource[] audioSources;
+    List<AudioSource> audioSourcesList = new List<AudioSource>();
 
     // Array to store AudioFiles
     List<AudioClip> audioFilesList = new List<AudioClip>();
 
-    public GameObject environment;
-    public GameObject playerSpeaker;
+    public GameObject environmentObject;
+    public GameObject playerSpeakerObject;
+    public int environment;
+    public int playerSpeaker;
+    public string currentEnvironment;
 
     // Create a static reference to the instance
     public static AudioManager Instance
@@ -47,12 +50,25 @@ public class AudioManager : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(this.gameObject);
 
-        // Initialize the array of AudioSources
-        audioSources = FindObjectsOfType<AudioSource>();
+        // Initialize the list of AudioSources
+        AudioSource[] audioSources = FindObjectsOfType<AudioSource>();
+        foreach (AudioSource audioSource in audioSources)
+        {
+            this.audioSourcesList.Add(audioSource);
+        }
         Debug.Log("AudioManager: Found " + audioSources.Length + " AudioSources in the scene.");
-
         // Load audio files dynamically from Resources folder
         LoadAudioFiles();
+
+        if (environmentObject == null) environmentObject = transform.gameObject.GetComponentInChildren<AudioSource>().gameObject;
+        if (playerSpeakerObject == null) playerSpeakerObject = GameManager.Instance.player.GetComponentInChildren<AudioSource>().gameObject;
+        environment = environmentObject.GetInstanceID();
+        playerSpeaker = playerSpeakerObject.GetInstanceID();
+    }
+
+    void Start()
+    {
+        // Set the environment audio volume
     }
 
     void LoadAudioFiles()
@@ -62,6 +78,20 @@ public class AudioManager : MonoBehaviour
 
         // Add loaded clips to the list
         audioFilesList.AddRange(loadedClips);
+    }
+
+    public void LoadAudioSources()
+    {
+        // Initialize the array of AudioSources
+        AudioSource[] audioSources = FindObjectsOfType<AudioSource>();
+        foreach (AudioSource audioSource in audioSources)
+        {
+            if (!this.audioSourcesList.Contains(audioSource))
+            {
+                this.audioSourcesList.Add(audioSource);
+            }
+        }
+        Debug.Log("AudioManager: Found " + audioSources.Length + " AudioSources in the scene.");
     }
 
     // Play a sound by name
@@ -241,7 +271,7 @@ public class AudioManager : MonoBehaviour
     // Stop all Audiosources
     public void StopAll()
     {
-        foreach (AudioSource audioSource in audioSources)
+        foreach (AudioSource audioSource in audioSourcesList)
         {
             audioSource.Stop();
         }
@@ -250,7 +280,7 @@ public class AudioManager : MonoBehaviour
 
     public void StopAllExcept(int gameObjectID)
     {
-        foreach (AudioSource audioSource in audioSources)
+        foreach (AudioSource audioSource in audioSourcesList)
         {
             if (audioSource.gameObject.GetInstanceID() != gameObjectID)
             {
@@ -326,10 +356,37 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    public string GetEnvironment()
+    {
+        AudioSource audioSource = GetAudioSource(environment);
+        currentEnvironment = audioSource.clip.name + " _ " + audioSource.volume.ToString() + " _ " + audioSource.pitch.ToString() + " _ " + audioSource.loop.ToString();
+        return currentEnvironment;
+    }
+
+    public void SetEnvironment(string environmentSettings)
+    {
+        string[] settings = environmentSettings.Split('_');
+        string clipName = settings[0].Trim();
+        float volume = float.Parse(settings[1].Trim());
+        float pitch = float.Parse(settings[2].Trim());
+        bool loop = bool.Parse(settings[3].Trim());
+
+        SetAudioClip(environment, clipName);
+        PlayAudio(environment, volume, pitch, loop);
+    }
+
+    public void AddAudioSource(AudioSource audioSource)
+    {
+        if (!audioSourcesList.Contains(audioSource))
+        {
+            audioSourcesList.Add(audioSource);
+        }
+    }
+
     // Get an AudioSource by name
     AudioSource GetAudioSource(int gameObjectID)
     {
-        foreach (AudioSource audioSource in audioSources)
+        foreach (AudioSource audioSource in audioSourcesList)
         {
             if (audioSource.gameObject.GetInstanceID() == gameObjectID)
             {

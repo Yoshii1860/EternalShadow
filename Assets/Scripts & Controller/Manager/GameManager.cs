@@ -45,11 +45,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] Image progressBar;
     [SerializeField] Item[] startGameItems;
 
+    CustomUpdateManager customUpdateManager;
     PlayerInput playerInput;
 
-    CustomUpdateManager customUpdateManager;
-
     public bool isPaused;
+
+    bool referencesUpdated = false;
 
 
 
@@ -121,9 +122,10 @@ public class GameManager : MonoBehaviour
         Debug.Log("Reference will be updated!");
 
         player = FindObjectOfType<Player>();
-        playerInput = FindObjectOfType<PlayerInput>();
         if (playerAnimController == null) playerAnimController = FindObjectOfType<PlayerAnimController>();
         if (playerController == null)  playerController = FindObjectOfType<PlayerController>();
+        if (pickupCanvas == null) pickupCanvas = GameObject.FindWithTag("PickupCanvas");
+        pickupCanvas.SetActive(false);
 
         inventory = GameObject.FindWithTag("Inventory");
         inventoryCanvas = inventory.transform.GetChild(0).gameObject;
@@ -151,6 +153,7 @@ public class GameManager : MonoBehaviour
             customUpdateManager.AddCustomUpdatable(player.GetComponent<PlayerController>());
             customUpdateManager.AddCustomUpdatable(player.GetComponent<Player>());
         }
+        else Debug.LogWarning("GameManager.cs: Player is null!");
         
         if (enemyPool != null)
         {
@@ -159,6 +162,7 @@ public class GameManager : MonoBehaviour
                 customUpdateManager.AddCustomUpdatable(enemy);
             } 
         }
+        else Debug.LogWarning("GameManager.cs: EnemyPool is null!");
 
         FlickeringLight[] flickeringLights = FindObjectsOfType<FlickeringLight>();
         if (flickeringLights != null)
@@ -168,9 +172,12 @@ public class GameManager : MonoBehaviour
                 customUpdateManager.AddCustomUpdatable(flickeringLight);
             }
         }
+        else Debug.LogWarning("GameManager.cs: FlickeringLights is null!");
         
         string debugLog = customUpdateManager.GetCustomUpdatables();
         Debug.Log("GameManager.cs: CustomUpdatables: " + debugLog);
+
+        referencesUpdated = true;
     }
 /////////////////////////////////////
 /////////////////////////////////////
@@ -188,17 +195,27 @@ public class GameManager : MonoBehaviour
             UpdateCustomUpdatables();
             Debug.Log("GameManager - Start - MainMenu: " + SceneManager.GetActiveScene().name);
             SetGameState(GameState.MainMenu);
+            AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "menu music");
+            AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 1f, 1f, true);
         }
         else
         {
             Debug.Log("GameManager - Start - Gameplay: " + SceneManager.GetActiveScene().name);
             UpdateReferences();
-            SetGameState(GameState.Gameplay);
-            foreach (Item item in startGameItems)
-            {
-                InventoryManager.Instance.AddItem(item);
-            }
+            StartCoroutine(StartWithUpdatedReferences());
         }
+    }
+
+    IEnumerator StartWithUpdatedReferences()
+    {
+        yield return new WaitUntil(() => referencesUpdated);
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "night sound");
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.5f, 1f, true);
+        foreach (Item item in startGameItems)
+        {
+            InventoryManager.Instance.AddItem(item);
+        }
+        referencesUpdated = false;
     }
 /////////////////////////////////////
 /////////////////////////////////////
@@ -249,8 +266,8 @@ public class GameManager : MonoBehaviour
     public IEnumerator StartGameWithBlackScreen()
     {
         Debug.Log("BlackScreen Start");
-        if (CurrentSubGameState != SubGameState.EventScene) GameplayEvent();
         // Set the black screen to active
+        CurrentSubGameState = SubGameState.EventScene;
         if (!blackScreen.activeSelf) blackScreen.SetActive(true);
 
         // Wait for 2 seconds before starting the fade-out
@@ -282,6 +299,7 @@ public class GameManager : MonoBehaviour
         // Deactivate the black screen once the fade-out is complete
         blackScreen.SetActive(false);
         blackScreen.GetComponent<Image>().color = Color.black;
+        AudioManager.Instance.LoadAudioSources();
 
         // Set the game state to Gameplay after the fade-out
         SetGameState(GameState.Gameplay, SubGameState.Default);
@@ -385,9 +403,14 @@ public class GameManager : MonoBehaviour
             case GameState.Gameplay:
                 // Add code for common gameplay behavior (for SubGameState.Default)
                 // This will be executed for all variations unless overridden in substates.
+                if (playerInput == null)
+                {
+                    playerInput = FindObjectOfType<PlayerInput>();
+                }
                 foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
                 {
                     agent.isStopped = false;
+                    Debug.Log("GameManager.cs: Move " + agent.name);
                 }
                 isPaused = false;
                 Cursor.lockState = CursorLockMode.Locked;
@@ -396,15 +419,18 @@ public class GameManager : MonoBehaviour
                 {
                     case SubGameState.Default:
                         playerInput.SwitchCurrentActionMap("Player");
+                        Debug.Log("GameManager.cs: Switch to GamePlay.Default");
                         break;
 
                     case SubGameState.EventScene:
                         playerInput.SwitchCurrentActionMap("Event");
+                        Debug.Log("GameManager.cs: Switch to GamePlay.EventScene");
                         break;
 
                     case SubGameState.PickUp:
                         isPaused = true;
                         playerInput.SwitchCurrentActionMap("PickUp");
+                        Debug.Log("GameManager.cs: Switch to GamePlay.PickUp");
                         break;
                 }
                 break;
@@ -454,7 +480,8 @@ public class GameManager : MonoBehaviour
     public void LoadNewGame()
     {
         // Add code to initialize a new game
-        LoadNewScene("Sandbox", true); // Load the Sandbox scene and set "new Game" flag to new    
+        LoadNewScene("Asylum", true); // Load the Sandbox scene and set "new Game" flag to new    
+        Debug.Log("GameManager.cs: New Game Loaded!");
     }
 
     public void SaveData(string filename = "autosave")
@@ -653,7 +680,7 @@ public class GameManager : MonoBehaviour
         {
             progressBar.fillAmount = asyncLoad.progress;
 
-            if (asyncLoad.progress >= 0.92f)
+            if (asyncLoad.progress >= 0.95f)
             {
                 progressBar.fillAmount = 1f;
                 asyncLoad.allowSceneActivation = true;
@@ -661,9 +688,9 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
-        StartGame();
-
         UpdateReferences();
+
+        StartGame();
 
         if (!newGame)
         {
@@ -671,11 +698,17 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "night sound");
+            AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.5f, 1f, true);
             foreach (Item item in startGameItems)
             {
                 InventoryManager.Instance.AddItem(item);
             }
         }
+
+        InputManager.Instance.Rebind("Player");
+        InputManager.Instance.Rebind("Inventory");
+        InputManager.Instance.Rebind("Pickup");
 
         // Scene is fully loaded
         Debug.Log("Scene " + sceneName + " is fully loaded!");

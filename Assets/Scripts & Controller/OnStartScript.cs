@@ -11,12 +11,5 @@ public class OnStartScript : MonoBehaviour
     {
         girl.SetActive(false);
         GameManager.Instance.StartGame();
-        Invoke("SetAndPlay", 2f);
-    }
-
-    void SetAndPlay()
-    {
-        int id = AudioManager.Instance.playerSpeaker.GetInstanceID();
-        AudioManager.Instance.PlaySoundOneShot(id, "player1", 0.8f, 1f, false);
     }
 }

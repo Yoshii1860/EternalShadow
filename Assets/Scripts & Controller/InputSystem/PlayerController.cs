@@ -86,6 +86,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     bool sprint, crouch, aim, fire, interact, reload, inventory, menu;
     float weaponSwitch;
 
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Event Functions
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,6 +107,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     {
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.Gameplay)
         {
+            Move();
             if (fire)                   Fire();
             else if (interact && !aim)  Interact();
             if (!aim)                   GameManager.Instance.playerAnimController.AimAnimation(false);
@@ -113,14 +115,6 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             if (reload)                 Reload();
             if (inventory)              Inventory();
             if (menu)                   Menu();
-        }
-    }
-
-    void FixedUpdate() 
-    {
-        if (GameManager.Instance.CurrentGameState == GameManager.GameState.Gameplay)
-        {
-            Move();            
         }
     }
 
@@ -325,7 +319,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         // Limit Force
         Vector3.ClampMagnitude(velocityChange, maxForce);
 
-        // Move rigidbody with acceleration instead of force
+        // Move rigidbody with acceleration instead of force)
         rb.AddForce(velocityChange * SpeedChangeRate, ForceMode.Acceleration);
     }
 

@@ -34,7 +34,8 @@ public class Player : MonoBehaviour, ICustomUpdatable
     [SerializeField] TextMeshProUGUI healthText;
     [SerializeField] TextMeshProUGUI staminaText;
     [SerializeField] TextMeshProUGUI bulletsText;
-    [SerializeField] GameObject playerSpeaker;
+    
+    int playerSpeaker;
 
     private int reducedStamina;
     private int maxHealth = 100;
@@ -86,7 +87,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
     void Start()
     {
         flashlight.enabled = false;
-        speakerID = playerSpeaker.GetInstanceID();
+        speakerID = AudioManager.Instance.playerSpeaker;
     }
 
     public void CustomUpdate(float deltaTime)

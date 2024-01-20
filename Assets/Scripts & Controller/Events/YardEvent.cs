@@ -68,6 +68,7 @@ public class YardEvent : MonoBehaviour
         {
             firstTime = false;
             girl.SetActive(true);
+            AudioManager.Instance.AddAudioSource(girl.GetComponent<AudioSource>());
             AudioManager.Instance.SetAudioClip(girl.GetInstanceID(), "weeping ghost woman", 0.6f, 1f, true);
             AudioManager.Instance.FadeIn(girl.GetInstanceID(), 5f, 0.6f);
             door.OpenDoor();
@@ -112,7 +113,7 @@ public class YardEvent : MonoBehaviour
         flickeringLight.smoothing = 5;
         AudioManager.Instance.PlayAudio(light.gameObject.GetInstanceID(), 0.6f, 1f, true);
         audioSourceIDList.Add(light.gameObject.GetInstanceID());
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.environment.GetInstanceID(), "dark piano tension", 1f, 1f, false);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.environment, "dark piano tension", 1f, 1f, false);
 
         for (int i = 0; i < intensityInMS; i++)
         {
@@ -188,13 +189,13 @@ public class YardEvent : MonoBehaviour
             if (elapsedTime >= 1f && !oneShot)
             {
                 oneShot = true;
-                AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment.GetInstanceID(), "jumpscare", 1.5f, 1f, false);
-                AudioManager.Instance.PlayAudio(AudioManager.Instance.environment.GetInstanceID());
+                AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "jumpscare", 1.5f, 1f, false);
+                AudioManager.Instance.PlayAudio(AudioManager.Instance.environment);
             }
 
             if (elapsedTime >= 3f)
             {
-                AudioManager.Instance.StopAllExcept(AudioManager.Instance.environment.GetInstanceID());
+                AudioManager.Instance.StopAllExcept(AudioManager.Instance.environment);
                 endEvent = true;
             }
 
@@ -253,17 +254,17 @@ public class YardEvent : MonoBehaviour
 
         // fade in blackscreen
         GameManager.Instance.StartCoroutine(GameManager.Instance.StartGameWithBlackScreen());
-        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment.GetInstanceID(), "hospital music", 0.15f, 1f, true);
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "hospital music", 0.15f, 1f, true);
 
-        yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(AudioManager.Instance.environment.GetInstanceID()));
+        yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(AudioManager.Instance.environment));
 
         AudioManager.Instance.StopAll();
-        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment.GetInstanceID(), 0.1f, 1f, true);
-        AudioManager.Instance.SetAudioClip(AudioManager.Instance.playerSpeaker.GetInstanceID(), "player3", 0.8f, 1f, false);
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.1f, 1f, true);
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.playerSpeaker, "player3", 0.8f, 1f, false);
 
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
 
-        AudioManager.Instance.PlayAudioWithDelay(AudioManager.Instance.playerSpeaker.GetInstanceID(), 2f);
+        AudioManager.Instance.PlayAudioWithDelay(AudioManager.Instance.playerSpeaker, 2f);
     }
 
     IEnumerator ActivateProbesGradually()

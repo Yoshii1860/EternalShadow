@@ -21,6 +21,7 @@ public class PlayerAnimController : MonoBehaviour
     public void StartAnimation()
     {
         animator.SetTrigger("StartAnim");
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "player1", 0.8f, 1f, false);
     }
 
     public void AimAnimation(bool isAiming)
@@ -38,7 +39,7 @@ public class PlayerAnimController : MonoBehaviour
     public void BlindnessAnimation()
     {
         animator.SetBool("Blinded", true);
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker.GetInstanceID(), "player2", .8f, 1f, false);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "player2", .8f, 1f, false);
     }
 
     public void StopBlindnessAnimation()

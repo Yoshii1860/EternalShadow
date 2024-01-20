@@ -189,17 +189,19 @@ MonoBehaviour:
   LastGameState: 0
   inventoryCanvas: {fileID: 0}
   inventory: {fileID: 0}
+  pickupCanvas: {fileID: 0}
   player: {fileID: 0}
+  playerController: {fileID: 0}
+  playerAnimController: {fileID: 0}
+  playerInput: {fileID: 0}
   objectPool: {fileID: 0}
   enemyPool: {fileID: 0}
   interactObjectPool: {fileID: 0}
-  blackScreen: {fileID: 0}
+  blackScreen: {fileID: 1129416956}
   progressBar: {fileID: 0}
   startGameItems:
-  - {fileID: 11400000, guid: 30a100123d6fea341aafd54ca4f30975, type: 2}
-  - {fileID: 11400000, guid: dfbdf96ea365f614c9aa1403aa3b3af7, type: 2}
-  - {fileID: 11400000, guid: 191b025959321df40a98664800251674, type: 2}
   - {fileID: 11400000, guid: 5578ebbaf6f38cd488ea2970400be3ad, type: 2}
+  isPaused: 0
   noAttackMode: 0
   noNoiseMode: 0
   _deleteSaveFiles: 0

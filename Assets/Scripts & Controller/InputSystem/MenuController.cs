@@ -184,7 +184,9 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         interact = false;
         
         if (selectedButton == null) return;
-        if (selectedButton.gameObject.CompareTag("NewGameButton"))              NewGame();
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.playerSpeaker, "woosh");
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.playerSpeaker, 0.8f, 1f, false);
+        if (selectedButton.gameObject.CompareTag("NewGameButton"))              StartCoroutine(StartNewGame());
         else if (selectedButton.gameObject.CompareTag("LoadGameButton"))        ActivateMenu(loadMenu);
         else if (selectedButton.gameObject.CompareTag("LoadReturnButton"))      Return(returnFromLoadButton);
         else if (selectedButton.gameObject.CompareTag("SaveReturnButton"))      Return(returnFromSaveButton);
@@ -347,10 +349,15 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         returnFromLoadButton.GetComponentInChildren<Image>().color = unselectedColor;
         returnFromSaveButton.GetComponentInChildren<Image>().color = unselectedColor;
         button.GetComponentInChildren<Image>().color = selectedColor;
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "click", 0.8f, 1f, false);
     }
 
-    void NewGame()
+    IEnumerator StartNewGame()
     {
+        yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(AudioManager.Instance.playerSpeaker));
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.playerSpeaker, "menu die");
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.playerSpeaker, 0.8f, 1f, false);
+        yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(AudioManager.Instance.playerSpeaker));
         GameManager.Instance.LoadNewGame();
         ActivateMenu(mainMenu, false);
         menuCanvas.SetActive(false);

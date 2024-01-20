@@ -26,6 +26,7 @@ TagManager:
   - ExitButton
   - NameTag
   - DescriptionTag
+  - PickupCanvas
   layers:
   - Default
   - TransparentFX
