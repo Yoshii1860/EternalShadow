@@ -6,6 +6,7 @@ using BehaviorTree;
 
 public class ActionGoToTarget : Node
 {
+    Animator animator;
     Transform transform;
     NavMeshAgent agent;
 
@@ -13,6 +14,7 @@ public class ActionGoToTarget : Node
     {
         this.transform = transform;
         this.agent = agent;
+        animator = transform.GetComponent<Animator>();
     }
 
     public override NodeState Evaluate()
@@ -33,6 +35,8 @@ public class ActionGoToTarget : Node
 
         agent.speed = EnemyBT.runSpeed;
         agent.SetDestination(target.position);
+        animator.SetBool("Walk", false);
+        animator.SetBool("Run", true);
 
         state = NodeState.RUNNING;
         return state;

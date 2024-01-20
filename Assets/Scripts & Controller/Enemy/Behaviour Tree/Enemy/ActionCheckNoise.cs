@@ -29,6 +29,8 @@ public class ActionCheckNoise : Node
         object obj = GetData("noisePosition");
         if (obj == null || aiSensor.playerInSight)
         {
+            ClearData("noisePosition");
+            ClearData("noiseLevel");
             state = NodeState.FAILURE;
             return state;
         }
@@ -41,7 +43,6 @@ public class ActionCheckNoise : Node
             if (waitCounter >= waitTime)
             {
                 isWaiting = false;
-                animator.SetBool("Walking", true);
                 ClearData("noisePosition");
                 ClearData("noiseLevel");
 
@@ -51,19 +52,20 @@ public class ActionCheckNoise : Node
         }
         else
         {
-            if (Vector3.Distance(transform.position, noisePos) < 0.01f)
+            if (Vector3.Distance(transform.position, noisePos) < 0.1f)
             {
                 transform.position = noisePos;
                 waitCounter = 0f;
                 isWaiting = true;
 
-                animator.SetBool("Walking", false);
+                animator.SetBool("Walk", false);
             }
             else
             {
                 Debug.Log("ActionCheckNoise: On the way");
                 agent.speed = EnemyBT.walkSpeed;
                 agent.SetDestination(noisePos);
+                animator.SetBool("Walk", true);
             }
         }
 

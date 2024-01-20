@@ -8,22 +8,36 @@ public class NoiseController : MonoBehaviour
     int priority = 0;
     float noiseLevel = 0f;
 
+    /*
     void OnCollisionStay(Collision other)
     {
-        if (noiseType == NoiseType.SHOOT) return;
+        if (transform.gameObject.tag == "Player") return;
+        else if (noiseType == NoiseType.SHOOT) return;
         if (other.gameObject.CompareTag("Player"))
         {
             NoiseManager.Instance.UpdateCurrentNoiseData(noiseLevel, priority);
         }
     }
+    */
 
     public void ShootNoise()
+    {
+        ChangeNoiseType(NoiseType.SHOOT);
+        NoiseManager.Instance.UpdateCurrentNoiseData(noiseLevel, priority);
+    }
+
+    void Start()
+    {
+        ChangeNoiseType(noiseType);
+    }
+
+    public void UpdateNoiseLevel()
     {
         NoiseManager.Instance.UpdateCurrentNoiseData(noiseLevel, priority);
     }
 
     // This method will be automatically called whenever a serialized property is changed in the Inspector
-    void Start()
+    public void ChangeNoiseType(NoiseType noiseType)
     {
         // Update the noiseLevel and priority based on the selected noiseType
         switch (noiseType)

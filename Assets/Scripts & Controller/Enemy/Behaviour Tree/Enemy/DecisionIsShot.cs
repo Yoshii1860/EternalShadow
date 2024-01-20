@@ -32,10 +32,10 @@ public class DecisionIsShot : Node
         if (isShot)
         {
             // Set the player as the target
-            Debug.Log("DecisionIsShot: Player is shot!");
+            Debug.Log("DecisionIsShot: Enemy is shot!");
 
             if (obj == null) parent.parent.SetData("target", GameManager.Instance.player.transform);
-            animator.SetBool("Walking", true);
+            animator.SetBool("Run", true);
 
             state = NodeState.SUCCESS;
             return state;

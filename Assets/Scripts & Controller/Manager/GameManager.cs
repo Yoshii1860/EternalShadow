@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] Image progressBar;
     [SerializeField] Item[] startGameItems;
 
-    CustomUpdateManager customUpdateManager;
+    public CustomUpdateManager customUpdateManager;
     PlayerInput playerInput;
 
     public bool isPaused;

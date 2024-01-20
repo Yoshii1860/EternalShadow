@@ -26,6 +26,10 @@ public class YardEvent : MonoBehaviour
     [SerializeField] Transform lookAtTarget;
     [Tooltip("The head object of the girl")]
     [SerializeField] Transform girlHead;
+    [Tooltip("The position for the girl to respawn after the event")]
+    [SerializeField] Transform girlRespawnPosition;
+    [Tooltip("The position for the girl to move to after the event")]
+    [SerializeField] Transform girlDestinationPosition;
 
     [Space(10)]
     [Header("Event - Increase Light Intensity")]
@@ -67,10 +71,11 @@ public class YardEvent : MonoBehaviour
         if (firstTime)
         {
             firstTime = false;
+            GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(girl.GetComponent<AISensor>());
             girl.SetActive(true);
             AudioManager.Instance.AddAudioSource(girl.GetComponent<AudioSource>());
             AudioManager.Instance.SetAudioClip(girl.GetInstanceID(), "weeping ghost woman", 0.6f, 1f, true);
-            AudioManager.Instance.FadeIn(girl.GetInstanceID(), 5f, 0.6f);
+            AudioManager.Instance.FadeIn(girl.GetInstanceID(), 10f, 0.6f);
             door.OpenDoor();
         }
         else if (secondTime)
@@ -264,7 +269,28 @@ public class YardEvent : MonoBehaviour
 
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
 
+        GirlActivation();
         AudioManager.Instance.PlayAudioWithDelay(AudioManager.Instance.playerSpeaker, 2f);
+    }
+
+    void GirlActivation()
+    {
+        // move girl to 2nd floor
+        girl.transform.position = girlRespawnPosition.position;
+        // Add AI to CustomUpdateManager
+        GameManager.Instance.customUpdateManager.AddCustomUpdatable(girl.GetComponent<AISensor>());
+        // activate girl
+        girl.SetActive(true);
+        // set waypoints for BT
+        EnemyBT girlBT = girl.GetComponent<EnemyBT>();
+        girlBT.waypoints[0] = girlRespawnPosition;
+        girlBT.waypoints[1] = girlDestinationPosition;
+        // activate BT and Sensor
+        girlBT.enabled = true;
+        girl.GetComponent<EnemyBT>().enabled = true;
+        girl.GetComponent<AISensor>().enabled = true;
+        // play audio
+        AudioManager.Instance.PlayAudio(girl.GetInstanceID(), 0.6f, 1f, true);
     }
 
     IEnumerator ActivateProbesGradually()

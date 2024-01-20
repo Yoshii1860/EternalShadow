@@ -42,7 +42,6 @@ public class DecisionSensing : Node
                 Debug.Log("DecisionSensing: Player in sight!");
                 ClearData("lastKnownPosition");
                 parent.parent.SetData("target", GameManager.Instance.player.transform);
-                animator.SetBool("Walking", true);
 
                 state = NodeState.SUCCESS;
                 return state;

@@ -42,26 +42,28 @@ public class ActionPatrol : Node
             if (waitCounter >= waitTime)
             {
                 isWaiting = false;
-                animator.SetBool("Walking", true);
+                animator.SetBool("Walk", true);
             }
         }
         else
         {
             Transform wp;
             wp = waypoints[currentWaypointIndex];
-            if (Vector3.Distance(transform.position, wp.position) < 0.01f)
+            if (Vector3.Distance(transform.position, wp.position) < 0.1f)
             {
                 transform.position = wp.position;
                 waitCounter = 0f;
                 isWaiting = true;
 
                 currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
-                animator.SetBool("Walking", false);
+                animator.SetBool("Run", false);
+                animator.SetBool("Walk", false);
             }
             else
             {
                 agent.speed = EnemyBT.walkSpeed;
                 agent.SetDestination(wp.position);
+                animator.SetBool("Walk", true);
             }
         }
 

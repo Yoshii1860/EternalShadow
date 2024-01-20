@@ -30,12 +30,11 @@ public class DecisionAttackRange : Node
         if (Vector3.Distance(transform.position, target.position) <= EnemyBT.attackRange)
         {
             Debug.Log("DecisionAttackRange: AttackRange");
-            animator.SetBool("Attacking", true);
-            animator.SetBool("Walking", false);
             state = NodeState.SUCCESS;
             return state;
         }
 
+        animator.SetBool("Attack", false);
         state = NodeState.FAILURE;
         return state;
     }

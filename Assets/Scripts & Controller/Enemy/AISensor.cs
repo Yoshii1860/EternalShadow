@@ -27,9 +27,6 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
 
     public void CustomUpdate(float deltaTime)
     {
-        if (!gameObject.activeSelf) return;
-        
-        Debug.Log("PlayerInSight: " + playerInSight + " from " + gameObject.name);
         scanTimer -= deltaTime;
         if (scanTimer < 0) 
         {
@@ -41,9 +38,10 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
     private void Scan()
     {
         count = Physics.OverlapSphereNonAlloc(transform.position, distance, colliders, layers, QueryTriggerInteraction.Collide);
-
+        
         for (int i = 0; i < count; i++)
         {
+            Debug.Log("Scan: " + colliders[i].gameObject.name);
             if (colliders[i].gameObject.CompareTag("Player"))
             {
                 // Calculate the direction to the player
@@ -58,6 +56,7 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
                     // Perform line of sight check
                     if (!Physics.Linecast(transform.position, colliders[i].transform.position, occlusionLayers))
                     {
+                        Debug.Log("PlayerInSight: " + playerInSight + " from " + gameObject.name);
                         playerInSight = true;
                         return;
                     }

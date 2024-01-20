@@ -33,12 +33,12 @@
             if (attackCounter >= EnemyBT.attackIntervall)
             {
                 Debug.Log("ActionAttack: Attack");
+                animator.SetBool("Attack", true);
                 bool playerIsDead = player.TakeDamage();
                 if (playerIsDead)
                 {
                     ClearData("target");
-                    animator.SetBool("Attacking", false);
-                    animator.SetBool("Walking", true);
+                    animator.SetBool("Attack", false);
                     attackCounter = 0f;
 
                     state = NodeState.SUCCESS;

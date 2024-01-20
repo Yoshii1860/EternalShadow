@@ -218,10 +218,10 @@ public class AudioManager : MonoBehaviour
         audioSource.volume = startVolume;
     }
 
-    public void FadeIn(int gameObjectID, float fadeInDuration, float maxVolume = 1f)
+    public void FadeIn(int gameObjectID, float fadeInDuration, float maxVolume = 1f, float startVolume = 0f)
     {
         AudioSource audioSource = GetAudioSource(gameObjectID);
-        StartCoroutine(FadeInCo(audioSource, fadeInDuration, maxVolume));
+        StartCoroutine(FadeInCo(audioSource, fadeInDuration, maxVolume, startVolume));
     }
 
     IEnumerator FadeInCo(AudioSource audioSource, float fadeInDuration, float maxVolume = 1f, float startVolume = 0f)

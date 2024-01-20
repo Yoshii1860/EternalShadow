@@ -9,12 +9,14 @@ public class ActionLastKnownPosition : Node
     Transform transform;
     NavMeshAgent agent;
     AISensor aiSensor;
+    Animator animator;
 
     public ActionLastKnownPosition(Transform transform, NavMeshAgent agent)
     {
         this.transform = transform;
         this.agent = agent;
         aiSensor = transform.GetComponent<AISensor>();
+        animator = transform.GetComponent<Animator>();
     }
 
     public override NodeState Evaluate()
@@ -34,6 +36,7 @@ public class ActionLastKnownPosition : Node
         if (Vector3.Distance(transform.position, lastKnownPosition) < 0.1f)
         {
             Debug.Log("ActionLastKnownPosition: Reached last known position!");
+            animator.SetBool("Walk", false);
             ClearData("lastKnownPosition");
             state = NodeState.SUCCESS;
             return state;
@@ -42,6 +45,7 @@ public class ActionLastKnownPosition : Node
         Debug.Log("ActionLastKnownPosition: On the way");
         agent.speed = EnemyBT.walkSpeed;
         agent.SetDestination(lastKnownPosition);
+        animator.SetBool("Walk", true);
 
         state = NodeState.RUNNING;
         return state;

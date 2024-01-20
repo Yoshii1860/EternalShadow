@@ -8,6 +8,7 @@ public class DecisionNoiseSensing : Node
     Transform transform;
     Animator animator;
     AISensor aiSensor;
+    float noiseReduction = 0.6f;
 
     public DecisionNoiseSensing(Transform transform)
     {
@@ -46,26 +47,46 @@ public class DecisionNoiseSensing : Node
         {
             parent.parent.SetData("noiseLevel", NoiseManager.Instance.noiseLevel);
             noiseLevel = NoiseManager.Instance.noiseLevel;
-        }
-        else
-        {
-            state = NodeState.SUCCESS;
-            return state;
+            Debug.Log("DecisionNoiseSensing: NoiseLevel: " + noiseLevel);
         }
 
         if (Vector3.Distance(transform.position, GameManager.Instance.player.transform.position) <= noiseLevel)
         {
             Debug.Log("DecisionNoiseSensing: Noise heard!");
+            // Check if there is a collider between the enemy and the player
+            RaycastHit hit;
+            Vector3 playerPosition = GameManager.Instance.player.transform.position;
+            Vector3 directionToPlayer = playerPosition - transform.position;
 
-            // Player is in sight, store the player as the target
-            Vector3 noisePosition = GameManager.Instance.player.transform.position;
-            parent.parent.SetData("noisePosition", noisePosition);
-            animator.SetBool("Walking", true);
+            if (!Physics.Linecast(transform.position, playerPosition, out hit, LayerMask.GetMask("Wall")))
+            {
+                Debug.Log("DecisionNoiseSensing: Noise heard! No wall in between!");
+                Vector3 noisePosition = GameManager.Instance.player.transform.position;
+                parent.parent.SetData("noisePosition", GameManager.Instance.player.transform.position);
 
-            state = NodeState.SUCCESS;
-            return state;
+                state = NodeState.SUCCESS;
+                return state;
+            }
+            else if (Vector3.Distance(transform.position, GameManager.Instance.player.transform.position) <= noiseLevel * noiseReduction)
+            {
+                Debug.Log("DecisionNoiseSensing: Noise heard through wall!");
+                Vector3 noisePosition = GameManager.Instance.player.transform.position;
+                parent.parent.SetData("noisePosition", GameManager.Instance.player.transform.position);
+
+                state = NodeState.SUCCESS;
+                return state;
+            }
+            else
+            {
+
+                Debug.Log("DecisionNoiseSensing: Noise heard! Wall in between - too far away!");
+                parent.parent.ClearData("noiseLevel");
+                state = NodeState.FAILURE;
+                return state;
+            }
         }
 
+        Debug.Log("DecisionNoiseSensing: No noise heard!");
         ClearData("noiseLevel");
 
         state = NodeState.FAILURE;

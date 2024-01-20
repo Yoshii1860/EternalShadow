@@ -6,12 +6,14 @@ using BehaviorTree;
 
 public class ActionChaseTarget : Node
 {
+    Animator animator;
     NavMeshAgent agent;
     float chaseTimer = 0f;
     float chaseDuration = 10f; // same as in Enemy.cs
 
-    public ActionChaseTarget(NavMeshAgent agent)
+    public ActionChaseTarget(Transform transform, NavMeshAgent agent)
     {        
+        animator = transform.GetComponent<Animator>();
         this.agent = agent;
     }
 
@@ -32,6 +34,7 @@ public class ActionChaseTarget : Node
         Debug.Log("ChaseTarget: Chasing!");
         agent.speed = EnemyBT.runSpeed;
         agent.SetDestination(target.position);
+        animator.SetBool("Run", true);
 
         chaseTimer += Time.deltaTime;
         if (chaseTimer >= chaseDuration)
@@ -40,6 +43,8 @@ public class ActionChaseTarget : Node
             ClearData("target");
             chaseTimer = 0f;
             state = NodeState.SUCCESS;
+            animator.SetBool("Run", false);
+            animator.SetBool("Walk", true);
             return state;
         }
 

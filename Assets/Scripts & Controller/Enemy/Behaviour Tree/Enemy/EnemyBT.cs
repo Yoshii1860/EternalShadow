@@ -6,8 +6,8 @@ public class EnemyBT : Tree
     public UnityEngine.Transform[] waypoints;
     public UnityEngine.AI.NavMeshAgent agent;
 
-    public static float walkSpeed = 2f;
-    public static float runSpeed = 3.5f;
+    public static float walkSpeed = 0.8f;
+    public static float runSpeed = 2.1f;
     public static float attackRange = 3f;
     public static float attackIntervall = 1f;
     public static float chaseRange = 30f;
@@ -24,7 +24,7 @@ public class EnemyBT : Tree
             new Sequence(new List<Node>
             {
                 new DecisionIsShot(transform),
-                new ActionChaseTarget(agent)
+                new ActionChaseTarget(transform, agent)
             }),
             new Sequence(new List<Node>
             {

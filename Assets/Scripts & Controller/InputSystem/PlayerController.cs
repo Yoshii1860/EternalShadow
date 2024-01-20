@@ -321,6 +321,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
         // Move rigidbody with acceleration instead of force)
         rb.AddForce(velocityChange * SpeedChangeRate, ForceMode.Acceleration);
+        transform.GetComponent<NoiseController>().UpdateNoiseLevel();
     }
 
     void MoveOutOfStamina()
