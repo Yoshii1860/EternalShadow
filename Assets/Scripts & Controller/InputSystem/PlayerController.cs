@@ -26,8 +26,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     public float standardRotationSpeed = 1.0f;
 	[Tooltip("Acceleration and deceleration")]
 	[SerializeField] float SpeedChangeRate = 10.0f;
-	[Tooltip("height of the camera while in crouch state")]
-	[SerializeField] float crouchYScale = 0.5f;
+    [Tooltip("The distance the player will move up or down when crouching")]
+    [SerializeField] float crouchYPosition = 1f;
     
     [Space(10)]
     [Header("Movement Sounds")]
@@ -76,7 +76,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     float lookRotation;
     float speed;
     bool crouchReleased = true;
-    float startYScale;
+    float startYPosition;
     float startFocalLength;
     bool isOutOfStamina = false;
     bool isDizzy = false;
@@ -99,7 +99,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         weaponSwitcher = weaponContainer.transform.GetComponent<WeaponSwitcher>();
         objectHandler = InventoryManager.Instance.GetComponent<ObjectHandler>();
 
-        startYScale = transform.localScale.y;
+        startYPosition = camRoot.transform.localPosition.y;
         startFocalLength = cmVirtualCamera.m_Lens.FieldOfView;
     }
 
@@ -226,6 +226,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             crouch = false;
             Crouch();
         }
+        sprint = false;
         aim = false;
         fire = false;
         interact = false;
@@ -324,6 +325,12 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         transform.GetComponent<NoiseController>().UpdateNoiseLevel();
     }
 
+    public void PushPlayerBack(float directionBack = 0.5f, float force = 10f)
+    {
+        Vector3 direction = new Vector3(directionBack, 0, 0);
+        rb.AddForce(direction * force, ForceMode.Impulse);
+    }
+
     void MoveOutOfStamina()
     {
         Debug.Log("Out of Stamina!");
@@ -417,23 +424,13 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     void Crouch()
     {
-        /* Avoid scaling the player while in air
-        if (!Physics.Raycast(transform.position, Vector3.down, 3f))
-        {
-            Debug.Log("Crouch: Not on ground");
-            return;
-        }
-        */
+        float targetCrouchY = crouch ? startYPosition - crouchYPosition : startYPosition;
 
-        if (crouch)
-        {
-            Debug.Log("Crouch: crouch");
-            transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
-        }
-        else if (!crouch)
-        {
-            transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
-        }
+        // Calculate the target position
+        Vector3 targetPosition = new Vector3(camRoot.transform.localPosition.x, targetCrouchY, camRoot.transform.localPosition.z);
+
+        // Set the camRoot's position to the target crouch position
+        camRoot.transform.localPosition = targetPosition;
     }
 
     void Aim()

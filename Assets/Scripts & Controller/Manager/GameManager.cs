@@ -163,16 +163,6 @@ public class GameManager : MonoBehaviour
             } 
         }
         else Debug.LogWarning("GameManager.cs: EnemyPool is null!");
-
-        FlickeringLight[] flickeringLights = FindObjectsOfType<FlickeringLight>();
-        if (flickeringLights != null)
-        {
-            foreach (FlickeringLight flickeringLight in flickeringLights)
-            {
-                customUpdateManager.AddCustomUpdatable(flickeringLight);
-            }
-        }
-        else Debug.LogWarning("GameManager.cs: FlickeringLights is null!");
         
         string debugLog = customUpdateManager.GetCustomUpdatables();
         Debug.Log("GameManager.cs: CustomUpdatables: " + debugLog);

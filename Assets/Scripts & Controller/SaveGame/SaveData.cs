@@ -55,7 +55,7 @@ public class InteractableObjectData
 public class SaveData
 {
     public string sceneName;
-    public int health;
+    public float health;
     public float[] position;
     public List<ItemData> items;
     public List<WeaponData> weapons;

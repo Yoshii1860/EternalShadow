@@ -54,7 +54,7 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
                 if (angleToPlayer <= angle)
                 {
                     // Perform line of sight check
-                    if (!Physics.Linecast(transform.position, colliders[i].transform.position, occlusionLayers))
+                    if (Physics.Linecast(transform.position, colliders[i].transform.position, occlusionLayers))
                     {
                         Debug.Log("PlayerInSight: " + playerInSight + " from " + gameObject.name);
                         playerInSight = true;

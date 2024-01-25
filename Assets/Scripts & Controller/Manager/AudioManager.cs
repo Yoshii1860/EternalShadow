@@ -15,8 +15,10 @@ public class AudioManager : MonoBehaviour
 
     public GameObject environmentObject;
     public GameObject playerSpeakerObject;
+    public GameObject playerSpeaker2Object;
     public int environment;
     public int playerSpeaker;
+    public int playerSpeaker2;
     public string currentEnvironment;
 
     // Create a static reference to the instance
@@ -61,9 +63,9 @@ public class AudioManager : MonoBehaviour
         LoadAudioFiles();
 
         if (environmentObject == null) environmentObject = transform.gameObject.GetComponentInChildren<AudioSource>().gameObject;
-        if (playerSpeakerObject == null) playerSpeakerObject = GameManager.Instance.player.GetComponentInChildren<AudioSource>().gameObject;
         environment = environmentObject.GetInstanceID();
         playerSpeaker = playerSpeakerObject.GetInstanceID();
+        playerSpeaker2 = playerSpeaker2Object.GetInstanceID();
     }
 
     void Start()
@@ -117,7 +119,7 @@ public class AudioManager : MonoBehaviour
     }
 
     // Play a sound one shot by name
-    public void PlaySoundOneShot(int gameObjectID, string clipName, float volume = 1f, float pitch = 1f, bool loop = false)
+    public void PlaySoundOneShot(int gameObjectID, string clipName, float volume = 1f, float pitch = 1f)
     {
         AudioSource audioSource = GetAudioSource(gameObjectID);
         AudioClip audioFile = GetAudioClip(clipName);
@@ -127,7 +129,6 @@ public class AudioManager : MonoBehaviour
         {
             audioSource.volume = volume;
             audioSource.pitch = pitch;
-            audioSource.loop = loop;
             if (audioFile.isReadyToPlay) audioSource.PlayOneShot(audioFile);
             else 
             {

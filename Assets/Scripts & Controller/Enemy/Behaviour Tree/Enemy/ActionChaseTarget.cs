@@ -44,7 +44,6 @@ public class ActionChaseTarget : Node
             chaseTimer = 0f;
             state = NodeState.SUCCESS;
             animator.SetBool("Run", false);
-            animator.SetBool("Walk", true);
             return state;
         }
 

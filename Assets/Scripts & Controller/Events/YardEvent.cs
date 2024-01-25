@@ -84,6 +84,18 @@ public class YardEvent : MonoBehaviour
             GameManager.Instance.GameplayEvent();
 
             GameManager.Instance.playerController.LookAtDirection(girl.transform);
+            
+            // Add all flickering lights to CustomUpdateManager
+            FlickeringLight[] flickeringLights = yardLights.GetComponentsInChildren<FlickeringLight>();
+            if (flickeringLights != null)
+            {
+                foreach (FlickeringLight fLight in flickeringLights)
+                {
+                    GameManager.Instance.customUpdateManager.AddCustomUpdatable(fLight);
+                }
+            }
+            FlickeringLight flickeringLight = light.GetComponent<FlickeringLight>();
+            GameManager.Instance.customUpdateManager.AddCustomUpdatable(flickeringLight);
 
             StartCoroutine(IncreaseIntensityGradually());
 
@@ -118,7 +130,7 @@ public class YardEvent : MonoBehaviour
         flickeringLight.smoothing = 5;
         AudioManager.Instance.PlayAudio(light.gameObject.GetInstanceID(), 0.6f, 1f, true);
         audioSourceIDList.Add(light.gameObject.GetInstanceID());
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.environment, "dark piano tension", 1f, 1f, false);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.environment, "dark piano tension", 1f, 1f);
 
         for (int i = 0; i < intensityInMS; i++)
         {
@@ -169,9 +181,9 @@ public class YardEvent : MonoBehaviour
 
         // move girl in front of player
         //////////////////////////////////////////////////////////////////
-        // manually calculated where the girl should be - BETTER SOLUTION?
+        // manually calculated where the girl should be - FIND BETTER SOLUTION
         //////////////////////////////////////////////////////////////////
-        girl.transform.position = new Vector3(girlTransform.position.x, girlTransform.position.y - 1.3847f, girlTransform.position.z);
+        girl.transform.position = new Vector3(girlTransform.position.x + 0.2f, girlTransform.position.y - 1.3847f, girlTransform.position.z);
         girl.transform.rotation = Quaternion.Euler(0f, girlTransform.rotation.eulerAngles.y - 180f, 0f);
 
         yield return new WaitForSeconds(lookBackTime);
@@ -196,6 +208,8 @@ public class YardEvent : MonoBehaviour
                 oneShot = true;
                 AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "jumpscare", 1.5f, 1f, false);
                 AudioManager.Instance.PlayAudio(AudioManager.Instance.environment);
+                yield return new WaitForSeconds(0.1f);
+                GameManager.Instance.playerController.PushPlayerBack();
             }
 
             if (elapsedTime >= 3f)
@@ -219,6 +233,10 @@ public class YardEvent : MonoBehaviour
 
         foreach (Light l in allLights.GetComponentsInChildren<Light>())
         {
+            if (l.GetComponent<FlickeringLight>() != null)
+            {
+                GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(l.GetComponent<FlickeringLight>());
+            }
             l.enabled = false;
         }
 

@@ -9,8 +9,5 @@ public class FlashlightCode : InteractableObject
     {
         GameManager.Instance.player.lightAvail = true;
         GameManager.Instance.player.LightSwitch();
-
-        // Implement the specific behavior for this object
-        Destroy(gameObject);
     }
 }

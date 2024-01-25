@@ -9,6 +9,7 @@ public class Enemy : MonoBehaviour
     public int health = 100;
     public bool isDead = false;
     public bool isShot = false;
+    public float damage = 10f;
     [SerializeField] float chaseTimer = 10f;
 
     public void TakeDamage(int damage)

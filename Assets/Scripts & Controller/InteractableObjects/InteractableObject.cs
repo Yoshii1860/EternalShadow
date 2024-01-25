@@ -100,6 +100,7 @@ public class InteractableObject : MonoBehaviour
 
         // Run object specific code
         RunItemCode();
+        Destroy(gameObject);
     }
 
     IEnumerator RotateObject(GameObject itemToRotate)
@@ -124,7 +125,6 @@ public class InteractableObject : MonoBehaviour
 
     protected virtual void RunItemCode()
     {
-        Debug.Log("Running the base item code.");
-        Debug.Log("This should destroy the main object at the end.");
+        Debug.Log("Running the base item code if available.");
     }
 }

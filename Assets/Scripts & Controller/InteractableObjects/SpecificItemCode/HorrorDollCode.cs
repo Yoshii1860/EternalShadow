@@ -13,8 +13,5 @@ public class HorrorDollCode : InteractableObject
     {
         // Convert the text to an integer, add 1, then convert back to string
         itemCount.text = (int.Parse(itemCount.text) + 1).ToString();
-
-        // Implement the specific behavior for this object
-        Destroy(gameObject);
     }
 }

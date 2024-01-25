@@ -349,7 +349,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         returnFromLoadButton.GetComponentInChildren<Image>().color = unselectedColor;
         returnFromSaveButton.GetComponentInChildren<Image>().color = unselectedColor;
         button.GetComponentInChildren<Image>().color = selectedColor;
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "click", 0.8f, 1f, false);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "click", 0.8f);
     }
 
     IEnumerator StartNewGame()

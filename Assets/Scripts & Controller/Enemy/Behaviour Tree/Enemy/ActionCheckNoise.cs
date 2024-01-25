@@ -52,7 +52,7 @@ public class ActionCheckNoise : Node
         }
         else
         {
-            if (Vector3.Distance(transform.position, noisePos) < 0.1f)
+            if (Vector3.Distance(transform.position, noisePos) < 0.05f)
             {
                 transform.position = noisePos;
                 waitCounter = 0f;
