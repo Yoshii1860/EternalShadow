@@ -2,9 +2,18 @@ using UnityEngine;
 
 public class UniqueIDComponent : MonoBehaviour
 {
+    #region Fields
+
     [SerializeField]
     private string uniqueID = "";
 
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// Gets or sets the unique ID of the object.
+    /// </summary>
     public string UniqueID
     {
         get { return uniqueID; }
@@ -25,4 +34,6 @@ public class UniqueIDComponent : MonoBehaviour
             UniqueIDManager.RegisterUniqueID(uniqueID, gameObject);
         }
     }
+
+    #endregion
 }

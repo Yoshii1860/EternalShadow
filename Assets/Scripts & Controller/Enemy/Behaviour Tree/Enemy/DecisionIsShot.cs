@@ -5,21 +5,41 @@ using BehaviorTree;
 
 public class DecisionIsShot : Node
 {
-    Transform transform;
-    Animator animator;
+    #region Fields
 
+    // References to components
+    private Transform transform;
+    private Animator animator;
+
+    #endregion
+
+    #region Constructors
+
+    // Constructor to initialize references
     public DecisionIsShot(Transform transform)
     {
         this.transform = transform;
-        animator = transform.GetComponent<Animator>();
+        this.animator = transform.GetComponent<Animator>();
     }
 
+    #endregion
+
+    #region Public Methods
+
+    // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        if (GameManager.Instance.isPaused) return NodeState.FAILURE;
-        
+        // Check if the game is paused
+        if (GameManager.Instance.isPaused)
+        {
+            // Return FAILURE to indicate that the decision is not satisfied
+            return NodeState.FAILURE;
+        }
+
+        // Retrieve the target from the blackboard
         object obj = GetData("target");
 
+        // Initialize variable to track if the enemy is shot
         bool isShot = false;
 
         // Check if the enemy is shot by accessing the EnemyManager
@@ -29,18 +49,26 @@ public class DecisionIsShot : Node
             isShot = enemyData.isShot;
         }
 
+        // If the enemy is shot, set the player as the target
         if (isShot)
         {
-            // Set the player as the target
             Debug.Log("DecisionIsShot: Enemy is shot!");
 
-            if (obj == null) parent.parent.SetData("target", GameManager.Instance.player.transform);
+            // If the target is not already set, set it to the player
+            if (obj == null) 
+            {
+                parent.parent.SetData("target", GameManager.Instance.player.transform);
+            }
 
+            // Set state to SUCCESS
             state = NodeState.SUCCESS;
             return state;
         }
 
+        // If the enemy is not shot, set state to FAILURE
         state = NodeState.FAILURE;
         return state;
     }
+
+    #endregion
 }

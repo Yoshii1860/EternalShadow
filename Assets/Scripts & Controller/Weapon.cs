@@ -1,10 +1,11 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class Weapon : MonoBehaviour
 {
+    #region Fields
+
     [Header("Weapon Settings")]
     [Tooltip("If the weapon can be used.")]
     public bool isAvailable = false;
@@ -33,6 +34,10 @@ public class Weapon : MonoBehaviour
     bool canShoot = true;
     bool canReload = true;
 
+    #endregion
+
+    #region Unity Callbacks
+
     void OnEnable()
     {
         canShoot = true;
@@ -45,31 +50,39 @@ public class Weapon : MonoBehaviour
         isEquipped = false;
     }
 
+    #endregion
+
+    #region Public Methods
+
     public void Execute()
     {
-        if(canShoot) StartCoroutine(Shoot());
+        if (canShoot) StartCoroutine(Shoot());
     }
 
     public void ExecuteReload()
     {
-        if(canReload) StartCoroutine(Reload());
+        if (canReload) StartCoroutine(Reload());
     }
-    
+
     public string GetWeaponStats()
     {
         // Order - Firepower: Reload Speed: Shoot Delay: Range: Capacity: (separated with \n)
         // Used for InventoryManager
-        return damage.ToString() + "\n" + timeOfReload.ToString() + "\n" + timeBetweenShots.ToString() + "\n" + range.ToString() + "\n" + magazine.ToString();
+        return $"{damage}\n{timeOfReload}\n{timeBetweenShots}\n{range}\n{magazine}";
     }
+
+    #endregion
+
+    #region Coroutines
 
     IEnumerator Shoot()
     {
         canShoot = false;
 
-        if(ammoSlot.GetCurrentAmmo(ammoType) >= 1 && magazineCount >= 1)
+        if (ammoSlot.GetCurrentAmmo(ammoType) >= 1 && magazineCount >= 1)
         {
             Debug.Log("Shooting");
-            
+
             // if weapon has a NoiseController, make noise
             NoiseController noiseController = GetComponent<NoiseController>();
             if (noiseController != null)
@@ -103,7 +116,7 @@ public class Weapon : MonoBehaviour
                 if (ammoType != Ammo.AmmoType.Infinite)
                 {
                     magazineCount--;
-                    
+
                     // SET UI FOR BULLETS
                     int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
                     GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
@@ -116,6 +129,7 @@ public class Weapon : MonoBehaviour
         {
             Debug.Log("Shoot: Out of ammo");
         }
+
         yield return new WaitForSeconds(timeBetweenShots);
         canShoot = true;
     }
@@ -124,16 +138,19 @@ public class Weapon : MonoBehaviour
     {
         canShoot = false;
         canReload = false;
+
         int currentInventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
-        if(currentInventoryAmmo >= 1 && magazineCount < magazine)
+
+        if (currentInventoryAmmo >= 1 && magazineCount < magazine)
         {
             Debug.Log("Reloading");
-            if(currentInventoryAmmo <= magazine - magazineCount)
+
+            if (currentInventoryAmmo <= magazine - magazineCount)
             {
                 magazineCount += currentInventoryAmmo;
                 InventoryManager.Instance.RemoveAmmo(ammoType, currentInventoryAmmo);
 
-                Debug.Log("Reloading Ammount: " + currentInventoryAmmo);
+                Debug.Log("Reloading Amount: " + currentInventoryAmmo);
             }
             else
             {
@@ -141,30 +158,33 @@ public class Weapon : MonoBehaviour
                 magazineCount += ammoNeeded;
                 InventoryManager.Instance.RemoveAmmo(ammoType, ammoNeeded);
 
-                Debug.Log("Reloading Ammount: " + ammoNeeded);
+                Debug.Log("Reloading Amount: " + ammoNeeded);
             }
 
             // SET UI FOR BULLETS
             int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
             Debug.Log("Inventory Ammo: " + inventoryAmmo);
-           GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
-
+            GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
         }
         else
         {
             Debug.Log("Reload failed.");
         }
+
         yield return new WaitForSeconds(timeOfReload);
         canShoot = true;
         canReload = true;
     }
+
+    #endregion
+
+    #region Private Methods
 
     GameObject ProcessRaycast()
     {
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, range))
         {
-
             return hit.transform.gameObject;
         }
         else
@@ -172,4 +192,6 @@ public class Weapon : MonoBehaviour
             return null;
         }
     }
+
+    #endregion
 }

@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class YardEvent : MonoBehaviour
 {
+    #region Serialized Fields
+
     [Space(10)]
     [Header("Serialized Objects")]
 	[Tooltip("The Enemy")]
@@ -31,6 +33,10 @@ public class YardEvent : MonoBehaviour
     [Tooltip("The position for the girl to move to after the event")]
     [SerializeField] Transform girlDestinationPosition;
 
+    #endregion
+
+    #region Event Paramters
+
     [Space(10)]
     [Header("Event - Increase Light Intensity")]
     [Tooltip("Intensity increase of the light over time in milliseconds")]
@@ -54,9 +60,9 @@ public class YardEvent : MonoBehaviour
     [Tooltip("The rotation the player should be moved to after the event")]
     [SerializeField] Vector3 playerRotationAfterEvent = new Vector3(0f, -90f, 0f);
 
-    [Space(10)]
-    [Header("Sounds")]
+    #endregion
 
+    #region Private Fields
 
     int counter = 0;
     Transform girlTransform;
@@ -66,26 +72,44 @@ public class YardEvent : MonoBehaviour
 
     List<int> audioSourceIDList = new List<int>();
 
+    #endregion
+
+    #region Unity Callbacks
+
     void OnTriggerExit(Collider other) 
     {
+        // Check if this is the first time OnTriggerExit is called
         if (firstTime)
         {
+            // Perform one-time actions on the first exit
             firstTime = false;
+
+            // Disable AISensor to stop AI updates during the event
             GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(girl.GetComponent<AISensor>());
+
+            // Activate the girl GameObject
             girl.SetActive(true);
+
+            // Set up and play weeping ghost woman audio on the girl
             AudioManager.Instance.AddAudioSource(girl.GetComponent<AudioSource>());
             AudioManager.Instance.SetAudioClip(girl.GetInstanceID(), "weeping ghost woman", 0.6f, 1f, true);
             AudioManager.Instance.FadeIn(girl.GetInstanceID(), 10f, 0.6f);
+
+            // Open the associated door
             door.OpenDoor();
         }
         else if (secondTime)
         {
+            // Check if this is the second time OnTriggerExit is called
             secondTime = false;
+
+            // Trigger a gameplay event in the GameManager to stop player from moving
             GameManager.Instance.GameplayEvent();
 
+            // Make the player character look at the girl
             GameManager.Instance.playerController.LookAtDirection(girl.transform);
             
-            // Add all flickering lights to CustomUpdateManager
+            // Add all flickering lights to CustomUpdateManager for dynamic updates
             FlickeringLight[] flickeringLights = yardLights.GetComponentsInChildren<FlickeringLight>();
             if (flickeringLights != null)
             {
@@ -94,115 +118,222 @@ public class YardEvent : MonoBehaviour
                     GameManager.Instance.customUpdateManager.AddCustomUpdatable(fLight);
                 }
             }
+            
+            // Add the main light to CustomUpdateManager for dynamic updates
             FlickeringLight flickeringLight = light.GetComponent<FlickeringLight>();
             GameManager.Instance.customUpdateManager.AddCustomUpdatable(flickeringLight);
 
+            // Start coroutines for gradual increase of light intensity,
+            // turning off lights, and ending the event
             StartCoroutine(IncreaseIntensityGradually());
-
             StartCoroutine(LightsOff());
-
             StartCoroutine(EndEvent());
         }
     }
 
+    #endregion
+
+    #region Private Methods
+
+    /// <summary>
+    /// Turn off all lights and reset the reflection probes to adjust to darkness.
+    /// </summary>
+    void Lightning()
+    {
+        // Stop all audio sources associated with lights
+        foreach (int audioSourceID in audioSourceIDList)
+        {
+            AudioManager.Instance.StopAudio(audioSourceID);
+        }
+
+        // Disable flickering lights and turn off all lights in the environment
+        foreach (Light l in allLights.GetComponentsInChildren<Light>())
+        {
+            // Remove flickering lights from CustomUpdateManager for efficiency
+            if (l.GetComponent<FlickeringLight>() != null)
+            {
+                GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(l.GetComponent<FlickeringLight>());
+            }
+
+            // Turn off the light
+            l.enabled = false;
+        }
+
+        // Enable alert lights to create a specific atmosphere
+        for (int i = 0; i < alertLights.Length; i++)
+        {
+            alertLights[i].GetComponent<Light>().enabled = true;
+        }
+
+        // Gradually fade out the audio associated with the girl
+        AudioManager.Instance.FadeOut(girl.GetInstanceID(), 0.5f);
+
+        // Start a coroutine to activate reflection probes gradually
+        StartCoroutine(ActivateProbesGradually());
+    }
+
+    /// <summary>
+    /// Activate the girl for the next phase of the event.
+    /// </summary>
+    void GirlActivation()
+    {
+        // Move the girl to the 2nd floor respawn position
+        girl.transform.position = girlRespawnPosition.position;
+
+        // Add AI to CustomUpdateManager for AI updates after the event
+        GameManager.Instance.customUpdateManager.AddCustomUpdatable(girl.GetComponent<AISensor>());
+
+        // Activate the girl GameObject
+        girl.SetActive(true);
+
+        // Set waypoints for Behavior Tree (BT) navigation
+        EnemyBT girlBT = girl.GetComponent<EnemyBT>();
+        girlBT.waypoints[0] = girlRespawnPosition;
+        girlBT.waypoints[1] = girlDestinationPosition;
+
+        // Enable BT and Sensor components on the girl
+        girlBT.enabled = true;
+        girl.GetComponent<EnemyBT>().enabled = true;
+        girl.GetComponent<AISensor>().enabled = true;
+
+        // Play an audio cue for the activated girl
+        AudioManager.Instance.PlayAudio(girl.GetInstanceID(), 0.6f, 1f, true);
+    }
+
+    #endregion
+
+    #region Coroutines
+
+    /// <summary>
+    /// Gradually increases the intensity of lights in the yard, creating an immersive atmosphere.
+    /// </summary>
     IEnumerator IncreaseIntensityGradually()
     {
+        // Wait for a delay before starting the intensity increase
         yield return new WaitForSeconds(2f);
 
+        // Enable and play audio for each yard light with random volume and pitch
         foreach (Light l in yardLights.GetComponentsInChildren<Light>())
         {
             l.enabled = true;
             float volume = Random.Range(0.3f, 0.8f);
             float pitch = Random.Range(0.8f, 1.2f);
-            // play audio with delay
+
+            // Play audio with a delay and store audio source ID for future control
             bool availableSource = AudioManager.Instance.PlayAudio(l.gameObject.GetInstanceID(), volume, pitch, true);
             if (availableSource)
             {
                 audioSourceIDList.Add(l.gameObject.GetInstanceID());
             }
-            // random delay between each light sound to make it sound more natural
+
+            // Introduce a random delay between each light sound for a natural effect
             yield return new WaitForSeconds(Random.Range(0.1f, 0.5f));
         }
 
+        // Access the main light and its flickering component
         Light mainLight = light.GetComponent<Light>();
-
         FlickeringLight flickeringLight = light.GetComponent<FlickeringLight>();
         flickeringLight.smoothing = 5;
+
+        // Play audio for the main light with a specific clip
         AudioManager.Instance.PlayAudio(light.gameObject.GetInstanceID(), 0.6f, 1f, true);
         audioSourceIDList.Add(light.gameObject.GetInstanceID());
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.environment, "dark piano tension", 1f, 1f);
 
+        // Gradually increase the intensity of all yard lights and the main light
         for (int i = 0; i < intensityInMS; i++)
         {
             foreach (Light l in yardLights.GetComponentsInChildren<Light>())
             {
+                // Adjust various parameters for each light
                 l.intensity += 0.1f;
                 l.range += 0.1f;
                 l.GetComponent<FlickeringLight>().minIntensity += 0.03f;
                 l.GetComponent<FlickeringLight>().maxIntensity += 0.1f;
+
+                // Increase audio volume if an AudioSource is attached
                 if (l.GetComponent<AudioSource>() != null)
                 {
                     l.GetComponent<AudioSource>().volume += 0.05f;
                 }
             }
+
+            // Adjust parameters for the main light
             mainLight.intensity += 0.1f;
             mainLight.range += 0.1f;
             flickeringLight.minIntensity += 0.03f;
             flickeringLight.maxIntensity += 0.1f;
             counter++;
 
+            // Trigger the start of the blindness effect when a specific intensity is reached
             if (counter == startBlindness)
             {
                 StartCoroutine(StartBlindness());
             }
 
+            // Introduce a small delay between intensity increments
             yield return new WaitForSeconds(0.1f);
         }
     }
 
+    /// <summary>
+    /// Initiates the blindness animation for the player and adjusts the camera's focus direction.
+    /// </summary>
     IEnumerator StartBlindness()
     {
+        // Trigger the blindness animation for the player character
         GameManager.Instance.playerAnimController.BlindnessAnimation();
+
+        // Create a temporary transform to store the lookAt position and rotation
         girlTransform = new GameObject("GirlTransform").transform;
         girlTransform.position = lookAtTarget.position;
         girlTransform.rotation = lookAtTarget.rotation;
 
+        // Wait for the specified blinded time duration before adjusting the player's focus direction
         yield return new WaitForSeconds(blindedTime);
         GameManager.Instance.playerController.LookAtDirection(lookAwayTarget);
     }
 
 
+    /// <summary>
+    /// Manages the transition to darkness by triggering lightning, stopping blindness animation,
+    /// and repositioning the girl in front of the player.
+    /// </summary>
     IEnumerator LightsOff()
     {
+        // Wait until the specified intensity increase duration is reached
         yield return new WaitUntil(() => counter == intensityInMS);
+
+        // Trigger the lightning effect to darken the environment
         Lightning();
         yield return new WaitForSeconds(1f);
+
+        // Stop the blindness animation for the player
         GameManager.Instance.playerAnimController.StopBlindnessAnimation();
 
-        // move girl in front of player
-        //////////////////////////////////////////////////////////////////
-        // manually calculated where the girl should be - FIND BETTER SOLUTION
-        //////////////////////////////////////////////////////////////////
+        // Manually calculate and set the position and rotation of the girl
+        // [TODO]: Consider finding a better solution for calculating the position
         girl.transform.position = new Vector3(girlTransform.position.x + 0.2f, girlTransform.position.y - 1.3847f, girlTransform.position.z);
         girl.transform.rotation = Quaternion.Euler(0f, girlTransform.rotation.eulerAngles.y - 180f, 0f);
 
+        // Wait for a specified duration before initiating the next phase
         yield return new WaitForSeconds(lookBackTime);
 
-        // move targetLookAt slowly to girl
+        // Move the lookAtTarget slowly towards the girl's head position
         float elapsedTime = 0f;
         Vector3 startingPosition = lookAwayTarget.position;
         Vector3 targetPosition = girlHead.position;
 
         bool oneShot = false;
 
+        // Gradually interpolate the position of lookAtTarget towards the girl's head
         while (elapsedTime < 10f)
         {
-            // Interpolate the position between starting and target positions over time
             lookAwayTarget.position = Vector3.Lerp(startingPosition, targetPosition, elapsedTime);
-        
-            // Increment the elapsed time based on delta time
+
             elapsedTime += Time.deltaTime * translationSpeed;
 
+            // Trigger a one-shot audio event and push the player back at a specific time
             if (elapsedTime >= 1f && !oneShot)
             {
                 oneShot = true;
@@ -212,6 +343,7 @@ public class YardEvent : MonoBehaviour
                 GameManager.Instance.playerController.PushPlayerBack();
             }
 
+            // Stop all sounds and mark the end of the event after a certain duration
             if (elapsedTime >= 3f)
             {
                 AudioManager.Instance.StopAllExcept(AudioManager.Instance.environment);
@@ -223,100 +355,72 @@ public class YardEvent : MonoBehaviour
         }
     }
 
-    // turn off all lights and reset the reflectionProbes to adjust to darkness
-    void Lightning()
-    {
-        foreach (int audioSourceID in audioSourceIDList)
-        {
-            AudioManager.Instance.StopAudio(audioSourceID);
-        }
-
-        foreach (Light l in allLights.GetComponentsInChildren<Light>())
-        {
-            if (l.GetComponent<FlickeringLight>() != null)
-            {
-                GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(l.GetComponent<FlickeringLight>());
-            }
-            l.enabled = false;
-        }
-
-        for (int i = 0; i < alertLights.Length; i++)
-        {
-            alertLights[i].GetComponent<Light>().enabled = true;
-        }
-
-        AudioManager.Instance.FadeOut(girl.GetInstanceID(), 0.5f);
-
-        StartCoroutine(ActivateProbesGradually());
-    }
-
+    /// <summary>
+    /// Manages the final phase of the event, including displaying a black screen, stopping sounds,
+    /// closing the door, moving the player, and preparing for the next game state.
+    /// </summary>
     IEnumerator EndEvent()
     {
+        // Wait until the end event condition is met
         yield return new WaitUntil(() => endEvent);
-        GameManager.Instance.blackScreen.SetActive(true);
-        
-        // stop all audios
-        // GameManager.Instance.audioManager.StopAll();
-        // Play Heartbeat sound
 
-        // close door
+        // Display a black screen to create a transition effect
+        GameManager.Instance.blackScreen.SetActive(true);
+
+        // Close the door associated with the event
         door.CloseDoor();
 
+        // Wait for a short duration
         yield return new WaitForSeconds(1f);
 
-        // deactivate girl
+        // Deactivate the girl GameObject
         girl.SetActive(false);
 
-        // default targetLookAt
+        // Reset the player's lookAt direction to default
         GameManager.Instance.playerController.LookAtReset();
-        // move player to the inside
+
+        // Move the player to the specified position and rotation after the event
         GameManager.Instance.playerController.transform.position = playerPositionAfterEvent;
         GameManager.Instance.playerController.transform.rotation = Quaternion.Euler(playerRotationAfterEvent);
 
+        // Wait for another short duration
         yield return new WaitForSeconds(1f);
 
-        // fade in blackscreen
+        // Fade in the black screen to transition to the next phase
         GameManager.Instance.StartCoroutine(GameManager.Instance.StartGameWithBlackScreen());
+
+        // Play background music associated with the next phase
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "hospital music", 0.15f, 1f, true);
 
+        // Wait until the background music is no longer playing
         yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(AudioManager.Instance.environment));
 
+        // Stop all sounds, play ambient audio, and set player's voice audio
         AudioManager.Instance.StopAll();
         AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.1f, 1f, true);
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.playerSpeaker, "player3", 0.8f, 1f, false);
 
+        // Wait until the game state transitions to the default state
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
 
+        // Activate the girl for the next phase
         GirlActivation();
+        // Play the player's voice audio after a short delay
         AudioManager.Instance.PlayAudioWithDelay(AudioManager.Instance.playerSpeaker, 2f);
     }
 
-    void GirlActivation()
-    {
-        // move girl to 2nd floor
-        girl.transform.position = girlRespawnPosition.position;
-        // Add AI to CustomUpdateManager
-        GameManager.Instance.customUpdateManager.AddCustomUpdatable(girl.GetComponent<AISensor>());
-        // activate girl
-        girl.SetActive(true);
-        // set waypoints for BT
-        EnemyBT girlBT = girl.GetComponent<EnemyBT>();
-        girlBT.waypoints[0] = girlRespawnPosition;
-        girlBT.waypoints[1] = girlDestinationPosition;
-        // activate BT and Sensor
-        girlBT.enabled = true;
-        girl.GetComponent<EnemyBT>().enabled = true;
-        girl.GetComponent<AISensor>().enabled = true;
-        // play audio
-        AudioManager.Instance.PlayAudio(girl.GetInstanceID(), 0.6f, 1f, true);
-    }
-
+    /// <summary>
+    /// Gradually activates reflection probes, adjusting to the changing environment.
+    /// </summary>
     IEnumerator ActivateProbesGradually()
     {
+        // Iterate through each reflection probe and render it with a delay
         for (int i = 0; i < reflectionProbes.Length; i++)
         {
             reflectionProbes[i].RenderProbe();
             yield return new WaitForSeconds(0.5f);
         }
     }
+
+    #endregion
 }

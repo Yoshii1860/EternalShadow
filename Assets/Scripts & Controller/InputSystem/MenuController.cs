@@ -10,11 +10,15 @@ using UnityEngine.SceneManagement;
 
 public class MenuController : MonoBehaviour, ICustomUpdatable
 {
+    #region Singleton
+
     public static MenuController Instance { get; private set; }
 
-    /////////////////////////////////
-    // Custom file comparer        //
-    /////////////////////////////////
+    #endregion
+
+    #region Custom File Comparer
+
+    // Custom comparer for sorting save files by date
     public class SaveFileComparer : IComparer<string>
     {
         public int Compare(string x, string y)
@@ -23,8 +27,10 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             System.DateTime xDate, yDate;
 
             // Try parsing the date and time from filenames
-            if (System.DateTime.TryParseExact(x, format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out xDate) &&
-                System.DateTime.TryParseExact(y, format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out yDate))
+            if (System.DateTime.TryParseExact(x, format, System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out xDate) &&
+                System.DateTime.TryParseExact(y, format, System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out yDate))
             {
                 // Compare the parsed dates to determine the order
                 return yDate.CompareTo(xDate); // Sorting in descending order (newest first)
@@ -36,15 +42,12 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             }
         }
     }
-    /////////////////////////////////
-    /////////////////////////////////
-    /////////////////////////////////
 
+    #endregion
 
+    #region Menu Canvas Variables
 
-    /////////////////////////////////
-    // Menu Canvas Variables       //
-    /////////////////////////////////
+    [Header("Menu Canvas Settings")]
     [SerializeField] GameObject loadFilePrefab;
     [SerializeField] GameObject saveFilePrefab;
     public GameObject menuCanvas;
@@ -54,48 +57,42 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     [SerializeField] Transform exitButton;
     [SerializeField] Transform loadMenu;
     [SerializeField] Transform saveMenu;
-    Transform[] menus;
     [SerializeField] Transform saveFileContainer;
     [SerializeField] Transform loadFileContainer;
     [SerializeField] Button returnFromLoadButton;
     [SerializeField] Button returnFromSaveButton;
-
     [SerializeField] int maxFiles = 8;
 
     Dictionary<Transform, Vector3> initialButtonPositions = new Dictionary<Transform, Vector3>();
+    Transform[] menus;
     Button[] buttons;
     Button selectedButton;
     int buttonNumber;
     public bool canCloseMenu = true;
     public float customTimer = 0f;
 
+    [Header("Colors")]
     [SerializeField] Color selectedColor;
     [SerializeField] Color unselectedColor;
-    /////////////////////////////////
-    /////////////////////////////////
-    /////////////////////////////////
 
+    #endregion
 
+    #region Menu Controller Variables
 
-    /////////////////////////////////
-    // Menu Controller Variables   //
-    /////////////////////////////////
+    [Header("Menu Controller Settings")]
     public float moveDebounceTime = 0.3f;
 
     bool interact, back;
     Vector2 move;
-    /////////////////////////////////
-    /////////////////////////////////
-    /////////////////////////////////
 
+    #endregion
 
-
-    /////////////////////////////////
-    // Event Functions             //
-    /////////////////////////////////
+    #region Unity Callbacks
 
     void Awake()
     {
+        #region Singleton
+
         // Singleton pattern to ensure only one instance exists
         if (Instance == null)
         {
@@ -110,13 +107,15 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         // Keep the GameManager between scene changes
         DontDestroyOnLoad(gameObject);
 
+        #endregion
+
         menus = new Transform[] { mainMenu, loadMenu, saveMenu };
         initialButtonPositions[newGameButton.transform] = newGameButton.transform.position;
         initialButtonPositions[loadGameButton.transform] = loadGameButton.transform.position;
         initialButtonPositions[exitButton.transform] = exitButton.transform.position;
     }
 
-    void Start() 
+    void Start()
     {
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
@@ -142,19 +141,14 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.MainMenu)
         {
-            if (interact)   Interact();
-            if (back)       Back();
+            if (interact) Interact();
+            if (back) Back();
         }
     }
-    /////////////////////////////////
-    /////////////////////////////////
-    /////////////////////////////////
 
+    #endregion
 
-
-    /////////////////////////////
-    // Menu Input Handler      //
-    /////////////////////////////
+    #region Input Handling
 
     public void OnInteract(InputAction.CallbackContext context)
     {
@@ -178,6 +172,10 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     {
         back = context.ReadValueAsButton();
     }
+
+    #endregion
+
+    #region Menu Interaction Methods
 
     void Interact()
     {
@@ -274,11 +272,9 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         else if (saveMenu.gameObject.activeSelf)    ActivateMenu(mainMenu, mainMenuActive);
     }
 
-    /////////////////////////////
-    /////////////////////////////
-    /////////////////////////////
+    #endregion
 
-
+    #region Menu Activation and Configuration
 
     void ActivateMenu(Transform menu, bool mainMenuState = false)
     {
@@ -362,6 +358,10 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         ActivateMenu(mainMenu, false);
         menuCanvas.SetActive(false);
     }
+
+    #endregion
+
+    #region Save and Load Methods
 
     public void SaveGame()
     {
@@ -451,6 +451,10 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         menuCanvas.SetActive(false);
     }
 
+    #endregion
+
+    #region Return and Exit Methods
+
     void Return(Button returnButton)
     {
         bool isMainMenu = SceneManager.GetActiveScene().name == "MainMenu";
@@ -487,4 +491,6 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             ActivateMenu(mainMenu, true);
         }
     }
+
+    #endregion
 }

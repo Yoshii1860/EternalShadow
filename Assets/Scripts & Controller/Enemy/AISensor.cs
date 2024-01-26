@@ -1,9 +1,10 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AISensor : MonoBehaviour, ICustomUpdatable
 {
+    #region Fields
+
     // FOV variables
     public float distance = 10;
     public float angle = 30;
@@ -14,59 +15,83 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
     public LayerMask occlusionLayers;
     public bool playerInSight = false;
 
-    Collider[] colliders = new Collider[10];
-    Mesh mesh;
-    int count;
-    float scanInterval;
-    float scanTimer;
+    private Collider[] colliders = new Collider[10];
+    private Mesh mesh;
+    private int count;
+    private float scanInterval;
+    private float scanTimer;
+
+    #endregion
+
+    #region MonoBehaviour Callbacks
 
     void Start()
     {
         scanInterval = 1.0f / scanFrequency;
     }
 
+    #endregion
+
+    #region ICustomUpdatable Implementation
+
     public void CustomUpdate(float deltaTime)
+    {
+        ScanUpdate(deltaTime);
+    }
+
+    #endregion
+
+    #region Private Methods
+
+    private void ScanUpdate(float deltaTime)
     {
         scanTimer -= deltaTime;
         if (scanTimer < 0) 
         {
             scanTimer += scanInterval;
-            Scan();
+            PerformScan();
         }
     }
 
-    private void Scan()
+    private void PerformScan()
     {
         count = Physics.OverlapSphereNonAlloc(transform.position, distance, colliders, layers, QueryTriggerInteraction.Collide);
         
         for (int i = 0; i < count; i++)
         {
-            Debug.Log("Scan: " + colliders[i].gameObject.name);
-            if (colliders[i].gameObject.CompareTag("Player"))
+            Debug.Log($"Scan: {colliders[i].gameObject.name}");
+
+            if (colliders[i].CompareTag("Player"))
             {
-                // Calculate the direction to the player
-                Vector3 directionToPlayer = colliders[i].transform.position - transform.position;
-
-                // Calculate the angle between the forward direction of the sensor and the direction to the player
-                float angleToPlayer = Vector3.Angle(transform.forward, directionToPlayer);
-
-                // Check if the player is within the FOV angle
-                if (angleToPlayer <= angle)
-                {
-                    // Perform line of sight check
-                    if (Physics.Linecast(transform.position, colliders[i].transform.position, occlusionLayers))
-                    {
-                        Debug.Log("PlayerInSight: " + playerInSight + " from " + gameObject.name);
-                        playerInSight = true;
-                        return;
-                    }
-                }
+                CheckPlayerInFOV(colliders[i].transform.position);
             }
         }
+
         playerInSight = false;
     }
 
-    Mesh CreateWedgeMesh() 
+    private void CheckPlayerInFOV(Vector3 playerPosition)
+    {
+        // Calculate the direction to the player
+        Vector3 directionToPlayer = playerPosition - transform.position;
+
+        // Calculate the angle between the forward direction of the sensor and the direction to the player
+        float angleToPlayer = Vector3.Angle(transform.forward, directionToPlayer);
+
+        // Check if the player is within the FOV angle
+        if (angleToPlayer <= angle)
+        {
+            // Perform line of sight check
+            if (Physics.Linecast(transform.position, playerPosition, occlusionLayers))
+            {
+                Debug.Log($"PlayerInSight: {playerInSight} from {gameObject.name}");
+                playerInSight = true;
+                return;
+            }
+        }
+    }
+
+    private Mesh CreateWedgeMesh() 
     {
         Mesh mesh = new Mesh();
 
@@ -149,6 +174,10 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
         return mesh;
     }
 
+    #endregion
+
+    #region Unity Callbacks
+
     void OnValidate() 
     {
         mesh = CreateWedgeMesh();
@@ -157,12 +186,23 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
 
     void OnDrawGizmos() 
     {
+        DrawSensorMesh();
+        DrawDetectionRadius();
+    }
+
+    private void DrawSensorMesh()
+    {
         if (mesh) 
         {
             Gizmos.color = meshColor;
             Gizmos.DrawMesh(mesh, transform.position, transform.rotation);
         }
+    }
 
+    private void DrawDetectionRadius()
+    {
         Gizmos.DrawWireSphere(transform.position, distance);
     }
+
+    #endregion
 }

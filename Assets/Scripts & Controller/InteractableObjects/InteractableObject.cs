@@ -1,15 +1,17 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-
 [RequireComponent(typeof(UniqueIDComponent))]
 public class InteractableObject : MonoBehaviour
 {
+    #region Variables
+
     protected Animator anim;
     public bool active = false;
+
+    [Header("Object Properties")]
     [SerializeField] Transform objectPosition;
     [SerializeField] bool rotateX = false;
     [SerializeField] bool rotateY = false;
@@ -18,12 +20,22 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] TextMeshProUGUI objectDescription;
     [SerializeField] string objectNameString;
     [SerializeField] string objectDescriptionString;
+
     Coroutine rotationCoroutine;
+
+    #endregion
+
+    #region Initialization
 
     void Start()
     {
+        // Initialize the animator
         anim = GetComponent<Animator>();
     }
+
+    #endregion
+
+    #region Interaction
 
     public virtual void Interact()
     {
@@ -39,40 +51,19 @@ public class InteractableObject : MonoBehaviour
         GameObject newItem = Instantiate(gameObject, GameManager.Instance.pickupCanvas.transform);
 
         // Deactivate all lights from showcase object
-        Light[] lights = newItem.GetComponentsInChildren<Light>();
-        foreach (Light l in lights)
-        {
-            l.enabled = false;
-        }
+        DeactivateLights(newItem);
 
         // Show Object Details on Screen
         objectName.text = objectNameString;
         objectDescription.text = objectDescriptionString;
 
         // Make in-scene object invisible
-        Renderer renderer = transform.GetComponent<Renderer>();
-        lights = transform.GetComponentsInChildren<Light>();
-        if (renderer != null) 
-        {
-            renderer.enabled = false;
-        }
-        else
-        {
-            Renderer[] renderers = transform.GetComponentsInChildren<Renderer>();
-            foreach (Renderer r in renderers)
-            {
-                r.enabled = false;
-            }
-        }
-        foreach (Light l in lights)
-        {
-            l.enabled = false;
-        }
+        DeactivateRendererAndLights(transform);
 
         // Run Item Code
         StartCoroutine(ItemCode(newItem));
-        
-        //Deactivate Collider
+
+        // Deactivate Collider
         Collider collider = newItem.GetComponent<Collider>();
         if (collider != null) collider.enabled = false;
 
@@ -81,12 +72,50 @@ public class InteractableObject : MonoBehaviour
         newItem.transform.rotation = objectPosition.rotation;
         newItem.transform.localScale = objectPosition.localScale;
 
+        // Rotate the object
         rotationCoroutine = StartCoroutine(RotateObject(newItem));
     }
 
+    void DeactivateRendererAndLights(Transform objTransform)
+    {
+        Renderer renderer = objTransform.GetComponent<Renderer>();
+        Light[] lights = objTransform.GetComponentsInChildren<Light>();
+
+        if (renderer != null)
+        {
+            renderer.enabled = false;
+        }
+        else
+        {
+            Renderer[] renderers = objTransform.GetComponentsInChildren<Renderer>();
+            foreach (Renderer r in renderers)
+            {
+                r.enabled = false;
+            }
+        }
+
+        foreach (Light l in lights)
+        {
+            l.enabled = false;
+        }
+    }
+
+    void DeactivateLights(GameObject obj)
+    {
+        Light[] lights = obj.GetComponentsInChildren<Light>();
+        foreach (Light l in lights)
+        {
+            l.enabled = false;
+        }
+    }
+
+    #endregion
+
+    #region Coroutines
+
     IEnumerator ItemCode(GameObject newItemToDestroy)
     {
-        // Wait for player to return to gameplaye mode
+        // Wait for the player to return to gameplay mode
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
 
         // Stop coroutine to prevent errors before deleting
@@ -98,8 +127,10 @@ public class InteractableObject : MonoBehaviour
         // Deactivate Canvas
         GameManager.Instance.pickupCanvas.SetActive(false);
 
-        // Run object specific code
+        // Run object-specific code
         RunItemCode();
+
+        // Destroy the interactable object
         Destroy(gameObject);
     }
 
@@ -123,8 +154,14 @@ public class InteractableObject : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Item-Specific Code
+
     protected virtual void RunItemCode()
     {
         Debug.Log("Running the base item code if available.");
     }
+
+    #endregion
 }

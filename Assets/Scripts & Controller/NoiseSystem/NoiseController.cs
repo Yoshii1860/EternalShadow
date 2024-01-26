@@ -4,43 +4,58 @@ using UnityEngine;
 
 public class NoiseController : MonoBehaviour
 {
+    #region Variables
+
     [SerializeField] NoiseType noiseType;
     int priority = 0;
     float noiseLevel = 0f;
 
-    /*
-    void OnCollisionStay(Collision other)
-    {
-        if (transform.gameObject.tag == "Player") return;
-        else if (noiseType == NoiseType.SHOOT) return;
-        if (other.gameObject.CompareTag("Player"))
-        {
-            NoiseManager.Instance.UpdateCurrentNoiseData(noiseLevel, priority);
-        }
-    }
-    */
+    #endregion
 
-    public void ShootNoise()
-    {
-        ChangeNoiseType(NoiseType.SHOOT);
-        NoiseManager.Instance.UpdateCurrentNoiseData(noiseLevel, priority);
-    }
+    #region Initialization
 
+    // Start method to initialize noise type
     void Start()
     {
         ChangeNoiseType(noiseType);
     }
 
+    #endregion
+
+    #region Collision and Noise
+
+    /*
+    void OnCollisionStay(Collision other)
+    {
+        // Commented out collision logic, as it seems to be unused or incomplete
+        // If intended to be used, complete the logic and uncomment as needed
+    }
+    */
+
+    // Triggered when a shoot noise occurs
+    public void ShootNoise()
+    {
+        // Change the noise type to shoot and update the noise data
+        ChangeNoiseType(NoiseType.SHOOT);
+        NoiseManager.Instance.UpdateCurrentNoiseData(noiseLevel, priority);
+    }
+
+    // Update the noise level without changing the noise type
     public void UpdateNoiseLevel()
     {
         NoiseManager.Instance.UpdateCurrentNoiseData(noiseLevel, priority);
     }
 
+    #endregion
+
+    #region Noise Type Management
+
+    // Method to change the noise type and update noise data accordingly
     // This method will be automatically called whenever a serialized property is changed in the Inspector
-    public void ChangeNoiseType(NoiseType noiseType)
+    public void ChangeNoiseType(NoiseType newNoiseType)
     {
         // Update the noiseLevel and priority based on the selected noiseType
-        switch (noiseType)
+        switch (newNoiseType)
         {
             case NoiseType.GRASS:
                 noiseLevel = NoiseManager.Instance.noiseData.grassNoiseLevel;
@@ -80,4 +95,6 @@ public class NoiseController : MonoBehaviour
                 break;
         }
     }
+
+    #endregion
 }

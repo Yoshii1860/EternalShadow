@@ -6,39 +6,62 @@ using BehaviorTree;
 
 public class ActionPatrol : Node
 {
-    Transform transform;
-    Animator animator;
-    Transform[] waypoints;
-    NavMeshAgent agent;
+    #region Fields
 
-    int currentWaypointIndex = 0;
+    // References to components
+    private Transform transform;
+    private Animator animator;
+    private Transform[] waypoints;
+    private NavMeshAgent agent;
 
-    float waitTime = 1f;
-    float waitCounter = 0f;
-    bool isWaiting = true;
+    // Patrol-related variables
+    private int currentWaypointIndex = 0;
+    private float waitTime = 1f;
+    private float waitCounter = 0f;
+    private bool isWaiting = true;
 
+    #endregion
+
+    #region Constructors
+
+    // Constructor to initialize references and waypoints
     public ActionPatrol(Transform transform, Transform[] waypoints, NavMeshAgent agent)
     {
         this.transform = transform;
-        animator = transform.GetComponent<Animator>();
+        this.animator = transform.GetComponent<Animator>();
         this.waypoints = waypoints;
         this.agent = agent;
     }
 
+    #endregion
+
+    #region Public Methods
+
+    // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        if (GameManager.Instance.isPaused) return NodeState.RUNNING;
-
-        object obj = GetData("lastKnownPosition");
-        if (obj != null)
+        // Check if the game is paused
+        if (GameManager.Instance.isPaused)
         {
+            // Return RUNNING to indicate that the action is ongoing
+            return NodeState.RUNNING;
+        }
+
+        // Check if there is a last known position, if yes, abort patrol
+        object lastKnownPos = GetData("lastKnownPosition");
+        if (lastKnownPos != null)
+        {
+            // Set state to FAILURE and return
             state = NodeState.FAILURE;
             return state;
         }
 
+        // Check if waiting
         if (isWaiting)
         {
             waitCounter += Time.deltaTime;
+
+            // Check if waiting time is over
             if (waitCounter >= waitTime)
             {
                 isWaiting = false;
@@ -47,27 +70,35 @@ public class ActionPatrol : Node
         }
         else
         {
-            Transform wp;
-            wp = waypoints[currentWaypointIndex];
-            if (Vector3.Distance(transform.position, wp.position) < 0.1f)
+            Transform currentWaypoint = waypoints[currentWaypointIndex];
+
+            // Check if reached the current waypoint
+            if (Vector3.Distance(transform.position, currentWaypoint.position) < 0.1f)
             {
-                transform.position = wp.position;
+                transform.position = currentWaypoint.position;
                 waitCounter = 0f;
                 isWaiting = true;
 
+                // Switch to the next waypoint in a loop
                 currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
+
+                // Reset animation states
                 animator.SetBool("Run", false);
                 animator.SetBool("Walk", false);
             }
             else
             {
+                // Move towards the current waypoint
                 agent.speed = EnemyBT.walkSpeed;
-                agent.SetDestination(wp.position);
+                agent.SetDestination(currentWaypoint.position);
                 animator.SetBool("Walk", true);
             }
         }
 
+        // Return RUNNING to indicate that the action is ongoing
         state = NodeState.RUNNING;
         return state;
     }
+
+    #endregion
 }

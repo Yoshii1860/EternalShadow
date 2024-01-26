@@ -6,29 +6,18 @@ using TMPro;
 
 public class Player : MonoBehaviour, ICustomUpdatable
 {
+    #region Fields
+
     [Tooltip("The health of the player.")]
     public float health = 100f;
     [Tooltip("The stamina of the player.")]
     public float stamina = 100f;
-    //[Tooltip("The regeneration in seconds of the player.")]
-    //public float healthReg = 10f;
-    [Tooltip("If the player is bleeding - reduces health over time.")]
     public bool isBleeding = false;
-    [Tooltip("Field for Debugging isPoisoned bool.")]
-    public bool isPoisonedDebug = false;
-    public bool isNotPoisonedDebug = false;
-    public bool poisonMeDebug = false;
-    [Tooltip("If the player is dizzy - stops at least once a minute for 3 seconds.")]
     public bool isDizzy = false;
-    [Tooltip("If the player is out of stamina - walk slow during 3 seconds.")]
     public bool isOutOfStamina = false;
-    [Tooltip("The stamina consumption timer of the player.")]
     public float staminaConsumptionTimer = 0.1f;
-    [Tooltip("The stamina regeneration timer of the player.")]
     public float staminaReg = 0.4f;
-    [Tooltip("The flashlight of the player.")]
     [SerializeField] Light flashlight;
-    [Tooltip("If the player has a light source.")]
     public bool lightAvail = false;
 
     [SerializeField] string[] painClips;
@@ -36,53 +25,78 @@ public class Player : MonoBehaviour, ICustomUpdatable
     [SerializeField] string[] poisenedClips;
     [SerializeField] string[] dizzyClips;
 
-
     [Space(10)]
     [Header("References")]
     [SerializeField] Image bloodOverlay;
     [SerializeField] Image poisonOverlay;
     [SerializeField] TextMeshProUGUI staminaText;
     [SerializeField] TextMeshProUGUI bulletsText;
-    
-    int playerSpeaker;
-    int playerSpeaker2;
 
+    // Stats-related
     private float reducedStamina;
     private float maxHealth = 100f;
     private float maxStamina = 100f;
-
+    bool healthReg = false;
     bool reducingStamina = false;
     bool increasingStamina = false;
 
+    // Audio-related
     bool isPlaying = false;
     int speakerID;
     int speaker2ID;
     bool breath = false;
     bool breathLouder = false;
     bool breathLoudest = false;
-
     bool isMoaning = false;
+    bool heartbeat = false;
+
+    // Timer-related
     bool waitTimer = false;
     bool timerIsRunning = false;
-    bool heartbeat = false;
-    bool healthReg = false;
     int waitingTime = 15;
 
-    void Update() 
+    #endregion
+
+    #region Unity Lifecycle Methods
+
+    void Start()
     {
-/////////////////////////////////////
-// DEBUG STATEMENT - REMOVE LATER //
-/////////////////////////////////////
-        if(isPoisonedDebug)
+        flashlight.enabled = false;
+        speakerID = AudioManager.Instance.playerSpeaker;
+        speaker2ID = AudioManager.Instance.playerSpeaker2;
+    }
+
+    public void CustomUpdate(float deltaTime)
+    {
+        Breathing();
+        LowLife();
+        if (waitTimer && !timerIsRunning)
+        {
+            timerIsRunning = true;
+            StartCoroutine(WaitTimer(waitingTime));
+        }
+    }
+
+    #endregion
+
+    #region Debug Methods
+
+    public bool isPoisonedDebug = false;
+    public bool isNotPoisonedDebug = false;
+    public bool poisonMeDebug = false;
+
+    void Update()
+    {
+        if (isPoisonedDebug)
         {
             isPoisoned = true;
         }
-        if(isNotPoisonedDebug)
+        if (isNotPoisonedDebug)
         {
             isPoisoned = false;
         }
 
-        if(poisonMeDebug)
+        if (poisonMeDebug)
         {
             Poisoned();
             poisonMeDebug = false;
@@ -105,25 +119,10 @@ public class Player : MonoBehaviour, ICustomUpdatable
             }
         }
     }
-/////////////////////////////////////
 
-    void Start()
-    {
-        flashlight.enabled = false;
-        speakerID = AudioManager.Instance.playerSpeaker;
-        speaker2ID = AudioManager.Instance.playerSpeaker2;
-    }
+    #endregion
 
-    public void CustomUpdate(float deltaTime)
-    {
-        Breathing();
-        LowLife();
-        if (waitTimer && !timerIsRunning)
-        {
-            timerIsRunning = true;
-            StartCoroutine(WaitTimer(waitingTime));
-        }
-    }
+    #region Health and State Methods
 
     void LowLife()
     {
@@ -273,6 +272,57 @@ public class Player : MonoBehaviour, ICustomUpdatable
         timerIsRunning = false;
     }
 
+    #endregion
+
+    #region Stamina Methods
+
+    public void IncreaseStamina() 
+    {
+        if (stamina > maxStamina)
+        {
+            return;
+        }
+        else if (!increasingStamina)
+        {
+            StartCoroutine(IncreaseStaminaOverTime());
+        }
+    }
+
+    public void ReduceStamina()
+    {
+        if (stamina <= 0f)
+        {
+            isOutOfStamina = true;
+            return;
+        }
+        else if (!reducingStamina)
+        {
+            StartCoroutine(ReduceStaminaOverTime());
+        }
+    }
+
+    IEnumerator ReduceStaminaOverTime()
+    {
+        reducingStamina = true;
+        yield return new WaitForSeconds(staminaConsumptionTimer);
+        if (stamina != 0f) stamina -= 1f;
+        staminaText.text = stamina.ToString();
+        reducingStamina = false;
+    }
+
+    IEnumerator IncreaseStaminaOverTime()
+    {
+        increasingStamina = true;
+        yield return new WaitForSeconds(staminaReg);
+        if (stamina < maxStamina) stamina += 1f;
+        staminaText.text = stamina.ToString();
+        increasingStamina = false;
+    }
+
+    #endregion
+
+    #region Stamina Methods
+
     void Breathing()
     {
         if (stamina > 60f)
@@ -336,6 +386,10 @@ public class Player : MonoBehaviour, ICustomUpdatable
         breathLoudest = false;
     }
 
+    #endregion
+
+    #region Property Changing Method
+
     void OnIsPoisonedChanged()
     {
         if (isPoisoned)
@@ -352,6 +406,10 @@ public class Player : MonoBehaviour, ICustomUpdatable
             staminaText.text = stamina.ToString();
         }
     }
+
+    #endregion
+
+    #region Player Actions
 
     public void LightSwitch()
     {
@@ -381,51 +439,14 @@ public class Player : MonoBehaviour, ICustomUpdatable
         Debug.Log("Player died.");
     }
 
-    public void IncreaseStamina() 
-    {
-        if (stamina > maxStamina)
-        {
-            return;
-        }
-        else if (!increasingStamina)
-        {
-            StartCoroutine(IncreaseStaminaOverTime());
-        }
-    }
+    #endregion
 
-    public void ReduceStamina()
-    {
-        if (stamina <= 0f)
-        {
-            isOutOfStamina = true;
-            return;
-        }
-        else if (!reducingStamina)
-        {
-            StartCoroutine(ReduceStaminaOverTime());
-        }
-    }
-
-    IEnumerator ReduceStaminaOverTime()
-    {
-        reducingStamina = true;
-        yield return new WaitForSeconds(staminaConsumptionTimer);
-        if (stamina != 0f) stamina -= 1f;
-        staminaText.text = stamina.ToString();
-        reducingStamina = false;
-    }
-
-    IEnumerator IncreaseStaminaOverTime()
-    {
-        increasingStamina = true;
-        yield return new WaitForSeconds(staminaReg);
-        if (stamina < maxStamina) stamina += 1f;
-        staminaText.text = stamina.ToString();
-        increasingStamina = false;
-    }
+    #region UI Methods
 
     public void SetBulletsUI(int currentBullets, int bulletsInInventory)
     {
         bulletsText.text = currentBullets + "/" + bulletsInInventory;
     }
+
+    #endregion
 }

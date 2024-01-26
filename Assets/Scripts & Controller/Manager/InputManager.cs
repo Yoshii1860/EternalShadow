@@ -5,13 +5,10 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
+    #region Singleton
+
     // Singleton instance
     static InputManager instance;
-
-    PlayerInput playerInput;
-    PlayerController playerController;
-    MenuController menuController;
-    InventoryController inventoryController;
 
     // Create a static reference to the instance
     public static InputManager Instance
@@ -32,6 +29,19 @@ public class InputManager : MonoBehaviour
             return instance;
         }
     }
+
+    #endregion
+
+    #region Fields
+
+    PlayerInput playerInput;
+    PlayerController playerController;
+    MenuController menuController;
+    InventoryController inventoryController;
+
+    #endregion
+
+    #region Initialization
 
     void Awake()
     {
@@ -76,6 +86,10 @@ public class InputManager : MonoBehaviour
             }
         }
     }
+
+    #endregion
+
+    #region Action Map Binding
 
     public void Rebind(string actionMapName)
     {
@@ -254,4 +268,6 @@ public class InputManager : MonoBehaviour
             }
         }
     }
+
+    #endregion
 }

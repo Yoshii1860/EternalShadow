@@ -9,83 +9,10 @@ using System.Timers;
 
 public class GameManager : MonoBehaviour
 {
+    #region Singleton Pattern
+
     public static GameManager Instance { get; private set; }
 
-    public enum GameState
-    {
-        MainMenu,
-        Gameplay,
-        Inventory,
-        Paused,
-        GameOver
-    }
-
-    public enum SubGameState
-    {
-        Default,
-        EventScene,
-        PickUp
-    }
-
-    public GameState CurrentGameState { get; private set; }
-    public SubGameState CurrentSubGameState { get; private set; }
-
-    public GameState LastGameState;
-
-    public GameObject inventoryCanvas;
-    public GameObject inventory;
-    public GameObject pickupCanvas;
-    public Player player;
-    public PlayerController playerController;
-    public PlayerAnimController playerAnimController;
-    public Transform objectPool;
-    public Transform enemyPool;
-    public Transform interactObjectPool;
-    public GameObject blackScreen;
-    [SerializeField] Image progressBar;
-    [SerializeField] Item[] startGameItems;
-
-    public CustomUpdateManager customUpdateManager;
-    PlayerInput playerInput;
-
-    public bool isPaused;
-
-    bool referencesUpdated = false;
-
-
-
-/////////////////////////////////////
-// DEBUG STATEMENT - Delete Files  //
-/////////////////////////////////////
-    [Header("Debug")]
-    [Tooltip("Debug mode for the enemy. If true, the enemy will not attack the player. Set during gamplay.")]
-    public bool noAttackMode = false;
-    [Tooltip("Debug mode for the enemy. If true, the enemy will not hear. Set during gamplay.")]
-    public bool noNoiseMode = false;
-    [Tooltip("When set to true, all saved files will be deleted and the bool sets back to false. Set during gameplay.")]
-    [SerializeField] bool _deleteSaveFiles = false;
-
-    // Public property for isPoisoned
-    public bool deleteSaveFiles
-    {
-        get => _deleteSaveFiles;
-        set
-        {
-            if (_deleteSaveFiles != value)
-            {
-                _deleteSaveFiles = value;
-            }
-        }
-    }
-/////////////////////////////////////
-/////////////////////////////////////
-/////////////////////////////////////
-
-
-
-/////////////////////////////////////
-// Singleton Pattern               //
-/////////////////////////////////////
     private void Awake()
     {
         // Singleton pattern to ensure only one instance exists
@@ -108,32 +35,116 @@ public class GameManager : MonoBehaviour
         // Get the CustomUpdateManager instance
         customUpdateManager = GetComponent<CustomUpdateManager>();
     }
-/////////////////////////////////////
-/////////////////////////////////////
-/////////////////////////////////////
 
+    #endregion
 
+    #region Enums
 
-/////////////////////////////////////
-// Reference Management            //
-/////////////////////////////////////
+    public enum GameState
+    {
+        MainMenu,
+        Gameplay,
+        Inventory,
+        Paused,
+        GameOver
+    }
+
+    public enum SubGameState
+    {
+        Default,
+        EventScene,
+        PickUp
+    }
+
+    #endregion
+
+    #region Fields
+
+    // Game state variables
+    public GameState CurrentGameState { get; private set; }
+    public SubGameState CurrentSubGameState { get; private set; }
+    public GameState LastGameState;
+
+    // Game objects and components
+    [Header("Game Objects")]
+    public GameObject inventoryCanvas;
+    public GameObject inventory;
+    public GameObject pickupCanvas;
+    public Player player;
+    public PlayerController playerController;
+    public PlayerAnimController playerAnimController;
+    public Transform objectPool;
+    public Transform enemyPool;
+    public Transform interactObjectPool;
+    public GameObject blackScreen;
+
+    [Header("UI Components")]
+    [SerializeField] Image progressBar;
+
+    [Header("Game Initialization")]
+    [SerializeField] Item[] startGameItems;
+
+    // Custom Update Manager and Input System
+    [Header("Custom Update System")]
+    public CustomUpdateManager customUpdateManager;
+    PlayerInput playerInput;
+
+    // Pause and debug flags
+    [Header("Pause Flag")]
+    public bool isPaused;
+
+    bool referencesUpdated = false;
+
+    #endregion
+
+    #region Debug
+
+    [Header("Debug")]
+    [Tooltip("Debug mode for the enemy. If true, the enemy will not attack the player. Set during gameplay.")]
+    public bool noAttackMode = false;
+    [Tooltip("Debug mode for the enemy. If true, the enemy will not hear. Set during gameplay.")]
+    public bool noNoiseMode = false;
+    [Tooltip("When set to true, all saved files will be deleted and the bool sets back to false. Set during gameplay.")]
+    [SerializeField] bool _deleteSaveFiles = false;
+
+    // Public property for deleteSaveFiles
+    public bool DeleteSaveFiles
+    {
+        get => _deleteSaveFiles;
+        set
+        {
+            if (_deleteSaveFiles != value)
+            {
+                _deleteSaveFiles = value;
+            }
+        }
+    }
+
+    #endregion
+
+    #region Reference Management
+
     void UpdateReferences()
     {
-        Debug.Log("Reference will be updated!");
+        Debug.Log("Updating references...");
 
+        // Find and assign player and related components
         player = FindObjectOfType<Player>();
         if (playerAnimController == null) playerAnimController = FindObjectOfType<PlayerAnimController>();
         if (playerController == null)  playerController = FindObjectOfType<PlayerController>();
         if (pickupCanvas == null) pickupCanvas = GameObject.FindWithTag("PickupCanvas");
         pickupCanvas.SetActive(false);
 
+        // Find and assign inventory components
         inventory = GameObject.FindWithTag("Inventory");
         inventoryCanvas = inventory.transform.GetChild(0).gameObject;
 
+        // Find and assign object pools
         objectPool = GameObject.FindWithTag("ObjectPool").transform;
         enemyPool = GameObject.FindWithTag("EnemyPool").transform;
         interactObjectPool = GameObject.FindWithTag("InteractObjectPool").transform;
 
+        // Update references in InventoryManager
         if(InventoryManager.Instance != null)
         {
             InventoryManager.Instance.UpdateReferences();
@@ -145,6 +156,7 @@ public class GameManager : MonoBehaviour
 
     void UpdateCustomUpdatables()
     {
+        // Add relevant components to CustomUpdateManager
         customUpdateManager.AddCustomUpdatable(MenuController.Instance);
         
         if (player != null) 
@@ -169,17 +181,14 @@ public class GameManager : MonoBehaviour
 
         referencesUpdated = true;
     }
-/////////////////////////////////////
-/////////////////////////////////////
-/////////////////////////////////////
 
+    #endregion
 
+    #region Start and Initialization
 
-/////////////////////////////////////
-// Start Game                      //
-/////////////////////////////////////
     private void Start()
     {
+        // Check if the current scene is the main menu
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
             UpdateCustomUpdatables();
@@ -198,35 +207,38 @@ public class GameManager : MonoBehaviour
 
     IEnumerator StartWithUpdatedReferences()
     {
+        // Wait until references are updated before starting the game
         yield return new WaitUntil(() => referencesUpdated);
+
+        // Set initial audio and add starting items
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "night sound");
         AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.5f, 1f, true);
+
         foreach (Item item in startGameItems)
         {
             InventoryManager.Instance.AddItem(item);
         }
+
         referencesUpdated = false;
     }
-/////////////////////////////////////
-/////////////////////////////////////
-/////////////////////////////////////
 
+    #endregion
 
+    #region DEBUG STATEMENT - Delete Files
 
-/////////////////////////////////////
-// DEBUG STATEMENT - Delete Files //
-/////////////////////////////////////
     private void Update()
     {
-        if (deleteSaveFiles)
+        // Check if deleteSaveFiles flag is true and delete save files
+        if (DeleteSaveFiles)
         {
             DeleteAllSaveFiles();
-            deleteSaveFiles = false;
+            DeleteSaveFiles = false;
         }
     }
 
     public void DeleteAllSaveFiles()
     {
+        // Delete all save files with .shadow extension
         string[] saveFiles = Directory.GetFiles(Application.persistentDataPath, "*.shadow");
 
         foreach (string saveFile in saveFiles)
@@ -238,15 +250,11 @@ public class GameManager : MonoBehaviour
         Debug.Log("##### All Save Files Deleted");
         Debug.Log("##############################");
     }
-/////////////////////////////////////
-/////////////////////////////////////
-/////////////////////////////////////
 
+    #endregion
 
+    #region Start Management
 
-/////////////////////////////////////
-// Game State Management           //
-/////////////////////////////////////
     public void StartGame()
     {
         // Add code to initialize the gameplay
@@ -295,6 +303,10 @@ public class GameManager : MonoBehaviour
         SetGameState(GameState.Gameplay, SubGameState.Default);
         Debug.Log("BlackScreen Stop");
     }
+
+    #endregion
+
+    #region Game State Management
 
     public void Inventory()
     {
@@ -458,15 +470,10 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
-/////////////////////////////////////
-/////////////////////////////////////
-/////////////////////////////////////
+    #endregion
 
+    #region Save and Load
 
-
-/////////////////////////////////////
-// Save/Load Game                  //
-/////////////////////////////////////
     public void LoadNewGame()
     {
         // Add code to initialize a new game
@@ -703,10 +710,5 @@ public class GameManager : MonoBehaviour
         // Scene is fully loaded
         Debug.Log("Scene " + sceneName + " is fully loaded!");
     }
-/////////////////////////////////////
-/////////////////////////////////////
-/////////////////////////////////////
-
-
-
+    #endregion
 }

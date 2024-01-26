@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+#region Save Data Classes
+
 [System.Serializable]
 public class ItemData
 {
@@ -51,9 +53,13 @@ public class InteractableObjectData
     public bool active;
 }
 
+#endregion
+
 [System.Serializable]
 public class SaveData
 {
+    #region Variables
+
     public string sceneName;
     public float health;
     public float[] position;
@@ -63,17 +69,17 @@ public class SaveData
     public List<EnemyData> enemies;
     public List<InteractableObjectData> interactableObjects;
 
+    #endregion
+
     public SaveData (Player player, Transform weaponPool, Transform objectPool, Transform enemyPool, Transform interactableObjectsPool)
     {
-        ////////////////////////////
-        // Save Scene Name
-        ////////////////////////////
+        #region Save Scene
 
         sceneName = SceneManager.GetActiveScene().name;
 
-        ////////////////////////////
-        // Save Player Stats
-        ////////////////////////////
+        #endregion
+
+        #region Save Player Data
         
         health = player.health;
 
@@ -82,9 +88,9 @@ public class SaveData
         position[1] = player.transform.position.y;
         position[2] = player.transform.position.z;
 
-        ////////////////////////////
-        // Save Inventory
-        ////////////////////////////
+        #endregion
+
+        #region Save Inventory Items
 
         items = new List<ItemData>();
         foreach (Item item in InventoryManager.Instance.Items)
@@ -103,9 +109,9 @@ public class SaveData
             items.Add(itemData);
         }
 
-        ////////////////////////////
-        // Save Weapons
-        ////////////////////////////
+        #endregion
+
+        #region Save Weapons
 
         weapons = new List<WeaponData>();
         for (int i = 0; i < weaponPool.childCount; i++)
@@ -119,9 +125,9 @@ public class SaveData
             weapons.Add(weaponData);
         }
 
-        ////////////////////////////
-        // Save Pickup Objects
-        ////////////////////////////
+        #endregion
+
+        #region Save Pickup Objects
 
         pickupObjects = new List<PickupObjectData>();
         foreach (ItemController pickupObject in objectPool.GetComponentsInChildren<ItemController>())
@@ -133,9 +139,9 @@ public class SaveData
             pickupObjects.Add(objectData);
         }
 
-        ////////////////////////////
-        // Save Enemies
-        ////////////////////////////
+        #endregion
+
+        #region Save Enemies
 
         enemies = new List<EnemyData>();
         foreach (Enemy enemy in enemyPool.GetComponentsInChildren<Enemy>())
@@ -157,9 +163,9 @@ public class SaveData
             enemies.Add(enemyData);
         }
 
-        ////////////////////////////
-        // Save Interactable Objects
-        ////////////////////////////
+        #endregion
+
+        #region Save Interactable Objects
 
         interactableObjects = new List<InteractableObjectData>();
         foreach (InteractableObject intObj in interactableObjectsPool.GetComponentsInChildren<InteractableObject>())
@@ -170,5 +176,7 @@ public class SaveData
 
             interactableObjects.Add(intObjData);
         }
+
+        #endregion
     }
 }

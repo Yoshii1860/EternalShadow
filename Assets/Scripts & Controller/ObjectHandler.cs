@@ -5,25 +5,49 @@ using UnityEngine.InputSystem;
 
 public class ObjectHandler : MonoBehaviour
 {
+    #region Fields
+
     // [SerializeField] private InputActionReference input;
     [SerializeField] float pickupDistance = 5f;
-    ItemActions action;
+    private ItemActions action;
 
-    void Start() 
+    #endregion
+
+    #region Unity Lifecycle Methods
+
+    void Start()
     {
+        // Initialize references on Start
         UpdateReferences();
     }
 
+    #endregion
+
+    #region Public Methods
+
+    /// <summary>
+    /// Execute the ObjectHandler functionality.
+    /// </summary>
     public void Execute()
     {
         DetectObjects();
     }
 
+    /// <summary>
+    /// Update references to other components.
+    /// </summary>
     public void UpdateReferences()
     {
         action = GetComponent<ItemActions>();
     }
 
+    #endregion
+
+    #region Private Methods
+
+    /// <summary>
+    /// Detect objects in front of the camera.
+    /// </summary>
     private void DetectObjects()
     {
         RaycastHit hit;
@@ -33,6 +57,7 @@ public class ObjectHandler : MonoBehaviour
             ItemController itemController = hit.collider.gameObject.GetComponent<ItemController>();
             InteractableObject intObj = hit.collider.gameObject.GetComponent<InteractableObject>();
             Door door = hit.collider.gameObject.GetComponent<Door>();
+
             if (itemController != null)
             {
                 intObj.Interact();
@@ -66,9 +91,14 @@ public class ObjectHandler : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Draw a ray in the Scene view for visualization.
+    /// </summary>
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * pickupDistance);
     }
+
+    #endregion
 }

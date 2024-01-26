@@ -4,46 +4,61 @@ using UnityEngine;
 
 public class FlickeringLight : MonoBehaviour, ICustomUpdatable
 {
-    Light light;
+    #region Public Fields
 
     [Tooltip("Minimum random light intensity")]
     public float minIntensity = 0f;
+
     [Tooltip("Maximum random light intensity")]
     public float maxIntensity = 1f;
+
     [Tooltip("Smooth out the randomness")]
     [Range(1, 50)]
     public int smoothing = 5;
 
+    #endregion
+
+    #region Private Fields    
+
+    private Light light;
+
     // Continuous average calculation via FIFO queue
-    // Saves us iterating every time we update, we just change by the delta
-    Queue<float> smoothQueue;
-    float lastSum = 0;
+    // Saves us iterating every time we update; we just change by the delta
+    private Queue<float> smoothQueue;
+    private float lastSum = 0;
 
+    #endregion
 
-    /// <summary>
-    /// Reset the randomness and start again. You usually don't need to call
-    /// this, deactivating/reactivating is usually fine but if you want a strict
-    /// restart you can do.
-    /// </summary>
-    public void Reset() 
-    {
-        smoothQueue.Clear();
-        lastSum = 0;
-    }
+    #region Unity Lifecycle Methods
 
-    void Start() 
+    void Start()
     {
         smoothQueue = new Queue<float>(smoothing);
         light = GetComponent<Light>();
     }
 
-    public void CustomUpdate(float deltaTime) 
+    #endregion
+
+    #region Flickering Implementation
+
+    /// <summary>
+    /// Reset the randomness and start again. You usually don't need to call
+    /// this; deactivating/reactivating is usually fine, but if you want a strict
+    /// restart, you can do.
+    /// </summary>
+    public void Reset()
+    {
+        smoothQueue.Clear();
+        lastSum = 0;
+    }
+
+    public void CustomUpdate(float deltaTime)
     {
         if (light == null)
             return;
 
         // pop off an item if too big
-        while (smoothQueue.Count >= smoothing) 
+        while (smoothQueue.Count >= smoothing)
         {
             lastSum -= smoothQueue.Dequeue();
         }
@@ -56,4 +71,6 @@ public class FlickeringLight : MonoBehaviour, ICustomUpdatable
         // Calculate new smoothed average
         light.intensity = lastSum / (float)smoothQueue.Count;
     }
+
+    #endregion
 }

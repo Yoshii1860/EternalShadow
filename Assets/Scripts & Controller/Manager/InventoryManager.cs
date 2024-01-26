@@ -7,47 +7,17 @@ using UnityEngine.SceneManagement;
 
 public class InventoryManager : MonoBehaviour
 {
+    #region Singleton
+
     public static InventoryManager Instance;
-    public List<Item> Items = new List<Item>();
 
-    [Space(10)]
-    [Header("Inventory Settings")]
-    [Tooltip("The prefab that will be used to display the inventory items")]
-    public GameObject inventoryItem;
-    [Tooltip("The prefab that will be used to display the inventory item display")]
-    public GameObject itemDisplay;
-    [Tooltip("The force that will be applied to the dropped item")]
-    public float dropForce;
-    // 
-    Transform[] gridLayouts;
-    public Transform itemContent;
-    public Transform itemPreview;
-    public GameObject weapons;
-    GameObject player;
-    Ammo ammo;
-
-    [Space(10)]
-    [Header("Colors")]
-    [Tooltip("The color of the selected item")]
-    public Color selectedColor;
-    [Tooltip("The color of the unselected item")]
-    public Color unselectedColor;
-    [Tooltip("The color of the highlighted item")]
-    public Color highlightedColor;
-
-    [Space(10)]
-    [Header("Only for Debugging)")]
-    public Item selectedItem;
-    public int highlightNumber;
-    public int selectedActionNumber;
-    public int itemActionNumber;
-    public bool itemActionsOpen;
-    public int actionsChildCount;
-
-    // The Image components of the item actions
-    Image[] itemCanvasActions;
-
+    // Create a static reference to the instance
     private void Awake()
+    {
+        InitializeSingleton();
+    }
+
+    void InitializeSingleton()
     {
         // Singleton pattern to ensure only one instance exists
         if (Instance == null)
@@ -64,22 +34,64 @@ public class InventoryManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    #endregion
+
+    #region Fields
+
+        public List<Item> Items = new List<Item>();
+
+        [Space(10)]
+        [Header("Inventory Settings")]
+        [Tooltip("The prefab that will be used to display the inventory items")]
+        public GameObject inventoryItem;
+        [Tooltip("The prefab that will be used to display the inventory item display")]
+        public GameObject itemDisplay;
+        [Tooltip("The force that will be applied to the dropped item")]
+        public float dropForce;
+
+        // Additional fields
+        Transform[] gridLayouts;
+        public Transform itemContent;
+        public Transform itemPreview;
+        public GameObject weapons;
+        GameObject player;
+        Ammo ammo;
+
+        [Space(10)]
+        [Header("Colors")]
+        [Tooltip("The color of the selected item")]
+        public Color selectedColor;
+        [Tooltip("The color of the unselected item")]
+        public Color unselectedColor;
+        [Tooltip("The color of the highlighted item")]
+        public Color highlightedColor;
+
+        [Space(10)]
+        [Header("Only for Debugging)")]
+        public Item selectedItem;
+        public int highlightNumber;
+        public int selectedActionNumber;
+        public int itemActionNumber;
+        public bool itemActionsOpen;
+        public int actionsChildCount;
+
+        // The Image components of the item actions
+        Image[] itemCanvasActions;
+
+        #endregion
+
+    #region Initialization
+
     void Start()
     {
-        gridLayouts = FindGridLayoutGroups();
-        itemContent = gridLayouts[1]; 
-        itemPreview = gridLayouts[2];
+        InitializeReferences();
     }
 
-    public void UpdateReferences()
+    void InitializeReferences()
     {
-        player = GameManager.Instance.player.gameObject;
-        weapons = FindObjectOfType<WeaponSwitcher>().gameObject;
-        ammo = player.GetComponent<Ammo>();
-
-        GetComponent<ItemActions>().UpdateReferences();
-        GetComponent<ObjectHandler>().UpdateReferences();
-        GetComponent<Potion>().UpdateReferences();
+        gridLayouts = FindGridLayoutGroups();
+        itemContent = gridLayouts[1];
+        itemPreview = gridLayouts[2];
     }
 
     private Transform[] FindGridLayoutGroups(Transform parent = null)
@@ -113,6 +125,25 @@ public class InventoryManager : MonoBehaviour
         // If no GridLayoutGroup was found, return null
         return null;
     }
+
+    #endregion
+
+    #region Update References
+
+    public void UpdateReferences()
+    {
+        player = GameManager.Instance.player.gameObject;
+        weapons = FindObjectOfType<WeaponSwitcher>().gameObject;
+        ammo = player.GetComponent<Ammo>();
+
+        GetComponent<ItemActions>().UpdateReferences();
+        GetComponent<ObjectHandler>().UpdateReferences();
+        GetComponent<Potion>().UpdateReferences();
+    }
+
+    #endregion
+
+    #region Item Management
 
     public void AddItem(Item item)
     {
@@ -271,6 +302,10 @@ public class InventoryManager : MonoBehaviour
         }
         return 0;
     }
+
+    #endregion
+
+    #region UI Handling
 
     public void ListItems()
     {
@@ -476,6 +511,10 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Item Actions
+
     public void DropItem(Item item)
     {
         Debug.Log("InventoryManager.DropItem(" + item.displayName + ")");
@@ -502,4 +541,6 @@ public class InventoryManager : MonoBehaviour
         ListItems();
         BackToSelection();
     }   
+
+    #endregion
 }

@@ -2,34 +2,69 @@
 
 public class BasicRigidBodyPush : MonoBehaviour
 {
-	public LayerMask pushLayers;
-	public bool canPush;
-	[Range(0.5f, 5f)] public float strength = 1.1f;
+    #region Fields
 
-	private void OnControllerColliderHit(ControllerColliderHit hit)
-	{
-		if (canPush) PushRigidBodies(hit);
-	}
+    [Header("Push Settings")]
+    [Tooltip("Layers to consider for pushing")]
+    public LayerMask pushLayers;
 
-	private void PushRigidBodies(ControllerColliderHit hit)
-	{
-		// https://docs.unity3d.com/ScriptReference/CharacterController.OnControllerColliderHit.html
+    [Tooltip("Toggle to enable or disable pushing")]
+    public bool canPush;
 
-		// make sure we hit a non kinematic rigidbody
-		Rigidbody body = hit.collider.attachedRigidbody;
-		if (body == null || body.isKinematic) return;
+    [Range(0.5f, 5f)]
+    [Tooltip("Strength of the push")]
+    public float strength = 1.1f;
 
-		// make sure we only push desired layer(s)
-		var bodyLayerMask = 1 << body.gameObject.layer;
-		if ((bodyLayerMask & pushLayers.value) == 0) return;
+    #endregion
 
-		// We dont want to push objects below us
-		if (hit.moveDirection.y < -0.3f) return;
+    #region Unity Callbacks
 
-		// Calculate push direction from move direction, horizontal motion only
-		Vector3 pushDir = new Vector3(hit.moveDirection.x, 0.0f, hit.moveDirection.z);
+    // Called when a controller hits a collider while performing a Move operation
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (canPush)
+        {
+            // Perform rigid body pushing if enabled
+            PushRigidBodies(hit);
+        }
+    }
 
-		// Apply the push and take strength into account
-		body.AddForce(pushDir * strength, ForceMode.Impulse);
-	}
+    #endregion
+
+    #region Private Methods
+
+    // Push rigid bodies based on collision information
+    private void PushRigidBodies(ControllerColliderHit hit)
+    {
+        // Ensure the hit object has a non-kinematic rigidbody
+        Rigidbody body = hit.collider.attachedRigidbody;
+        if (body == null || body.isKinematic)
+        {
+            // Ignore if the body is null or kinematic
+            return;
+        }
+
+        // Check if the hit object's layer is included in the pushLayers
+        var bodyLayerMask = 1 << body.gameObject.layer;
+        if ((bodyLayerMask & pushLayers.value) == 0)
+        {
+            // Ignore if the layer is not included in pushLayers
+            return;
+        }
+
+        // Avoid pushing objects below the controller
+        if (hit.moveDirection.y < -0.3f)
+        {
+            // Ignore if the hit is from below
+            return;
+        }
+
+        // Calculate the push direction (horizontal motion only)
+        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0.0f, hit.moveDirection.z);
+
+        // Apply the push force, taking strength into account
+        body.AddForce(pushDir * strength, ForceMode.Impulse);
+    }
+
+    #endregion
 }

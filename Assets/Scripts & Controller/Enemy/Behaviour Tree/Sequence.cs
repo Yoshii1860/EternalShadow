@@ -1,16 +1,36 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace BehaviorTree
-{  
+{
+    /// <summary>
+    /// The Sequence node represents a control flow node in the behavior tree.
+    /// It iterates through its children and returns failure if any child fails.
+    /// </summary>
     public class Sequence : Node
     {
+        #region Constructors
+
+        /// <summary>
+        /// Default constructor for Sequence.
+        /// </summary>
         public Sequence() : base() { }
+
+        /// <summary>
+        /// Constructor for Sequence with initial children.
+        /// </summary>
+        /// <param name="children">List of child nodes.</param>
         public Sequence(List<Node> children) : base(children) { }
 
-        // iterate through all children and check the state after evaluating
-        // If any child fails, stop and return failure
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Evaluate the Sequence node by iterating through its children.
+        /// If any child fails, stop and return failure.
+        /// </summary>
+        /// <returns>The state of the Sequence node after evaluation.</returns>
         public override NodeState Evaluate()
         {
             bool isAnyChildRunning = false;
@@ -33,10 +53,12 @@ namespace BehaviorTree
                 }
             }
 
-            // check if some are running and block us in the running state
-            // or if all are successfull and we can return success
+            // Check if some are running and block us in the running state
+            // or if all are successful and we can return success
             state = isAnyChildRunning ? NodeState.RUNNING : NodeState.SUCCESS;
             return state;
         }
+
+        #endregion
     }
 }

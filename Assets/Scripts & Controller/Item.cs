@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#region Enum and CreateAssetMenu
+
+// Enum defining the types of items
 public enum ItemType
 {
     Weapon,
@@ -10,31 +13,62 @@ public enum ItemType
     Object
 }
 
+// CreateAssetMenu attribute to create new items from Unity Editor
 [CreateAssetMenu(fileName = "New Item", menuName = "Item/Create New Item")]
-public class Item : ScriptableObject 
+#endregion
+
+public class Item : ScriptableObject
 {
+    #region Serialized Fields
+
+    [Header("General Properties")]
+    [Tooltip("The display name of the item")]
     public string displayName;
+
+    [Tooltip("The description of the item")]
     public string description;
+
+    [Tooltip("The icon representing the item")]
     public Sprite icon;
+
+    [Tooltip("Path to the icon resource")]
     public string iconPath;
+
+    [Tooltip("Determines if the item is unique")]
     public bool unique;
+
+    [Tooltip("The quantity of the item")]
     public int quantity;
+
+    [Tooltip("The prefab associated with the item")]
     public GameObject prefab;
+
+    [Tooltip("Path to the prefab resource")]
     public string prefabPath;
+
+    [Tooltip("The type of the item")]
     public ItemType type;
 
-    // Additional field for AmmoType, only visible when ItemType is Ammo
-    [SerializeField]
-    private Ammo.AmmoType ammoType;
+    #endregion
+
+    #region Additional Fields
+
+    [Header("Additional Fields")]
+    [Tooltip("Ammo type of the item (visible when ItemType is Ammo)")]
+    [SerializeField] private Ammo.AmmoType ammoType;
+
+    [Tooltip("Potion type of the item (visible when ItemType is Potion)")]
+    [SerializeField] private Potion.PotionType potionType;
+
+    #endregion
+
+    #region Properties
 
     public Ammo.AmmoType AmmoType
     {
         get
         {
-            if (type == ItemType.Ammo)
-                return ammoType;
-            else
-                return Ammo.AmmoType.None; // Return a default value for non-Bullet items
+            return type == ItemType.Ammo ? ammoType : Ammo.AmmoType.None;
         }
         set
         {
@@ -42,24 +76,21 @@ public class Item : ScriptableObject
         }
     }
 
-    // Additional field for PotionType, only visible when ItemType is Potion
-    [SerializeField]
-    private Potion.PotionType potionType;
-
     public Potion.PotionType PotionType
     {
         get
         {
-            if (type == ItemType.Potion)
-                return potionType;
-            else
-                return Potion.PotionType.None; // Return a default value for non-Potion items
+            return type == ItemType.Potion ? potionType : Potion.PotionType.None;
         }
         set
         {
             potionType = value;
         }
     }
+
+    #endregion
+
+    #region Unity Editor Callbacks
 
     // This method will be called when the Item asset is created or modified in the Unity Editor.
     private void OnValidate()
@@ -69,6 +100,10 @@ public class Item : ScriptableObject
 
         if (prefab != null) prefabPath = GetResourcePath(prefab);
     }
+
+    #endregion
+
+    #region Helper Methods
 
     // Helper method to get the resource path of an object.
     private string GetResourcePath(Object obj)
@@ -92,5 +127,6 @@ public class Item : ScriptableObject
             return null;
         }
     }
-}
 
+    #endregion
+}

@@ -10,9 +10,9 @@ public class EnemyManager : MonoBehaviour
     // Store enemy-related data here
     public Dictionary<Transform, Enemy> enemyDataDictionary = new Dictionary<Transform, Enemy>();
 
-/////////////////////////////////////
-// Singleton Pattern               //
-/////////////////////////////////////
+    #region Singleton Pattern
+
+    // Awake is called before Start
     private void Awake()
     {
         // Singleton pattern to ensure only one instance exists
@@ -29,16 +29,19 @@ public class EnemyManager : MonoBehaviour
         // Keep the EnemyManager between scene changes
         DontDestroyOnLoad(gameObject);
     }
-/////////////////////////////////////
-/////////////////////////////////////
-/////////////////////////////////////
 
+    #endregion
 
+    #region Enemy Manager
 
-/////////////////////////////////////
-// Enemy Manager                   //
-/////////////////////////////////////
+    // Start is called before the first frame update
     void Start()
+    {
+        InitializeEnemyPool();
+    }
+
+    // Initialize enemy pool either from GameManager or find by tag
+    private void InitializeEnemyPool()
     {
         if (GameManager.Instance.enemyPool != null)
         {
@@ -51,6 +54,7 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    // Fill the enemy array with data from the enemy pool
     private void FillEnemyArray(Transform enemyPool)
     {
         foreach (Transform enemyTransform in enemyPool)
@@ -78,10 +82,6 @@ public class EnemyManager : MonoBehaviour
     {
         return enemyDataDictionary.TryGetValue(enemyTransform, out enemyData);
     }
-/////////////////////////////////////
-/////////////////////////////////////
-/////////////////////////////////////
 
-
-
+    #endregion
 }

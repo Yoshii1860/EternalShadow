@@ -1,34 +1,34 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Cinemachine;
 
 public class PlayerController : MonoBehaviour, ICustomUpdatable
 {
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Variables
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    #region Movement Variables
 
     [Header("Movement")]
-	[Tooltip("Move speed of the character in m/s")]
-	[SerializeField] float moveSpeed = 4.0f;
+    [Tooltip("Move speed of the character in m/s")]
+    [SerializeField] float moveSpeed = 4.0f;
     [Tooltip("Maximum force applied when moving in m/s")]
     [SerializeField] float maxForce = 1f;
-	[Tooltip("Sprint speed of the character in m/s")]
-	[SerializeField] float sprintSpeed = 6.0f;
-	[Tooltip("Crouch speed of the character in m/s")]
-	[SerializeField] float crouchSpeed = 0.6f;
-	[Tooltip("Rotation speed of the character")]
-	public float rotationSpeed = 1.0f;
+    [Tooltip("Sprint speed of the character in m/s")]
+    [SerializeField] float sprintSpeed = 6.0f;
+    [Tooltip("Crouch speed of the character in m/s")]
+    [SerializeField] float crouchSpeed = 0.6f;
+    [Tooltip("Rotation speed of the character")]
+    public float rotationSpeed = 1.0f;
     [Tooltip("Rotation speed of the character during Gameplay")]
     public float standardRotationSpeed = 1.0f;
-	[Tooltip("Acceleration and deceleration")]
-	[SerializeField] float SpeedChangeRate = 10.0f;
+    [Tooltip("Acceleration and deceleration")]
+    [SerializeField] float SpeedChangeRate = 10.0f;
     [Tooltip("The distance the player will move up or down when crouching")]
     [SerializeField] float crouchYPosition = 1f;
-    
+
+    #endregion
+
+    #region Movement Sounds
+
     [Space(10)]
     [Header("Movement Sounds")]
     [Tooltip("The pitch of the footstep sound")]
@@ -44,23 +44,28 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     [Tooltip("The volume of the footstep sound while crouching")]
     [SerializeField] float crouchVolume = 0.9f;
 
+    #endregion
+
+    #region Cinemachine Variables
 
     [Space(10)]
     [Header("Cinemachine")]
-	[Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
+    [Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
     [SerializeField] GameObject camRoot;
     [Tooltip("How far in degrees can you move the camera up")]
-	[SerializeField] float topClamp = 90.0f;
-	[Tooltip("How far in degrees can you move the camera down")]
-	[SerializeField] float bottomClamp = -90.0f;
-    [Tooltip("The the player follow camera set in Cinemachine Brain")]
-
-    [Space(10)]
-	[SerializeField] CinemachineVirtualCamera cmVirtualCamera;
-    [Tooltip("Additional degress to override the camera when aiming.")]
-	[SerializeField] float focalLength = 33f;
+    [SerializeField] float topClamp = 90.0f;
+    [Tooltip("How far in degrees can you move the camera down")]
+    [SerializeField] float bottomClamp = -90.0f;
+    [Tooltip("The player follow camera set in Cinemachine Brain")]
+    [SerializeField] CinemachineVirtualCamera cmVirtualCamera;
+    [Tooltip("Additional degrees to override the camera when aiming.")]
+    [SerializeField] float focalLength = 33f;
     [Tooltip("The default target for LookAt")]
     [SerializeField] Transform defaultTarget;
+
+    #endregion
+
+    #region Player Components and Input
 
     // The weapon container attached to the player.
     GameObject weaponContainer;
@@ -81,15 +86,18 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     bool isOutOfStamina = false;
     bool isDizzy = false;
 
+    #endregion
+
+    #region Player Input Variables
+
     // Player Input
     Vector2 move, look;
     bool sprint, crouch, aim, fire, interact, reload, inventory, menu;
     float weaponSwitch;
 
+    #endregion
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Event Functions
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    #region Event Functions
 
     void Start()
     {
@@ -108,17 +116,17 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.Gameplay)
         {
             Move();
-            if (fire)                   Fire();
-            else if (interact && !aim)  Interact();
-            if (!aim)                   GameManager.Instance.playerAnimController.AimAnimation(false);
-            if (weaponSwitch != 0)      WeaponSwitch();
-            if (reload)                 Reload();
-            if (inventory)              Inventory();
-            if (menu)                   Menu();
+            if (fire) Fire();
+            else if (interact && !aim) Interact();
+            if (!aim) GameManager.Instance.playerAnimController.AimAnimation(false);
+            if (weaponSwitch != 0) WeaponSwitch();
+            if (reload) Reload();
+            if (inventory) Inventory();
+            if (menu) Menu();
         }
     }
 
-    private void LateUpdate() 
+    private void LateUpdate()
     {
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.Gameplay)
         {
@@ -127,9 +135,9 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         }
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Camera Functions
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    #endregion
+
+    #region Camera Functions
 
     // Set this function to be called when you want to make the camera look at a specific direction
     public void LookAtDirection(Transform direction)
@@ -143,9 +151,9 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         cmVirtualCamera.LookAt = defaultTarget;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Input Functions
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    #endregion
+
+    #region Input Functions
 
     public void OnMove(InputAction.CallbackContext context)
     {
@@ -181,7 +189,6 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         fire = context.ReadValueAsButton();
     }
 
-
     public void OnInteract(InputAction.CallbackContext context)
     {
         interact = context.ReadValueAsButton();
@@ -214,14 +221,15 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             Light();
         }
     }
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // GameManager Functions
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    #endregion
+
+    #region GameManager Functions
 
     public void GamePlayEvent()
     {
         // Disable player movement
-        if (crouch) 
+        if (crouch)
         {
             crouch = false;
             Crouch();
@@ -233,14 +241,14 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         reload = false;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Gameplay Functions
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+    #endregion
+
+    #region Gameplay Functions
 
     void Move()
     {
         // Make Player move slower for 3 seconds
-        if (player.isOutOfStamina && !isOutOfStamina)   
+        if (player.isOutOfStamina && !isOutOfStamina)
         {
             MoveOutOfStamina();
         }
@@ -251,7 +259,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             MoveDefault();
         }
         else
-        {   
+        {
             MoveDefault();
         }
     }
@@ -260,7 +268,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     {
         int audioSourceID = transform.gameObject.GetInstanceID();
 
-        if (sprint && !crouch && !player.isOutOfStamina) 
+        if (sprint && !crouch && !player.isOutOfStamina)
         {
             speed = sprintSpeed;
             if (NoiseManager.Instance.noiseData.runModifier != NoiseManager.Instance.noiseLevelMultiplier)
@@ -271,7 +279,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
             AudioManager.Instance.SetAudioClip(audioSourceID, "stone step", sprintVolume, sprintPitch, true);
         }
-        else if (crouch) 
+        else if (crouch)
         {
             speed = crouchSpeed;
             if (NoiseManager.Instance.noiseData.crouchModifier != NoiseManager.Instance.noiseLevelMultiplier)
@@ -282,7 +290,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
             AudioManager.Instance.SetAudioClip(audioSourceID, "stone step", crouchVolume, crouchPitch, true);
         }
-        else 
+        else
         {
             speed = moveSpeed;
             if (NoiseManager.Instance.noiseData.walkModifier != NoiseManager.Instance.noiseLevelMultiplier)
@@ -298,7 +306,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         Vector3 currentVelocity = rb.velocity;
         Vector3 targetVelocity = new Vector3(move.x, 0, move.y) * speed;
 
-        // Allign direction
+        // Align direction
         targetVelocity = transform.TransformDirection(targetVelocity);
 
         // Calculate forces
@@ -511,9 +519,15 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         GameManager.Instance.player.LightSwitch();
     }
 
+    #endregion
+
+    #region UI Functions
+
     private void OnDrawGizmos() 
     {
         Gizmos.color = Color.red;
         Gizmos.DrawRay(transform.position, Vector3.down * 2f);
     }
+
+    #endregion
 }
