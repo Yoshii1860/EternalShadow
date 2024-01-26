@@ -161,7 +161,8 @@ public class AudioManager : MonoBehaviour
         {
             audioSource.volume = volume;
             audioSource.pitch = pitch;
-            if (audioFile.isReadyToPlay) audioSource.PlayOneShot(audioFile);
+            AudioDataLoadState loadState = audioFile.loadState;
+            if (loadState == AudioDataLoadState.Loaded) audioSource.PlayOneShot(audioFile);
             else
             {
                 Debug.LogWarning($"AudioManager: AudioClip not ready to play - {clipName}");

@@ -80,7 +80,6 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     Rigidbody rb;
     float lookRotation;
     float speed;
-    bool crouchReleased = true;
     float startYPosition;
     float startFocalLength;
     bool isOutOfStamina = false;

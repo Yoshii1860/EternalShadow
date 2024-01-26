@@ -41,7 +41,6 @@ public class Player : MonoBehaviour, ICustomUpdatable
     bool increasingStamina = false;
 
     // Audio-related
-    bool isPlaying = false;
     int speakerID;
     int speaker2ID;
     bool breath = false;

@@ -20,7 +20,7 @@ public class FlickeringLight : MonoBehaviour, ICustomUpdatable
 
     #region Private Fields    
 
-    private Light light;
+    private Light mainLight;
 
     // Continuous average calculation via FIFO queue
     // Saves us iterating every time we update; we just change by the delta
@@ -34,7 +34,7 @@ public class FlickeringLight : MonoBehaviour, ICustomUpdatable
     void Start()
     {
         smoothQueue = new Queue<float>(smoothing);
-        light = GetComponent<Light>();
+        mainLight = GetComponent<Light>();
     }
 
     #endregion
@@ -54,7 +54,7 @@ public class FlickeringLight : MonoBehaviour, ICustomUpdatable
 
     public void CustomUpdate(float deltaTime)
     {
-        if (light == null)
+        if (mainLight == null)
             return;
 
         // pop off an item if too big
@@ -69,7 +69,7 @@ public class FlickeringLight : MonoBehaviour, ICustomUpdatable
         lastSum += newVal;
 
         // Calculate new smoothed average
-        light.intensity = lastSum / (float)smoothQueue.Count;
+        mainLight.intensity = lastSum / (float)smoothQueue.Count;
     }
 
     #endregion

@@ -19,7 +19,7 @@ public class YardEvent : MonoBehaviour
     [Tooltip("All lights of the environment")]
     [SerializeField] GameObject allLights;
     [Tooltip("The main light above the enemy")]
-    [SerializeField] GameObject light;
+    [SerializeField] GameObject mainLight;
     [Tooltip("The reflection probes inside the house")]
     [SerializeField] ReflectionProbe[] reflectionProbes;
     [Tooltip("All red lights inside and outside the house")]
@@ -120,7 +120,7 @@ public class YardEvent : MonoBehaviour
             }
             
             // Add the main light to CustomUpdateManager for dynamic updates
-            FlickeringLight flickeringLight = light.GetComponent<FlickeringLight>();
+            FlickeringLight flickeringLight = mainLight.GetComponent<FlickeringLight>();
             GameManager.Instance.customUpdateManager.AddCustomUpdatable(flickeringLight);
 
             // Start coroutines for gradual increase of light intensity,
@@ -231,13 +231,13 @@ public class YardEvent : MonoBehaviour
         }
 
         // Access the main light and its flickering component
-        Light mainLight = light.GetComponent<Light>();
-        FlickeringLight flickeringLight = light.GetComponent<FlickeringLight>();
+        Light mainLightComp = mainLight.GetComponent<Light>();
+        FlickeringLight flickeringLight = mainLightComp.GetComponent<FlickeringLight>();
         flickeringLight.smoothing = 5;
 
         // Play audio for the main light with a specific clip
-        AudioManager.Instance.PlayAudio(light.gameObject.GetInstanceID(), 0.6f, 1f, true);
-        audioSourceIDList.Add(light.gameObject.GetInstanceID());
+        AudioManager.Instance.PlayAudio(mainLight.GetInstanceID(), 0.6f, 1f, true);
+        audioSourceIDList.Add(mainLight.GetInstanceID());
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.environment, "dark piano tension", 1f, 1f);
 
         // Gradually increase the intensity of all yard lights and the main light
@@ -259,8 +259,8 @@ public class YardEvent : MonoBehaviour
             }
 
             // Adjust parameters for the main light
-            mainLight.intensity += 0.1f;
-            mainLight.range += 0.1f;
+            mainLightComp.intensity += 0.1f;
+            mainLightComp.range += 0.1f;
             flickeringLight.minIntensity += 0.03f;
             flickeringLight.maxIntensity += 0.1f;
             counter++;
@@ -424,3 +424,4 @@ public class YardEvent : MonoBehaviour
 
     #endregion
 }
+
