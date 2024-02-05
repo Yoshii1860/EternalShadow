@@ -50,11 +50,21 @@ public class ActionCheckNoise : Node
         object obj = GetData("noisePosition");
 
         // Check if there is no noise position or if the player is in sight
-        if (obj == null || aiSensor.playerInSight)
+        if (aiSensor.playerInSight)
         {
-            // Clear noise data and set state to FAILURE
+            Debug.Log("ActionCheckNoise: Player in sight!!!");
+            // Clear noise data and set target
             ClearData("noisePosition");
             ClearData("noiseLevel");
+            parent.parent.SetData("target", GameManager.Instance.player.transform);
+            state = NodeState.SUCCESS;
+            return state;
+        }
+        else if (obj == null)
+        {
+            ClearData("noisePosition");
+            ClearData("noiseLevel");
+            // Set state to FAILURE
             state = NodeState.FAILURE;
             return state;
         }

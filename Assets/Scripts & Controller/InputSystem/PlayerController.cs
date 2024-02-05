@@ -103,7 +103,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         rb = GetComponent<Rigidbody>();
         player = GetComponent<Player>();
         weaponContainer = player.transform.GetChild(0).GetChild(0).gameObject;
-        weaponSwitcher = weaponContainer.transform.GetComponent<WeaponSwitcher>();
+        weaponSwitcher = weaponContainer.transform.GetComponentInChildren<WeaponSwitcher>();
+        weaponContainer = weaponSwitcher.gameObject;
         objectHandler = InventoryManager.Instance.GetComponent<ObjectHandler>();
 
         startYPosition = camRoot.transform.localPosition.y;

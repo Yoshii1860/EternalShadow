@@ -37,7 +37,7 @@ public class CustomUpdateManager : MonoBehaviour
         float deltaTime = Time.deltaTime;
 
         // Call CustomUpdate for all registered scripts
-        foreach (var updatable in customUpdatables)
+        foreach (var updatable in customUpdatables.ToArray())
         {
             updatable.CustomUpdate(deltaTime);
         }

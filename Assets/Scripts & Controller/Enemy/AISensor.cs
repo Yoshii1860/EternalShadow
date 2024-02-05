@@ -15,6 +15,8 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
     public LayerMask occlusionLayers;
     public bool playerInSight = false;
 
+    [SerializeField] private Transform head;
+    [SerializeField] private Transform camRoot;
     private Collider[] colliders = new Collider[10];
     private Mesh mesh;
     private int count;
@@ -28,6 +30,10 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
     void Start()
     {
         scanInterval = 1.0f / scanFrequency;
+        if (camRoot == null)
+        {
+            camRoot = GameManager.Instance.player.transform.GetChild(0);
+        }
     }
 
     #endregion
@@ -59,15 +65,12 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
         
         for (int i = 0; i < count; i++)
         {
-            Debug.Log($"Scan: {colliders[i].gameObject.name}");
-
             if (colliders[i].CompareTag("Player"))
             {
                 CheckPlayerInFOV(colliders[i].transform.position);
+                Debug.Log($"{colliders[i].gameObject.name} within sensing area!");
             }
         }
-
-        playerInSight = false;
     }
 
     private void CheckPlayerInFOV(Vector3 playerPosition)
@@ -81,13 +84,24 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
         // Check if the player is within the FOV angle
         if (angleToPlayer <= angle)
         {
+            bool lineOfSight = Physics.Linecast(head.position, camRoot.position, occlusionLayers);
+            Debug.DrawLine(head.position, camRoot.position, lineOfSight ? Color.red : Color.green, 0.5f);
             // Perform line of sight check
-            if (Physics.Linecast(transform.position, playerPosition, occlusionLayers))
+            if (!lineOfSight)
             {
-                Debug.Log($"PlayerInSight: {playerInSight} from {gameObject.name}");
                 playerInSight = true;
+                Debug.Log($"PlayerInSight: {playerInSight} from {gameObject.name}");
                 return;
             }
+            else 
+            {
+                Debug.Log($"Player not in LOS of {gameObject.name}");
+                playerInSight = false;
+            }
+        }
+        {
+            Debug.Log($"Player not in FOV of {gameObject.name}");
+            playerInSight = false;
         }
     }
 
@@ -186,7 +200,7 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
 
     void OnDrawGizmos() 
     {
-        DrawSensorMesh();
+        //DrawSensorMesh();
         DrawDetectionRadius();
     }
 

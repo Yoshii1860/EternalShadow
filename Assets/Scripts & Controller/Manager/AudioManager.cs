@@ -43,12 +43,21 @@ public class AudioManager : MonoBehaviour
 
     #region GameObject References and IDs
 
+    // Debug settings
+    [Header("Debug Settings")]
+    [Tooltip("Enable debug messages and warnings")]
+    public bool debugSettings = true;
+    [Space(10)]
+
     // GameObject references for environment and player speakers
+    [Header("Audio Source Objects")]
     public GameObject environmentObject;
     public GameObject playerSpeakerObject;
     public GameObject playerSpeaker2Object;
+    [Space(10)]
 
     // Instance IDs for environment and player speakers
+    [Header("Audio Source IDs - Do Not Modify")]
     public int environment;
     public int playerSpeaker;
     public int playerSpeaker2;
@@ -76,7 +85,7 @@ public class AudioManager : MonoBehaviour
         {
             audioSourcesList.Add(audioSource);
         }
-        Debug.Log($"AudioManager: Found {audioSources.Length} AudioSources in the scene.");
+        if (debugSettings) Debug.Log($"AUDIO: Found {audioSources.Length} AudioSources in the scene.");
 
         // Load audio files dynamically from Resources folder
         LoadAudioFiles();
@@ -125,7 +134,7 @@ public class AudioManager : MonoBehaviour
                 audioSourcesList.Add(audioSource);
             }
         }
-        Debug.Log($"AudioManager: Found {audioSources.Length} AudioSources in the scene.");
+        if (debugSettings) Debug.Log($"AudioManager: Found {audioSources.Length} AudioSources in the scene.");
     }
 
     // Play a sound by name
@@ -140,12 +149,12 @@ public class AudioManager : MonoBehaviour
             audioSource.pitch = pitch;
             audioSource.loop = loop;
             audioSource.Play();
-            Debug.Log($"AudioManager: Playing {audioSource.clip.name} on {audioSource.gameObject.name}");
+            if (debugSettings) Debug.Log($"AudioManager: Playing {audioSource.clip.name} on {audioSource.gameObject.name}");
             return true;
         }
         else
         {
-            Debug.LogWarning($"AudioManager: Sound not found - {gameObjectID}");
+            if (debugSettings) Debug.LogWarning($"AudioManager: Sound not found - {gameObjectID}");
             return false;
         }
     }
@@ -165,20 +174,20 @@ public class AudioManager : MonoBehaviour
             if (loadState == AudioDataLoadState.Loaded) audioSource.PlayOneShot(audioFile);
             else
             {
-                Debug.LogWarning($"AudioManager: AudioClip not ready to play - {clipName}");
+                if (debugSettings) Debug.LogWarning($"AudioManager: AudioClip not ready to play - {clipName}");
                 return;
             }
-            Debug.Log($"AudioManager: Playing {audioFile.name} on {audioSource.gameObject.name}");
+            if (debugSettings) Debug.Log($"AudioManager: Playing {audioFile.name} on {audioSource.gameObject.name}");
         }
         else
         {
             if (audioSource == null)
             {
-                Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
+                if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
             }
             else
             {
-                Debug.LogWarning($"AudioManager: AudioClip not found - {clipName}");
+                if (debugSettings) Debug.LogWarning($"AudioManager: AudioClip not found - {clipName}");
             }
         }
     }
@@ -202,14 +211,8 @@ public class AudioManager : MonoBehaviour
         }
         else
         {
-            if (audioSource == null)
-            {
-                Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
-            }
-            else
-            {
-                Debug.LogWarning($"AudioManager: AudioClip not found - {clipName}");
-            }
+            if (audioSource == null && debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
+            else if (debugSettings) Debug.LogWarning($"AudioManager: AudioClip not found - {clipName}");
         }
     }
 
@@ -223,10 +226,7 @@ public class AudioManager : MonoBehaviour
             audioSource.Stop();
             audioSource.clip.UnloadAudioData();
         }
-        else
-        {
-            Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
-        }
+        else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
     }
 
     // Fade out audio for an AudioSource
@@ -315,7 +315,7 @@ public class AudioManager : MonoBehaviour
         {
             audioSource.Stop();
         }
-        Debug.Log("AudioManager: Stopping all AudioSources.");
+        if (debugSettings) Debug.Log("AudioManager: Stopping all AudioSources.");
     }
 
     // Stop all AudioSources except the specified one
@@ -341,7 +341,7 @@ public class AudioManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
+            if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
             return false;
         }
     }
@@ -355,10 +355,7 @@ public class AudioManager : MonoBehaviour
         {
             StartCoroutine(SetAudioVolumeCo(audioSource, 0.5f, volume));
         }
-        else
-        {
-            Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
-        }
+        else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
     }
 
     IEnumerator SetAudioVolumeCo(AudioSource audioSource, float duration, float endVolume)
@@ -433,7 +430,7 @@ public class AudioManager : MonoBehaviour
             }
         }
 
-        Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
+        if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
         return null;
     }
 

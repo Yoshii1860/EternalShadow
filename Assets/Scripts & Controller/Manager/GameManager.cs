@@ -64,6 +64,7 @@ public class GameManager : MonoBehaviour
     public GameState CurrentGameState { get; private set; }
     public SubGameState CurrentSubGameState { get; private set; }
     public GameState LastGameState;
+    public SubGameState LastSubGameState;
 
     // Game objects and components
     [Header("Game Objects")]
@@ -300,7 +301,9 @@ public class GameManager : MonoBehaviour
         AudioManager.Instance.LoadAudioSources();
 
         // Set the game state to Gameplay after the fade-out
+        yield return new WaitForSecondsRealtime(5f);
         SetGameState(GameState.Gameplay, SubGameState.Default);
+        playerAnimController.SetBaseLayers();
         Debug.Log("BlackScreen Stop");
     }
 
@@ -336,6 +339,7 @@ public class GameManager : MonoBehaviour
         // Add code to pause the game
         foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
         {
+            Debug.Log("GameManager - PauseGame: Remove " + enemy.name);
             customUpdateManager.RemoveCustomUpdatable(enemy);
         } 
     }
@@ -353,6 +357,7 @@ public class GameManager : MonoBehaviour
         // Add code for picking up an item
         foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
         {
+            Debug.Log("GameManager - PickUp: Remove " + enemy.name);
             customUpdateManager.RemoveCustomUpdatable(enemy);
         }
     }
@@ -364,7 +369,9 @@ public class GameManager : MonoBehaviour
         if (inventoryCanvas.activeSelf) inventoryCanvas.SetActive(false);
         foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
         {
+            Debug.Log("GameManager - ResumeGame: Add " + enemy.name);
             customUpdateManager.AddCustomUpdatable(enemy);
+            Debug.Log("GameManager - ResumeGame: Finish adding");
         } 
     }
 
@@ -377,8 +384,11 @@ public class GameManager : MonoBehaviour
     private void SetGameState(GameState newState, SubGameState newSubGameState = SubGameState.Default)
     {
         LastGameState = CurrentGameState;
+        LastSubGameState = CurrentSubGameState;
         CurrentGameState = newState;
         CurrentSubGameState = newSubGameState;
+
+        Debug.Log("GameManager.cs: SetGameState: " + CurrentGameState + "." + CurrentSubGameState);
 
         // Handle state-specific actions
         switch (CurrentGameState)
@@ -405,15 +415,18 @@ public class GameManager : MonoBehaviour
             case GameState.Gameplay:
                 // Add code for common gameplay behavior (for SubGameState.Default)
                 // This will be executed for all variations unless overridden in substates.
+
                 if (playerInput == null)
                 {
                     playerInput = FindObjectOfType<PlayerInput>();
                 }
+
                 foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
                 {
                     agent.isStopped = false;
                     Debug.Log("GameManager.cs: Move " + agent.name);
                 }
+
                 isPaused = false;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;

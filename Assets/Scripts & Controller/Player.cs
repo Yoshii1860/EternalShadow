@@ -415,6 +415,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
         if (lightAvail)
         {
             flashlight.enabled = !flashlight.enabled;
+            GameManager.Instance.playerAnimController.Flashlight(flashlight.transform.parent.gameObject, flashlight.enabled);
             Debug.Log("Light is available");
         }
         else
