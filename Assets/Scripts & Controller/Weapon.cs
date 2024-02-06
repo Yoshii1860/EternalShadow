@@ -54,9 +54,10 @@ public class Weapon : MonoBehaviour
 
     #region Public Methods
 
-    public void Execute()
+    public void Execute(Weapon weapon)
     {
-        if (canShoot) StartCoroutine(Shoot());
+        if (weapon == null) return;
+        else if (canShoot) StartCoroutine(Shoot(weapon));
     }
 
     public void ExecuteReload()
@@ -75,13 +76,15 @@ public class Weapon : MonoBehaviour
 
     #region Coroutines
 
-    IEnumerator Shoot()
+    IEnumerator Shoot(Weapon weapon)
     {
+        if (string.Compare(weapon.transform.name, "Pistol") != 0) yield break;
         canShoot = false;
 
         if (ammoSlot.GetCurrentAmmo(ammoType) >= 1 && magazineCount >= 1)
         {
             Debug.Log("Shooting");
+            GameManager.Instance.playerAnimController.ShootAnimation();
 
             // if weapon has a NoiseController, make noise
             NoiseController noiseController = GetComponent<NoiseController>();

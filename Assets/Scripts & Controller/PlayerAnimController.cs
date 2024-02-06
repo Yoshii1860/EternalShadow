@@ -9,10 +9,12 @@ public class PlayerAnimController : MonoBehaviour
 
     PlayerController playerController;
     public Animator animator;
-    bool leftOrRight = true;
     bool lightSwitch = false;
     string currentWeapon = "None";
     bool pistolBool = false;
+
+    [SerializeField] GameObject pistol;
+    ParticleSystem muzzleFlash;
 
     FastIKFabric[] fastIKFabricsLeft;
     FastIKFabric[] fastIKFabricsRight;
@@ -57,15 +59,24 @@ public class PlayerAnimController : MonoBehaviour
     public void AimAnimation(bool isAiming)
     {
         // Sets the aiming state of the animation
-        animator.SetBool("Aim", isAiming);
+        if (pistolBool) animator.SetBool("Aim", isAiming);
     }
 
     public void ShootAnimation()
     {
-        // Triggers the shoot animation, alternating between left and right
-        animator.SetTrigger("Shoot");
-        animator.SetBool("LeftOrRight", leftOrRight);
-        leftOrRight = !leftOrRight;
+        // Triggers the shoot animation
+        if (pistolBool) 
+        {
+            // Check if the muzzle flash is already playing
+            if (muzzleFlash.isPlaying) return;
+            // Set the trigger for the shoot animation
+            animator.SetTrigger("Shoot");
+            // Play Shoot Audio
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "pistol shoot", 1f, 1f);
+            // Play Muzzle Flash
+            muzzleFlash.Play();
+            muzzleFlash.transform.GetComponentInChildren<LightFlicker>().StartFlicker();
+        }
     }
 
     public void BlindnessAnimation()
@@ -130,8 +141,27 @@ public class PlayerAnimController : MonoBehaviour
             // Set Weapon active and enable IK fabrics
             weapon.SetActive(true);
 
-            if (string.Compare(weapon.name, "Pistol") == 0) IKFabrics(fastIKFabricsRight, true);
-            else IKFabrics(fastIKFabricsLeft, true);
+            switch (weapon.name)
+            {
+                case "Pistol":
+                    IKFabrics(fastIKFabricsRight, true);
+                    if (!lightSwitch) 
+                    {
+                        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "pistol on", 0.5f, 1.2f);
+                        IKFabrics(fastIKFabricsLeft, true);
+                        IKFabricsTargetChange(weapon.name);
+                    }
+                    break;
+                case "None":
+                    IKFabrics(fastIKFabricsRight, false);
+                    if (!lightSwitch) IKFabrics(fastIKFabricsLeft, false);
+                    break;
+                default:
+                    AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "flashlight on", 0.5f);
+                    IKFabrics(fastIKFabricsLeft, true);
+                    IKFabricsTargetChange("Flashlight");
+                    break;
+            }
         }
 
         // Sets the initial position and rotation of the flashlight
@@ -178,39 +208,24 @@ public class PlayerAnimController : MonoBehaviour
         {
             // Set Weapon inactive and disable IK fabrics
             weapon.SetActive(false);
-            // If weapon is pistol
+
             if (string.Compare(weapon.name, "Pistol") == 0)
             {
-                // Disable right hand IK fabrics
+                AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "pistol off", 0.5f);
                 IKFabrics(fastIKFabricsRight, false);
-                // If flashlight is off
-                // Disable left hand IK fabrics
                 if (!lightSwitch) IKFabrics(fastIKFabricsLeft, false);
             }
-            // If weapon is None
             else if (string.Compare(weapon.name, "None") == 0)
             {
-                // Disable right hand IK fabrics
                 IKFabrics(fastIKFabricsRight, false);
-                // If flashlight is off
-                // Disable right hand IK fabrics
-                if (!lightSwitch) IKFabrics(fastIKFabricsRight, false);
+                if (!lightSwitch) IKFabrics(fastIKFabricsLeft, false);
             }
-            // If weapon is flashlight
             else
             {
-                // if pistol is off
-                // disable left hand IK fabrics
+                AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "flashlight off", 0.5f);
                 if (!pistolBool) IKFabrics(fastIKFabricsLeft, false);
-                // if pistol is on
-                // change IK Fabrics target
                 else IKFabricsTargetChange("Pistol");
             }
-        }
-        else if (isOn)
-        {
-            IKFabricsTargetChange(weapon.name);
-            if (!lightSwitch) IKFabrics(fastIKFabricsLeft, true);
         }
     }
 
@@ -315,6 +330,7 @@ public class PlayerAnimController : MonoBehaviour
 
     void InitializeReferences()
     {
+        muzzleFlash = pistol.GetComponentInChildren<ParticleSystem>();
         fastIKFabricsLeft = shoulderLeft.GetComponentsInChildren<FastIKFabric>();
         fastIKFabricsRight = shoulderRight.GetComponentsInChildren<FastIKFabric>();
         IKFabrics(fastIKFabricsLeft, false);

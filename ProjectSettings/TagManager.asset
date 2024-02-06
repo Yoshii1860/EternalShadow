@@ -27,6 +27,7 @@ TagManager:
   - NameTag
   - DescriptionTag
   - PickupCanvas
+  - FxTemporaire
   layers:
   - Default
   - TransparentFX

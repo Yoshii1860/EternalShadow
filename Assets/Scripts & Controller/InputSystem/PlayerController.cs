@@ -453,14 +453,14 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     {
         fire = false;
 
-        GameManager.Instance.playerAnimController.ShootAnimation();
-
         // loop through weapons and execute the Weapon script that is on the active object
         foreach (Transform child in weaponContainer.transform)
         {
             if (child.gameObject.activeSelf)
             {
-                child.GetComponent<Weapon>().Execute();
+                Weapon weapon = child.GetComponent<Weapon>();
+                weapon.Execute(weapon);
+                return;
             }
         }
     }
