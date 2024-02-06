@@ -90,6 +90,15 @@ public class WeaponSwitcher : MonoBehaviour
 
         // Update the current weapon index
         currentWeaponIndex = nextWeaponIndex;
+
+        // Send information to Anim Controller
+        StartCoroutine(SendWeaponToAnimController(currentWeapon, nextWeapon));
+    }
+
+    IEnumerator SendWeaponToAnimController(Transform currentWeapon, Transform nextWeapon)
+    {
+        yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
+        GameManager.Instance.playerAnimController.SetWeapon(currentWeapon, nextWeapon);
     }
 
     #endregion

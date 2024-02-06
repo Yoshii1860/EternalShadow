@@ -303,7 +303,7 @@ public class GameManager : MonoBehaviour
         // Set the game state to Gameplay after the fade-out
         yield return new WaitForSecondsRealtime(5f);
         SetGameState(GameState.Gameplay, SubGameState.Default);
-        playerAnimController.SetBaseLayers();
+        playerAnimController.SetAnimLayer("None");
         Debug.Log("BlackScreen Stop");
     }
 

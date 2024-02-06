@@ -10,14 +10,28 @@ public class PlayerAnimController : MonoBehaviour
     PlayerController playerController;
     public Animator animator;
     bool leftOrRight = true;
+    bool lightSwitch = false;
+    string currentWeapon = "None";
+    bool pistolBool = false;
 
-    FastIKFabric[] fastIKFabrics;
-    [SerializeField] GameObject fpsArms;
+    FastIKFabric[] fastIKFabricsLeft;
+    FastIKFabric[] fastIKFabricsRight;
+    [SerializeField] GameObject shoulderLeft;
+    [SerializeField] GameObject shoulderRight;
+    [SerializeField] Transform[] flashlightPoints;
+    [SerializeField] Transform[] pistolPoints;
 
+    // Flashlight positions and rotations
     [SerializeField] Vector3 offFlashlightPosition;
     [SerializeField] Vector3 offFlashlightRotation;
     [SerializeField] Vector3 onFlashlightPosition;
     [SerializeField] Vector3 onFlashlightRotation;
+
+    // Pistol positions and rotations
+    [SerializeField] Vector3 offPistolPosition;
+    [SerializeField] Vector3 offPistolRotation;
+    [SerializeField] Vector3 onPistolPosition;
+    [SerializeField] Vector3 onPistolRotation;
 
     #endregion
 
@@ -67,39 +81,77 @@ public class PlayerAnimController : MonoBehaviour
         animator.SetBool("Blinded", false);
     }
 
+    #endregion
+
+    #region Inverse Kinematics
+
+    public void SetWeapon(Transform currentWeapon, Transform nextWeapon)
+    {
+        if (string.Compare(nextWeapon.name, "None") == 0)
+        {
+            pistolBool = false;
+            StartCoroutine(LerpToOnPosition(currentWeapon.gameObject, false));
+            this.currentWeapon = nextWeapon.name;
+            SetAnimLayer(this.currentWeapon);
+        }
+        else if (string.Compare(nextWeapon.name, "Pistol") == 0)
+        {
+            pistolBool = true;
+            StartCoroutine(LerpToOnPosition(nextWeapon.gameObject, true));
+            this.currentWeapon = nextWeapon.name;
+            SetAnimLayer(this.currentWeapon);
+        }
+    }
+
     public void Flashlight(GameObject flashlight, bool isOn)
     {
         if (isOn)
         {
             // Moves the flashlight to the new position and rotation
+            lightSwitch = isOn;
             StartCoroutine(LerpToOnPosition(flashlight, isOn));
-            animator.SetLayerWeight(1, 0);
-            animator.SetLayerWeight(2, 1);
+            SetAnimLayer(currentWeapon);
         }
-        else
+        else if (!isOn)
         {
             // Moves the flashlight to the standard position and rotation
+            lightSwitch = isOn;
             StartCoroutine(LerpToOnPosition(flashlight, isOn));
-            animator.SetLayerWeight(1, 1);
-            animator.SetLayerWeight(2, 0);
+            SetAnimLayer(currentWeapon);
         }
     }
 
     // Lerps the flashlight to the new position and rotation
-    IEnumerator LerpToOnPosition(GameObject flashlight, bool isOn)
+    IEnumerator LerpToOnPosition(GameObject weapon, bool isOn)
     {
+        // If weapon will be enabled
         if (isOn)
         {
-            flashlight.SetActive(true);
-            IKFabrics(true);
+            // Set Weapon active and enable IK fabrics
+            weapon.SetActive(true);
+
+            if (string.Compare(weapon.name, "Pistol") == 0) IKFabrics(fastIKFabricsRight, true);
+            else IKFabrics(fastIKFabricsLeft, true);
         }
 
         // Sets the initial position and rotation of the flashlight
-        Vector3 currentPosition = flashlight.transform.localPosition;
-        Vector3 currentRotation = flashlight.transform.localEulerAngles;
+        Vector3 currentPosition = weapon.transform.localPosition;
+        Vector3 currentRotation = weapon.transform.localEulerAngles;
+
         // Sets the target position and rotation of the flashlight
-        Vector3 targetPosition = isOn ? onFlashlightPosition : offFlashlightPosition;
-        Vector3 targetRotation = isOn ? onFlashlightRotation : offFlashlightRotation;
+        Vector3 targetPosition;
+        Vector3 targetRotation;
+
+        if (string.Compare(weapon.name, "Pistol") == 0)
+        {
+            targetPosition = isOn ? onPistolPosition : offPistolPosition;
+            targetRotation = isOn ? onPistolRotation : offPistolRotation;
+        }
+        else
+        {
+            targetPosition = isOn ? onFlashlightPosition : offFlashlightPosition;
+            targetRotation = isOn ? onFlashlightRotation : offFlashlightRotation;
+        }
 
         float lerpTime = isOn ? 0.5f : 0.1f;
         float positionDistance = isOn ? 0.01f : 40f;
@@ -111,40 +163,149 @@ public class PlayerAnimController : MonoBehaviour
             currentPosition = Vector3.Lerp(currentPosition, targetPosition, lerpTime);
             currentRotation = Vector3.Lerp(currentRotation, targetRotation, lerpTime);
 
-            flashlight.transform.localPosition = currentPosition;
-            flashlight.transform.localEulerAngles = currentRotation;
+            weapon.transform.localPosition = currentPosition;
+            weapon.transform.localEulerAngles = currentRotation;
 
             yield return null;
         }
 
         // Sets the final position and rotation of the flashlight
-        flashlight.transform.localPosition = targetPosition;
-        flashlight.transform.localEulerAngles = currentRotation;
+        weapon.transform.localPosition = targetPosition;
+        weapon.transform.localEulerAngles = currentRotation;
 
+        // If weapon will be disabled
         if (!isOn)
         {
-            flashlight.SetActive(false);
-            IKFabrics(false);
+            // Set Weapon inactive and disable IK fabrics
+            weapon.SetActive(false);
+            // If weapon is pistol
+            if (string.Compare(weapon.name, "Pistol") == 0)
+            {
+                // Disable right hand IK fabrics
+                IKFabrics(fastIKFabricsRight, false);
+                // If flashlight is off
+                // Disable left hand IK fabrics
+                if (!lightSwitch) IKFabrics(fastIKFabricsLeft, false);
+            }
+            // If weapon is None
+            else if (string.Compare(weapon.name, "None") == 0)
+            {
+                // Disable right hand IK fabrics
+                IKFabrics(fastIKFabricsRight, false);
+                // If flashlight is off
+                // Disable right hand IK fabrics
+                if (!lightSwitch) IKFabrics(fastIKFabricsRight, false);
+            }
+            // If weapon is flashlight
+            else
+            {
+                // if pistol is off
+                // disable left hand IK fabrics
+                if (!pistolBool) IKFabrics(fastIKFabricsLeft, false);
+                // if pistol is on
+                // change IK Fabrics target
+                else IKFabricsTargetChange("Pistol");
+            }
+        }
+        else if (isOn)
+        {
+            IKFabricsTargetChange(weapon.name);
+            if (!lightSwitch) IKFabrics(fastIKFabricsLeft, true);
         }
     }
 
     // Sets the base layer (no weapon no flashlight) of the animation
-    public void SetBaseLayers()
+    public void SetAnimLayer(string layerName)
     {
-        // Sets the base layers of the animation
-        animator.SetLayerWeight(1, 1);
-        animator.SetLayerWeight(2, 0);
-        //animator.SetLayerWeight(3, 1);
-        //animator.SetLayerWeight(4, 1);
+        switch (layerName)
+        {
+            case "None":
+                if(!lightSwitch)
+                {
+                    animator.SetLayerWeight(1, 1);
+                    animator.SetLayerWeight(2, 0);
+                    animator.SetLayerWeight(3, 0);
+                    animator.SetLayerWeight(4, 0);
+                }
+                else
+                {
+                    animator.SetLayerWeight(1, 0);
+                    animator.SetLayerWeight(2, 1);
+                    animator.SetLayerWeight(3, 0);
+                    animator.SetLayerWeight(4, 0);
+                }
+                break;
+            case "Pistol":
+                if(!lightSwitch)
+                {
+                    animator.SetLayerWeight(1, 0);
+                    animator.SetLayerWeight(2, 0);
+                    animator.SetLayerWeight(3, 1);
+                    animator.SetLayerWeight(4, 0);
+                }
+                else
+                {
+                    animator.SetLayerWeight(1, 0);
+                    animator.SetLayerWeight(2, 0);
+                    animator.SetLayerWeight(3, 0);
+                    animator.SetLayerWeight(4, 1);
+                }
+                break;
+        }
     }
 
     // Enables or disables all IK fabrics
-    void IKFabrics(bool onOrOff)
+    void IKFabrics(FastIKFabric[] leftOrRight, bool onOrOff)
     {
         // Enables the IK fabrics
-        foreach (FastIKFabric fastIKFabric in fastIKFabrics)
+        foreach (FastIKFabric fastIKFabric in leftOrRight)
         {
             fastIKFabric.enabled = onOrOff;
+        }
+    }
+
+    void IKFabricsTargetChange(string weaponName)
+    {
+        // Changes the target of the IK fabrics
+        foreach (FastIKFabric fastIKFabric in fastIKFabricsLeft)
+        {
+            // Extract the base GameObject name before "#.L_end"
+            string baseName = fastIKFabric.transform.name.Substring(0, fastIKFabric.transform.name.Length - 7);
+
+            if (string.Compare(weaponName, "Pistol") == 0)
+            {
+                foreach (Transform pistolPoint in pistolPoints)
+                {
+                    if (pistolPoint.name.Contains(baseName))
+                    {
+                        if (pistolPoint.name.Contains("Target"))
+                        {
+                            fastIKFabric.Target = pistolPoint;
+                        }
+                        else
+                        {
+                            fastIKFabric.Pole = pistolPoint;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (Transform flashlightPoint in flashlightPoints)
+                {
+                    if (flashlightPoint.name.Contains(baseName))
+                    {
+                        if (flashlightPoint.name.Contains("Target"))
+                        {
+                            fastIKFabric.Target = flashlightPoint;
+                        }
+                        else
+                        {
+                            fastIKFabric.Pole = flashlightPoint;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -154,8 +315,10 @@ public class PlayerAnimController : MonoBehaviour
 
     void InitializeReferences()
     {
-        fastIKFabrics = fpsArms.GetComponentsInChildren<FastIKFabric>();
-        IKFabrics(false);
+        fastIKFabricsLeft = shoulderLeft.GetComponentsInChildren<FastIKFabric>();
+        fastIKFabricsRight = shoulderRight.GetComponentsInChildren<FastIKFabric>();
+        IKFabrics(fastIKFabricsLeft, false);
+        IKFabrics(fastIKFabricsRight, false);
         
         // Initializes references, such as the player controller and animator
         playerController = GetComponent<PlayerController>();

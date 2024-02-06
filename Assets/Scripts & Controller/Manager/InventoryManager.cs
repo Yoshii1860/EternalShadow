@@ -226,6 +226,7 @@ public class InventoryManager : MonoBehaviour
                     {
                         weapons.GetComponent<WeaponSwitcher>().SwitchWeapon(true);
                     }
+                    break;
                 }
             }
         }
