@@ -85,7 +85,14 @@ public class AudioManager : MonoBehaviour
         {
             audioSourcesList.Add(audioSource);
         }
-        if (debugSettings) Debug.Log($"AUDIO: Found {audioSources.Length} AudioSources in the scene.");
+        if (debugSettings)
+        {
+            Debug.Log($"AUDIO: Found {audioSources.Length} AudioSources in the scene.");
+            for (int i = 0; i < audioSources.Length; i++)
+            {
+                Debug.Log($"AUDIO: AudioSource {i + 1} - {audioSources[i].gameObject.name}");
+            }
+        }
 
         // Load audio files dynamically from Resources folder
         LoadAudioFiles();
@@ -157,6 +164,30 @@ public class AudioManager : MonoBehaviour
             if (debugSettings) Debug.LogWarning($"AudioManager: Sound not found - {gameObjectID}");
             return false;
         }
+    }
+
+    // Pause audio for an AudioSource
+    public void PauseAudio(int gameObjectID)
+    {
+        AudioSource audioSource = GetAudioSource(gameObjectID);
+
+        if (audioSource != null)
+        {
+            audioSource.Pause();
+        }
+        else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
+    }
+
+    // Unpause audio for an AudioSource
+    public void UnpauseAudio(int gameObjectID)
+    {
+        AudioSource audioSource = GetAudioSource(gameObjectID);
+
+        if (audioSource != null)
+        {
+            audioSource.UnPause();
+        }
+        else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
     }
 
     // Play a sound one-shot by name

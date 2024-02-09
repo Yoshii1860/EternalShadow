@@ -173,7 +173,11 @@ public class GameManager : MonoBehaviour
             foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
             {
                 customUpdateManager.AddCustomUpdatable(enemy);
-            } 
+            }
+            foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>())
+            {
+                customUpdateManager.AddCustomUpdatable(mannequin);
+            }
         }
         else Debug.LogWarning("GameManager.cs: EnemyPool is null!");
         
@@ -341,7 +345,11 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("GameManager - PauseGame: Remove " + enemy.name);
             customUpdateManager.RemoveCustomUpdatable(enemy);
-        } 
+        }
+        foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>())
+        {
+            customUpdateManager.RemoveCustomUpdatable(mannequin);
+        }
     }
 
     public void GameplayEvent()
@@ -360,6 +368,10 @@ public class GameManager : MonoBehaviour
             Debug.Log("GameManager - PickUp: Remove " + enemy.name);
             customUpdateManager.RemoveCustomUpdatable(enemy);
         }
+        foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>())
+        {
+            customUpdateManager.RemoveCustomUpdatable(mannequin);
+        }
     }
 
     public void ResumeGame()
@@ -372,7 +384,11 @@ public class GameManager : MonoBehaviour
             Debug.Log("GameManager - ResumeGame: Add " + enemy.name);
             customUpdateManager.AddCustomUpdatable(enemy);
             Debug.Log("GameManager - ResumeGame: Finish adding");
-        } 
+        }
+        foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>())
+        {
+            customUpdateManager.AddCustomUpdatable(mannequin);
+        }
     }
 
     public void GameOver()

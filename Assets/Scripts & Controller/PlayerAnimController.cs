@@ -13,6 +13,7 @@ public class PlayerAnimController : MonoBehaviour
     string currentWeapon = "None";
     bool pistolBool = false;
 
+    [SerializeField] GameObject weaponsObj;
     [SerializeField] GameObject pistol;
     ParticleSystem muzzleFlash;
 
@@ -147,7 +148,8 @@ public class PlayerAnimController : MonoBehaviour
                     IKFabrics(fastIKFabricsRight, true);
                     if (!lightSwitch) 
                     {
-                        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "pistol on", 0.5f, 1.2f);
+                        Debug.Log("Weapon: " + weapon.name);
+                        AudioManager.Instance.PlaySoundOneShot(weaponsObj.GetInstanceID(), "pistol on", 0.5f, 1.2f);
                         IKFabrics(fastIKFabricsLeft, true);
                         IKFabricsTargetChange(weapon.name);
                     }
@@ -157,7 +159,7 @@ public class PlayerAnimController : MonoBehaviour
                     if (!lightSwitch) IKFabrics(fastIKFabricsLeft, false);
                     break;
                 default:
-                    AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "flashlight on", 0.5f);
+                    AudioManager.Instance.PlaySoundOneShot(weaponsObj.GetInstanceID(), "flashlight on", 0.5f);
                     IKFabrics(fastIKFabricsLeft, true);
                     IKFabricsTargetChange("Flashlight");
                     break;
@@ -211,7 +213,7 @@ public class PlayerAnimController : MonoBehaviour
 
             if (string.Compare(weapon.name, "Pistol") == 0)
             {
-                AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "pistol off", 0.5f);
+                AudioManager.Instance.PlaySoundOneShot(weaponsObj.GetInstanceID(), "pistol off", 0.5f);
                 IKFabrics(fastIKFabricsRight, false);
                 if (!lightSwitch) IKFabrics(fastIKFabricsLeft, false);
             }
@@ -222,7 +224,7 @@ public class PlayerAnimController : MonoBehaviour
             }
             else
             {
-                AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "flashlight off", 0.5f);
+                AudioManager.Instance.PlaySoundOneShot(weaponsObj.GetInstanceID(), "flashlight off", 0.5f);
                 if (!pistolBool) IKFabrics(fastIKFabricsLeft, false);
                 else IKFabricsTargetChange("Pistol");
             }
