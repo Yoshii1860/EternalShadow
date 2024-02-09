@@ -11,6 +11,9 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     [SerializeField] Transform head;
     [Tooltip("Speed at which the head rotates to face the player")]
     [SerializeField] float headRotationSpeed = 1f;
+    [Tooltip("Array of body parts of the mannequin for death animation")]
+    [SerializeField] Transform[] bodyParts;
+    [SerializeField] Transform[] deathParts;
     #endregion
 
     #region Private Fields
@@ -18,6 +21,7 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     NavMeshAgent navMeshAgent;
     Animator animator;
     bool stopped = true; // Flag to track if the mannequin has stopped moving
+    bool dead = false;
     #endregion
 
     #region MonoBehaviour Callbacks
@@ -35,6 +39,7 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
 
     public void CustomUpdate(float deltaTime)
     {
+        if (dead) return;
         // Update mannequin behaviors
         TurnHead(); // Rotate the mannequin's head to face the player
         MoveMannequin(); // Move the mannequin based on player's visibility
@@ -106,5 +111,58 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
         animator.speed = 1; // Set animator speed to 1 to resume animation
         stopped = false; // Set stopped flag to false to indicate the mannequin has resumed movement
     }
+
+    public void Hit(GameObject hitObject)
+    {
+        if (string.Compare(hitObject.name, "head") == 0)
+        {
+            dead = true;
+            hitObject.GetComponent<Rigidbody>().AddForce(-transform.forward * 5f, ForceMode.Impulse);
+            StartCoroutine(Death());
+        }
+        else
+        {
+            Debug.Log("Mannequin hit by player: " + hitObject.name);
+        }
+    }
+
+    IEnumerator Death()
+    {
+        for (int i = 0; i < bodyParts.Length; i++)
+        {
+            for (int j = 0; j < deathParts.Length; j++)
+            {
+                if (string.Compare(bodyParts[i].name, deathParts[j].name) == 0)
+                {
+                    SwitchBodyPart(bodyParts[i], deathParts[j]);
+                    if (string.Compare(deathParts[j].name, "head") == 0) yield return new WaitForSeconds(1f);
+                    else yield return new WaitForSeconds(0.15f);
+                    break;
+                }
+            }
+        }
+        AudioManager.Instance.StopAudio(gameObject.GetInstanceID());
+        yield return null;
+    }
+
+    private void SwitchBodyPart(Transform bodyPart, Transform deathPart)
+    {
+        bodyPart.position = deathPart.position;
+        bodyPart.rotation = deathPart.rotation;
+        deathPart.gameObject.SetActive(true);
+        bodyPart.gameObject.SetActive(false);
+        if (string.Compare(deathPart.name, "head") == 0)
+        {
+            deathPart.GetComponent<Rigidbody>().AddForce(-transform.forward * 5f, ForceMode.Impulse);
+        }
+        else
+        {
+            // random number between .8 and 1.2
+            float randomVolume = Random.Range(0.6f, 1.0f);
+            float randomPitch = Random.Range(0.8f, 1.2f);
+            AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "wood fall", randomVolume, randomPitch);
+        }
+    }
+
     #endregion
 }

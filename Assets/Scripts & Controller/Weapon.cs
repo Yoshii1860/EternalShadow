@@ -94,6 +94,7 @@ public class Weapon : MonoBehaviour
             }
 
             GameObject target = ProcessRaycast();
+            Debug.Log("Target Hit: " + target.name);
             if (target != null)
             {
                 if (ammoType != Ammo.AmmoType.Infinite)
@@ -112,6 +113,19 @@ public class Weapon : MonoBehaviour
                 {
                     target.GetComponent<Enemy>().TakeDamage(damage);
                     // Hit animation
+                }
+                else
+                {
+                    Transform currentParent = target.transform;
+                    while (currentParent != null && currentParent.GetComponent<Mannequin>() == null)
+                    {
+                        currentParent = currentParent.parent;
+                    }
+
+                    if (currentParent != null)
+                    {
+                        currentParent.GetComponent<Mannequin>().Hit(target);
+                    }
                 }
             }
             else
