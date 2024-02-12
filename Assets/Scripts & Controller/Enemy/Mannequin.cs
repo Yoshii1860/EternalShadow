@@ -22,6 +22,9 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     Animator animator;
     bool stopped = true; // Flag to track if the mannequin has stopped moving
     bool dead = false;
+    public bool move = false;
+    public bool started = false;
+    bool firstAudio = false;
     #endregion
 
     #region MonoBehaviour Callbacks
@@ -31,17 +34,15 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
         player = GameManager.Instance.player.transform;
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-
-        // Play audio and pause it instantly to use Pause/Unpause methods later
-        AudioManager.Instance.PlayAudio(gameObject.GetInstanceID(), 1f, 1f, true); // Play audio for the mannequin
-        AudioManager.Instance.PauseAudio(gameObject.GetInstanceID()); // Pause audio for the mannequin
     }
 
     public void CustomUpdate(float deltaTime)
     {
         if (dead) return;
         // Update mannequin behaviors
+        if (!started) return;
         TurnHead(); // Rotate the mannequin's head to face the player
+        if (!move) return;
         MoveMannequin(); // Move the mannequin based on player's visibility
     }
     #endregion
@@ -106,7 +107,12 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
         // Resume the mannequin's movement
         if (!stopped) return;
         animator.SetTrigger("Walk"); // Trigger the "Walk" animation in the animator
-        AudioManager.Instance.UnpauseAudio(gameObject.GetInstanceID()); // Unpause audio for the mannequin
+        if (!firstAudio) 
+        {
+            AudioManager.Instance.PlayAudio(gameObject.GetInstanceID(), 1f, 1f, true); // Play audio for the mannequin
+            firstAudio = true;
+        }
+        else AudioManager.Instance.UnpauseAudio(gameObject.GetInstanceID()); // Unpause audio for the mannequin
         navMeshAgent.SetDestination(player.position); // Set destination for NavMeshAgent to player's position
         animator.speed = 1; // Set animator speed to 1 to resume animation
         stopped = false; // Set stopped flag to false to indicate the mannequin has resumed movement
@@ -135,14 +141,19 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
                 if (string.Compare(bodyParts[i].name, deathParts[j].name) == 0)
                 {
                     SwitchBodyPart(bodyParts[i], deathParts[j]);
-                    if (string.Compare(deathParts[j].name, "head") == 0) yield return new WaitForSeconds(1f);
-                    else yield return new WaitForSeconds(0.15f);
+                    if (string.Compare(deathParts[j].name, "head") == 0) yield return new WaitForSeconds(2f);
                     break;
                 }
             }
         }
+        AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "mannequin death", 1f, 1f, false);
+        AudioManager.Instance.PlayAudio(gameObject.GetInstanceID());
+        yield return new WaitUntil (() => !AudioManager.Instance.IsPlaying(gameObject.GetInstanceID()));
         AudioManager.Instance.StopAudio(gameObject.GetInstanceID());
-        yield return null;
+        GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(this);
+        AudioManager.Instance.RemoveAudioSource(gameObject.GetInstanceID());
+        yield return new WaitForSeconds(30f);
+        Destroy(gameObject);
     }
 
     private void SwitchBodyPart(Transform bodyPart, Transform deathPart)
@@ -160,7 +171,6 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
             // random number between .8 and 1.2
             float randomVolume = Random.Range(0.6f, 1.0f);
             float randomPitch = Random.Range(0.8f, 1.2f);
-            AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "wood fall", randomVolume, randomPitch);
         }
     }
 
