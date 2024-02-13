@@ -15,17 +15,20 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
     [SerializeField] GameObject monsterAudio;
     int monsterAudioID;
 
+    [SerializeField] GameObject itemLight;
+
     [SerializeField] Transform[] waypoints;
     Transform currentWaypoint;
+    Transform previousWaypoint;
     int waypointIndex = 0;
+    Collider waypointTrigger;
 
     bool inside = false;
     bool started = false;
 
-    float warningDistance = 5f;
     int warningCounter = 0;
 
-    bool waypointMoving = true;
+    bool exited = false;
 
     void Start()
     {
@@ -36,7 +39,8 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
     public void CustomUpdate(float deltaTime)
     {
         if (!started) GetCloser();
-        else if (!waypointMoving && started) MoveAway();
+        if (waypoints[waypointIndex].childCount > 0) exited = waypoints[waypointIndex].GetComponentInChildren<MusicboxWay>().exited;
+        MusicBoxVolume();
     }
 
     void GetCloser()
@@ -63,6 +67,7 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
                 StartCoroutine(FadeToBlack());
                 door.CloseDoor();
                 door.locked = true;
+                StartCoroutine(LeavingWay());
             }
         }
     }
@@ -111,50 +116,97 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
 
     IEnumerator MoveMusicbox()
     {
-        if (waypointIndex <= waypoints.Length) currentWaypoint = waypoints[waypointIndex];
+        // if the last waypoint is reached, end the coroutine
+        if (waypointIndex == waypoints.Length - 1)
+        {
+            Debug.Log("END!!!");
+            itemLight.SetActive(true);
+            yield break;
+        }
+
+        Debug.Log("MoveMusicbox started");  
         WaitForSeconds wait = new WaitForSeconds(0.05f);
 
-        // if player is inside transform.position, move transform to currentWaypoint
+        // when starting the event, previousWaypoint is null, so set it to the first waypoint
+        if (previousWaypoint == null) previousWaypoint = waypoints[waypointIndex]; 
+        else 
+        {
+            previousWaypoint.gameObject.SetActive(false);
+            previousWaypoint = currentWaypoint;
+        }
+
+        // if waypointIndex+1 is out of bounds of waypoints length, set currentWaypoint to the last waypoint
+        if (waypointIndex == waypoints.Length - 1) yield break;
+        else currentWaypoint = waypoints[waypointIndex+1];
+        currentWaypoint.gameObject.SetActive(true);
+
         yield return new WaitUntil(() => inside);
-        waypointMoving = true;
+
+        GameManager.Instance.GameplayEvent();
+
         while (Vector3.Distance(transform.position, currentWaypoint.position) > 0.1f)
         {
             transform.position = Vector3.MoveTowards(transform.position, currentWaypoint.position, 0.1f);
             yield return wait;
         }
-        waypointMoving = false;
+
+        GameManager.Instance.ResumeFromEventScene();
+
         inside = false;
-        if (waypoints.Length > 1)
+
+        // preventing first waypoint to be deactivated prematurely
+        if (!waypoints[waypointIndex+1].gameObject.activeSelf) previousWaypoint.gameObject.SetActive(false);
+        // activates the players path of the next waypoint
+        currentWaypoint.GetChild(0).gameObject.SetActive(true);
+        waypointIndex++;
+        StartCoroutine(MoveMusicbox());
+
+        if (warningCounter == 3)
         {
-            Destroy(waypoints[waypointIndex].gameObject);
-            waypointIndex++;
-            StartCoroutine(MoveMusicbox());
-        }
-        else
-        {
-            Debug.Log("Second last waypoint, turn item light on");
+            AudioManager.Instance.PlaySoundOneShot(monsterAudioID, "MB attack", 1f, 1f);
+            Debug.Log("DEATH!!!!!!!!!!!!!");
         }
     }
 
-    void MoveAway()
+    IEnumerator LeavingWay()
     {
-        float distance = Vector3.Distance(transform.position, GameManager.Instance.player.transform.position);
-        while (!waypointMoving)
+        Debug.Log("\"LeavingWay\" started");
+        yield return new WaitUntil(() => exited);
+        Debug.Log("\"LeavingWay\" triggered");
+        int random = Random.Range(1, 6);
+        string sound = "MB alert " + random;
+        AudioManager.Instance.PlaySoundOneShot(monsterAudioID, sound, 0.8f, 1f);
+        warningCounter++;
+        Debug.Log("WARNING " + warningCounter);
+        StartCoroutine(TimeToLeave());
+        yield return new WaitUntil(() => !exited);
+        StartCoroutine(LeavingWay());
+    }
+
+    IEnumerator TimeToLeave()
+    {
+        int counter = warningCounter;
+        yield return new WaitForSeconds(15f);
+        if (exited && counter == warningCounter)
         {
-            if (distance < warningDistance)
-            {
-                int random = Random.Range(1, 6);
-                string sound = "MB alert " + random;
-                AudioManager.Instance.PlaySoundOneShot(monsterAudioID, sound, 0.8f, 1f);
-                distance = Vector3.Distance(transform.position, GameManager.Instance.player.transform.position);
-                warningCounter++;
-                Debug.Log("WARNING " + warningCounter);
-            }
-            if (warningCounter > 3)
-            {
-                AudioManager.Instance.PlaySoundOneShot(monsterAudioID, "MB attack", 1f, 1f);
-                Debug.Log("YOU LOST");
-            }
+            AudioManager.Instance.PlaySoundOneShot(monsterAudioID, "MB attack", 1f, 1f);
+            Debug.Log("DEATH!!!!!!!!!!!!!");
         }
+    }
+
+    void MusicBoxVolume()
+    {
+        // Calculate the angle between player and music box
+        Vector3 direction = transform.position - GameManager.Instance.player.transform.position;
+        float angle = Vector3.Angle(GameManager.Instance.player.transform.forward, direction);
+
+        // Inverse relationship: lower angle (facing) -> higher volume, higher angle (looking away) -> lower volume
+        float volume = Mathf.SmoothStep(1f, 0.5f, angle / 180f); // Reverse order of arguments
+
+        // Clamp volume to your desired range (0.5f minimum, 1f maximum)
+        volume = Mathf.Clamp(volume, 0.5f, 1f);
+
+        // Set music box volume
+        AudioManager.Instance.SetAudioVolume(gameObject.GetInstanceID(), volume);
     }
 }

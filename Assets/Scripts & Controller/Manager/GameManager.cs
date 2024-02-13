@@ -382,6 +382,7 @@ public class GameManager : MonoBehaviour
         foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
         {
             Debug.Log("GameManager - ResumeGame: Add " + enemy.name);
+            // check if enemy is in customUpdatables
             customUpdateManager.AddCustomUpdatable(enemy);
             Debug.Log("GameManager - ResumeGame: Finish adding");
         }
@@ -389,6 +390,11 @@ public class GameManager : MonoBehaviour
         {
             customUpdateManager.AddCustomUpdatable(mannequin);
         }
+    }
+
+    public void ResumeFromEventScene()
+    {
+        SetGameState(GameState.Gameplay, SubGameState.Default);
     }
 
     public void GameOver()
