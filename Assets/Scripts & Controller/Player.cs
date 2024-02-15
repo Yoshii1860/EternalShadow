@@ -17,7 +17,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
     public bool isOutOfStamina = false;
     public float staminaConsumptionTimer = 0.1f;
     public float staminaReg = 0.4f;
-    [SerializeField] Light flashlight;
+    public Light flashlight;
     public bool lightAvail = false;
 
     [SerializeField] string[] painClips;

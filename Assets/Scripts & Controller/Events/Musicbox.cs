@@ -30,6 +30,11 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
 
     bool exited = false;
 
+    bool end = false;
+
+    [SerializeField] ItemController musicBoxObject;
+    [SerializeField] Transform musicBoxLid;
+
     void Start()
     {
         GameManager.Instance.customUpdateManager.AddCustomUpdatable(this);
@@ -59,6 +64,16 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
     {
         if (other.CompareTag("Player"))
         {
+            if (Vector3.Distance(transform.position, waypoints[waypoints.Length-1].position) < 0.1f)
+            {
+                if (end) return;
+                StopAllCoroutines();
+                StartCoroutine(FadeOut());
+                itemLight.SetActive(true);
+                GameManager.Instance.player.lightAvail = true;
+                end = true;
+                return;
+            }
             if (inside) return;
             else inside = true;
             if (!started)
@@ -81,10 +96,39 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
             yield return new WaitForSeconds(0.01f);
         }
         yield return new WaitForSeconds(2f);
+        GameManager.Instance.GameplayEvent();
+        if (GameManager.Instance.player.flashlight.enabled) GameManager.Instance.player.LightSwitch();
+        GameManager.Instance.player.lightAvail = false;
         AudioManager.Instance.PlaySoundOneShot(monsterAudioID, "MB grunt", 0.8f, 1f);
         yield return new WaitForSeconds(1f);
         StartCoroutine(TextFade());
         StartCoroutine(MoveMusicbox());
+    }
+
+    IEnumerator FadeOut()
+    {
+        foreach (Transform waypoint in waypoints)
+        {
+            waypoint.gameObject.SetActive(false);
+        }
+        musicBoxObject.enabled = false;
+        text.gameObject.SetActive(false);
+        for (float i = image.color.a; i > 0; i -= 0.01f)
+        {
+            image.color = new Color(0, 0, 0, i);
+            yield return new WaitForSeconds(0.01f);
+        }
+        door.locked = false;
+        door.OpenDoor();
+        AudioManager.Instance.FadeOut(gameObject.GetInstanceID(), 5f);
+        yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(gameObject.GetInstanceID()));
+        for (float i = musicBoxLid.localEulerAngles.x; i > 0; i -= 0.5f)
+        {
+            musicBoxLid.localEulerAngles = new Vector3(i, 0, 0);
+            yield return new WaitForSeconds(0.01f);
+        }
+        musicBoxObject.enabled = true;
+        this.enabled = false;
     }
 
     IEnumerator TextFade(bool alpha = true)
@@ -116,14 +160,6 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
 
     IEnumerator MoveMusicbox()
     {
-        // if the last waypoint is reached, end the coroutine
-        if (waypointIndex == waypoints.Length - 1)
-        {
-            Debug.Log("END!!!");
-            itemLight.SetActive(true);
-            yield break;
-        }
-
         Debug.Log("MoveMusicbox started");  
         WaitForSeconds wait = new WaitForSeconds(0.05f);
 
