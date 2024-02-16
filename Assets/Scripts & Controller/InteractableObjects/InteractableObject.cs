@@ -8,7 +8,8 @@ public class InteractableObject : MonoBehaviour
 {
     #region Variables
 
-    protected Animator anim;
+    [Header("If not Pickup - no base code will be run")]
+    [SerializeField] bool isPickup = true;
     public bool active = false;
 
     [Header("Object Properties")]
@@ -19,19 +20,9 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] TextMeshProUGUI objectName;
     [SerializeField] TextMeshProUGUI objectDescription;
     [SerializeField] string objectNameString;
-    [SerializeField] string objectDescriptionString;
+    [SerializeField] string objectDescriptionString;    
 
     Coroutine rotationCoroutine;
-
-    #endregion
-
-    #region Initialization
-
-    void Start()
-    {
-        // Initialize the animator
-        anim = GetComponent<Animator>();
-    }
 
     #endregion
 
@@ -40,6 +31,12 @@ public class InteractableObject : MonoBehaviour
     public virtual void Interact()
     {
         Debug.Log("Interacting with the base interactable object.");
+
+        if (!isPickup) 
+        {
+            RunItemCode();
+            return;
+        }
 
         // Open Canvas
         GameManager.Instance.pickupCanvas.SetActive(true);

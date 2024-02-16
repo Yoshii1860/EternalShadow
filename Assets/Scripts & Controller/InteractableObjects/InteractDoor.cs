@@ -6,8 +6,8 @@ public class InteractDoor : InteractableObject
 {
     public override void Interact()
     {
-        base.Interact();
+        /*base.Interact();
         active = !active;
-        anim.SetBool("Open", active);
+        anim.SetBool("Open", active);*/
     }
 }
