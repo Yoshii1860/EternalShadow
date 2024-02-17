@@ -78,6 +78,7 @@ public class GameManager : MonoBehaviour
     public Transform enemyPool;
     public Transform interactObjectPool;
     public GameObject blackScreen;
+    public GameObject fpsArms;
 
     [Header("UI Components")]
     [SerializeField] Image progressBar;
@@ -172,7 +173,7 @@ public class GameManager : MonoBehaviour
         {
             foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
             {
-                customUpdateManager.AddCustomUpdatable(enemy);
+                enemy.ResumePlayerInSight();
             }
             foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>())
             {
@@ -263,10 +264,10 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         // Add code to initialize the gameplay
-        StartCoroutine(StartGameWithBlackScreen());
+        StartCoroutine(StartGameWithBlackScreen(true));
     }
 
-    public IEnumerator StartGameWithBlackScreen()
+    public IEnumerator StartGameWithBlackScreen(bool first = true)
     {
         Debug.Log("BlackScreen Start");
         // Set the black screen to active
@@ -290,7 +291,7 @@ public class GameManager : MonoBehaviour
             Color newColor = Color.Lerp(startColor, targetColor, t);
             blackScreen.GetComponent<Image>().color = newColor;
 
-            if (elapsedTime >= 1f && !unique) 
+            if (elapsedTime >= 1f && !unique && first) 
             {
                 playerAnimController.StartAnimation();
                 unique = true;
@@ -302,12 +303,14 @@ public class GameManager : MonoBehaviour
         // Deactivate the black screen once the fade-out is complete
         blackScreen.SetActive(false);
         blackScreen.GetComponent<Image>().color = Color.black;
-        AudioManager.Instance.LoadAudioSources();
+        if (first) AudioManager.Instance.LoadAudioSources();
 
+        float waitTime = first ? 5f : 1f;
+        WaitForSecondsRealtime wait = new WaitForSecondsRealtime(waitTime);
         // Set the game state to Gameplay after the fade-out
-        yield return new WaitForSecondsRealtime(5f);
+        yield return wait;
         SetGameState(GameState.Gameplay, SubGameState.Default);
-        playerAnimController.SetAnimLayer("None");
+        if (first) playerAnimController.SetAnimLayer("None");
         Debug.Log("BlackScreen Stop");
     }
 
@@ -344,7 +347,7 @@ public class GameManager : MonoBehaviour
         foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
         {
             Debug.Log("GameManager - PauseGame: Remove " + enemy.name);
-            customUpdateManager.RemoveCustomUpdatable(enemy);
+            enemy.PausePlayerInSight();
         }
         foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>())
         {
@@ -366,7 +369,7 @@ public class GameManager : MonoBehaviour
         foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
         {
             Debug.Log("GameManager - PickUp: Remove " + enemy.name);
-            customUpdateManager.RemoveCustomUpdatable(enemy);
+            enemy.PausePlayerInSight();
         }
         foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>())
         {
@@ -383,7 +386,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("GameManager - ResumeGame: Add " + enemy.name);
             // check if enemy is in customUpdatables
-            customUpdateManager.AddCustomUpdatable(enemy);
+            enemy.ResumePlayerInSight();
             Debug.Log("GameManager - ResumeGame: Finish adding");
         }
         foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>())

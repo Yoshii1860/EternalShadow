@@ -6,6 +6,7 @@ public class MannequinEvent : MonoBehaviour
 {
     [SerializeField] Mannequin firstMannequin;
     [SerializeField] Mannequin secondMannequin;
+    [SerializeField] Weapon weapon;
     bool firstEnter = false;
 
     void OnTriggerExit(Collider other) 
@@ -20,9 +21,12 @@ public class MannequinEvent : MonoBehaviour
             }
             else
             {
-                firstMannequin.move = true;
-                secondMannequin.move = true;
-                Destroy(gameObject);
+                if (weapon.isAvailable)
+                {
+                    firstMannequin.move = true;
+                    secondMannequin.move = true;
+                    Destroy(gameObject);
+                }
             }
         }
     }

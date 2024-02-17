@@ -387,12 +387,13 @@ public class YardEvent : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         // Fade in the black screen to transition to the next phase
-        GameManager.Instance.StartCoroutine(GameManager.Instance.StartGameWithBlackScreen());
+        GameManager.Instance.StartCoroutine(GameManager.Instance.StartGameWithBlackScreen(false));
 
         // Play background music associated with the next phase
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "hospital music", 0.15f, 1f, true);
 
         // Wait until the background music is no longer playing
+        Debug.Log("Waiting for background music to stop...");
         yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(AudioManager.Instance.environment));
 
         // Stop all sounds, play ambient audio, and set player's voice audio
@@ -401,6 +402,7 @@ public class YardEvent : MonoBehaviour
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.playerSpeaker, "player3", 0.8f, 1f, false);
 
         // Wait until the game state transitions to the default state
+        Debug.Log("Waiting for game state to transition to default...");
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
 
         // Activate the girl for the next phase

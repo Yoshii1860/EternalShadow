@@ -50,6 +50,7 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
 
     void GetCloser()
     {
+        if (!AudioManager.Instance.IsPlaying(gameObject.GetInstanceID())) AudioManager.Instance.PlayAudio(gameObject.GetInstanceID(), 1f, 1f, true);
         // Calculate direction to the player
         float distance = Vector3.Distance(transform.position, GameManager.Instance.player.transform.position);
         // If the player gets closer, fade to black

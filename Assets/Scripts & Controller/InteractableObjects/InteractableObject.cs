@@ -20,13 +20,23 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] TextMeshProUGUI objectName;
     [SerializeField] TextMeshProUGUI objectDescription;
     [SerializeField] string objectNameString;
-    [SerializeField] string objectDescriptionString;    
+    [SerializeField] string objectDescriptionString;
 
     Coroutine rotationCoroutine;
 
     #endregion
 
     #region Interaction
+
+    void RendererToggle(GameObject go, bool active)
+    {
+        for (int i = 0; i < go.transform.childCount; i++)
+        {
+            Renderer renderer = go.transform.GetChild(i).gameObject.GetComponent<Renderer>();
+            if (renderer != null && renderer.gameObject.activeSelf) renderer.enabled = active;
+            if (go.transform.GetChild(i).childCount > 0) RendererToggle(go.transform.GetChild(i).gameObject, active);
+        }
+    }
 
     public virtual void Interact()
     {
@@ -37,6 +47,9 @@ public class InteractableObject : MonoBehaviour
             RunItemCode();
             return;
         }
+
+        // loop through all active children and grand children of fpsArms and disable mesh renderer
+        RendererToggle(GameManager.Instance.fpsArms, false);
 
         // Open Canvas
         GameManager.Instance.pickupCanvas.SetActive(true);
@@ -114,6 +127,8 @@ public class InteractableObject : MonoBehaviour
     {
         // Wait for the player to return to gameplay mode
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
+
+        RendererToggle(GameManager.Instance.fpsArms, true);
 
         // Stop coroutine to prevent errors before deleting
         StopCoroutine(rotationCoroutine);

@@ -12,6 +12,7 @@ public class PlayerAnimController : MonoBehaviour
     bool lightSwitch = false;
     string currentWeapon = "None";
     bool pistolBool = false;
+    bool pistolPickup = true;
 
     [SerializeField] GameObject weaponsObj;
     [SerializeField] GameObject pistol;
@@ -117,20 +118,10 @@ public class PlayerAnimController : MonoBehaviour
 
     public void Flashlight(GameObject flashlight, bool isOn)
     {
-        if (isOn)
-        {
-            // Moves the flashlight to the new position and rotation
-            lightSwitch = isOn;
-            StartCoroutine(LerpToOnPosition(flashlight, isOn));
-            SetAnimLayer(currentWeapon);
-        }
-        else if (!isOn)
-        {
-            // Moves the flashlight to the standard position and rotation
-            lightSwitch = isOn;
-            StartCoroutine(LerpToOnPosition(flashlight, isOn));
-            SetAnimLayer(currentWeapon);
-        }
+        // Moves the flashlight to the new position and rotation
+        lightSwitch = isOn;
+        StartCoroutine(LerpToOnPosition(flashlight, isOn));
+        SetAnimLayer(currentWeapon);
     }
 
     // Lerps the flashlight to the new position and rotation
@@ -139,26 +130,33 @@ public class PlayerAnimController : MonoBehaviour
         // If weapon will be enabled
         if (isOn)
         {
-            // Set Weapon active and enable IK fabrics
+            if (pistolPickup && string.Compare(weapon.name, "Pistol") == 0)
+            {
+                pistolPickup = false;
+                GameManager.Instance.player.LightSwitch();
+                yield return new WaitForSeconds(0.1f);
+            }
             weapon.SetActive(true);
 
             switch (weapon.name)
             {
                 case "Pistol":
+                    Debug.Log("PlayerAnim - Weapon: " + weapon.name + " - LightSwitch: " + lightSwitch);
                     IKFabrics(fastIKFabricsRight, true);
-                    if (!lightSwitch) 
+                    AudioManager.Instance.PlaySoundOneShot(weaponsObj.GetInstanceID(), "pistol on", 0.5f, 1.2f);
+                    if (!lightSwitch)
                     {
-                        Debug.Log("Weapon: " + weapon.name);
-                        AudioManager.Instance.PlaySoundOneShot(weaponsObj.GetInstanceID(), "pistol on", 0.5f, 1.2f);
                         IKFabrics(fastIKFabricsLeft, true);
                         IKFabricsTargetChange(weapon.name);
                     }
                     break;
                 case "None":
+                    Debug.Log("PlayerAnim - Weapon: None - LightSwitch: " + lightSwitch);
                     IKFabrics(fastIKFabricsRight, false);
                     if (!lightSwitch) IKFabrics(fastIKFabricsLeft, false);
                     break;
                 default:
+                    Debug.Log("PlayerAnim - Weapon: Flashlight - LightSwitch: " + lightSwitch);
                     AudioManager.Instance.PlaySoundOneShot(weaponsObj.GetInstanceID(), "flashlight on", 0.5f);
                     IKFabrics(fastIKFabricsLeft, true);
                     IKFabricsTargetChange("Flashlight");

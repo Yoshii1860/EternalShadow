@@ -7,6 +7,8 @@ public class WeaponSwitcher : MonoBehaviour
     #region Fields
 
     private int currentWeaponIndex = 0;
+    private bool smallPause = false;
+    [SerializeField] Weapon pistol;
 
     #endregion
 
@@ -14,15 +16,20 @@ public class WeaponSwitcher : MonoBehaviour
 
     public void Execute(float mouseScroll)
     {
-        if (mouseScroll > 0)
+        if (smallPause) return;
+
+        if (pistol.isAvailable)
         {
-            // Scroll up to switch to the next weapon
-            SwitchWeapon(true);
-        }
-        else if (mouseScroll < 0)
-        {
-            // Scroll down to switch to the previous weapon
-            SwitchWeapon(false);
+            if (mouseScroll > 0)
+            {
+                // Scroll up to switch to the next weapon
+                SwitchWeapon(true);
+            }
+            else if (mouseScroll < 0)
+            {
+                // Scroll down to switch to the previous weapon
+                SwitchWeapon(false);
+            }
         }
     }
 
@@ -50,6 +57,8 @@ public class WeaponSwitcher : MonoBehaviour
 
     public void SwitchWeapon(bool upOrDown)
     {
+        smallPause = true;
+
         int nextWeaponIndex = upOrDown ? currentWeaponIndex - 1 : currentWeaponIndex + 1;
 
         if (nextWeaponIndex < 0 || nextWeaponIndex >= transform.childCount)
@@ -99,6 +108,8 @@ public class WeaponSwitcher : MonoBehaviour
     {
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
         GameManager.Instance.playerAnimController.SetWeapon(currentWeapon, nextWeapon);
+        yield return new WaitForSeconds(0.25f);
+        smallPause = false;
     }
 
     #endregion

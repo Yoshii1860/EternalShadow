@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
+  m_Name: Musicbox
+  m_EditorClassIdentifier: 
+  displayName: Old Musicbox
+  description: Inside you can see a number written in blood... "1860"
+  icon: {fileID: 21300000, guid: 87e5164fc87c8bb4da6b5fbb6970c442, type: 3}
+  iconPath: VFX/ItemIcons/musicboxicon
+  unique: 1
+  quantity: 1
+  prefab: {fileID: 979859657941160054, guid: 18e1f6ae9d26e9740b1dd2cb927b7d7d, type: 3}
+  prefabPath: Prefabs/Musicbox
+  type: 3
+  ammoType: 0
+  potionType: 0

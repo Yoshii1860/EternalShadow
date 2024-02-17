@@ -14,11 +14,13 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
     public LayerMask layers;
     public LayerMask occlusionLayers;
     public bool playerInSight = false;
+    bool savePlayerInSight = false;
+    bool paused = false;
 
     [SerializeField] private Transform head;
     [SerializeField] private Transform camRoot;
     private Collider[] colliders = new Collider[10];
-    private Mesh mesh;
+    private Mesh mesh;  
     private int count;
     private float scanInterval;
     private float scanTimer;
@@ -42,7 +44,7 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
 
     public void CustomUpdate(float deltaTime)
     {
-        ScanUpdate(deltaTime);
+        if (!paused) ScanUpdate(deltaTime);
     }
 
     #endregion
@@ -103,6 +105,19 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
             Debug.Log($"Player not in FOV of {gameObject.name}");
             playerInSight = false;
         }
+    }
+
+    public void PausePlayerInSight()
+    {
+        savePlayerInSight = playerInSight;
+        playerInSight = false;
+        paused = true;
+    }
+
+    public void ResumePlayerInSight()
+    {
+        playerInSight = savePlayerInSight;
+        paused = false;
     }
 
     private Mesh CreateWedgeMesh() 
