@@ -53,7 +53,8 @@ public class GameManager : MonoBehaviour
     {
         Default,
         EventScene,
-        PickUp
+        PickUp,
+        Painting
     }
 
     #endregion
@@ -94,6 +95,8 @@ public class GameManager : MonoBehaviour
     // Pause and debug flags
     [Header("Pause Flag")]
     public bool isPaused;
+    [Tooltip("When Pickup is active, but another canvas is used. Set during gameplay.")]
+    public bool canvasActive = false;
 
     bool referencesUpdated = false;
 
@@ -160,6 +163,11 @@ public class GameManager : MonoBehaviour
     {
         // Add relevant components to CustomUpdateManager
         customUpdateManager.AddCustomUpdatable(MenuController.Instance);
+        PaintingController paintingController = FindObjectOfType<PaintingController>();
+        if (paintingController != null)
+        {
+            customUpdateManager.AddCustomUpdatable(paintingController);
+        }
         
         if (player != null) 
         {
@@ -377,6 +385,22 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void PaintingEvent()
+    {
+        SetGameState(GameState.Gameplay, SubGameState.Painting);
+        foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
+        {
+            Debug.Log("GameManager - PickUp: Remove " + enemy.name);
+            enemy.PausePlayerInSight();
+        }
+        foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>())
+        {
+            customUpdateManager.RemoveCustomUpdatable(mannequin);
+        }
+        PaintingEvent paintingEvent = FindObjectOfType<PaintingEvent>();
+        paintingEvent.StartPaintingEvent();
+    }
+
     public void ResumeGame()
     {
         SetGameState(GameState.Gameplay, SubGameState.Default);
@@ -471,6 +495,11 @@ public class GameManager : MonoBehaviour
                         isPaused = true;
                         playerInput.SwitchCurrentActionMap("PickUp");
                         Debug.Log("GameManager.cs: Switch to GamePlay.PickUp");
+                        break;
+                    case SubGameState.Painting:
+                        isPaused = true;
+                        playerInput.SwitchCurrentActionMap("Painting");
+                        Debug.Log("GameManager.cs: Switch to GamePlay.Painting");
                         break;
                 }
                 break;
@@ -744,6 +773,7 @@ public class GameManager : MonoBehaviour
         InputManager.Instance.Rebind("Player");
         InputManager.Instance.Rebind("Inventory");
         InputManager.Instance.Rebind("Pickup");
+        InputManager.Instance.Rebind("Painting");
 
         // Scene is fully loaded
         Debug.Log("Scene " + sceneName + " is fully loaded!");

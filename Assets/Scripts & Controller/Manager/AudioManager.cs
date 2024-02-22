@@ -174,7 +174,7 @@ public class AudioManager : MonoBehaviour
         if (audioSource != null)
         {
             audioSource.Pause();
-            Debug.Log($"AudioManager: Pausing {audioSource.clip.name} on {audioSource.gameObject.name}");
+            if (debugSettings) Debug.Log($"AudioManager: Pausing {audioSource.clip.name} on {audioSource.gameObject.name}");
         }
         else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
     }
@@ -187,7 +187,7 @@ public class AudioManager : MonoBehaviour
         if (audioSource != null)
         {
             audioSource.UnPause();
-            Debug.Log($"AudioManager: Unpausing {audioSource.clip.name} on {audioSource.gameObject.name}");
+            if (debugSettings) Debug.Log($"AudioManager: Unpausing {audioSource.clip.name} on {audioSource.gameObject.name}");
         }
         else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
     }
@@ -241,7 +241,7 @@ public class AudioManager : MonoBehaviour
             audioSource.volume = volume;
             audioSource.pitch = pitch;
             audioSource.loop = loop;
-            Debug.Log($"AudioManager: Set {audioFile.name} on {audioSource.gameObject.name}");
+            if (debugSettings) Debug.Log($"AudioManager: Set {audioFile.name} on {audioSource.gameObject.name}");
         }
         else
         {
@@ -259,7 +259,7 @@ public class AudioManager : MonoBehaviour
         {
             audioSource.Stop();
             audioSource.clip.UnloadAudioData();
-            Debug.Log($"AudioManager: Stopping {audioSource.gameObject.name}");
+            if (debugSettings) Debug.Log($"AudioManager: Stopping {audioSource.gameObject.name}");
         }
         else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
     }
@@ -349,7 +349,7 @@ public class AudioManager : MonoBehaviour
         foreach (AudioSource audioSource in audioSourcesList)
         {
             audioSource.Stop();
-            Debug.Log("AudioManager: Stopping all AudioSources.");
+            if (debugSettings) Debug.Log("AudioManager: Stopping all AudioSources.");
         }
         if (debugSettings) Debug.Log("AudioManager: Stopping all AudioSources.");
     }
@@ -369,7 +369,7 @@ public class AudioManager : MonoBehaviour
                 audioSourceName = audioSource.gameObject.name;
             }
         }
-        Debug.Log("AudioManager: Stopping all AudioSources except " + audioSourceName);
+        if (debugSettings) Debug.Log("AudioManager: Stopping all AudioSources except " + audioSourceName);
     }
 
     // Check if audio is playing for an AudioSource
@@ -379,7 +379,7 @@ public class AudioManager : MonoBehaviour
 
         if (audioSource != null)
         {
-            Debug.Log($"AudioManager: Checking if Audio Source {audioSource.gameObject.name} is playing ({audioSource.isPlaying})");
+            if (debugSettings) Debug.Log($"AudioManager: Checking if Audio Source {audioSource.gameObject.name} is playing ({audioSource.isPlaying})");
             return audioSource.isPlaying;
         }
         else
@@ -458,7 +458,7 @@ public class AudioManager : MonoBehaviour
     {
         AudioSource audioSource = GetAudioSource(gameObjectID);
         audioSourcesList.Remove(audioSource);
-        Debug.Log($"AudioManager: Removed {audioSource.gameObject.name} from the list.");
+        if (debugSettings) Debug.Log($"AudioManager: Removed {audioSource.gameObject.name} from the list.");
     }
 
     // Add an AudioSource to the list
@@ -467,7 +467,7 @@ public class AudioManager : MonoBehaviour
         if (!audioSourcesList.Contains(audioSource))
         {
             audioSourcesList.Add(audioSource);
-            Debug.Log($"AudioManager: Added {audioSource.gameObject.name} to the list.");
+            if (debugSettings) Debug.Log($"AudioManager: Added {audioSource.gameObject.name} to the list.");
         }
     }
 

@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     [Tooltip("How far in degrees can you move the camera down")]
     [SerializeField] float bottomClamp = -90.0f;
     [Tooltip("The player follow camera set in Cinemachine Brain")]
-    [SerializeField] CinemachineVirtualCamera cmVirtualCamera;
+    public CinemachineVirtualCamera cmVirtualCamera;
     [Tooltip("Additional degrees to override the camera when aiming.")]
     [SerializeField] float focalLength = 33f;
     [Tooltip("The default target for LookAt")]
@@ -468,7 +468,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     void Interact()
     {
         interact = false;
-        if (GameManager.Instance.pickupCanvas.activeSelf)
+        if (GameManager.Instance.pickupCanvas.activeSelf || GameManager.Instance.canvasActive)
         {
             GameManager.Instance.ResumeGame();
         }

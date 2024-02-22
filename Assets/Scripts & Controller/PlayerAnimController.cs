@@ -94,6 +94,13 @@ public class PlayerAnimController : MonoBehaviour
         animator.SetBool("Blinded", false);
     }
 
+    public void PenholderAnimation()
+    {
+        // Initiates the penholder animation
+        if (GameManager.Instance.player.flashlight.enabled) GameManager.Instance.player.LightSwitch();
+        if (pistolBool) animator.gameObject.GetComponentInChildren<WeaponSwitcher>().Execute(1);
+    }
+
     #endregion
 
     #region Inverse Kinematics

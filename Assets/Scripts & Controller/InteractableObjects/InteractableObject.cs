@@ -28,7 +28,7 @@ public class InteractableObject : MonoBehaviour
 
     #region Interaction
 
-    void RendererToggle(GameObject go, bool active)
+    public virtual void RendererToggle(GameObject go, bool active)
     {
         for (int i = 0; i < go.transform.childCount; i++)
         {

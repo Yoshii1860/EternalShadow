@@ -57,8 +57,13 @@ public class ObjectHandler : MonoBehaviour
             ItemController itemController = hit.collider.gameObject.GetComponent<ItemController>();
             InteractableObject intObj = hit.collider.gameObject.GetComponent<InteractableObject>();
             Door door = hit.collider.gameObject.GetComponent<Door>();
+            PaintingEvent paintingEvent = hit.collider.gameObject.GetComponent<PaintingEvent>();
 
-            if (itemController != null)
+            if (paintingEvent != null)
+            {
+                GameManager.Instance.PaintingEvent();
+            }
+            else if (itemController != null)
             {
                 intObj.Interact();
                 // Use PickUp() method from ItemActions class

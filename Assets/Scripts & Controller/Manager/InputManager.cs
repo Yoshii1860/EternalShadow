@@ -38,6 +38,7 @@ public class InputManager : MonoBehaviour
     PlayerController playerController;
     MenuController menuController;
     InventoryController inventoryController;
+    PaintingController paintingController;
 
     #endregion
 
@@ -58,6 +59,7 @@ public class InputManager : MonoBehaviour
         playerController = FindObjectOfType<PlayerController>();
         menuController = FindObjectOfType<MenuController>();
         inventoryController = FindObjectOfType<InventoryController>();
+        paintingController = FindObjectOfType<PaintingController>();
 
         // Iterate through all action maps
         foreach (var actionMap in playerInput.actions.actionMaps)
@@ -79,6 +81,10 @@ public class InputManager : MonoBehaviour
             else if (actionMap.name == "Pickup" && playerController != null)
             {
                 BindPickupActions(actionMap);
+            }
+            else if (actionMap.name == "Painting" && paintingController != null)
+            {
+                BindPaintingActions(actionMap);
             }
             else
             {
@@ -112,6 +118,10 @@ public class InputManager : MonoBehaviour
             else if (actionMap.name == "Pickup" && actionMapName == "Pickup")
             {
                 BindPickupActions(actionMap);
+            }
+            else if (actionMap.name == "Painting" && actionMapName == "Painting")
+            {
+                BindPaintingActions(actionMap);
             }
             else
             {
@@ -261,6 +271,35 @@ public class InputManager : MonoBehaviour
             if (action.name == "Interact")
             {
                 action.performed += playerController.OnInteract;
+            }
+            else
+            {
+                Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
+            }
+        }
+    }
+
+    void BindPaintingActions(InputActionMap actionMap)
+    {
+        if (paintingController == null)
+        {
+            paintingController = FindObjectOfType<PaintingController>();
+        }
+        // Subscribe to actions within this action map
+        foreach (var action in actionMap.actions)
+        {
+            // Check if it's the action you're interested in
+            if (action.name == "Move")
+            {
+                action.performed += paintingController.OnMove;
+            }
+            else if (action.name == "Interact")
+            {
+                action.performed += paintingController.OnInteract;
+            }
+            else if (action.name == "Back")
+            {
+                action.performed += paintingController.OnBack;
             }
             else
             {
