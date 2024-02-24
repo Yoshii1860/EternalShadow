@@ -20,6 +20,7 @@ public class PaintingEvent : MonoBehaviour
     private int lastSelector;
 
     [SerializeField] GameObject pen;
+    [SerializeField] GameObject drawer;
 
     public int paintingSelector
     {
@@ -256,6 +257,10 @@ public class PaintingEvent : MonoBehaviour
             pen.transform.localRotation = Quaternion.Lerp(startRotation, targetRotation, t);
             yield return null;
         }
+
+        yield return new WaitForSeconds(1f);
+
+        drawer.GetComponent<Drawer>().Interact();
     }
     #endregion
 }
