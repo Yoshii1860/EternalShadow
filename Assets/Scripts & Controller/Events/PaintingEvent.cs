@@ -56,8 +56,6 @@ public class PaintingEvent : MonoBehaviour
 
     IEnumerator StartingEvent()
     {
-        // Undo flashlight and weapon if enabled
-        GameManager.Instance.playerAnimController.PenholderAnimation();
         
         // Transform pens x-rotation from 0 to -25
         float time = 0;
@@ -74,7 +72,12 @@ public class PaintingEvent : MonoBehaviour
         }
 
         AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "pen click", 1f, 1f);
+
         yield return new WaitForSeconds(0.5f);
+
+        // Undo flashlight and weapon if enabled
+        GameManager.Instance.playerAnimController.PenholderAnimation();
+        
         pause = false;
 
         // change LookAtDirection

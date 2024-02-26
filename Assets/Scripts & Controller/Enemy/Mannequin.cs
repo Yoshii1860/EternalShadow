@@ -14,6 +14,8 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     [Tooltip("Array of body parts of the mannequin for death animation")]
     [SerializeField] Transform[] bodyParts;
     [SerializeField] Transform[] deathParts;
+    [Tooltip("Maximum distance at which the mannequin can follow the player")]
+    [SerializeField] float maxDistance = 50f;
     #endregion
 
     #region Private Fields
@@ -77,10 +79,11 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
         // Ignore the "Characters" and "Enemies" layers
         int layerMask = ~((1 << LayerMask.NameToLayer("Characters")) | (1 << LayerMask.NameToLayer("Enemies")));
         bool isPlayerVisible = Physics.Linecast(head.position, playerHead, layerMask);
+        float distance = Vector3.Distance(player.position, head.position);
 
         // If the mannequin is outside the player's field of view or the player is not visible to the mannequin, 
         // the mannequin starts to move
-        if (angle < 90f || isPlayerVisible)
+        if (angle < 90f && distance < maxDistance || isPlayerVisible && distance < maxDistance)
         {
             ResumeAnimation(); // Resume the mannequin's movement
             Debug.DrawLine(head.position, playerHead, Color.green); // Draw a debug line to visualize player visibility

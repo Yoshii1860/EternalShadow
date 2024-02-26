@@ -6,8 +6,12 @@ public class ButtonCode : InteractableObject
 {
     [Space(10)]
     [Header("RUN ITEM CODE")]
+    [Tooltip("The door to open")]
+    [SerializeField] Door doorToOpen;
     [Tooltip("The door to unlock")]
-    [SerializeField] Door door;
+    [SerializeField] Door doorOne;
+    [Tooltip("The door to unlock")]
+    [SerializeField] Door doorTwo;
     Animator animator;
 
     // Override the base class method for specific implementation
@@ -16,6 +20,9 @@ public class ButtonCode : InteractableObject
         animator = GetComponent<Animator>();
         animator.SetTrigger("Button");
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "push button", 1f, 1f);
-        door.locked = false;
+        doorToOpen.locked = false;
+        doorOne.locked = false;
+        doorTwo.locked = false;
+        doorToOpen.Interact();
     }
 }

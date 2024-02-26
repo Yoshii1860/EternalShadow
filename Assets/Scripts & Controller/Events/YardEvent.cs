@@ -32,6 +32,8 @@ public class YardEvent : MonoBehaviour
     [SerializeField] Transform girlRespawnPosition;
     [Tooltip("The position for the girl to move to after the event")]
     [SerializeField] Transform girlDestinationPosition;
+    [Tooltip("The sun object in the environment")]
+    [SerializeField] GameObject sun;
 
     #endregion
 
@@ -69,6 +71,7 @@ public class YardEvent : MonoBehaviour
     bool firstTime = true;
     bool secondTime = true;
     bool endEvent = false;
+    public bool musicBox = false;
 
     List<int> audioSourceIDList = new List<int>();
 
@@ -175,7 +178,7 @@ public class YardEvent : MonoBehaviour
     /// <summary>
     /// Activate the girl for the next phase of the event.
     /// </summary>
-    void GirlActivation()
+    /*void GirlActivation()
     {
         // Move the girl to the 2nd floor respawn position
         girl.transform.position = girlRespawnPosition.position;
@@ -198,7 +201,7 @@ public class YardEvent : MonoBehaviour
 
         // Play an audio cue for the activated girl
         AudioManager.Instance.PlayAudio(girl.GetInstanceID(), 0.6f, 1f, true);
-    }
+    }*/
 
     #endregion
 
@@ -376,6 +379,9 @@ public class YardEvent : MonoBehaviour
         // Deactivate the girl GameObject
         girl.SetActive(false);
 
+        // Turn off the sun
+        sun.SetActive(false);
+
         // Reset the player's lookAt direction to default
         GameManager.Instance.playerController.LookAtReset();
 
@@ -405,8 +411,11 @@ public class YardEvent : MonoBehaviour
         Debug.Log("Waiting for game state to transition to default...");
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
 
+        // Start Audio for Musicbox
+        musicBox = true;
+
         // Activate the girl for the next phase
-        GirlActivation();
+        // GirlActivation();
         // Play the player's voice audio after a short delay
         AudioManager.Instance.PlayAudioWithDelay(AudioManager.Instance.playerSpeaker, 2f);
     }

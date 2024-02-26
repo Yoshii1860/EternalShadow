@@ -32,6 +32,10 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
 
     bool end = false;
 
+    bool once = false;
+
+    YardEvent yardEvent;
+
     [SerializeField] ItemController musicBoxObject;
     [SerializeField] Transform musicBoxLid;
 
@@ -39,13 +43,20 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
     {
         GameManager.Instance.customUpdateManager.AddCustomUpdatable(this);
         monsterAudioID = monsterAudio.GetInstanceID();
+        yardEvent = FindObjectOfType<YardEvent>();
     }
 
     public void CustomUpdate(float deltaTime)
     {
-        if (!started) GetCloser();
+        if (!started && yardEvent.musicBox) GetCloser();
         if (waypoints[waypointIndex].childCount > 0) exited = waypoints[waypointIndex].GetComponentInChildren<MusicboxWay>().exited;
-        MusicBoxVolume();
+        if (yardEvent.musicBox) MusicBoxVolume();
+        if (!started && yardEvent.musicBox) AdjustEnvironmentVolume();
+        else if (started && !once) 
+        {
+            AudioManager.Instance.PauseAudio(AudioManager.Instance.environment);
+            once = true;
+        }
     }
 
     void GetCloser()
@@ -129,6 +140,8 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
             yield return new WaitForSeconds(0.01f);
         }
         musicBoxObject.enabled = true;
+        AudioManager.Instance.UnpauseAudio(AudioManager.Instance.environment);
+        AudioManager.Instance.SetAudioVolume(AudioManager.Instance.environment, 0.1f);
         this.enabled = false;
     }
 
@@ -245,5 +258,17 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
 
         // Set music box volume
         AudioManager.Instance.SetAudioVolume(gameObject.GetInstanceID(), volume);
+    }
+
+    void AdjustEnvironmentVolume()
+    {
+        // Calculate distance between player and object
+        float distance = Vector3.Distance(transform.position, GameManager.Instance.player.transform.position);
+
+        // Customize distance range and volume curve to your preferences
+        float targetVolume = Mathf.Lerp(0.02f, 0.1f, Mathf.Clamp01(distance / 5f)); // Adjust values as needed
+
+        // Set environment music volume
+        AudioManager.Instance.SetAudioVolume(AudioManager.Instance.environment, targetVolume);
     }
 }
