@@ -28,6 +28,7 @@ TagManager:
   - DescriptionTag
   - PickupCanvas
   - FxTemporaire
+  - slenderman
   layers:
   - Default
   - TransparentFX

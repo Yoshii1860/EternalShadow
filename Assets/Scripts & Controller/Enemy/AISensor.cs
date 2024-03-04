@@ -25,6 +25,12 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
     private float scanInterval;
     private float scanTimer;
 
+    private Enemy enemy;
+
+    private Coroutine coroutine;
+
+    public bool hidden = false;
+
     #endregion
 
     #region MonoBehaviour Callbacks
@@ -36,6 +42,8 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
         {
             camRoot = GameManager.Instance.player.transform.GetChild(0);
         }
+
+        enemy = GetComponent<Enemy>();
     }
 
     #endregion
@@ -44,7 +52,12 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
 
     public void CustomUpdate(float deltaTime)
     {
-        if (!paused) ScanUpdate(deltaTime);
+        if (!paused && !hidden) ScanUpdate(deltaTime);
+        else if (hidden) 
+        {
+            playerInSight = false;
+            if (gameObject.activeSelf) Debug.Log("AISensor: Player hidden from enemy!");
+        }
     }
 
     #endregion
@@ -70,10 +83,44 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
             if (colliders[i].CompareTag("Player"))
             {
                 CheckPlayerInFOV(colliders[i].transform.position);
-                Debug.Log($"{colliders[i].gameObject.name} within sensing area!");
+                if (gameObject.activeSelf) Debug.Log($"{colliders[i].gameObject.name} within sensing area!");
             }
         }
+
+        /*colliders = Physics.OverlapSphere(transform.position, 1.5f, LayerMask.GetMask("Interact"));
+        if (colliders.Length > 0)
+        {
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (colliders[i].GetComponent<Door>() != null)
+                {
+                    enemy.enteredDoor = true;
+                    enemy.GetComponent<Animator>().SetTrigger("crouch");
+                    Debug.LogWarning("Entered door!");
+
+                    // if coroutine is not running, call coroutine
+                    if (coroutine == null)
+                    {
+                        coroutine = StartCoroutine(InsideDoor());
+                    }
+                    break;
+                }   
+            }
+        }
+        else enemy.enteredDoor = false;
+
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            colliders[i] = null;
+        }*/
     }
+
+    /*IEnumerator InsideDoor()
+    {
+        yield return new WaitUntil(() => enemy.enteredDoor == false);
+        enemy.GetComponent<Animator>().SetTrigger("uncrouch");
+        coroutine = null;
+    }*/
 
     private void CheckPlayerInFOV(Vector3 playerPosition)
     {
@@ -92,17 +139,17 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
             if (!lineOfSight)
             {
                 playerInSight = true;
-                Debug.Log($"PlayerInSight: {playerInSight} from {gameObject.name}");
+                if (gameObject.activeSelf) Debug.Log($"PlayerInSight: {playerInSight} from {gameObject.name}");
                 return;
             }
             else 
             {
-                Debug.Log($"Player not in LOS of {gameObject.name}");
+                if (gameObject.activeSelf) Debug.Log($"Player not in LOS of {gameObject.name}");
                 playerInSight = false;
             }
         }
         {
-            Debug.Log($"Player not in FOV of {gameObject.name}");
+            if (gameObject.activeSelf) Debug.Log($"Player not in FOV of {gameObject.name}");
             playerInSight = false;
         }
     }
@@ -118,6 +165,22 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
     {
         playerInSight = savePlayerInSight;
         paused = false;
+    }
+
+    public void PlayerInSightForced(float time)
+    {
+        StartCoroutine(ForcedPlayerInSight(time));
+    }
+
+    private IEnumerator ForcedPlayerInSight(float time)
+    {
+        while (time > 0)
+        {
+            time -= Time.deltaTime;
+            playerInSight = true;
+            yield return null;
+        }
+        playerInSight = false;
     }
 
     private Mesh CreateWedgeMesh() 

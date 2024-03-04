@@ -24,8 +24,6 @@ public class YardEvent : MonoBehaviour
     [SerializeField] ReflectionProbe[] reflectionProbes;
     [Tooltip("All red lights inside and outside the house")]
     [SerializeField] GameObject[] alertLights;
-    [Tooltip("The target the player should look at after getting blinded")]
-    [SerializeField] Transform lookAtTarget;
     [Tooltip("The head object of the girl")]
     [SerializeField] Transform girlHead;
     [Tooltip("The position for the girl to respawn after the event")]
@@ -67,7 +65,8 @@ public class YardEvent : MonoBehaviour
     #region Private Fields
 
     int counter = 0;
-    Transform girlTransform;
+    Vector3 girlPosition;
+    Vector3 girlRotation;
     bool firstTime = true;
     bool secondTime = true;
     bool endEvent = false;
@@ -88,7 +87,7 @@ public class YardEvent : MonoBehaviour
             firstTime = false;
 
             // Disable AISensor to stop AI updates during the event
-            GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(girl.GetComponent<AISensor>());
+            girl.GetComponent<AISensor>().hidden = true;
 
             // Activate the girl GameObject
             girl.SetActive(true);
@@ -159,6 +158,7 @@ public class YardEvent : MonoBehaviour
             }
 
             // Turn off the light
+            l.intensity = 0.5f;
             l.enabled = false;
         }
 
@@ -174,34 +174,6 @@ public class YardEvent : MonoBehaviour
         // Start a coroutine to activate reflection probes gradually
         StartCoroutine(ActivateProbesGradually());
     }
-
-    /// <summary>
-    /// Activate the girl for the next phase of the event.
-    /// </summary>
-    /*void GirlActivation()
-    {
-        // Move the girl to the 2nd floor respawn position
-        girl.transform.position = girlRespawnPosition.position;
-
-        // Add AI to CustomUpdateManager for AI updates after the event
-        GameManager.Instance.customUpdateManager.AddCustomUpdatable(girl.GetComponent<AISensor>());
-
-        // Activate the girl GameObject
-        girl.SetActive(true);
-
-        // Set waypoints for Behavior Tree (BT) navigation
-        EnemyBT girlBT = girl.GetComponent<EnemyBT>();
-        girlBT.waypoints[0] = girlRespawnPosition;
-        girlBT.waypoints[1] = girlDestinationPosition;
-
-        // Enable BT and Sensor components on the girl
-        girlBT.enabled = true;
-        girl.GetComponent<EnemyBT>().enabled = true;
-        girl.GetComponent<AISensor>().enabled = true;
-
-        // Play an audio cue for the activated girl
-        AudioManager.Instance.PlayAudio(girl.GetInstanceID(), 0.6f, 1f, true);
-    }*/
 
     #endregion
 
@@ -288,9 +260,8 @@ public class YardEvent : MonoBehaviour
         GameManager.Instance.playerAnimController.BlindnessAnimation();
 
         // Create a temporary transform to store the lookAt position and rotation
-        girlTransform = new GameObject("GirlTransform").transform;
-        girlTransform.position = lookAtTarget.position;
-        girlTransform.rotation = lookAtTarget.rotation;
+        girlPosition = GameManager.Instance.player.transform.position;
+        girlPosition.x -= 1f;
 
         // Wait for the specified blinded time duration before adjusting the player's focus direction
         yield return new WaitForSeconds(blindedTime);
@@ -315,9 +286,11 @@ public class YardEvent : MonoBehaviour
         GameManager.Instance.playerAnimController.StopBlindnessAnimation();
 
         // Manually calculate and set the position and rotation of the girl
-        // [TODO]: Consider finding a better solution for calculating the position
-        girl.transform.position = new Vector3(girlTransform.position.x + 0.2f, girlTransform.position.y - 1.3847f, girlTransform.position.z);
-        girl.transform.rotation = Quaternion.Euler(0f, girlTransform.rotation.eulerAngles.y - 180f, 0f);
+        Debug.Log("Girl Position: " + girl.transform.position);
+        Debug.Log("Setting it to: " + girlPosition);
+        girl.transform.position = girlPosition;
+        girl.transform.rotation = Quaternion.Euler(0f, 95f, 0f);
+        Debug.Log("New position: " + girl.transform.position);
 
         // Wait for a specified duration before initiating the next phase
         yield return new WaitForSeconds(lookBackTime);
@@ -377,6 +350,7 @@ public class YardEvent : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         // Deactivate the girl GameObject
+        girl.GetComponent<AISensor>().hidden = false;
         girl.SetActive(false);
 
         // Turn off the sun
@@ -414,8 +388,6 @@ public class YardEvent : MonoBehaviour
         // Start Audio for Musicbox
         musicBox = true;
 
-        // Activate the girl for the next phase
-        // GirlActivation();
         // Play the player's voice audio after a short delay
         AudioManager.Instance.PlayAudioWithDelay(AudioManager.Instance.playerSpeaker, 2f);
     }

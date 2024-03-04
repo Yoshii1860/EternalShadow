@@ -12,6 +12,8 @@ public class ButtonCode : InteractableObject
     [SerializeField] Door doorOne;
     [Tooltip("The door to unlock")]
     [SerializeField] Door doorTwo;
+    [Tooltip("The slenderman to spawn when the button is pushed")]
+    [SerializeField] GameObject slenderman;
     Animator animator;
 
     // Override the base class method for specific implementation
@@ -24,5 +26,7 @@ public class ButtonCode : InteractableObject
         doorOne.locked = false;
         doorTwo.locked = false;
         doorToOpen.Interact();
+        slenderman.SetActive(true);
+        slenderman.GetComponent<AISensor>().PlayerInSightForced(6f);
     }
 }

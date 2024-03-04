@@ -62,6 +62,8 @@ public class AudioManager : MonoBehaviour
     public int playerSpeaker;
     public int playerSpeaker2;
 
+    bool slenderToggle = false;
+
     #endregion
 
     #region Unity Callbacks
@@ -263,6 +265,7 @@ public class AudioManager : MonoBehaviour
         }
         else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
     }
+
 
     // Fade out audio for an AudioSource
     public void FadeOut(int gameObjectID, float fadeOutDuration)
@@ -499,6 +502,72 @@ public class AudioManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    #endregion
+
+    #region Character Specific Audio
+
+    public void ToggleSlenderAudio(GameObject slender, bool isChasing)
+    {
+        int slenderID = slender.GetInstanceID();
+        int stepID = slender.transform.GetChild(0).gameObject.GetInstanceID();
+        string clip = GetAudioClip(slenderID);
+
+        if (slenderToggle) return;
+        else if (!IsPlaying(slender.GetInstanceID()))
+        {
+            PlayAudio(slenderID);
+            PlayAudio(stepID);
+            return;
+        }
+        else if (isChasing && string.Compare(clip, "slender scream") == 0)
+        {
+            return;
+        }
+        else if (!isChasing && string.Compare(clip, "slender hello") == 0)
+        {
+            return;
+        }
+
+        slenderToggle = true;
+        StartCoroutine(SlenderToggle(slenderID, stepID, isChasing));
+    }
+
+    IEnumerator SlenderToggle(int slenderID, int stepID, bool isChasing)
+    {
+        string talkClip = "";
+        string walkClip = "";
+        float fadeTime = 1f;
+        float volume = 1f;
+        float pitch = 1f;
+
+        if (isChasing)
+        {
+            talkClip = "slender scream";
+            walkClip = "slender run";
+            fadeTime = 1f;
+            volume = 1f;
+        }
+        else
+        {
+            talkClip = "slender hello";
+            walkClip = "slender walk";
+            fadeTime = 5f;
+            volume = 0.4f;
+            pitch = 0.9f;
+        }
+
+        FadeOut(slenderID, fadeTime);
+        FadeOut(stepID, fadeTime);
+        AudioSource audioSource = GetAudioSource(slenderID);
+        yield return new WaitUntil(() => !audioSource.isPlaying);
+        SetAudioClip(slenderID, talkClip, volume, 1f, true);
+        SetAudioClip(stepID, walkClip, volume, pitch, true);
+        yield return new WaitForSeconds(0.25f);
+        PlayAudio(slenderID, volume, 1f, true);
+        PlayAudio(stepID, volume, pitch, true);
+        slenderToggle = false;
     }
 
     #endregion

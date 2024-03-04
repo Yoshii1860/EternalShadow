@@ -47,6 +47,13 @@ public class ActionPatrol : Node
             return NodeState.RUNNING;
         }
 
+        if (waypoints[0] == null)
+        {
+            // Set state to FAILURE and return
+            state = NodeState.FAILURE;
+            return state;
+        }
+
         // Check if there is a last known position, if yes, abort patrol
         object lastKnownPos = GetData("lastKnownPosition");
         if (lastKnownPos != null)

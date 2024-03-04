@@ -94,7 +94,7 @@ public class GameManager : MonoBehaviour
 
     // Pause and debug flags
     [Header("Pause Flag")]
-    public bool isPaused;
+    public bool isPaused = false;
     [Tooltip("When Pickup is active, but another canvas is used. Set during gameplay.")]
     public bool canvasActive = false;
 
@@ -181,6 +181,7 @@ public class GameManager : MonoBehaviour
         {
             foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
             {
+                customUpdateManager.AddCustomUpdatable(enemy);
                 enemy.ResumePlayerInSight();
             }
             foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>())
@@ -470,33 +471,48 @@ public class GameManager : MonoBehaviour
                     playerInput = FindObjectOfType<PlayerInput>();
                 }
 
-                foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
-                {
-                    agent.isStopped = false;
-                    Debug.Log("GameManager.cs: Move " + agent.name);
-                }
-
-                isPaused = false;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 switch (CurrentSubGameState)
                 {
                     case SubGameState.Default:
+                        foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
+                        {
+                            agent.isStopped = false;
+                            Debug.Log("GameManager.cs: Move " + agent.name);
+                        }
+                        isPaused = false;
                         playerInput.SwitchCurrentActionMap("Player");
                         Debug.Log("GameManager.cs: Switch to GamePlay.Default");
                         break;
 
                     case SubGameState.EventScene:
+                        foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
+                        {
+                            agent.isStopped = true;
+                            Debug.Log("GameManager.cs: Move " + agent.name);
+                        }
+                        isPaused = true;
                         playerInput.SwitchCurrentActionMap("Event");
                         Debug.Log("GameManager.cs: Switch to GamePlay.EventScene");
                         break;
 
                     case SubGameState.PickUp:
+                        foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
+                        {
+                            agent.isStopped = true;
+                            Debug.Log("GameManager.cs: Move " + agent.name);
+                        }
                         isPaused = true;
                         playerInput.SwitchCurrentActionMap("PickUp");
                         Debug.Log("GameManager.cs: Switch to GamePlay.PickUp");
                         break;
                     case SubGameState.Painting:
+                        foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
+                        {
+                            agent.isStopped = true;
+                            Debug.Log("GameManager.cs: Move " + agent.name);
+                        }
                         isPaused = true;
                         playerInput.SwitchCurrentActionMap("Painting");
                         Debug.Log("GameManager.cs: Switch to GamePlay.Painting");
