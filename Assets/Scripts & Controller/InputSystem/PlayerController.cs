@@ -5,7 +5,7 @@ using Cinemachine;
 
 public class PlayerController : MonoBehaviour, ICustomUpdatable
 {
-    #region Movement Variables
+    #region Movement Variables 
 
     [Header("Movement")]
     [Tooltip("Move speed of the character in m/s")]
@@ -77,6 +77,11 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     // Canvas used for showing items that are picked up.
     [SerializeField] GameObject pickupCanvas;
 
+    float standardSpotAngle = 50f;
+    float newSpotAngle = 30f;
+    float standardIntensity = 1f;
+    float newIntensity = 1.5f;
+
     Rigidbody rb;
     float lookRotation;
     float speed;
@@ -118,7 +123,6 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             Move();
             if (fire) Fire();
             else if (interact && !aim) Interact();
-            if (!aim) GameManager.Instance.playerAnimController.AimAnimation(false);
             if (weaponSwitch != 0) WeaponSwitch();
             if (reload) Reload();
             if (inventory) Inventory();
@@ -443,10 +447,17 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     void Aim()
     {
-        GameManager.Instance.playerAnimController.AimAnimation(true);
+        GameManager.Instance.playerAnimController.AimAnimation(aim);
 
         // Increase camera FOV smoothly when aiming
         cmVirtualCamera.m_Lens.FieldOfView = Mathf.Lerp(cmVirtualCamera.m_Lens.FieldOfView, aim ? focalLength : startFocalLength, Time.deltaTime * 10f);
+
+        Light flashlight = GetComponent<Player>().flashlight;
+        if (flashlight.enabled)
+        {
+            flashlight.spotAngle = Mathf.Lerp(flashlight.spotAngle, aim ? newSpotAngle : standardSpotAngle, Time.deltaTime * 10f);
+            flashlight.intensity = Mathf.Lerp(flashlight.intensity, aim ? newIntensity : standardIntensity, Time.deltaTime * 10f);
+        }
     }
 
     void Fire()

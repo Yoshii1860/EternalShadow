@@ -52,11 +52,15 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
 
     public void CustomUpdate(float deltaTime)
     {
-        if (!paused && !hidden) ScanUpdate(deltaTime);
-        else if (hidden) 
+        if (!paused && !hidden) 
         {
-            playerInSight = false;
-            if (gameObject.activeSelf) Debug.Log("AISensor: Player hidden from enemy!");
+            if (hidden)
+            {
+                playerInSight = false;
+                if (gameObject.activeSelf) Debug.Log("AISensor: Player hidden from enemy!");
+                return;
+            }
+            ScanUpdate(deltaTime);
         }
     }
 
@@ -86,41 +90,7 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
                 if (gameObject.activeSelf) Debug.Log($"{colliders[i].gameObject.name} within sensing area!");
             }
         }
-
-        /*colliders = Physics.OverlapSphere(transform.position, 1.5f, LayerMask.GetMask("Interact"));
-        if (colliders.Length > 0)
-        {
-            for (int i = 0; i < colliders.Length; i++)
-            {
-                if (colliders[i].GetComponent<Door>() != null)
-                {
-                    enemy.enteredDoor = true;
-                    enemy.GetComponent<Animator>().SetTrigger("crouch");
-                    Debug.LogWarning("Entered door!");
-
-                    // if coroutine is not running, call coroutine
-                    if (coroutine == null)
-                    {
-                        coroutine = StartCoroutine(InsideDoor());
-                    }
-                    break;
-                }   
-            }
-        }
-        else enemy.enteredDoor = false;
-
-        for (int i = 0; i < colliders.Length; i++)
-        {
-            colliders[i] = null;
-        }*/
     }
-
-    /*IEnumerator InsideDoor()
-    {
-        yield return new WaitUntil(() => enemy.enteredDoor == false);
-        enemy.GetComponent<Animator>().SetTrigger("uncrouch");
-        coroutine = null;
-    }*/
 
     private void CheckPlayerInFOV(Vector3 playerPosition)
     {
@@ -174,13 +144,14 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
 
     private IEnumerator ForcedPlayerInSight(float time)
     {
+        savePlayerInSight = playerInSight;
         while (time > 0)
         {
             time -= Time.deltaTime;
             playerInSight = true;
             yield return null;
         }
-        playerInSight = false;
+        playerInSight = savePlayerInSight;
     }
 
     private Mesh CreateWedgeMesh() 

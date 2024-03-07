@@ -37,6 +37,8 @@ public class PlayerAnimController : MonoBehaviour
     [SerializeField] Vector3 onPistolPosition;
     [SerializeField] Vector3 onPistolRotation;
 
+    public bool debugMode = false;
+
     #endregion
 
     #region Unity Lifecycle Methods
@@ -53,6 +55,8 @@ public class PlayerAnimController : MonoBehaviour
 
     public void StartAnimation()
     {
+        if (debugMode) Debug.Log("PlayerAnim - StartAnimation");
+
         // Triggers the start animation and plays a sound
         animator.SetTrigger("StartAnim");
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "player1", 0.8f, 1f);
@@ -60,12 +64,16 @@ public class PlayerAnimController : MonoBehaviour
 
     public void AimAnimation(bool isAiming)
     {
+        if (debugMode) Debug.Log("PlayerAnim - AimAnimation: " + isAiming);
+
         // Sets the aiming state of the animation
-        if (pistolBool) animator.SetBool("Aim", isAiming);
+        if (pistolBool || lightSwitch) animator.SetBool("Aim", isAiming);
     }
 
     public void ShootAnimation()
     {
+        if (debugMode) Debug.Log("PlayerAnim - Try to shoot!");
+
         // Triggers the shoot animation
         if (pistolBool) 
         {
@@ -83,6 +91,8 @@ public class PlayerAnimController : MonoBehaviour
 
     public void BlindnessAnimation()
     {
+        if (debugMode) Debug.Log("PlayerAnim - BlindnessAnimation");
+
         // Initiates the blindness animation and plays a sound
         animator.SetBool("Blinded", true);
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "player2", .8f, 1f);
@@ -90,12 +100,16 @@ public class PlayerAnimController : MonoBehaviour
 
     public void StopBlindnessAnimation()
     {
+        if (debugMode) Debug.Log("PlayerAnim - StopBlindnessAnimation");
+
         // Stops the blindness animation
         animator.SetBool("Blinded", false);
     }
 
     public void PenholderAnimation()
     {
+        if (debugMode) Debug.Log("PlayerAnim - PenholderAnimation");
+
         // Initiates the penholder animation
         if (GameManager.Instance.player.flashlight.enabled) GameManager.Instance.player.LightSwitch();
         if (pistolBool) animator.gameObject.GetComponentInChildren<WeaponSwitcher>().Execute(1);
@@ -107,6 +121,8 @@ public class PlayerAnimController : MonoBehaviour
 
     public void SetWeapon(Transform currentWeapon, Transform nextWeapon)
     {
+        if (debugMode) Debug.Log("PlayerAnim - SetWeapon: " + nextWeapon.name + " - LightSwitch: " + lightSwitch);
+
         if (string.Compare(nextWeapon.name, "None") == 0)
         {
             pistolBool = false;
@@ -125,6 +141,8 @@ public class PlayerAnimController : MonoBehaviour
 
     public void Flashlight(GameObject flashlight, bool isOn)
     {
+        if (debugMode) Debug.Log("PlayerAnim - Flashlight: " + isOn);
+
         // Moves the flashlight to the new position and rotation
         lightSwitch = isOn;
         StartCoroutine(LerpToOnPosition(flashlight, isOn));
@@ -134,6 +152,8 @@ public class PlayerAnimController : MonoBehaviour
     // Lerps the flashlight to the new position and rotation
     IEnumerator LerpToOnPosition(GameObject weapon, bool isOn)
     {
+        if (debugMode) Debug.Log("PlayerAnim - LerpToOnPosition: " + weapon.name + " - LightSwitch: " + isOn);
+
         // If weapon will be enabled
         if (isOn)
         {
@@ -148,7 +168,6 @@ public class PlayerAnimController : MonoBehaviour
             switch (weapon.name)
             {
                 case "Pistol":
-                    Debug.Log("PlayerAnim - Weapon: " + weapon.name + " - LightSwitch: " + lightSwitch);
                     IKFabrics(fastIKFabricsRight, true);
                     AudioManager.Instance.PlaySoundOneShot(weaponsObj.GetInstanceID(), "pistol on", 0.5f, 1.2f);
                     if (!lightSwitch)
@@ -158,18 +177,18 @@ public class PlayerAnimController : MonoBehaviour
                     }
                     break;
                 case "None":
-                    Debug.Log("PlayerAnim - Weapon: None - LightSwitch: " + lightSwitch);
                     IKFabrics(fastIKFabricsRight, false);
                     if (!lightSwitch) IKFabrics(fastIKFabricsLeft, false);
                     break;
-                default:
-                    Debug.Log("PlayerAnim - Weapon: Flashlight - LightSwitch: " + lightSwitch);
+                case "Flashlight":
                     AudioManager.Instance.PlaySoundOneShot(weaponsObj.GetInstanceID(), "flashlight on", 0.5f);
                     IKFabrics(fastIKFabricsLeft, true);
                     IKFabricsTargetChange("Flashlight");
                     break;
             }
         }
+
+        /*
 
         // Sets the initial position and rotation of the flashlight
         Vector3 currentPosition = weapon.transform.localPosition;
@@ -184,10 +203,15 @@ public class PlayerAnimController : MonoBehaviour
             targetPosition = isOn ? onPistolPosition : offPistolPosition;
             targetRotation = isOn ? onPistolRotation : offPistolRotation;
         }
-        else
+        else if (string.Compare(weapon.name, "Flashlight") == 0)
         {
             targetPosition = isOn ? onFlashlightPosition : offFlashlightPosition;
             targetRotation = isOn ? onFlashlightRotation : offFlashlightRotation;
+        }
+        else
+        {
+            targetPosition = Vector3.zero;
+            targetRotation = Vector3.zero;
         }
 
         float lerpTime = isOn ? 0.5f : 0.1f;
@@ -197,6 +221,9 @@ public class PlayerAnimController : MonoBehaviour
         while (Vector3.Distance(currentPosition, targetPosition) > positionDistance ||
             Vector3.Distance(currentRotation, targetRotation) > rotationDistance)
         {
+            Debug.Log("Lerping: " + weapon.name + " - targetPosition: " + targetPosition + " - targetRotation: " + targetRotation);
+            Debug.Log(weapon.name + "lerping to" + weapon.transform.localPosition + " - " + weapon.transform.localEulerAngles);
+
             currentPosition = Vector3.Lerp(currentPosition, targetPosition, lerpTime);
             currentRotation = Vector3.Lerp(currentRotation, targetRotation, lerpTime);
 
@@ -209,6 +236,8 @@ public class PlayerAnimController : MonoBehaviour
         // Sets the final position and rotation of the flashlight
         weapon.transform.localPosition = targetPosition;
         weapon.transform.localEulerAngles = currentRotation;
+
+        */
 
         // If weapon will be disabled
         if (!isOn)
@@ -239,6 +268,8 @@ public class PlayerAnimController : MonoBehaviour
     // Sets the base layer (no weapon no flashlight) of the animation
     public void SetAnimLayer(string layerName)
     {
+        if (debugMode) Debug.Log("PlayerAnim - SetAnimLayer: " + layerName + " - LightSwitch: " + lightSwitch);
+
         switch (layerName)
         {
             case "None":
@@ -279,6 +310,8 @@ public class PlayerAnimController : MonoBehaviour
     // Enables or disables all IK fabrics
     void IKFabrics(FastIKFabric[] leftOrRight, bool onOrOff)
     {
+        if (debugMode) Debug.Log("PlayerAnim - IKFabrics: " + onOrOff);
+
         // Enables the IK fabrics
         foreach (FastIKFabric fastIKFabric in leftOrRight)
         {
@@ -288,6 +321,8 @@ public class PlayerAnimController : MonoBehaviour
 
     void IKFabricsTargetChange(string weaponName)
     {
+        if (debugMode) Debug.Log("PlayerAnim - IKFabricsTargetChange: " + weaponName + " - LightSwitch: " + lightSwitch);
+
         // Changes the target of the IK fabrics
         foreach (FastIKFabric fastIKFabric in fastIKFabricsLeft)
         {

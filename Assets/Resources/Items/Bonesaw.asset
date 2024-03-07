@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
+  m_Name: Bonesaw
+  m_EditorClassIdentifier: 
+  displayName: Bonesaw
+  description: This looks pretty solid. Might cut through everything, even human
+    bones.
+  icon: {fileID: 21300000, guid: bdd80b6835daac64aa9d82ec42ba4225, type: 3}
+  iconPath: VFX/ItemIcons/bonesaw
+  unique: 1
+  quantity: 1
+  prefab: {fileID: 6446087884125340742, guid: d8b559ce09ff1e846881e3a6a1486d39, type: 3}
+  prefabPath: Assets/Hospital/Prefabs/Props/Surgery/Saw
+  type: 3
+  ammoType: 0
+  potionType: 0

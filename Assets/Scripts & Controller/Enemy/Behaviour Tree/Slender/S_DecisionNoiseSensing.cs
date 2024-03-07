@@ -81,7 +81,8 @@ public class S_DecisionNoiseSensing : Node
             state = NodeState.FAILURE;
             return state;
         }
-        else if (aiSensor.playerInSight)
+        
+        if (aiSensor.playerInSight)
         {
             // Clear noise data and set the player as the target
             ClearData("noisePosition");
