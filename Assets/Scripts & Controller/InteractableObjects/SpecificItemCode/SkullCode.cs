@@ -12,6 +12,7 @@ public class SkullCode : InteractableObject
     [SerializeField] Vector3 skullcapRotation; // -15.45, 16.68, 102.13
     [SerializeField] float cutTimer = 4.5f;
     [SerializeField] string displayMessage;
+    [SerializeField] Transform vCamFollowTarget;
 
     void Start()
     {
@@ -28,7 +29,8 @@ public class SkullCode : InteractableObject
             InventoryManager.Instance.RemoveItem(item);
             bonesaw.SetActive(true);
             GameManager.Instance.GameplayEvent();
-            GameManager.Instance.playerController.LookAtDirection(skullcap.transform.parent);
+            GameManager.Instance.playerController.ToggleArms(false);
+            GameManager.Instance.playerController.SetFollowTarget(vCamFollowTarget);
             bonesaw.GetComponent<Animator>().SetTrigger("Cut");
             StartCoroutine(CutSkull());
         }
@@ -59,7 +61,8 @@ public class SkullCode : InteractableObject
 
         bonesaw.SetActive(false);
         skullcap.transform.parent.GetComponent<Collider>().enabled = false;
-        GameManager.Instance.playerController.LookAtReset();
+        GameManager.Instance.playerController.ToggleArms(true);
+        GameManager.Instance.playerController.SetFollowTarget();
         GameManager.Instance.ResumeGame();
     }
 }

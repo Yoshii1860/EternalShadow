@@ -26,17 +26,13 @@ public class ObjectHandler : MonoBehaviour
 
     #region Public Methods
 
-    /// <summary>
     /// Execute the ObjectHandler functionality.
-    /// </summary>
     public void Execute()
     {
         DetectObjects();
     }
 
-    /// <summary>
     /// Update references to other components.
-    /// </summary>
     public void UpdateReferences()
     {
         action = GetComponent<ItemActions>();
@@ -46,9 +42,7 @@ public class ObjectHandler : MonoBehaviour
 
     #region Private Methods
 
-    /// <summary>
     /// Detect objects in front of the camera.
-    /// </summary>
     private void DetectObjects()
     {
         RaycastHit hit;
@@ -67,6 +61,10 @@ public class ObjectHandler : MonoBehaviour
 
             if (itemController != null)
             {
+                if (itemController.inventoryItem)
+                {
+                    if (InventoryCheck()) return;
+                }
                 itemController.Interact();
                 // Use PickUp() method from ItemActions class
                 Debug.Log("ObjectHandler - PickUp");
@@ -89,6 +87,10 @@ public class ObjectHandler : MonoBehaviour
                 InteractableObject intObj = hit.collider.gameObject.GetComponent<InteractableObject>();
                 if (intObj != null)
                 {
+                    if (intObj.inventoryItem)
+                    {
+                        if (InventoryCheck()) return;
+                    }
                     intObj.Interact();
                     return;
                 }
@@ -120,9 +122,17 @@ public class ObjectHandler : MonoBehaviour
         }
     }
 
-    /// <summary>
+    private bool InventoryCheck()
+    {
+        // Check if the player has space in the inventory
+        if (InventoryManager.Instance.ItemCount() >= InventoryManager.Instance.maxItems)
+        {
+            return true;
+        }
+        return false;
+    }
+
     /// Draw a ray in the Scene view for visualization.
-    /// </summary>
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

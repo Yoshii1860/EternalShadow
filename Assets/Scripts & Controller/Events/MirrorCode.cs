@@ -16,6 +16,8 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
     [SerializeField] Door door; // Reference to the door object to see if it´s closed
     [SerializeField] Light roomLights; // Reference to the room lights to see if they are on
 
+    bool once = true; // Flag to track if the event has been triggered
+
     void Start()
     {
         playerLayer = 1 << GameManager.Instance.player.gameObject.layer; // Set the player layer to the layer of the player object
@@ -80,18 +82,21 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
             && angle                                > 14.2 
             && angle                                < 14.6)
             {
-                if (GameManager.Instance.player.flashlight.spotAngle < 35f && !roomLights.enabled)
+                if (GameManager.Instance.player.flashlight.spotAngle < 35f && !roomLights.enabled && once)
                 {
+                    once = false;
                     Vector3 playerPosition = GameManager.Instance.player.transform.position;
                     Vector3 playerEulerAngles = GameManager.Instance.player.transform.eulerAngles;
                     StartCoroutine(EndEvent(playerPosition, playerEulerAngles));
                 }
+                else Debug.Log("MirrorEvent: The flashlight is not pointing at the mirror!");
             }
             else
             {
                 secondSpotlight.SetActive(false);
             }
         }
+        else Debug.Log("MirrorEvent: The door is closed!");
     }
 
     IEnumerator EndEvent(Vector3 position, Vector3 eulerAngles)

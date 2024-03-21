@@ -10,7 +10,7 @@ public class SummonText : InteractableObject
 
     protected override void RunItemCode()
     {
-        RendererToggle(GameManager.Instance.fpsArms, false);
+        GameManager.Instance.playerController.ToggleArms(false);
         GameManager.Instance.PickUp();
         canvas.SetActive(true);
         GameManager.Instance.canvasActive = true;
@@ -22,6 +22,6 @@ public class SummonText : InteractableObject
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
         canvas.SetActive(false);
         GameManager.Instance.canvasActive = false;
-        RendererToggle(GameManager.Instance.fpsArms, true);
+        GameManager.Instance.playerController.ToggleArms(false);
     }
 }

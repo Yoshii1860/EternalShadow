@@ -340,7 +340,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16ed7316a1f278345a2b3ae88d24c02b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPickup: 1
   active: 0
+  inventoryItem: 1
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 1
@@ -349,6 +351,7 @@ MonoBehaviour:
   objectDescription: {fileID: 0}
   objectNameString: Old Musicbox
   objectDescriptionString: Inside you can see a number written in blood... "1860"
+  clipName: 
   item: {fileID: 11400000, guid: 3cf687a7e2f699d42907d6eb6eb4fa1e, type: 2}
   originalPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &1504502567687819851

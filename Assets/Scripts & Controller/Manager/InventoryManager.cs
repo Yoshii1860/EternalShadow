@@ -48,6 +48,9 @@ public class InventoryManager : MonoBehaviour
         public GameObject itemDisplay;
         [Tooltip("The force that will be applied to the dropped item")]
         public float dropForce;
+        [Tooltip("The maximum amount of items that can be stored in the inventory")]
+        public int maxItems = 9;
+
 
         // Additional fields
         Transform[] gridLayouts;
@@ -522,7 +525,7 @@ public class InventoryManager : MonoBehaviour
         GameObject obj = Instantiate(item.prefab, player.transform.position + player.transform.forward, Quaternion.identity, GameManager.Instance.objectPool);
         Rigidbody itemRigidbody = obj.AddComponent<Rigidbody>();
         itemRigidbody.AddForce(player.transform.forward * dropForce, ForceMode.Impulse);
-        Destroy(itemRigidbody, 1.5f);
+        StartCoroutine(RemoveRigidbody(obj));
 
         if(item.type == ItemType.Weapon)
         {
@@ -541,7 +544,24 @@ public class InventoryManager : MonoBehaviour
         Items.Remove(item);
         ListItems();
         BackToSelection();
+    }
+
+    IEnumerator RemoveRigidbody(GameObject obj)
+    {
+        yield return new WaitForSeconds(1f);
+        Destroy(obj.GetComponent<Rigidbody>());
     }   
+
+    public int ItemCount()
+    {
+        if (Items.Count >= maxItems)
+        {
+            GameManager.Instance.DisplayMessage("Inventory is full", 2f);
+            // play an audio
+            return Items.Count;
+        }
+        return Items.Count;
+    }
 
     #endregion
 }

@@ -104,9 +104,9 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
         for (float i = image.color.a; i < 1; i += 0.01f)
         {
             image.color = new Color(0, 0, 0, i);
-            if (i > 0.99f)
             yield return new WaitForSeconds(0.01f);
         }
+        image.color = new Color(0, 0, 0, 1);
         yield return new WaitForSeconds(2f);
         GameManager.Instance.GameplayEvent();
         if (GameManager.Instance.player.flashlight.enabled) GameManager.Instance.player.LightSwitch();

@@ -64,6 +64,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     [SerializeField] Transform defaultTarget;
     [Tooltip("Mesh of the Arms")]
     [SerializeField] Renderer fpsArms;
+    [Tooltip("Flashlight attached to the player")]
+    [SerializeField] GameObject flashlight;
 
     #endregion
 
@@ -181,6 +183,27 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     public void ToggleArms(bool active)
     {
         fpsArms.enabled = active;
+        if (flashlight.activeSelf)
+        {
+            flashlight.GetComponent<Renderer>().enabled = active;
+        }
+        Transform[] weapons = weaponContainer.GetComponentsInChildren<Transform>();
+        foreach (Transform weapon in weapons)
+        {
+            Renderer renderer = weapon.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.enabled = active;
+            }
+            else
+            {
+                Renderer[] renderers = weapon.GetComponentsInChildren<Renderer>();
+                foreach (Renderer r in renderers)
+                {
+                    r.enabled = active;
+                }
+            }
+        }
     }
 
     #endregion

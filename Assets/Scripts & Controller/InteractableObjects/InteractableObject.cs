@@ -11,6 +11,7 @@ public class InteractableObject : MonoBehaviour
     [Header("If not Pickup - no base code will be run")]
     public bool isPickup = true;
     public bool active = false;
+    public bool inventoryItem = true;
 
     [Header("Object Properties")]
     [SerializeField] Transform objectPosition;
@@ -29,16 +30,6 @@ public class InteractableObject : MonoBehaviour
 
     #region Interaction
 
-    public virtual void RendererToggle(GameObject go, bool active)
-    {
-        for (int i = 0; i < go.transform.childCount; i++)
-        {
-            Renderer renderer = go.transform.GetChild(i).gameObject.GetComponent<Renderer>();
-            if (renderer != null && renderer.gameObject.activeSelf) renderer.enabled = active;
-            if (go.transform.GetChild(i).childCount > 0) RendererToggle(go.transform.GetChild(i).gameObject, active);
-        }
-    }
-
     public virtual void Interact()
     {
         Debug.Log("Interacting with the base interactable object.");
@@ -50,7 +41,7 @@ public class InteractableObject : MonoBehaviour
         }
 
         // loop through all active children and grand children of fpsArms and disable mesh renderer
-        RendererToggle(GameManager.Instance.fpsArms, false);
+        GameManager.Instance.playerController.ToggleArms(false);
 
         // Open Canvas
         GameManager.Instance.pickupCanvas.SetActive(true);
@@ -61,8 +52,12 @@ public class InteractableObject : MonoBehaviour
         if (clipName == "") clipName = "pickup item";
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, clipName, 0.6f, 1f);
 
+        DeactivateEmission();
+
         // Create Duplicate Object on Canvas
         GameObject newItem = Instantiate(gameObject, GameManager.Instance.pickupCanvas.transform);
+
+        gameObject.GetComponent<Collider>().enabled = false;
 
         // Deactivate all lights from showcase object
         DeactivateLights(newItem);
@@ -123,6 +118,32 @@ public class InteractableObject : MonoBehaviour
         }
     }
 
+    void DeactivateEmission()
+    {
+        MeshRenderer renderer = GetComponent<MeshRenderer>();
+        if (renderer != null)
+        {
+            foreach(Material material in renderer.materials)
+            {
+                material.DisableKeyword("_EMISSION");
+            }
+        }
+        else
+        {
+            MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>();
+            if (renderers != null)
+            {
+                foreach (MeshRenderer rendererChild in renderers)
+                {
+                    foreach (Material material in rendererChild.materials)
+                    {
+                        material.DisableKeyword("_EMISSION");
+                    }
+                }
+            }
+        }
+    }
+
     #endregion
 
     #region Coroutines
@@ -132,8 +153,6 @@ public class InteractableObject : MonoBehaviour
         // Wait for the player to return to gameplay mode
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
 
-        RendererToggle(GameManager.Instance.fpsArms, true);
-
         // Stop coroutine to prevent errors before deleting
         StopCoroutine(rotationCoroutine);
 
@@ -141,6 +160,7 @@ public class InteractableObject : MonoBehaviour
         Destroy(newItemToDestroy);
 
         // Deactivate Canvas
+        GameManager.Instance.playerController.ToggleArms(true);
         GameManager.Instance.pickupCanvas.SetActive(false);
 
         // Run object-specific code

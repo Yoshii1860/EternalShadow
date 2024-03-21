@@ -19,7 +19,7 @@ MonoBehaviour:
   iconPath: VFX/ItemIcons/Bandage
   unique: 0
   quantity: 1
-  prefab: {fileID: 3843195161043321567, guid: 81885fc93eb8a4e4ea54e7bc3e0e48dd, type: 3}
+  prefab: {fileID: 4001121234425887939, guid: d6d929bd16f5e3f4e988ff2888c41071, type: 3}
   prefabPath: Prefabs/Items/Bandage
   type: 2
   ammoType: 0

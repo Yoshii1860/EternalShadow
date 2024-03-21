@@ -39,6 +39,7 @@ public class ItemController : InteractableObject
     {
         if (isPickup) return;
         if (clipName == "") clipName = "pickup item";
+        if (!isPickup) GameManager.Instance.DisplayMessage("Picked up " + item.displayName, 2f);
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, clipName, 0.6f, 1f);
     }
 }

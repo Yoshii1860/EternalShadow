@@ -15,7 +15,7 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     [SerializeField] Transform[] bodyParts;
     [SerializeField] Transform[] deathParts;
     [Tooltip("Maximum distance at which the mannequin can follow the player")]
-    [SerializeField] float maxDistance = 50f;
+    [SerializeField] float maxDistance = 18f;
     #endregion
 
     #region Private Fields
@@ -28,6 +28,7 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     public bool started = false;
     bool firstAudio = false;
     float waitTimer = 0f;
+    bool stuckCheckActive = false;
     #endregion
 
     #region MonoBehaviour Callbacks
@@ -98,11 +99,17 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
             ResumeAnimation(); // Resume the mannequin's movement
             if (waitTimer == 0) Attack(); // Attack the player if close enough
             Debug.DrawLine(head.position, playerHead, Color.green); // Draw a debug line to visualize player visibility
+            if (!stuckCheckActive) StartCoroutine(StuckCheck());
         }
         else
         {
             StopAnimation(); // Stop the mannequin's movement
             Debug.DrawLine(head.position, playerHead, Color.red); // Draw a debug line to visualize player visibility
+            if (stuckCheckActive) 
+            {
+                StopCoroutine(StuckCheck());
+                stuckCheckActive = false;
+            }
         }
     }
 
@@ -179,6 +186,30 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
         {
             Debug.Log("Mannequin hit by player: " + hitObject.name);
         }
+    }
+
+    IEnumerator StuckCheck()
+    {
+        stuckCheckActive = true;
+        if (navMeshAgent.velocity.magnitude < 0.1f)
+        {
+            float timer = 3f;
+            while (timer > 0)
+            {
+                timer -= Time.deltaTime;
+
+                if (navMeshAgent.velocity.magnitude > 0.1f)
+                {
+                    stuckCheckActive = false;
+                    yield break;
+                }
+
+                yield return null;
+            }
+            Debug.Log("Mannequin is stuck!");
+            StopAnimation();
+        }
+        stuckCheckActive = false;
     }
 
     IEnumerator AttackHit()
