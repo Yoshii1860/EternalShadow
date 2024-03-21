@@ -81,10 +81,10 @@ MonoBehaviour:
   rotateZ: 0
   objectName: {fileID: 0}
   objectDescription: {fileID: 0}
-  objectNameString: Music Key
-  objectDescriptionString: There is a tag that says "Music".. What door could it
-    be for?
-  item: {fileID: 11400000, guid: 8b295343db816ab41aebc51a63c03209, type: 2}
+  objectNameString: Cabinet Key
+  objectDescriptionString: There is a tag that says "Cabinet".
+  clipName: 
+  item: {fileID: 11400000, guid: eeca86dc98950164b9e46a35c8f79000, type: 2}
   originalPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &6364469392284021877
 GameObject:

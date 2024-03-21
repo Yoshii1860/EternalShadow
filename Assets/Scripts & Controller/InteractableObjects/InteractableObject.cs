@@ -9,7 +9,7 @@ public class InteractableObject : MonoBehaviour
     #region Variables
 
     [Header("If not Pickup - no base code will be run")]
-    [SerializeField] bool isPickup = true;
+    public bool isPickup = true;
     public bool active = false;
 
     [Header("Object Properties")]
@@ -21,6 +21,7 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] TextMeshProUGUI objectDescription;
     [SerializeField] string objectNameString;
     [SerializeField] string objectDescriptionString;
+    public string clipName;
 
     Coroutine rotationCoroutine;
 
@@ -56,6 +57,9 @@ public class InteractableObject : MonoBehaviour
 
         // Pause UpdateManager
         GameManager.Instance.PickUp();
+
+        if (clipName == "") clipName = "pickup item";
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, clipName, 0.6f, 1f);
 
         // Create Duplicate Object on Canvas
         GameObject newItem = Instantiate(gameObject, GameManager.Instance.pickupCanvas.transform);
@@ -172,7 +176,7 @@ public class InteractableObject : MonoBehaviour
 
     protected virtual void RunItemCode()
     {
-        Debug.Log("Running the base item code if available.");
+        Debug.Log("Running base item code.");
     }
 
     #endregion

@@ -10,6 +10,7 @@ public class ObjectHandler : MonoBehaviour
     // [SerializeField] private InputActionReference input;
     [SerializeField] float pickupDistance = 5f;
     private ItemActions action;
+    public bool lightSwitchActive = false;
 
     #endregion
 
@@ -54,44 +55,67 @@ public class ObjectHandler : MonoBehaviour
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, pickupDistance))
         {
             Debug.Log("ObjectHandler.DetectObjects: " + hit.collider.gameObject.name);
-            ItemController itemController = hit.collider.gameObject.GetComponent<ItemController>();
-            InteractableObject intObj = hit.collider.gameObject.GetComponent<InteractableObject>();
-            Door door = hit.collider.gameObject.GetComponent<Door>();
             PaintingEvent paintingEvent = hit.collider.gameObject.GetComponent<PaintingEvent>();
 
             if (paintingEvent != null)
             {
                 GameManager.Instance.PaintingEvent();
+                return;
             }
-            else if (itemController != null)
+
+            ItemController itemController = hit.collider.gameObject.GetComponent<ItemController>();
+
+            if (itemController != null)
             {
-                intObj.Interact();
+                itemController.Interact();
                 // Use PickUp() method from ItemActions class
                 Debug.Log("ObjectHandler - PickUp");
                 action.PickUp(hit);
+                return;
             }
-            else if (hit.collider.gameObject.tag == "Save")
+
+            if (hit.collider.gameObject.tag == "Save")
             {
                 // Open UI to save game
                 Debug.Log("ObjectHandler - Save");
                 GameManager.Instance.OpenSaveScreen();
+                return;
             }
-            else if (hit.collider.gameObject.layer == 6)
+
+            if (hit.collider.gameObject.layer == 6)
             {
                 Debug.Log("ObjectHandler - Interact");
+
+                InteractableObject intObj = hit.collider.gameObject.GetComponent<InteractableObject>();
                 if (intObj != null)
                 {
                     intObj.Interact();
+                    return;
                 }
-                else if (door != null)
+                
+                Door door = hit.collider.gameObject.GetComponent<Door>();
+                if (door != null)
                 {
                     door.Interact();
+                    return;
                 }
-                else
+
+                TextCode textCode = hit.collider.gameObject.GetComponent<TextCode>();
+                if (textCode != null)
                 {
-                    intObj = hit.collider.gameObject.GetComponentInParent<InteractableObject>();
-                    intObj.Interact();
+                    textCode.ReadText();
+                    return;
                 }
+
+                LightSwitch lightSwitch = hit.collider.gameObject.GetComponent<LightSwitch>();
+                if (lightSwitch != null)
+                {
+                    lightSwitch.SwitchLights();
+                    return;
+                }
+                
+                intObj = hit.collider.gameObject.GetComponentInParent<InteractableObject>();
+                intObj.Interact();
             }
         }
     }

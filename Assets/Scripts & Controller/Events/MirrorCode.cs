@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Cinemachine;
 
 public class MirrorCode : MonoBehaviour, ICustomUpdatable
 {
@@ -10,10 +9,12 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
     Transform spotlightTransform; // Transform of the spotlight on the mirror
     [SerializeField] Transform camRootTransform; // Transform of the camRoot on the player
     [SerializeField] GameObject secondSpotlight; // Angle of the spotlight
-    [SerializeField] CinemachineVirtualCamera vcam; // Reference to the virtual camera
     [SerializeField] Transform newFollowTarget; // Reference to the vcam follow object
     [SerializeField] GameObject particles; // Reference to the particles on the cross
     [SerializeField] Animator animator; // Reference to the animator on the cross
+
+    [SerializeField] Door door; // Reference to the door object to see if it´s closed
+    [SerializeField] Light roomLights; // Reference to the room lights to see if they are on
 
     void Start()
     {
@@ -22,17 +23,12 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
         mirrorLayer = 1 << gameObject.layer; // Set the mirror layer to the layer of the mirror object
         spotlightTransform.gameObject.SetActive(false); // Disable the spotlight initially
         secondSpotlight.SetActive(false); // Disable the second spotlight initially
-
-        ///////////////////////////////////////
-        // SET THIS AT A PROPER TIME IN THE GAME
-        ///////////////////////////////////////
-        GameManager.Instance.customUpdateManager.AddCustomUpdatable(this); // Add this script to the custom update manager
-        ///////////////////////////////////////
+        this.enabled = false; // Disable the script initially
     }
     
     public void CustomUpdate(float deltaTime)
     {
-        RaycastOnMirror();
+        if (GameManager.Instance.player.flashlight.enabled) RaycastOnMirror();
     }
 
     void RaycastOnMirror()
@@ -77,18 +73,24 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
 
     void CheckMirrorHit(float angle)
     {
-        if (spotlightTransform.localPosition.y  > -0.06 
-        && spotlightTransform.localPosition.y   < 0.06
-        && angle                                > 14.2 
-        && angle                                < 14.6)
+        if (!door.DoorState())
         {
-            Vector3 playerPosition = GameManager.Instance.player.transform.position;
-            Vector3 playerEulerAngles = GameManager.Instance.player.transform.eulerAngles;
-            StartCoroutine(EndEvent(playerPosition, playerEulerAngles));
-        }
-        else
-        {
-            secondSpotlight.SetActive(false);
+            if (spotlightTransform.localPosition.y  > -0.06 
+            && spotlightTransform.localPosition.y   < 0.06
+            && angle                                > 14.2 
+            && angle                                < 14.6)
+            {
+                if (GameManager.Instance.player.flashlight.spotAngle < 35f && !roomLights.enabled)
+                {
+                    Vector3 playerPosition = GameManager.Instance.player.transform.position;
+                    Vector3 playerEulerAngles = GameManager.Instance.player.transform.eulerAngles;
+                    StartCoroutine(EndEvent(playerPosition, playerEulerAngles));
+                }
+            }
+            else
+            {
+                secondSpotlight.SetActive(false);
+            }
         }
     }
 
@@ -104,10 +106,15 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
         }
         GameManager.Instance.GameplayEvent();
         secondSpotlight.SetActive(true);
-        vcam.Follow = newFollowTarget;
+        GameManager.Instance.playerController.SetFollowTarget(newFollowTarget);
         yield return new WaitForSeconds(1.5f);
         particles.SetActive(true);
         yield return new WaitForSeconds(1f);
         animator.SetTrigger("Fall");
+        yield return new WaitForSeconds(9f);
+        GameManager.Instance.playerController.SetFollowTarget();
+        secondSpotlight.SetActive(false);
+        GameManager.Instance.ResumeGame();
+        this.enabled = false;
     }
 }

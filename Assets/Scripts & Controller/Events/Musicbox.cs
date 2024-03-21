@@ -251,10 +251,10 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
         float angle = Vector3.Angle(GameManager.Instance.player.transform.forward, direction);
 
         // Inverse relationship: lower angle (facing) -> higher volume, higher angle (looking away) -> lower volume
-        float volume = Mathf.SmoothStep(1f, 0.5f, angle / 180f); // Reverse order of arguments
+        float volume = Mathf.SmoothStep(1f, 0.25f, angle / 180f); // Reverse order of arguments
 
         // Clamp volume to your desired range (0.5f minimum, 1f maximum)
-        volume = Mathf.Clamp(volume, 0.5f, 1f);
+        volume = Mathf.Clamp(volume, 0.25f, 1f);
 
         // Set music box volume
         AudioManager.Instance.SetAudioVolume(gameObject.GetInstanceID(), volume);

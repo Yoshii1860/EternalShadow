@@ -60,7 +60,7 @@ public class S_ActionPatrol : Node
         if (sensor.playerInSight)
         {
             // Set state to FAILURE and return
-            parent.parent.SetData("target", GameManager.Instance.player.transform);
+            parent.SetData("target", GameManager.Instance.player.transform);
             if (debugMode) Debug.Log("A - Patrol: FAILURE (Player in Sight)");
             state = NodeState.FAILURE;
             return state;

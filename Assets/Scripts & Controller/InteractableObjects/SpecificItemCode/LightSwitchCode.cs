@@ -12,11 +12,24 @@ public class LightSwitchCode : InteractableObject
     [SerializeField] ReflectionProbe[] reflectionProbes;
     [Tooltip("The handle to switch on the light")]
     [SerializeField] GameObject handle;
+    [SerializeField] PaintingEvent paintingEvent;
+    [SerializeField] Door doorToUnlock;
+    [SerializeField] Door doorToUnlock2;
 
     // Override the base class method for specific implementation
     protected override void RunItemCode()
     {
+        paintingEvent.active = true;
+        doorToUnlock.locked = false;
+        doorToUnlock2.locked = false;
         StartCoroutine(RotateHandleGradually());
+
+        // Find All scripts "LightSwitch" in scene
+        LightSwitch[] lightSwitches = FindObjectsOfType<LightSwitch>();
+        foreach (LightSwitch lightSwitch in lightSwitches)
+        {
+            lightSwitch.noCurrent = false;
+        }
     }
 
     IEnumerator RotateHandleGradually()
@@ -40,7 +53,7 @@ public class LightSwitchCode : InteractableObject
             yield return null;
         }
 
-        StartCoroutine(ActivateProbesGradually());
+        //StartCoroutine(ActivateProbesGradually());
     }
 
     IEnumerator ActivateProbesGradually()

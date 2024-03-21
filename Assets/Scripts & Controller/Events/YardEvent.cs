@@ -83,53 +83,11 @@ public class YardEvent : MonoBehaviour
         // Check if this is the first time OnTriggerExit is called
         if (firstTime)
         {
-            // Perform one-time actions on the first exit
-            firstTime = false;
-
-            // Disable AISensor to stop AI updates during the event
-            girl.GetComponent<AISensor>().hidden = true;
-
-            // Activate the girl GameObject
-            girl.SetActive(true);
-
-            // Set up and play weeping ghost woman audio on the girl
-            AudioManager.Instance.AddAudioSource(girl.GetComponent<AudioSource>());
-            AudioManager.Instance.SetAudioClip(girl.GetInstanceID(), "weeping ghost woman", 0.6f, 1f, true);
-            AudioManager.Instance.FadeIn(girl.GetInstanceID(), 10f, 0.6f);
-
-            // Open the associated door
-            door.OpenDoor();
+            FirstEnter();
         }
         else if (secondTime)
         {
-            // Check if this is the second time OnTriggerExit is called
-            secondTime = false;
-
-            // Trigger a gameplay event in the GameManager to stop player from moving
-            GameManager.Instance.GameplayEvent();
-
-            // Make the player character look at the girl
-            GameManager.Instance.playerController.LookAtDirection(girl.transform);
-            
-            // Add all flickering lights to CustomUpdateManager for dynamic updates
-            FlickeringLight[] flickeringLights = yardLights.GetComponentsInChildren<FlickeringLight>();
-            if (flickeringLights != null)
-            {
-                foreach (FlickeringLight fLight in flickeringLights)
-                {
-                    GameManager.Instance.customUpdateManager.AddCustomUpdatable(fLight);
-                }
-            }
-            
-            // Add the main light to CustomUpdateManager for dynamic updates
-            FlickeringLight flickeringLight = mainLight.GetComponent<FlickeringLight>();
-            GameManager.Instance.customUpdateManager.AddCustomUpdatable(flickeringLight);
-
-            // Start coroutines for gradual increase of light intensity,
-            // turning off lights, and ending the event
-            StartCoroutine(IncreaseIntensityGradually());
-            StartCoroutine(LightsOff());
-            StartCoroutine(EndEvent());
+            SecondEnter();
         }
     }
 
@@ -137,30 +95,82 @@ public class YardEvent : MonoBehaviour
 
     #region Private Methods
 
-    /// <summary>
+    void FirstEnter()
+    {
+        // Perform one-time actions on the first exit
+        firstTime = false;
+
+        // Disable AISensor to stop AI updates during the event
+        girl.GetComponent<AISensor>().hidden = true;
+
+        // Activate the girl GameObject
+        girl.SetActive(true);
+
+        // Set up and play weeping ghost woman audio on the girl
+        AudioManager.Instance.AddAudioSource(girl.GetComponent<AudioSource>());
+        AudioManager.Instance.SetAudioClip(girl.GetInstanceID(), "weeping ghost woman", 0.6f, 1f, true);
+        AudioManager.Instance.FadeIn(girl.GetInstanceID(), 10f, 0.6f);
+
+        // Open the associated door
+        door.OpenDoor();
+    }
+
+    void SecondEnter()
+    {
+        // Check if this is the second time OnTriggerExit is called
+        secondTime = false;
+
+        // Trigger a gameplay event in the GameManager to stop player from moving
+        GameManager.Instance.GameplayEvent();
+
+        // Make the player character look at the girl
+        GameManager.Instance.playerController.LookAtDirection(girl.transform);
+        
+        // Add all flickering lights to CustomUpdateManager for dynamic updates
+        FlickeringLight[] flickeringLights = yardLights.GetComponentsInChildren<FlickeringLight>();
+        foreach (FlickeringLight flickeringLight in flickeringLights)
+        {
+            GameManager.Instance.customUpdateManager.AddCustomUpdatable(flickeringLight);
+        }
+        
+        // Add the main light to CustomUpdateManager for dynamic updates
+        FlickeringLight flickeringMainLight = mainLight.GetComponent<FlickeringLight>();
+        GameManager.Instance.customUpdateManager.AddCustomUpdatable(flickeringMainLight);
+
+        // Start coroutines for gradual increase of light intensity,
+        // turning off lights, and ending the event
+        StartCoroutine(IncreaseIntensityGradually());
+        StartCoroutine(LightsOff());
+        StartCoroutine(EndEvent());
+    }
+
     /// Turn off all lights and reset the reflection probes to adjust to darkness.
-    /// </summary>
     void Lightning()
     {
-        // Stop all audio sources associated with lights
-        foreach (int audioSourceID in audioSourceIDList)
+        for (int i = 0; i < audioSourceIDList.Count; i++)
         {
-            AudioManager.Instance.StopAudio(audioSourceID);
+            AudioManager.Instance.StopAudio(audioSourceIDList[i]);
         }
 
-        // Disable flickering lights and turn off all lights in the environment
-        foreach (Light l in allLights.GetComponentsInChildren<Light>())
+        Light[] allLightsArray = allLights.GetComponentsInChildren<Light>();
+        for (int i = 0; i < allLightsArray.Length; i++)
         {
             // Remove flickering lights from CustomUpdateManager for efficiency
-            if (l.GetComponent<FlickeringLight>() != null)
+            if (allLightsArray[i].GetComponent<FlickeringLight>() != null)
             {
-                GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(l.GetComponent<FlickeringLight>());
+                GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(allLightsArray[i].GetComponent<FlickeringLight>());
             }
 
-            // Turn off the light
-            l.intensity = 0.5f;
-            l.enabled = false;
+            // Turn off the lights
+            allLightsArray[i].enabled = false;
         }
+
+        Light[] yardLightsArray = yardLights.GetComponentsInChildren<Light>();
+        for (int i = 0; i < yardLightsArray.Length; i++)
+        {
+            yardLightsArray[i].intensity = 1f;
+        }
+        mainLight.GetComponent<Light>().intensity = 1f;
 
         // Enable alert lights to create a specific atmosphere
         for (int i = 0; i < alertLights.Length; i++)
@@ -179,26 +189,25 @@ public class YardEvent : MonoBehaviour
 
     #region Coroutines
 
-    /// <summary>
     /// Gradually increases the intensity of lights in the yard, creating an immersive atmosphere.
-    /// </summary>
     IEnumerator IncreaseIntensityGradually()
     {
         // Wait for a delay before starting the intensity increase
         yield return new WaitForSeconds(2f);
 
         // Enable and play audio for each yard light with random volume and pitch
-        foreach (Light l in yardLights.GetComponentsInChildren<Light>())
+        Light[] yardLightsArray = yardLights.GetComponentsInChildren<Light>();
+        for (int i = 0; i < yardLightsArray.Length; i++)
         {
-            l.enabled = true;
+            yardLightsArray[i].enabled = true;
             float volume = Random.Range(0.3f, 0.8f);
             float pitch = Random.Range(0.8f, 1.2f);
 
             // Play audio with a delay and store audio source ID for future control
-            bool availableSource = AudioManager.Instance.PlayAudio(l.gameObject.GetInstanceID(), volume, pitch, true);
+            bool availableSource = AudioManager.Instance.PlayAudio(yardLightsArray[i].gameObject.GetInstanceID(), volume, pitch, true);
             if (availableSource)
             {
-                audioSourceIDList.Add(l.gameObject.GetInstanceID());
+                audioSourceIDList.Add(yardLightsArray[i].gameObject.GetInstanceID());
             }
 
             // Introduce a random delay between each light sound for a natural effect
@@ -215,29 +224,33 @@ public class YardEvent : MonoBehaviour
         audioSourceIDList.Add(mainLight.GetInstanceID());
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.environment, "dark piano tension", 1f, 1f);
 
+        FlickeringLight[] flickeringLights = yardLights.GetComponentsInChildren<FlickeringLight>();
         // Gradually increase the intensity of all yard lights and the main light
         for (int i = 0; i < intensityInMS; i++)
         {
-            foreach (Light l in yardLights.GetComponentsInChildren<Light>())
+            for (int j = 0; j < yardLightsArray.Length; j++)
             {
                 // Adjust various parameters for each light
-                l.intensity += 0.1f;
-                l.range += 0.1f;
-                l.GetComponent<FlickeringLight>().minIntensity += 0.03f;
-                l.GetComponent<FlickeringLight>().maxIntensity += 0.1f;
+                yardLightsArray[j].intensity += 0.05f;
+                yardLightsArray[j].range += 0.05f;
+                if (flickeringLights[j] != null)
+                {
+                    flickeringLights[j].minIntensity += 0.015f;
+                    flickeringLights[j].maxIntensity += 0.05f;
+                }
 
                 // Increase audio volume if an AudioSource is attached
-                if (l.GetComponent<AudioSource>() != null)
+                if (yardLightsArray[j].GetComponent<AudioSource>() != null)
                 {
-                    l.GetComponent<AudioSource>().volume += 0.05f;
+                    yardLightsArray[j].GetComponent<AudioSource>().volume += 0.025f;
                 }
             }
 
             // Adjust parameters for the main light
-            mainLightComp.intensity += 0.1f;
-            mainLightComp.range += 0.1f;
-            flickeringLight.minIntensity += 0.03f;
-            flickeringLight.maxIntensity += 0.1f;
+            mainLightComp.intensity += 0.05f;
+            mainLightComp.range += 0.05f;
+            flickeringLight.minIntensity += 0.015f;
+            flickeringLight.maxIntensity += 0.05f;
             counter++;
 
             // Trigger the start of the blindness effect when a specific intensity is reached
@@ -251,9 +264,7 @@ public class YardEvent : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Initiates the blindness animation for the player and adjusts the camera's focus direction.
-    /// </summary>
     IEnumerator StartBlindness()
     {
         // Trigger the blindness animation for the player character
@@ -265,14 +276,13 @@ public class YardEvent : MonoBehaviour
 
         // Wait for the specified blinded time duration before adjusting the player's focus direction
         yield return new WaitForSeconds(blindedTime);
+        GameManager.Instance.playerController.ToggleArms(false);
         GameManager.Instance.playerController.LookAtDirection(lookAwayTarget);
     }
 
 
-    /// <summary>
     /// Manages the transition to darkness by triggering lightning, stopping blindness animation,
     /// and repositioning the girl in front of the player.
-    /// </summary>
     IEnumerator LightsOff()
     {
         // Wait until the specified intensity increase duration is reached
@@ -286,11 +296,8 @@ public class YardEvent : MonoBehaviour
         GameManager.Instance.playerAnimController.StopBlindnessAnimation();
 
         // Manually calculate and set the position and rotation of the girl
-        Debug.Log("Girl Position: " + girl.transform.position);
-        Debug.Log("Setting it to: " + girlPosition);
         girl.transform.position = girlPosition;
         girl.transform.rotation = Quaternion.Euler(0f, 95f, 0f);
-        Debug.Log("New position: " + girl.transform.position);
 
         // Wait for a specified duration before initiating the next phase
         yield return new WaitForSeconds(lookBackTime);
@@ -301,6 +308,7 @@ public class YardEvent : MonoBehaviour
         Vector3 targetPosition = girlHead.position;
 
         bool oneShot = false;
+        bool once = false;
 
         // Gradually interpolate the position of lookAtTarget towards the girl's head
         while (elapsedTime < 10f)
@@ -309,20 +317,28 @@ public class YardEvent : MonoBehaviour
 
             elapsedTime += Time.deltaTime * translationSpeed;
 
+            // Trigger a one-shot animation event at a specific time for girl to wide open her mouth
+            if (elapsedTime >= 0.6f && !once)
+            {
+                once = true;
+                Debug.Log("Mouth Animation Triggered!");
+                girl.GetComponent<Animator>().SetTrigger("Mouth");
+            }
+
             // Trigger a one-shot audio event and push the player back at a specific time
             if (elapsedTime >= 1f && !oneShot)
             {
                 oneShot = true;
                 AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "jumpscare", 1.5f, 1f, false);
                 AudioManager.Instance.PlayAudio(AudioManager.Instance.environment);
+                GameManager.Instance.player.transform.LookAt(girl.transform.position);
                 yield return new WaitForSeconds(0.1f);
                 GameManager.Instance.playerController.PushPlayerBack();
             }
 
             // Stop all sounds and mark the end of the event after a certain duration
-            if (elapsedTime >= 3f)
+            if (elapsedTime >= 2.5f && !endEvent)
             {
-                AudioManager.Instance.StopAllExcept(AudioManager.Instance.environment);
                 endEvent = true;
             }
 
@@ -331,10 +347,8 @@ public class YardEvent : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Manages the final phase of the event, including displaying a black screen, stopping sounds,
     /// closing the door, moving the player, and preparing for the next game state.
-    /// </summary>
     IEnumerator EndEvent()
     {
         // Wait until the end event condition is met
@@ -342,16 +356,24 @@ public class YardEvent : MonoBehaviour
 
         // Display a black screen to create a transition effect
         GameManager.Instance.blackScreen.SetActive(true);
-
+        GameManager.Instance.playerController.ToggleArms(true);
         // Close the door associated with the event
         door.CloseDoor();
+
+        yield return new WaitForSeconds(2f);
+
+        AudioManager.Instance.StopAllExcept(AudioManager.Instance.environment);
 
         // Wait for a short duration
         yield return new WaitForSeconds(1f);
 
-        // Deactivate the girl GameObject
-        girl.GetComponent<AISensor>().hidden = false;
+        // Deactivate the girl GameObject nad set girl to a new destination
         girl.SetActive(false);
+        girl.transform.position = new Vector3(-10.1878738f,-1.7069f,-13.7854099f);
+        girl.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+        girl.GetComponent<AISensor>().hidden = false;
+        girl.GetComponent<EnemyBT>().enabled = false;
+        girl.GetComponentInChildren<Collider>().enabled = false;
 
         // Turn off the sun
         sun.SetActive(false);
@@ -392,9 +414,7 @@ public class YardEvent : MonoBehaviour
         AudioManager.Instance.PlayAudioWithDelay(AudioManager.Instance.playerSpeaker, 2f);
     }
 
-    /// <summary>
     /// Gradually activates reflection probes, adjusting to the changing environment.
-    /// </summary>
     IEnumerator ActivateProbesGradually()
     {
         // Iterate through each reflection probe and render it with a delay
@@ -407,4 +427,3 @@ public class YardEvent : MonoBehaviour
 
     #endregion
 }
-

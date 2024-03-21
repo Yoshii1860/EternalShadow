@@ -12,7 +12,6 @@ public class PlayerAnimController : MonoBehaviour
     bool lightSwitch = false;
     string currentWeapon = "None";
     bool pistolBool = false;
-    bool pistolPickup = true;
 
     [SerializeField] GameObject weaponsObj;
     [SerializeField] GameObject pistol;
@@ -157,12 +156,6 @@ public class PlayerAnimController : MonoBehaviour
         // If weapon will be enabled
         if (isOn)
         {
-            if (pistolPickup && string.Compare(weapon.name, "Pistol") == 0)
-            {
-                pistolPickup = false;
-                GameManager.Instance.player.LightSwitch();
-                yield return new WaitForSeconds(0.1f);
-            }
             weapon.SetActive(true);
 
             switch (weapon.name)
@@ -174,6 +167,11 @@ public class PlayerAnimController : MonoBehaviour
                     {
                         IKFabrics(fastIKFabricsLeft, true);
                         IKFabricsTargetChange(weapon.name);
+                    }
+                    else
+                    {
+                        IKFabrics(fastIKFabricsLeft, true);
+                        IKFabricsTargetChange("Flashlight");
                     }
                     break;
                 case "None":
@@ -263,6 +261,8 @@ public class PlayerAnimController : MonoBehaviour
                 else IKFabricsTargetChange("Pistol");
             }
         }
+
+        yield return null;
     }
 
     // Sets the base layer (no weapon no flashlight) of the animation
@@ -350,6 +350,9 @@ public class PlayerAnimController : MonoBehaviour
             {
                 foreach (Transform flashlightPoint in flashlightPoints)
                 {
+                    // Overwriting the flashlightPoint renderer until find the cause of its activation
+                    flashlightPoint.GetComponent<Renderer>().enabled = false;
+                    
                     if (flashlightPoint.name.Contains(baseName))
                     {
                         if (flashlightPoint.name.Contains("Target"))

@@ -27,6 +27,7 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     public bool move = false;
     public bool started = false;
     bool firstAudio = false;
+    float waitTimer = 0f;
     #endregion
 
     #region MonoBehaviour Callbacks
@@ -46,6 +47,15 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
         TurnHead(); // Rotate the mannequin's head to face the player
         if (!move) return;
         MoveMannequin(); // Move the mannequin based on player's visibility
+        CheckDoor();
+        if (waitTimer > 0f)
+        {
+            waitTimer -= deltaTime;
+            if (waitTimer <= 0f)
+            {
+                waitTimer = 0f;
+            }
+        }
     }
     #endregion
 
@@ -86,6 +96,7 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
         if (angle < 90f && distance < maxDistance || isPlayerVisible && distance < maxDistance)
         {
             ResumeAnimation(); // Resume the mannequin's movement
+            if (waitTimer == 0) Attack(); // Attack the player if close enough
             Debug.DrawLine(head.position, playerHead, Color.green); // Draw a debug line to visualize player visibility
         }
         else
@@ -121,12 +132,47 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
         stopped = false; // Set stopped flag to false to indicate the mannequin has resumed movement
     }
 
+    private void CheckDoor()
+    {
+        // Check with a sphere if the mannequin is close to a door
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, 2f, LayerMask.GetMask("Interact"));
+        // make it visible for debugging
+        if (hitColliders.Length > 0)
+        {
+            for (int i = 0; i < hitColliders.Length; i++)
+            {
+                Door door = hitColliders[i].GetComponent<Door>();
+                if (door != null)
+                {
+                    if (!door.DoorState() && !door.locked)
+                    {
+                        door.OpenDoor();
+                    }
+                }
+            }
+        }
+    }
+
+    private void Attack()
+    {
+        // Check if mannequin is close enough to attack
+        float distance = Vector3.Distance(player.position, head.position);
+
+        if (distance < 2f)
+        {
+            waitTimer = 2f;
+            StartCoroutine(AttackHit());
+        }
+    }
+
     public void Hit(GameObject hitObject)
     {
         if (string.Compare(hitObject.name, "head") == 0)
         {
             dead = true;
             hitObject.GetComponent<Rigidbody>().AddForce(-transform.forward * 5f, ForceMode.Impulse);
+            AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "mannequin death", 1f, 1f, false);
+
             StartCoroutine(Death());
         }
         else
@@ -135,8 +181,22 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
         }
     }
 
+    IEnumerator AttackHit()
+    {
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "mannequin hit", 1f); // Play attack sound
+        float randomDamage = Random.Range(15, 33f);
+        GameManager.Instance.player.TakeDamage(randomDamage);
+        yield return new WaitForSeconds(0.5f);
+        int randomNum = Random.Range(1, 5);
+        float randomVolume = Random.Range(0.6f, 1.0f);
+        string painSound = "pain" + randomNum.ToString();
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, painSound, randomVolume); // Play pain sound
+    }
+
     IEnumerator Death()
     {
+        AudioManager.Instance.PlayAudio(gameObject.GetInstanceID());
+
         for (int i = 0; i < bodyParts.Length; i++)
         {
             for (int j = 0; j < deathParts.Length; j++)
@@ -149,13 +209,13 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
                 }
             }
         }
-        AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "mannequin death", 1f, 1f, false);
-        AudioManager.Instance.PlayAudio(gameObject.GetInstanceID());
+
         yield return new WaitUntil (() => !AudioManager.Instance.IsPlaying(gameObject.GetInstanceID()));
         AudioManager.Instance.StopAudio(gameObject.GetInstanceID());
         GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(this);
         AudioManager.Instance.RemoveAudioSource(gameObject.GetInstanceID());
         yield return new WaitForSeconds(30f);
+        
         Destroy(gameObject);
     }
 

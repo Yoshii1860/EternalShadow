@@ -6,6 +6,7 @@ using System.IO;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Timers;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -72,6 +73,7 @@ public class GameManager : MonoBehaviour
     public GameObject inventoryCanvas;
     public GameObject inventory;
     public GameObject pickupCanvas;
+    public GameObject textCanvas;
     public Player player;
     public PlayerController playerController;
     public PlayerAnimController playerAnimController;
@@ -81,11 +83,11 @@ public class GameManager : MonoBehaviour
     public GameObject blackScreen;
     public GameObject fpsArms;
 
+    public GameObject MessageCanvas;
+    public TextMeshProUGUI messageText;
+
     [Header("UI Components")]
     [SerializeField] Image progressBar;
-
-    [Header("Game Initialization")]
-    [SerializeField] Item[] startGameItems;
 
     // Custom Update Manager and Input System
     [Header("Custom Update System")]
@@ -228,11 +230,6 @@ public class GameManager : MonoBehaviour
         // Set initial audio and add starting items
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "night sound");
         AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.5f, 1f, true);
-
-        foreach (Item item in startGameItems)
-        {
-            InventoryManager.Instance.AddItem(item);
-        }
 
         referencesUpdated = false;
     }
@@ -388,6 +385,13 @@ public class GameManager : MonoBehaviour
 
     public void PaintingEvent()
     {
+        PaintingEvent paintingEvent = FindObjectOfType<PaintingEvent>();
+        if (!paintingEvent.active)
+        {
+            DisplayMessage("It seems like you can control something with it, but it has no power.", 3f);
+            return;
+        }
+
         SetGameState(GameState.Gameplay, SubGameState.Painting);
         foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>())
         {
@@ -398,7 +402,6 @@ public class GameManager : MonoBehaviour
         {
             customUpdateManager.RemoveCustomUpdatable(mannequin);
         }
-        PaintingEvent paintingEvent = FindObjectOfType<PaintingEvent>();
         paintingEvent.StartPaintingEvent();
     }
 
@@ -453,7 +456,10 @@ public class GameManager : MonoBehaviour
                 {
                     foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
                     {
-                        agent.isStopped = true;
+                        if (agent.gameObject.activeSelf)
+                        {
+                            agent.isStopped = true;
+                        }
                     }
                 }
                 isPaused = true;
@@ -478,8 +484,11 @@ public class GameManager : MonoBehaviour
                     case SubGameState.Default:
                         foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
                         {
-                            agent.isStopped = false;
-                            Debug.Log("GameManager.cs: Move " + agent.name);
+                            if (agent.gameObject.activeSelf)
+                            {
+                                agent.isStopped = false;
+                                Debug.Log("GameManager.cs: Move " + agent.name);
+                            }
                         }
                         isPaused = false;
                         playerInput.SwitchCurrentActionMap("Player");
@@ -489,8 +498,11 @@ public class GameManager : MonoBehaviour
                     case SubGameState.EventScene:
                         foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
                         {
-                            agent.isStopped = true;
-                            Debug.Log("GameManager.cs: Move " + agent.name);
+                            if (agent.gameObject.activeSelf)
+                            {
+                                agent.isStopped = true;
+                                Debug.Log("GameManager.cs: Move " + agent.name);
+                            }
                         }
                         isPaused = true;
                         playerInput.SwitchCurrentActionMap("Event");
@@ -500,8 +512,11 @@ public class GameManager : MonoBehaviour
                     case SubGameState.PickUp:
                         foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
                         {
-                            agent.isStopped = true;
-                            Debug.Log("GameManager.cs: Move " + agent.name);
+                            if (agent.gameObject.activeSelf)
+                            {
+                                agent.isStopped = true;
+                                Debug.Log("GameManager.cs: Move " + agent.name);
+                            }
                         }
                         isPaused = true;
                         playerInput.SwitchCurrentActionMap("PickUp");
@@ -510,8 +525,11 @@ public class GameManager : MonoBehaviour
                     case SubGameState.Painting:
                         foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
                         {
-                            agent.isStopped = true;
-                            Debug.Log("GameManager.cs: Move " + agent.name);
+                            if (agent.gameObject.activeSelf)
+                            {
+                                agent.isStopped = true;
+                                Debug.Log("GameManager.cs: Move " + agent.name);
+                            }
                         }
                         isPaused = true;
                         playerInput.SwitchCurrentActionMap("Painting");
@@ -524,7 +542,10 @@ public class GameManager : MonoBehaviour
                 // Add code for inventory behavior
                 foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
                 {
-                    agent.isStopped = true;
+                    if (agent.gameObject.activeSelf)
+                    {
+                        agent.isStopped = true;
+                    }
                 }
                 isPaused = true;
                 playerInput.SwitchCurrentActionMap("Inventory");
@@ -538,7 +559,10 @@ public class GameManager : MonoBehaviour
                 // Add code for paused behavior
                 foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
                 {
-                    agent.isStopped = true;
+                    if (agent.gameObject.activeSelf)
+                    {
+                        agent.isStopped = true;
+                    }
                 }
                 isPaused = true;
                 Cursor.lockState = CursorLockMode.None;
@@ -553,6 +577,24 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
+    #endregion
+
+    #region Message Management
+
+    public void DisplayMessage(string message, float duration = 3f)
+    {
+        if (MessageCanvas.activeSelf) return;
+        messageText.text = message;
+        MessageCanvas.SetActive(true);
+        StartCoroutine(HideMessage(duration));
+    }
+
+    IEnumerator HideMessage(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        MessageCanvas.SetActive(false);
+    }
+
     #endregion
 
     #region Save and Load
@@ -780,10 +822,6 @@ public class GameManager : MonoBehaviour
         {
             AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "night sound");
             AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.5f, 1f, true);
-            foreach (Item item in startGameItems)
-            {
-                InventoryManager.Instance.AddItem(item);
-            }
         }
 
         InputManager.Instance.Rebind("Player");

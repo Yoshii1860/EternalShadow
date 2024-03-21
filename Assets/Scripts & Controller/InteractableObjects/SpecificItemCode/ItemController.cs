@@ -34,4 +34,11 @@ public class ItemController : InteractableObject
         pickedUpState = false;
         originalPosition = transform.position;
     }
+
+    protected override void RunItemCode()
+    {
+        if (isPickup) return;
+        if (clipName == "") clipName = "pickup item";
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, clipName, 0.6f, 1f);
+    }
 }

@@ -62,6 +62,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     [SerializeField] float focalLength = 33f;
     [Tooltip("The default target for LookAt")]
     [SerializeField] Transform defaultTarget;
+    [Tooltip("Mesh of the Arms")]
+    [SerializeField] Renderer fpsArms;
 
     #endregion
 
@@ -141,21 +143,48 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     #endregion
 
+
     #region Camera Functions
 
     // Set this function to be called when you want to make the camera look at a specific direction
     public void LookAtDirection(Transform direction)
     {
         cmVirtualCamera.LookAt = direction;
+        player.transform.LookAt(direction, Vector3.up);
     }
 
     // Set this function to be called when you want to reset the camera to look at the default target
     public void LookAtReset()
     {
         cmVirtualCamera.LookAt = defaultTarget;
+        player.transform.LookAt(defaultTarget, Vector3.up);
+    }
+
+    public void SetFollowTarget(Transform target = null) 
+    {
+        if (target == null)
+        {
+            target = camRoot.transform;
+            cmVirtualCamera.Follow = target;
+            //LookAtReset();
+            Debug.Log("Follow target is null, setting to camRoot");
+        }
+        else
+        {
+            cmVirtualCamera.Follow = target;
+            LookAtDirection(null);
+        }
+        
+        Debug.Log("Setting follow target to " + target.name);
+    }
+
+    public void ToggleArms(bool active)
+    {
+        fpsArms.enabled = active;
     }
 
     #endregion
+
 
     #region Input Functions
 
@@ -281,7 +310,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             }
             player.ReduceStamina();
 
-            AudioManager.Instance.SetAudioClip(audioSourceID, "stone step", sprintVolume, sprintPitch, true);
+            AudioManager.Instance.SetAudioVolume(audioSourceID, sprintVolume, 0.1f);
+            AudioManager.Instance.SetAudioPitch(audioSourceID, sprintPitch);
         }
         else if (crouch)
         {
@@ -292,7 +322,8 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             }
             player.IncreaseStamina();
 
-            AudioManager.Instance.SetAudioClip(audioSourceID, "stone step", crouchVolume, crouchPitch, true);
+            AudioManager.Instance.SetAudioVolume(audioSourceID, crouchVolume, 0.1f);
+            AudioManager.Instance.SetAudioPitch(audioSourceID, crouchPitch);
         }
         else
         {
@@ -303,12 +334,53 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             }
             player.IncreaseStamina();
 
-            AudioManager.Instance.SetAudioClip(audioSourceID, "stone step", normalVolume, normalPitch, true);
+            AudioManager.Instance.SetAudioVolume(audioSourceID, normalVolume, 0.1f);
+            AudioManager.Instance.SetAudioPitch(audioSourceID, normalPitch);
         }
 
         // Find target velocity
         Vector3 currentVelocity = rb.velocity;
         Vector3 targetVelocity = new Vector3(move.x, 0, move.y) * speed;
+
+/*
+        //////////////////////////
+        // Slide on side of objects
+        //////////////////////////
+
+        // Cast rays from the left and right shoulders with a little offset
+        Vector3 rightRayOrigin = transform.position + new Vector3(0.4f, 0.5f, 0f);
+        Vector3 leftRayOrigin = transform.position + new Vector3(-0.4f, 0.5f, 0f);
+        float raycastDistance = 0.6f; // Adjust based on character size
+
+        RaycastHit rightHit;
+        RaycastHit leftHit;
+
+        bool rightCollision = Physics.Raycast(rightRayOrigin, transform.forward, out rightHit, raycastDistance);
+        bool leftCollision = Physics.Raycast(leftRayOrigin, transform.forward, out leftHit, raycastDistance);
+
+        // If either ray hits, we have a collision with a wall or object
+        if (rightCollision || leftCollision)
+        {
+            // Collision detected, adjust movement vector to slide alongside the object
+            Vector3 newMovementDirection;
+            if (rightCollision)
+            {
+                newMovementDirection = Vector3.Reflect(transform.forward, rightHit.normal);
+            }
+            else
+            {
+                newMovementDirection = Vector3.Reflect(transform.forward, leftHit.normal);
+            }
+            
+            // Project original movement vector onto new direction
+            targetVelocity = Vector3.Project(targetVelocity, newMovementDirection);
+        }
+
+        //////////////////////////
+        //////////////////////////
+        //////////////////////////
+
+*/
 
         // Align direction
         targetVelocity = transform.TransformDirection(targetVelocity);
@@ -400,38 +472,15 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     void Look()
     {
-        // If the player is in an event scene, use the camera's rotation directly
-        if (GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.EventScene)
-        {
-            rotationSpeed = 15f;
-            // Use the camera's rotation directly
-            Vector3 camRotation = cmVirtualCamera.transform.eulerAngles;
+        rotationSpeed = standardRotationSpeed;
 
-            // Turn
-            transform.rotation = Quaternion.Euler(0f, camRotation.y, 0f);
+        // Turn
+        transform.Rotate(Vector3.up * look.x * rotationSpeed * Time.deltaTime);
 
-            // Look only on the x-axis until aligned
-            float xRotationDifference = Mathf.DeltaAngle(camRotation.x, camRoot.transform.eulerAngles.x);
-            
-            if (Mathf.Abs(xRotationDifference) > 1f)
-            {
-                lookRotation -= xRotationDifference * rotationSpeed * Time.deltaTime;
-                lookRotation = Mathf.Clamp(lookRotation, bottomClamp, topClamp);
-                camRoot.transform.eulerAngles = new Vector3(lookRotation, camRoot.transform.eulerAngles.y, camRoot.transform.eulerAngles.z);
-            }
-        }
-        else
-        {
-            rotationSpeed = standardRotationSpeed;
-
-            // Turn
-            transform.Rotate(Vector3.up * look.x * rotationSpeed * Time.deltaTime);
-
-            // Look
-            lookRotation -= look.y * rotationSpeed * Time.deltaTime;
-            lookRotation = Mathf.Clamp(lookRotation, bottomClamp, topClamp);
-            camRoot.transform.eulerAngles = new Vector3(lookRotation, camRoot.transform.eulerAngles.y, camRoot.transform.eulerAngles.z);
-        }
+        // Look
+        lookRotation -= look.y * rotationSpeed * Time.deltaTime;
+        lookRotation = Mathf.Clamp(lookRotation, bottomClamp, topClamp);
+        camRoot.transform.eulerAngles = new Vector3(lookRotation, camRoot.transform.eulerAngles.y, camRoot.transform.eulerAngles.z);
     }
 
     void Crouch()
@@ -482,6 +531,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         if (GameManager.Instance.pickupCanvas.activeSelf || GameManager.Instance.canvasActive)
         {
             GameManager.Instance.ResumeGame();
+            GameManager.Instance.canvasActive = false;
         }
         else
         {

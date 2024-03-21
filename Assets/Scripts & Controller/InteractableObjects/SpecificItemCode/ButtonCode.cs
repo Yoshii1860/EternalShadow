@@ -8,10 +8,6 @@ public class ButtonCode : InteractableObject
     [Header("RUN ITEM CODE")]
     [Tooltip("The door to open")]
     [SerializeField] Door doorToOpen;
-    [Tooltip("The door to unlock")]
-    [SerializeField] Door doorOne;
-    [Tooltip("The door to unlock")]
-    [SerializeField] Door doorTwo;
     [Tooltip("The slenderman to spawn when the button is pushed")]
     [SerializeField] GameObject slenderman;
     Animator animator;
@@ -23,8 +19,6 @@ public class ButtonCode : InteractableObject
         animator.SetTrigger("Button");
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "push button", 1f, 1f);
         doorToOpen.locked = false;
-        doorOne.locked = false;
-        doorTwo.locked = false;
         doorToOpen.Interact();
         slenderman.SetActive(true);
         slenderman.GetComponent<AISensor>().PlayerInSightForced(6f);

@@ -22,6 +22,11 @@ public class PaintingEvent : MonoBehaviour
     [SerializeField] GameObject pen;
     [SerializeField] GameObject drawer;
 
+    [SerializeField] GameObject girl;
+    [SerializeField] GameObject door;
+
+    public bool active = false;
+
     public int paintingSelector
     {
         get { return _paintingSelector; }
@@ -33,10 +38,7 @@ public class PaintingEvent : MonoBehaviour
         }
     }
 
-    // Look and stand positions for the player during the painting event
-    [SerializeField] Transform lookAtPaintings;
-    [SerializeField] Transform lookAtPenholder;
-    [SerializeField] Transform standAtDesk;
+    [SerializeField] Transform vCamFollow;
 
     public bool pause = false;
 
@@ -48,15 +50,12 @@ public class PaintingEvent : MonoBehaviour
     public void StartPaintingEvent()
     {
         pause = true;
-        // Move player to the stand position
-        GameManager.Instance.player.transform.position = Vector3.Lerp(GameManager.Instance.player.transform.position, standAtDesk.position, Time.deltaTime * 10f);
 
         StartCoroutine(StartingEvent());    
     }
 
     IEnumerator StartingEvent()
     {
-        
         // Transform pens x-rotation from 0 to -25
         float time = 0;
         float duration = 2f;
@@ -80,8 +79,11 @@ public class PaintingEvent : MonoBehaviour
         
         pause = false;
 
+        door.GetComponent<Renderer>().enabled = false;
+
         // change LookAtDirection
-        GameManager.Instance.playerController.LookAtDirection(lookAtPaintings);
+        GameManager.Instance.playerController.SetFollowTarget(vCamFollow);
+        GameManager.Instance.playerController.ToggleArms(false);
         // Reset painting selection
         paintingSelector = 0;
         // Adjust camera field of view
@@ -239,13 +241,18 @@ public class PaintingEvent : MonoBehaviour
     IEnumerator EndPaintingEvent()
     {
         yield return new WaitForSeconds(1f);
-        // Adjust camera field of view
-        GameManager.Instance.playerController.cmVirtualCamera.m_Lens.FieldOfView = Mathf.Lerp(GameManager.Instance.playerController.cmVirtualCamera.m_Lens.FieldOfView, 60f, Time.deltaTime * 10f);
 
         transform.GetComponent<Collider>().enabled = false;
 
-        GameManager.Instance.playerController.LookAtReset();
+        door.GetComponent<Renderer>().enabled = true;
+
+        GameManager.Instance.playerController.SetFollowTarget();
+        GameManager.Instance.playerController.ToggleArms(true);
         GameManager.Instance.ResumeGame();
+
+        girl.GetComponent<EnemyBT>().ResetTree();
+        girl.SetActive(true);
+        girl.GetComponent<Animator>().SetTrigger("Bath");
 
         // Transform pens x-rotation from -25 to 0
         float time = 0;

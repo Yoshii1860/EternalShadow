@@ -393,13 +393,13 @@ public class AudioManager : MonoBehaviour
     }
 
     // Set the audio volume for an AudioSource gradually
-    public void SetAudioVolume(int gameObjectID, float volume)
+    public void SetAudioVolume(int gameObjectID, float volume, float duration = 0.5f)
     {
         AudioSource audioSource = GetAudioSource(gameObjectID);
 
         if (audioSource != null)
         {
-            StartCoroutine(SetAudioVolumeCo(audioSource, 0.5f, volume));
+            StartCoroutine(SetAudioVolumeCo(audioSource, duration, volume));
         }
         else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
     }
@@ -419,6 +419,18 @@ public class AudioManager : MonoBehaviour
         // Ensure the volume is set to the target value
         audioSource.volume = endVolume;
     }
+
+    public void SetAudioPitch(int gameObjectID, float pitch)
+    {
+        AudioSource audioSource = GetAudioSource(gameObjectID);
+
+        if (audioSource != null)
+        {
+            audioSource.pitch = pitch;
+        }
+        else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
+    }
+
 
     // Get the name of the audio clip for an AudioSource
     public string GetAudioClip(int gameObjectID)
@@ -475,7 +487,7 @@ public class AudioManager : MonoBehaviour
     }
 
     // Get an AudioSource by instance ID
-    AudioSource GetAudioSource(int gameObjectID)
+    public AudioSource GetAudioSource(int gameObjectID)
     {
         foreach (AudioSource audioSource in audioSourcesList)
         {
