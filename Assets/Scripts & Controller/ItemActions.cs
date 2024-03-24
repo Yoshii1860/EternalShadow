@@ -23,18 +23,14 @@ public class ItemActions : MonoBehaviour
 
     #region Public Methods
 
-    /// <summary>
     /// Update references to other components.
-    /// </summary>
     public void UpdateReferences()
     {
         potion = GetComponent<Potion>();
         player = GameManager.Instance.player;
     }
 
-    /// <summary>
     /// Pick up the item and add it to the inventory.
-    /// </summary>
     /// <param name="item">The RaycastHit containing information about the item.</param>
     public void PickUp(RaycastHit item)
     {
@@ -47,9 +43,7 @@ public class ItemActions : MonoBehaviour
         itemController.isPickedUp = true;
     }
 
-    /// <summary>
     /// Use the specified item.
-    /// </summary>
     /// <param name="item">The item to be used.</param>
     public void Use(Item item)
     {
@@ -63,29 +57,26 @@ public class ItemActions : MonoBehaviour
             potion.Painkillers(item);
         else if (item.type == ItemType.Weapon)
             InventoryManager.Instance.weapons.GetComponent<WeaponSwitcher>().SelectWeapon(item);
+        else InventoryManager.Instance.DisplayMessage("You cannot use this right now.");
     }
 
-    /// <summary>
+    /*
     /// Combine the specified item.
-    /// </summary>
     /// <param name="item">The item to be combined.</param>
     public void Combine(Item item)
     {
         Debug.Log("Combined: " + item.name);
     }
+    */
 
-    /// <summary>
     /// Inspect the specified item.
-    /// </summary>
     /// <param name="item">The item to be inspected.</param>
     public void Inspect(Item item)
     {
-        Debug.Log("Inspected: " + item.name);
+        InventoryManager.Instance.Inspect(item);
     }
 
-    /// <summary>
     /// Throw away the specified item.
-    /// </summary>
     /// <param name="item">The item to be thrown away.</param>
     public void ThrowAway(Item item)
     {

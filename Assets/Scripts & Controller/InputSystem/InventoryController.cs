@@ -18,11 +18,14 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     private ItemActions itemActions;
 
     private bool interact, exit, back;
-    private Vector2 move;
+    private Vector2 move, look;
+    private float scroll;
 
     public bool inventoryClosing = false;
     private float inventoryCounter = 0f;
     private float inventoryTimer = 0.5f;
+
+    private float inspectorTimer;
 
     #endregion
 
@@ -37,10 +40,30 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
 
     // Called every frame if the script is enabled
     public void CustomUpdate(float deltaTime)
-    {
+    {       
+        if (InventoryManager.Instance.isInspecting)
+        {
+            if (interact || back || exit)
+            {
+                Debug.Log("InventoryController.CustomUpdate: ResumeFromInspector");
+                InventoryManager.Instance.ResumeFromInspector();
+                inspectorTimer = 0.5f;
+            } else Inspect();
+            return;
+        }
+
         // Check if the game is in the Inventory state
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.Inventory)
         {
+            if (inspectorTimer > 0)
+            {
+                inspectorTimer -= deltaTime;
+                interact = false;
+                exit = false;
+                back = false;
+                return;
+            }
+            
             // Process input actions related to the inventory
             if (interact)   Interact();
             if (exit)       Exit();
@@ -87,6 +110,8 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
         // Read the value of the move vector
         move = context.ReadValue<Vector2>();
 
+        if (InventoryManager.Instance.isInspecting) return;
+
         // Debounce the move input
         float deltaTime = Time.deltaTime;
         if (Time.time - moveDebounceTime > deltaTime)
@@ -103,22 +128,44 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
         back = context.ReadValueAsButton();
     }
 
+    public void OnLook(InputAction.CallbackContext context)
+    {
+        look = context.ReadValue<Vector2>();
+    }
+
+    public void OnScroll(InputAction.CallbackContext context)
+    {
+        scroll = context.ReadValue<float>();
+        Debug.Log("InventoryController.OnScroll = " + scroll);
+    }
+
     #endregion
 
     #region Input Processing Methods
+
+    // Process the inspect action
+    private void Inspect()
+    {
+        InventoryManager.Instance.RotateInspectorItem(look.x, look.y, scroll);
+        look = Vector2.zero;
+        scroll = 0f;
+    }
 
     // Process the interact action
     private void Interact()
     {
         interact = false;
+        Debug.Log("InventoryController.Interact");
 
         // Check if item actions are not open
         if (!InventoryManager.Instance.itemActionsOpen)
         {
+            Debug.Log("InventoryController.Interact: ItemActionsNotOpen");
             InventoryManager.Instance.ShowItemDisplay();
         }
         else
         {
+            Debug.Log("InventoryController.Interact: ItemActionsOpen");
             // Perform the selected item action
             switch (InventoryManager.Instance.itemActionNumber)
             {
@@ -127,13 +174,15 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
                     break;
                 case 1:
                     itemActions.Inspect(InventoryManager.Instance.selectedItem);
+                    return;
+                case 2:
+                    itemActions.ThrowAway(InventoryManager.Instance.selectedItem);
                     break;
+                /*
                 case 2:
                     itemActions.Combine(InventoryManager.Instance.selectedItem);
                     break;
-                case 3:
-                    itemActions.ThrowAway(InventoryManager.Instance.selectedItem);
-                    break;
+                */
             }
 
             InventoryManager.Instance.BackToSelection();
@@ -143,6 +192,7 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     // Process the exit action
     private void Exit()
     {
+        Debug.Log("InventoryController.Exit");
         exit = false;
         inventoryClosing = true;
 
@@ -166,6 +216,7 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     // Process the back action
     private void Back()
     {
+        back = false;
         InventoryManager.Instance.BackToSelection();
     }
 

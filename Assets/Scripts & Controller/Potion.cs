@@ -54,12 +54,13 @@ public class Potion : MonoBehaviour
     {
         if (player.isPoisoned)
         {
+            InventoryManager.Instance.DisplayMessage("The effects of the poison start to fade away.");
             player.isPoisoned = false;
             InventoryManager.Instance.RemoveItem(item);
         }
         else
         {
-            Debug.Log("Not poisoned");
+            InventoryManager.Instance.DisplayMessage("You don`t have an infection.");
         }
     }
 
@@ -69,14 +70,19 @@ public class Potion : MonoBehaviour
     /// <param name="item">The bandage item.</param>
     public void Bandage(Item item)
     {
-        if (player.isBleeding)
+        if (player.isBleeding || player.health < 100)
         {
+            if (player.isBleeding) InventoryManager.Instance.DisplayMessage("You stopped the bleeding.");
+            else if (player.health + 50 < 100) InventoryManager.Instance.DisplayMessage("You feel better now.");
+            else InventoryManager.Instance.DisplayMessage("You are fully healed.");
+
             player.isBleeding = false;
+            player.health += 50;
             InventoryManager.Instance.RemoveItem(item);
         }
         else
         {
-            Debug.Log("Not bleeding");
+            InventoryManager.Instance.DisplayMessage("You don`t have any wounds.");
         }
     }
 
@@ -88,12 +94,13 @@ public class Potion : MonoBehaviour
     {
         if (player.isDizzy)
         {
+            InventoryManager.Instance.DisplayMessage("The pain starts to fade away.");
             player.isDizzy = false;
             InventoryManager.Instance.RemoveItem(item);
         }
         else
         {
-            Debug.Log("Not dizzy");
+            InventoryManager.Instance.DisplayMessage("You don`t need those pills right now.");
         }
     }
 

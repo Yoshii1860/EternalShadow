@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: PistolAmmo
   m_EditorClassIdentifier: 
-  displayName: .40 S&W
-  description: The .40 S&W is a rimless pistol cartridge for the Glock 22.
-  icon: {fileID: 21300000, guid: 7ff7ca383ac36574c9f49f78c2d0b2a9, type: 3}
+  displayName: 9mm Bullets
+  description: These 9mm handgun rounds are rimless bullets for the most common pistols.
+  icon: {fileID: 21300000, guid: 88ea4b58abe34ad4ba7b60ed7ae5b9a5, type: 3}
   iconPath: VFX/ItemIcons/Bullets
   unique: 0
-  quantity: 5
-  prefab: {fileID: 2240932926847244716, guid: 71d5e360c9423a34e9ac020da23e337c, type: 3}
-  prefabPath: Prefabs/Items/Bullets
+  quantity: 3
+  prefab: {fileID: 496015967415131217, guid: 9060b108bf149744e81dc8b9857575ec, type: 3}
+  prefabPath: Prefabs/Items/bullets
   type: 1
   ammoType: 1
   potionType: 0

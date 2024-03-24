@@ -46,10 +46,30 @@ public class InventoryManager : MonoBehaviour
         public GameObject inventoryItem;
         [Tooltip("The prefab that will be used to display the inventory item display")]
         public GameObject itemDisplay;
+        [Tooltip("The prefab that will be used to display the doll")]
+        public GameObject dollDisplay;
+        [Tooltip("The camera that will be used to inspect items")]
+        public GameObject inspectorCamera;
+        [Tooltip("The prefab that will be used to display the item inspector")]
+        public GameObject inspector;
+        [Tooltip("The transform that will be used to parent the item to inspect")]
+        public Transform inspectItemTransform;
+        [Tooltip("The canvas that will be used to display messages")]
+        public GameObject messageCanvas;
+        [Tooltip("The text that will be used to display messages")]
+        public TextMeshProUGUI messageText;
         [Tooltip("The force that will be applied to the dropped item")]
         public float dropForce;
         [Tooltip("The maximum amount of items that can be stored in the inventory")]
         public int maxItems = 9;
+        [Tooltip("The sensitivity of the zoom when inspecting items")]
+        public float zoomSensitive = 0.01f;
+        [Tooltip("The sensitivity of the look when inspecting items")]
+        public float lookSensitivity = 0.5f;
+        [Tooltip("The maximum zoom scale when inspecting items")]
+        public float maxZoomScale = 4f;
+        [Tooltip("The minimum zoom scale when inspecting items")]
+        public float minZoomScale = 0.5f;
 
 
         // Additional fields
@@ -59,6 +79,7 @@ public class InventoryManager : MonoBehaviour
         public GameObject weapons;
         GameObject player;
         Ammo ammo;
+        GameObject inspectorItem;
 
         [Space(10)]
         [Header("Colors")]
@@ -77,6 +98,7 @@ public class InventoryManager : MonoBehaviour
         public int itemActionNumber;
         public bool itemActionsOpen;
         public int actionsChildCount;
+        public bool isInspecting = false;
 
         // The Image components of the item actions
         Image[] itemCanvasActions;
@@ -314,6 +336,7 @@ public class InventoryManager : MonoBehaviour
     public void ListItems()
     {
         // Clear list before showing items
+        Debug.Log("InventoryManager.ListItems() - Clearing itemContent and itemPreview");
         foreach (Transform child in itemContent)
         {
             Destroy(child.gameObject);
@@ -324,6 +347,7 @@ public class InventoryManager : MonoBehaviour
         }
 
         // Show items from inventory list in UI
+        Debug.Log("InventoryManager.ListItems() - Showing " + Items.Count + " items in itemContent");
         foreach (Item item in Items)
         {
             GameObject obj = Instantiate(inventoryItem, itemContent);
@@ -388,6 +412,7 @@ public class InventoryManager : MonoBehaviour
     public void ShowItemDisplay()
     {
         selectedItem = Items[highlightNumber];
+        Debug.Log("InventoryManager.ShowItemDisplay() for" + selectedItem.displayName);
         ChangeSelectedItemColor(false, false);
 
         itemActionNumber = 0;
@@ -398,6 +423,7 @@ public class InventoryManager : MonoBehaviour
         if (itemPreview.childCount == 0)
         {
             obj = Instantiate(itemDisplay, itemPreview);
+            Debug.Log("InventoryManager.ShowItemDisplay() - Instantiated ItemDisplay: " + obj.name);
         }
         else
         {
@@ -408,10 +434,12 @@ public class InventoryManager : MonoBehaviour
             }
             // Instantiate ItemDisplay UI
             obj = Instantiate(itemDisplay, itemPreview);
+            Debug.Log("InventoryManager.ShowItemDisplay() - Instantiated ItemDisplay: " + obj.name);
         }
 
         // Change icon of obj to item.icon
         Image[] itemCanvasIcons = obj.GetComponentsInChildren<Image>();
+        Debug.Log("InventoryManager.ShowItemDisplay() - Changing icon to " + selectedItem.icon.name);
         // Iterate through the Image components and find the desired one
         foreach (Image itemCanvasIcon in itemCanvasIcons)
         {
@@ -424,6 +452,7 @@ public class InventoryManager : MonoBehaviour
 
         // Get all TextMeshProUGUI components
         TextMeshProUGUI[] itemCanvasTexts = obj.GetComponentsInChildren<TextMeshProUGUI>();
+        Debug.Log("InventoryManager.ShowItemDisplay() - Changing text to " + selectedItem.displayName);
         foreach (TextMeshProUGUI itemCanvasText in itemCanvasTexts)
         {
             // Change name and description of ItemDisplay
@@ -481,6 +510,7 @@ public class InventoryManager : MonoBehaviour
 
     public void ChangeSelectedItemColor(bool highlight, bool newSelected)
     {
+        Debug.Log("InventoryManager.ChangeSelectedItemColor(" + highlight + ", " + newSelected + ")");
         selectedItem = Items[highlightNumber];
 
         ItemController itemController;
@@ -502,16 +532,111 @@ public class InventoryManager : MonoBehaviour
 
     public void ChangeSelectedActionColor(bool newHighlight)
     {
+        Debug.Log("InventoryManager.ChangeSelectedActionColor(" + newHighlight + ")");
         itemCanvasActions[itemActionNumber].color = newHighlight ? highlightedColor : unselectedColor;
     }
 
     public void BackToSelection()
     {
+        Debug.Log("Back To Selection - Destroying ItemDisplay UI");
         itemActionsOpen = false;
         if (Items.Count > 0) ChangeSelectedItemColor(true, true);
         foreach (Transform child in itemPreview)
         {
             Destroy(child.gameObject);
+        }
+    }
+
+    public void Inspect(Item item)
+    {
+        Debug.Log("InventoryManager.Inspect(" + item.displayName + ") - Set content and display to false and inspector items to true");
+        InstantiateItemToInspect();
+        isInspecting = true;
+        foreach (Transform child in itemContent)
+        {
+            child.gameObject.SetActive(false);
+        }
+        foreach (Transform child in itemPreview)
+        {
+            child.gameObject.SetActive(false);
+        }
+        dollDisplay.SetActive(false);
+        inspectorCamera.SetActive(true);
+        inspector.SetActive(true);
+    }
+
+    void InstantiateItemToInspect()
+    {
+        Debug.Log("InventoryManager.InstantiateItemToInspect() - Instantiating " + selectedItem.displayName + " to inspect");
+        inspectorItem = Instantiate(selectedItem.prefab, inspectItemTransform);
+        inspectorItem.transform.localPosition = new Vector3(0, 0, 0.8f);
+        inspectorItem.transform.localRotation = Quaternion.identity;
+        inspectorItem.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+    }
+
+    public void RotateInspectorItem(float x, float y, float scale)
+    {
+        float zoom = scale * zoomSensitive;
+        float xRot = -x * lookSensitivity;
+        float yRot = -y * lookSensitivity;
+        if (inspectorItem != null)
+        {
+            inspectorItem.transform.Rotate(Vector3.up, xRot);
+            inspectorItem.transform.Rotate(Vector3.right, yRot);
+            if (inspectorItem.transform.localScale.x + zoom < minZoomScale)
+            {
+                inspectorItem.transform.localScale = new Vector3(minZoomScale, minZoomScale, minZoomScale);
+            }
+            else if (inspectorItem.transform.localScale.x + zoom > maxZoomScale)
+            {
+                inspectorItem.transform.localScale = new Vector3(maxZoomScale, maxZoomScale, maxZoomScale);
+            }
+            else
+            {
+                inspectorItem.transform.localScale += new Vector3(zoom, zoom, zoom);
+            }
+        }
+        else Debug.LogError("InventoryManager.RotateInspectorItem() - inspectorItem is null");
+    }
+
+    public void ResumeFromInspector()
+    {
+        Debug.Log("InventoryManager.ResumeFromInspector() - Set content and display to true and inspector items to false");
+        inspectorCamera.SetActive(false);
+        inspector.SetActive(false);
+        dollDisplay.SetActive(true);
+        Destroy(inspectorItem);
+        inspectorItem = null;
+        foreach (Transform child in itemContent)
+        {
+            child.gameObject.SetActive(true);
+        }
+        foreach (Transform child in itemPreview)
+        {
+            child.gameObject.SetActive(true);
+        }
+        isInspecting = false;
+    }
+
+
+    #endregion
+
+    #region Message Management
+
+    public void DisplayMessage(string message, float duration = 2f)
+    {
+        messageText.text = message;
+        if (!messageCanvas.activeSelf) messageCanvas.SetActive(true);
+        StartCoroutine(HideMessage(duration, message));
+    }
+
+    IEnumerator HideMessage(float duration, string message)
+    {
+        yield return new WaitForSeconds(duration);
+        // string compare: if message is same as messageText
+        if (string.Compare(message, messageText.text) == 0)
+        {
+            messageCanvas.SetActive(false);
         }
     }
 

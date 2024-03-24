@@ -83,7 +83,7 @@ public class GameManager : MonoBehaviour
     public GameObject blackScreen;
     public GameObject fpsArms;
 
-    public GameObject MessageCanvas;
+    public GameObject messageCanvas;
     public TextMeshProUGUI messageText;
 
     [Header("UI Components")]
@@ -551,8 +551,8 @@ public class GameManager : MonoBehaviour
                 playerInput.SwitchCurrentActionMap("Inventory");
                 inventoryCanvas.SetActive(true);
                 InventoryManager.Instance.ListItems();
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
                 break;
 
             case GameState.Paused:
@@ -583,16 +583,19 @@ public class GameManager : MonoBehaviour
 
     public void DisplayMessage(string message, float duration = 3f)
     {
-        if (MessageCanvas.activeSelf) return;
         messageText.text = message;
-        MessageCanvas.SetActive(true);
-        StartCoroutine(HideMessage(duration));
+        if (!messageCanvas.activeSelf) messageCanvas.SetActive(true);
+        StartCoroutine(HideMessage(duration, message));
     }
 
-    IEnumerator HideMessage(float duration)
+    IEnumerator HideMessage(float duration, string message)
     {
         yield return new WaitForSeconds(duration);
-        MessageCanvas.SetActive(false);
+        // string compare: if message is same as messageText
+        if (string.Compare(message, messageText.text) == 0)
+        {
+            messageCanvas.SetActive(false);
+        }
     }
 
     #endregion

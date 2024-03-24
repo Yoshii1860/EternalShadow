@@ -12,6 +12,7 @@ public class InteractableObject : MonoBehaviour
     public bool isPickup = true;
     public bool active = false;
     public bool inventoryItem = true;
+    public bool useEmission = true;
 
     [Header("Object Properties")]
     [SerializeField] Transform objectPosition;
@@ -56,8 +57,6 @@ public class InteractableObject : MonoBehaviour
 
         // Create Duplicate Object on Canvas
         GameObject newItem = Instantiate(gameObject, GameManager.Instance.pickupCanvas.transform);
-
-        gameObject.GetComponent<Collider>().enabled = false;
 
         // Deactivate all lights from showcase object
         DeactivateLights(newItem);

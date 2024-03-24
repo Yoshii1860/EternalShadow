@@ -251,6 +251,14 @@ public class InputManager : MonoBehaviour
             {
                 action.performed += inventoryController.OnExit;
             }
+            else if (action.name == "Look")
+            {
+                action.performed += inventoryController.OnLook;
+            }
+            else if (action.name == "Scroll")
+            {
+                action.performed += inventoryController.OnScroll;
+            }
             else
             {
                 Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);

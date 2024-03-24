@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Antibiotics
   m_EditorClassIdentifier: 
   displayName: Antibiotics
-  description: Antibiotics are medicines that fight infections caused by bacteria
-    in humans
-  icon: {fileID: 21300000, guid: c18877ff7ac79c0449b605cacc290f93, type: 3}
+  description: Alorpromazine are antibiotics, a medicine that fights infections caused
+    by bacteria in humans. Manufactured by Umbrella Corp..
+  icon: {fileID: 21300000, guid: 1f6b8265bbf84c94dba756f83f6678ee, type: 3}
   iconPath: VFX/ItemIcons/Antibiotics
   unique: 0
   quantity: 1

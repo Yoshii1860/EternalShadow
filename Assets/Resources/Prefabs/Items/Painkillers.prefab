@@ -11,9 +11,10 @@ GameObject:
   - component: {fileID: 3310036295106835780}
   - component: {fileID: 3310036295106835776}
   - component: {fileID: 3310036295106835779}
-  - component: {fileID: 3310036295106835778}
-  - component: {fileID: 5518392713569616629}
-  m_Layer: 0
+  - component: {fileID: 7494710205072175929}
+  - component: {fileID: 7543415476596383816}
+  - component: {fileID: 8929184377496512900}
+  m_Layer: 6
   m_Name: Painkillers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 3310036295106835783}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.467, y: -0.478, z: -0.361}
-  m_LocalScale: {x: 0.29529873, y: 0.084729984, z: 0.15071233}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -42,7 +43,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3310036295106835783}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 6432871737276203138, guid: dc05fb8eb979205468786a8232ea8351, type: 3}
 --- !u!23 &3310036295106835779
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -63,7 +64,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 790f83212d601e7418141603997bcf6c, type: 2}
+  - {fileID: 2100000, guid: cf62bfb6b34fa5641bdc41d2662348a5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -85,7 +86,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3310036295106835778
+--- !u!114 &7494710205072175929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3310036295106835783}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueID: 
+--- !u!65 &7543415476596383816
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -96,9 +110,9 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5518392713569616629
+  m_Size: {x: 0.1, y: 0.2, z: 0.15}
+  m_Center: {x: -0.00000047683716, y: 0.07670546, z: -0.00034154393}
+--- !u!114 &8929184377496512900
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -107,7 +121,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 3310036295106835783}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3933c0825e904a3478f5d3c4b326382f, type: 3}
+  m_Script: {fileID: 11500000, guid: 16ed7316a1f278345a2b3ae88d24c02b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPickup: 0
+  active: 0
+  inventoryItem: 1
+  objectPosition: {fileID: 0}
+  rotateX: 0
+  rotateY: 0
+  rotateZ: 0
+  objectName: {fileID: 0}
+  objectDescription: {fileID: 0}
+  objectNameString: 
+  objectDescriptionString: 
+  clipName: 
   item: {fileID: 11400000, guid: 5b1c4b73854f6734b8f5ed6ee8c517ea, type: 2}
+  originalPosition: {x: 0, y: 0, z: 0}

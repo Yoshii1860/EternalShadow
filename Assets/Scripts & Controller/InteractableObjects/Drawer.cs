@@ -11,21 +11,29 @@ public class Drawer : InteractableObject
     [SerializeField] bool drawer;
     [Tooltip("The position (drawer) or rotation (door) to move to")]
     [SerializeField] Vector3 openPosOrRot;
+    Vector3 closedPosOrRot;
+    bool isOpen = false;
+    bool isMoving = false;
 
     void Start()
     {
+        closedPosOrRot = drawer ? transform.localPosition : transform.localEulerAngles;
         transform.GetComponent<AudioSource>().spatialBlend = 1;
         transform.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Custom;
     }
 
     protected override void RunItemCode()
     {
+        if (isMoving) return;
         StartCoroutine(LerpToPosition());
     }
 
     IEnumerator LerpToPosition()
     {
-        Vector3 currentVector = drawer ? transform.localPosition : transform.localEulerAngles;
+        isMoving = true;
+        Vector3 currentVector = isOpen ? openPosOrRot : closedPosOrRot;
+        Vector3 newPosOrRot = isOpen ? closedPosOrRot : openPosOrRot;
+
         float t = 0f;
         float timeToMove = 1f;
 
@@ -34,18 +42,27 @@ public class Drawer : InteractableObject
 
         yield return new WaitForSeconds(0.3f);
 
-        while (t < 1)
+        isOpen = !isOpen;
+
+        if (drawer)
         {
-            t += Time.deltaTime / timeToMove;
-            if (drawer)
+            while (t < 1)
             {
-                transform.localPosition = Vector3.Lerp(currentVector, openPosOrRot, t);
+                t += Time.deltaTime / timeToMove;
+                transform.localPosition = Vector3.Lerp(currentVector, newPosOrRot, t);
+                yield return null;
             }
-            else
-            {
-                transform.localEulerAngles = Vector3.Lerp(currentVector, openPosOrRot, t);
-            }
-            yield return null;
         }
+        else
+        {
+            while (t < 1)
+            {
+                t += Time.deltaTime / timeToMove;
+                transform.localEulerAngles = Vector3.Lerp(currentVector, newPosOrRot, t);
+                yield return null;
+            }
+        }
+        
+        isMoving = false;
     }
 }

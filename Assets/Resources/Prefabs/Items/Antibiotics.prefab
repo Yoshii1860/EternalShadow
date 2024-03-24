@@ -11,9 +11,10 @@ GameObject:
   - component: {fileID: 4723766163332694016}
   - component: {fileID: 5383337181642720253}
   - component: {fileID: 3552178881372634486}
-  - component: {fileID: 3723768619767234103}
-  - component: {fileID: 1409021539202057141}
-  m_Layer: 0
+  - component: {fileID: 8283554883840197992}
+  - component: {fileID: 5260216402451036457}
+  - component: {fileID: 8123906031763669783}
+  m_Layer: 6
   m_Name: Antibiotics
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 6200164740777521001}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.113, y: -0.3, z: -0.38}
-  m_LocalScale: {x: 0.20518, y: 0.20518, z: 0.20518}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -42,7 +43,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6200164740777521001}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: -5894674620776975435, guid: 9ea50b587b0a08043aea02c683d5ec38, type: 3}
 --- !u!23 &3552178881372634486
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -63,7 +64,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: ad61bf388eb2fcc45b520fdaa91cc85c, type: 2}
+  - {fileID: 2100000, guid: cf62bfb6b34fa5641bdc41d2662348a5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -85,21 +86,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &3723768619767234103
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6200164740777521001}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1409021539202057141
+--- !u!114 &8283554883840197992
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -108,7 +95,46 @@ MonoBehaviour:
   m_GameObject: {fileID: 6200164740777521001}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3933c0825e904a3478f5d3c4b326382f, type: 3}
+  m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uniqueID: 
+--- !u!114 &5260216402451036457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6200164740777521001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16ed7316a1f278345a2b3ae88d24c02b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isPickup: 0
+  active: 0
+  inventoryItem: 1
+  objectPosition: {fileID: 0}
+  rotateX: 0
+  rotateY: 0
+  rotateZ: 0
+  objectName: {fileID: 0}
+  objectDescription: {fileID: 0}
+  objectNameString: 
+  objectDescriptionString: 
+  clipName: 
   item: {fileID: 11400000, guid: 237f99aa18c82ee4ead9e354bec1847c, type: 2}
+  originalPosition: {x: 0, y: 0, z: 0}
+--- !u!65 &8123906031763669783
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6200164740777521001}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.12, y: 0.18, z: 0.15}
+  m_Center: {x: -0.00013303757, y: 0.07670546, z: 0.000029921532}
