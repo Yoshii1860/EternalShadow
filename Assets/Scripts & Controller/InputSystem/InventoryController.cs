@@ -17,7 +17,7 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
 
     private ItemActions itemActions;
 
-    private bool interact, exit, back;
+    private bool interact, exit, back, inspectInteract;
     private Vector2 move, look;
     private float scroll;
 
@@ -49,6 +49,9 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
                 InventoryManager.Instance.ResumeFromInspector();
                 inspectorTimer = 0.5f;
             } else Inspect();
+
+            if (inspectInteract) InspectInteract();
+            
             return;
         }
 
@@ -139,6 +142,11 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
         Debug.Log("InventoryController.OnScroll = " + scroll);
     }
 
+    public void OnInspectInteract(InputAction.CallbackContext context)
+    {
+        inspectInteract = context.ReadValueAsButton();
+    }
+
     #endregion
 
     #region Input Processing Methods
@@ -149,6 +157,18 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
         InventoryManager.Instance.RotateInspectorItem(look.x, look.y, scroll);
         look = Vector2.zero;
         scroll = 0f;
+    }
+
+    private void InspectInteract()
+    {
+        Debug.Log("InventoryController.InspectInteract");
+        inspectInteract = false;
+        Interaction objInteraction = InventoryManager.Instance.ReturnInspectorItem().GetComponent<Interaction>();
+        if (objInteraction != null)
+        {
+            Debug.Log("InventoryController.InspectInteract: Interact");
+            objInteraction.Interact();
+        }
     }
 
     // Process the interact action
@@ -193,6 +213,17 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     private void Exit()
     {
         Debug.Log("InventoryController.Exit");
+        if (InventoryManager.Instance.isInspecting)
+        {
+            Debug.Log("InventoryController.Exit: ResumeFromInspector");
+            InventoryManager.Instance.ResumeFromInspector();
+            inspectorTimer = 0.5f;
+            return;
+        }
+        if (InventoryManager.Instance.itemActionsOpen)
+        {
+            InventoryManager.Instance.BackToSelection();
+        }
         exit = false;
         inventoryClosing = true;
 
@@ -229,11 +260,11 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     {
         if (move.y > 0.5f)
         {
-            MoveSelectionUpDown(-3);
+            MoveSelectionUpDown(-4);
         }
         else if (move.y < -0.5f)
         {
-            MoveSelectionUpDown(3);
+            MoveSelectionUpDown(4);
         }
         else if (move.x > 0.5f)
         {

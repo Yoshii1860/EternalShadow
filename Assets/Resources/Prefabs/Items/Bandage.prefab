@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3208298927981174038}
   - component: {fileID: 1560302880129182185}
   - component: {fileID: -2108758430069378052}
-  - component: {fileID: 5210999193107824326}
+  - component: {fileID: 4855610039289051876}
   m_Layer: 6
   m_Name: Bandage
   m_TagString: Untagged
@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 4001121234425887939}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.060000002, y: 0.06, z: 0.09000001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -98,7 +98,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uniqueID: 
+  uniqueID: B0
 --- !u!114 &-2108758430069378052
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -113,6 +113,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isPickup: 0
   active: 0
+  inventoryItem: 1
+  useEmission: 1
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -124,7 +126,7 @@ MonoBehaviour:
   clipName: 
   item: {fileID: 11400000, guid: 5578ebbaf6f38cd488ea2970400be3ad, type: 2}
   originalPosition: {x: 0, y: 0, z: 0}
---- !u!65 &5210999193107824326
+--- !u!65 &4855610039289051876
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -135,5 +137,5 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.643684, y: 1.581722, z: 2}
-  m_Center: {x: 0, y: -0.0012179911, z: 0}
+  m_Size: {x: 0.082184196, y: 0.079086095, z: 0.099999994}
+  m_Center: {x: -0.00000035762787, y: -0.000060899183, z: 0}

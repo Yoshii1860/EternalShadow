@@ -29,6 +29,7 @@ TagManager:
   - PickupCanvas
   - FxTemporaire
   - slenderman
+  - lid
   layers:
   - Default
   - TransparentFX

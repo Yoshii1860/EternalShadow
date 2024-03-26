@@ -32,7 +32,10 @@ public class S_DecisionLastKnownPosition : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return RUNNING to indicate that the decision is inconclusive
@@ -40,8 +43,21 @@ public class S_DecisionLastKnownPosition : Node
             state = NodeState.RUNNING;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        if (aiSensor.hidden)
+        ////////////////////////////////////////////////////////////////////////
+        // FAILURE CHECKS
+        ////////////////////////////////////////////////////////////////////////
+        object obj = GetData("target");
+
+        if (obj != null)
+        {
+            ClearData("lastKnownPosition");
+            if (debugMode) Debug.Log("D - LastKnownPosition: FAILURE (Target exists)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        else if (aiSensor.hidden)
         {
             ClearData("lastKnownPosition");
             if (debugMode) Debug.Log("D - LastKnownPosition: FAILURE (Hidden)");
@@ -56,12 +72,13 @@ public class S_DecisionLastKnownPosition : Node
             state = NodeState.FAILURE;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
         // Retrieve the last known position from the blackboard
-        object obj = GetData("lastKnownPosition");
+        object objPos = GetData("lastKnownPosition");
 
         // If the last known position exists, set state to SUCCESS
-        if (obj != null)
+        if (objPos != null)
         {
             if (debugMode) Debug.Log("D - LastKnownPosition: SUCCESS (Last Known Position)");
             state = NodeState.SUCCESS;

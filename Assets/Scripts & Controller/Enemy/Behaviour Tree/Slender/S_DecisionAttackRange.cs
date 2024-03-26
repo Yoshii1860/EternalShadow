@@ -10,6 +10,7 @@ public class S_DecisionAttackRange : Node
     // References to components
     private Transform transform;
     private Animator animator;
+    private AISensor aiSensor;
 
     // Debug mode flag
     private bool debugMode;
@@ -24,6 +25,7 @@ public class S_DecisionAttackRange : Node
         this.transform = transform;
         this.animator = transform.GetComponent<Animator>();
         this.debugMode = debugMode;
+        aiSensor = transform.GetComponent<AISensor>();
     }
 
     #endregion
@@ -33,7 +35,10 @@ public class S_DecisionAttackRange : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+    
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return RUNNING to indicate that the decision is ongoing
@@ -41,18 +46,26 @@ public class S_DecisionAttackRange : Node
             state = NodeState.RUNNING;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        // Retrieve the target from the blackboard
+        ////////////////////////////////////////////////////////////////////////
+        // FAILURE CHECKS
+        ////////////////////////////////////////////////////////////////////////
         object obj = GetData("target");
 
-        // Check if the target is null
         if (obj == null)
         {
-            // Set state to FAILURE and return
             if (debugMode) Debug.Log("D - AttackRange: FAILURE (No Target)");
             state = NodeState.FAILURE;
             return state;
         }
+        else if (aiSensor.hidden)
+        {
+            if (debugMode) Debug.Log("D - AttackRange: FAILURE (Hidden)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        ////////////////////////////////////////////////////////////////////////
 
         // Calculate the distance between the agent and the target
         Transform target = (Transform)obj;

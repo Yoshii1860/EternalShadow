@@ -14,11 +14,14 @@ public class Player : MonoBehaviour, ICustomUpdatable
     public float stamina = 100f;
     public bool isBleeding = false;
     public bool isDizzy = false;
+    public bool isPoisoned = false;
     public bool isOutOfStamina = false;
     public float staminaConsumptionTimer = 0.1f;
     public float staminaReg = 0.4f;
     public Light flashlight;
     public bool lightAvail = false;
+    public float maxHealth = 100f;
+    public float maxStamina = 100f;
 
     [SerializeField] string[] painClips;
     [SerializeField] string[] hitClips;
@@ -29,13 +32,12 @@ public class Player : MonoBehaviour, ICustomUpdatable
     [Header("References")]
     [SerializeField] Image bloodOverlay;
     [SerializeField] Image poisonOverlay;
+    [SerializeField] Image dizzyOverlay;
     [SerializeField] TextMeshProUGUI staminaText;
     [SerializeField] TextMeshProUGUI bulletsText;
 
     // Stats-related
     private float reducedStamina;
-    private float maxHealth = 100f;
-    private float maxStamina = 100f;
     bool healthReg = false;
     bool reducingStamina = false;
     bool increasingStamina = false;
@@ -80,42 +82,29 @@ public class Player : MonoBehaviour, ICustomUpdatable
 
     #region Debug Methods
 
-    public bool isPoisonedDebug = false;
-    public bool isNotPoisonedDebug = false;
-    public bool poisonMeDebug = false;
+    public bool poisonDebug = false;
+    public bool dizzyDebug = false;
+    public bool bleedingDebug = false;
 
+    // Just for DEBUG
     void Update()
     {
-        if (isPoisonedDebug)
-        {
-            isPoisoned = true;
-        }
-        if (isNotPoisonedDebug)
-        {
-            isPoisoned = false;
-        }
-
-        if (poisonMeDebug)
+        if (isPoisoned && !poisonDebug)
         {
             Poisoned();
-            poisonMeDebug = false;
+            poisonDebug = true;
         }
-    }
 
-    // Private backing field for isPoisoned property
-    [SerializeField] bool _isPoisoned = false;
-
-    // Public property for isPoisoned
-    public bool isPoisoned
-    {
-        get => _isPoisoned;
-        set
+        if (isDizzy && !dizzyDebug)
         {
-            if (_isPoisoned != value)
-            {
-                _isPoisoned = value;
-                OnIsPoisonedChanged();
-            }
+            Dizzy();
+            dizzyDebug = true;
+        }
+
+        if (isBleeding && !bleedingDebug)
+        {
+            Bleeding();
+            bleedingDebug = true;
         }
     }
 
@@ -201,21 +190,22 @@ public class Player : MonoBehaviour, ICustomUpdatable
     public void Poisoned()
     {
         isPoisoned = true;
-        AudioManager.Instance.PlaySoundOneShot(speakerID, hitClips[Random.Range(0, hitClips.Length)], Random.Range(0.3f, 0.6f), Random.Range(0.85f, 1.1f));
+        GameManager.Instance.DisplayMessage("You have an infection. Take some antibiotics!", 3f);
+        OnIsPoisonedChanged();
+        StartCoroutine(PoisonEffect());
         StartCoroutine(PoisonedRoutine());
     }
 
-    IEnumerator PoisonedRoutine()
+    IEnumerator PoisonEffect()
     {
-        poisonOverlay.color = new Color(poisonOverlay.color.r, poisonOverlay.color.g, poisonOverlay.color.b, 0.018f);
-        
+        //  change transparency of poison overlay flawlessly
         while (isPoisoned)
         {
             waitingTime = Random.Range(20, 60);
             if (!waitTimer && !isMoaning)
             {
                 // randomize and play moaning sound
-                AudioManager.Instance.PlaySoundOneShot(speakerID, poisenedClips[Random.Range(0, poisenedClips.Length)], Random.Range(0.2f, 0.4f), Random.Range(0.85f, 1.1f));
+                if (!GameManager.Instance.isPaused) AudioManager.Instance.PlaySoundOneShot(speakerID, poisenedClips[Random.Range(0, poisenedClips.Length)], Random.Range(0.2f, 0.4f), Random.Range(0.85f, 1.1f));
                 waitTimer = true;
             }
 
@@ -233,10 +223,106 @@ public class Player : MonoBehaviour, ICustomUpdatable
                 poisonOverlay.color = new Color(poisonOverlay.color.r, poisonOverlay.color.g, poisonOverlay.color.b, i);
                 yield return new WaitForSeconds(0.1f);
             }
+
+            if (!isPoisoned)
+            {
+                poisonOverlay.color = new Color(poisonOverlay.color.r, poisonOverlay.color.g, poisonOverlay.color.b, 0f);
+            }
         }
-        if (!isPoisoned)
+    }
+
+    IEnumerator PoisonedRoutine()
+    {
+        poisonOverlay.color = new Color(poisonOverlay.color.r, poisonOverlay.color.g, poisonOverlay.color.b, 0.018f);
+        // randomize and play moaning sound
+        AudioManager.Instance.PlaySoundOneShot(speakerID, hitClips[Random.Range(0, hitClips.Length)], Random.Range(0.3f, 0.6f), Random.Range(0.85f, 1.1f));
+        
+        StartCoroutine(PoisonEffect());
+
+        yield return new WaitUntil (() => !isPoisoned);
+        Debug.Log("Poisoned routine ended.");
+        poisonOverlay.color = new Color(poisonOverlay.color.r, poisonOverlay.color.g, poisonOverlay.color.b, 0f);
+    }
+
+    public void Dizzy()
+    {
+        GameManager.Instance.DisplayMessage("You suffer from a concussion. Take some painkiller!", 3f);
+        isDizzy = true;
+        StartCoroutine(DizzinessEffect());
+        StartCoroutine(DizzyRoutine());
+    }
+
+    IEnumerator DizzyRoutine()
+    {
+        yield return new WaitForSeconds(10f);
+
+        while (isDizzy && !GameManager.Instance.isPaused)
         {
-            poisonOverlay.color = new Color(poisonOverlay.color.r, poisonOverlay.color.g, poisonOverlay.color.b, 0f);
+            waitingTime = Random.Range(20, 120);
+            yield return new WaitForSeconds(waitingTime);
+            if (!isDizzy) break;
+            yield return new WaitUntil(() => !GameManager.Instance.isPaused);
+            StartCoroutine(DizzinessEffect());
+            yield return new WaitForSeconds(10f);
+        }
+
+        if (!isDizzy)
+        {
+            dizzyOverlay.color = new Color(dizzyOverlay.color.r, dizzyOverlay.color.g, dizzyOverlay.color.b, 0f);
+        }
+        else
+        {
+            StartCoroutine(DizzyRoutine());
+        }
+    }
+
+    IEnumerator DizzinessEffect()
+    {
+        // randomize and play moaning sound
+        AudioManager.Instance.PlaySoundOneShot(speakerID, "dizzy1", Random.Range(0.3f, 0.6f), Random.Range(0.85f, 1.1f));
+        yield return new WaitForSeconds(2f);
+        AudioManager.Instance.PlaySoundOneShot(speakerID, "ringing", 1f, 1f);
+        GameManager.Instance.playerController.MoveSpeedChange(0.5f, 7f);
+        //  change transparency of poison overlay flawlessly
+        for (float i = 0f; i <= 0.5f; i += 0.025f)
+        {
+            dizzyOverlay.color = new Color(dizzyOverlay.color.r, dizzyOverlay.color.g, dizzyOverlay.color.b, i);
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        yield return new WaitForSeconds(3f);
+
+        // change transparency of poison overlay back
+        for (float i = 0.5f; i >= 0f; i -= 0.025f)
+        {
+            dizzyOverlay.color = new Color(dizzyOverlay.color.r, dizzyOverlay.color.g, dizzyOverlay.color.b, i);
+            yield return new WaitForSeconds(0.1f);
+        }
+        dizzyOverlay.color = new Color(dizzyOverlay.color.r, dizzyOverlay.color.g, dizzyOverlay.color.b, 0f);
+    }
+
+    public void Bleeding()
+    {
+        isBleeding = true;
+        GameManager.Instance.DisplayMessage("You are bleeding. Use a bandage!", 3f);
+        int stopBleedingAmount = Random.Range(30, 50);
+        StartCoroutine(BleedingRoutine(stopBleedingAmount));
+    }
+
+    IEnumerator BleedingRoutine(int stopBleedingAmount)
+    {
+        yield return new WaitForSeconds(10f);
+        if (isBleeding)
+        {
+            AudioManager.Instance.PlaySoundOneShot(speakerID, painClips[Random.Range(0, painClips.Length)], Random.Range(0.3f, 0.5f), Random.Range(0.85f, 1.1f));
+            health -= 3f;
+            if (health <= stopBleedingAmount) 
+            {
+                isBleeding = false;
+                GameManager.Instance.DisplayMessage("The bleeding stopped.", 3f);
+                yield break;
+            }
+            StartCoroutine(BleedingRoutine(stopBleedingAmount));
         }
     }
 
@@ -244,6 +330,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
     {
         while(heartbeat)
         {
+            if (!GameManager.Instance.isPaused) break;
             // scale bloodOverlay to heartbeat
             yield return new WaitForSeconds(0.15f);
             bloodOverlay.transform.localScale = new Vector3(1.01f, 1.01f, 1.01f);
@@ -393,9 +480,9 @@ public class Player : MonoBehaviour, ICustomUpdatable
     {
         if (isPoisoned)
         {
-            maxStamina = 80f;
-            if (stamina > maxStamina) stamina = 80f;
-            staminaReg = 0.3f;
+            maxStamina = 75f;
+            if (stamina > maxStamina) stamina = 75f;
+            staminaReg = 0.2f;
             staminaText.text = stamina.ToString();
         }
         else

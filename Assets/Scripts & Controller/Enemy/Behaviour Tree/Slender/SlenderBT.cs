@@ -50,12 +50,6 @@ public class SlenderBT : Tree
                 new S_ActionChaseTarget(debugMode, transform, agent)
             }),
 
-            /*new Sequence(new List<Node>
-            {
-                new S_DecisionDoorSensing(transform),
-                new S_ActionDoor(transform, agent)
-            }),*/
-
             // Sequence for responding to noise
             new Sequence(new List<Node>
             {

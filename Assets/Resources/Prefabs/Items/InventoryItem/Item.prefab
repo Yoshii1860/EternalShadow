@@ -27,7 +27,7 @@ RectTransform:
   m_GameObject: {fileID: 4988374118840457253}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.66, y: 0.66, z: 0.66}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4671614758645709187}
@@ -35,7 +35,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -48, y: 28}
+  m_AnchoredPosition: {x: -35.414085, y: 18.834946}
   m_SizeDelta: {x: 75, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4054682128304964916
@@ -163,7 +163,7 @@ RectTransform:
   m_GameObject: {fileID: 6429501284592972107}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1179474564900783624}
@@ -311,6 +311,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isPickup: 1
   active: 0
+  inventoryItem: 1
+  useEmission: 1
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -319,6 +321,7 @@ MonoBehaviour:
   objectDescription: {fileID: 0}
   objectNameString: 
   objectDescriptionString: 
+  clipName: 
   item: {fileID: 0}
   originalPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &5000725881898160799
@@ -361,7 +364,7 @@ RectTransform:
   m_GameObject: {fileID: 8618978023862858467}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.66, y: 0.66, z: 0.66}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4671614758645709187}

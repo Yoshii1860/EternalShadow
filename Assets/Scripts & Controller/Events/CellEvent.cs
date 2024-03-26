@@ -9,6 +9,8 @@ public class CellEvent : MonoBehaviour
     [SerializeField] GameObject unflippedCell;
     [SerializeField] GameObject[] mannequins;
     [SerializeField] Transform lookAtObject;
+    [Tooltip("The horror doll that will only be there when it`s flipped")]
+    [SerializeField] GameObject horrorDoll;
 
     void Start()
     {
@@ -27,6 +29,7 @@ public class CellEvent : MonoBehaviour
             {
                 unflippedCell.SetActive(true);
                 flippedCell.SetActive(false);
+                horrorDoll.SetActive(false);
                 for (int i = 0; i < mannequins.Length; i++)
                 {
                     mannequins[i].SetActive(true);

@@ -37,7 +37,10 @@ public class S_ActionGoToTarget : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return FAILURE to indicate that the action cannot be executed
@@ -45,11 +48,13 @@ public class S_ActionGoToTarget : Node
             state = NodeState.FAILURE;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        // Retrieve target from blackboard
+        ////////////////////////////////////////////////////////////////////////
+        // FAILURE CHECKS
+        ////////////////////////////////////////////////////////////////////////
         object obj = GetData("target");
 
-        // Check if there is no target
         if (obj == null)
         {
             // Set state to FAILURE and return
@@ -57,17 +62,10 @@ public class S_ActionGoToTarget : Node
             state = NodeState.FAILURE;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
         // Get target transform
         Transform target = (Transform)obj;
-
-        /*if (enemy.enteredDoor)
-        {
-            agent.SetDestination(target.position);
-            // Set state to FAILURE and return
-            state = NodeState.FAILURE;
-            return state;
-        }*/
 
         // Set agent speed, set destination, and trigger running animation
         agent.speed = SlenderBT.runSpeed;

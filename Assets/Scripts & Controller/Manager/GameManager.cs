@@ -326,6 +326,7 @@ public class GameManager : MonoBehaviour
 
     public void Inventory()
     {
+        InventoryManager.Instance.StatsUpdate();
         SetGameState(GameState.Inventory);
         // Add code to display the inventory
     }

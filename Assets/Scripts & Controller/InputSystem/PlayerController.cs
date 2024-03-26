@@ -297,6 +297,27 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         reload = false;
     }
 
+    public void MoveSpeedChange(float speedChangeRate, float duration)
+    {
+        float moveSpeedSave = moveSpeed;
+        float sprintSpeedSave = sprintSpeed;
+        float crouchSpeedSave = crouchSpeed;
+
+        moveSpeed *= speedChangeRate;
+        sprintSpeed *= speedChangeRate;
+        crouchSpeed *= speedChangeRate;
+
+        StartCoroutine(ResetMoveSpeed(moveSpeedSave, sprintSpeedSave, crouchSpeedSave, duration));
+    }
+
+    IEnumerator ResetMoveSpeed(float moveSpeedSave, float sprintSpeedSave, float crouchSpeedSave, float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        moveSpeed = moveSpeedSave;
+        sprintSpeed = sprintSpeedSave;
+        crouchSpeed = crouchSpeedSave;
+    }
+
     #endregion
 
     #region Gameplay Functions

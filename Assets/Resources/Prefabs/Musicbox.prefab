@@ -183,7 +183,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 1860
+  m_text: 5627
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d558a584ef7498541b1fe5113f5085ca, type: 2}
   m_sharedMaterial: {fileID: 8575758687119323197, guid: d558a584ef7498541b1fe5113f5085ca, type: 2}
@@ -267,6 +267,7 @@ GameObject:
   - component: {fileID: 4071510726365089663}
   - component: {fileID: 4071510726365089665}
   - component: {fileID: 4071510726365089666}
+  - component: {fileID: 2877771441118474140}
   m_Layer: 6
   m_Name: Musicbox
   m_TagString: Untagged
@@ -343,6 +344,7 @@ MonoBehaviour:
   isPickup: 1
   active: 0
   inventoryItem: 1
+  useEmission: 1
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 1
@@ -350,10 +352,22 @@ MonoBehaviour:
   objectName: {fileID: 0}
   objectDescription: {fileID: 0}
   objectNameString: Old Musicbox
-  objectDescriptionString: Inside you can see a number written in blood... "1860"
+  objectDescriptionString: "Maybe you can just open it to see what\xB4s inside?"
   clipName: 
   item: {fileID: 11400000, guid: 3cf687a7e2f699d42907d6eb6eb4fa1e, type: 2}
   originalPosition: {x: 0, y: 0, z: 0}
+--- !u!114 &2877771441118474140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979859657941160054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db764724691251145a47c35d99c01788, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1504502567687819851
 GameObject:
   m_ObjectHideFlags: 0
@@ -699,7 +713,7 @@ GameObject:
   - component: {fileID: 7469819750956065999}
   m_Layer: 0
   m_Name: Lid
-  m_TagString: Untagged
+  m_TagString: lid
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

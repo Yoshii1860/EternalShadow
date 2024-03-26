@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Musicbox
   m_EditorClassIdentifier: 
   displayName: Old Musicbox
-  description: Inside you can see a number written in blood... "1860"
+  description: "Maybe you can just open it to see what\xB4s inside?"
   icon: {fileID: 21300000, guid: 87e5164fc87c8bb4da6b5fbb6970c442, type: 3}
   iconPath: VFX/ItemIcons/musicboxicon
   unique: 1

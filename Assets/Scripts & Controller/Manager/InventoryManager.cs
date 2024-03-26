@@ -54,6 +54,18 @@ public class InventoryManager : MonoBehaviour
         public GameObject inspector;
         [Tooltip("The transform that will be used to parent the item to inspect")]
         public Transform inspectItemTransform;
+        [Tooltip("The canvas that will be used to display the status of the player")]
+        public GameObject statsDisplay;
+        [Tooltip("The fill amount of the health bar")]
+        public Image healthBar;
+        [Tooltip("The fill amount of the stamina bar")]
+        public Image staminaBar;
+        [Tooltip("The icons that will be used to display status effects")]
+        public GameObject bleedingIcon;
+        [Tooltip("The icons that will be used to display status effects")]
+        public GameObject poisonedIcon;
+        [Tooltip("The icons that will be used to display status effects")]
+        public GameObject dizzyIcon;
         [Tooltip("The canvas that will be used to display messages")]
         public GameObject messageCanvas;
         [Tooltip("The text that will be used to display messages")]
@@ -80,6 +92,10 @@ public class InventoryManager : MonoBehaviour
         GameObject player;
         Ammo ammo;
         GameObject inspectorItem;
+        TextMeshProUGUI healthText;
+        TextMeshProUGUI maxHealthText;
+        TextMeshProUGUI staminaText;
+        TextMeshProUGUI maxStaminaText;
 
         [Space(10)]
         [Header("Colors")]
@@ -117,6 +133,10 @@ public class InventoryManager : MonoBehaviour
         gridLayouts = FindGridLayoutGroups();
         itemContent = gridLayouts[1];
         itemPreview = gridLayouts[2];
+        healthText = healthBar.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        maxHealthText = healthBar.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+        staminaText = staminaBar.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        maxStaminaText = staminaBar.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
     }
 
     private Transform[] FindGridLayoutGroups(Transform parent = null)
@@ -561,6 +581,7 @@ public class InventoryManager : MonoBehaviour
             child.gameObject.SetActive(false);
         }
         dollDisplay.SetActive(false);
+        statsDisplay.SetActive(false);
         inspectorCamera.SetActive(true);
         inspector.SetActive(true);
     }
@@ -572,6 +593,11 @@ public class InventoryManager : MonoBehaviour
         inspectorItem.transform.localPosition = new Vector3(0, 0, 0.8f);
         inspectorItem.transform.localRotation = Quaternion.identity;
         inspectorItem.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+    }
+
+    public GameObject ReturnInspectorItem()
+    {
+        return inspectorItem;
     }
 
     public void RotateInspectorItem(float x, float y, float scale)
@@ -605,6 +631,7 @@ public class InventoryManager : MonoBehaviour
         inspectorCamera.SetActive(false);
         inspector.SetActive(false);
         dollDisplay.SetActive(true);
+        statsDisplay.SetActive(true);
         Destroy(inspectorItem);
         inspectorItem = null;
         foreach (Transform child in itemContent)
@@ -618,6 +645,21 @@ public class InventoryManager : MonoBehaviour
         isInspecting = false;
     }
 
+    public void StatsUpdate()
+    {
+        healthBar.fillAmount = GameManager.Instance.player.health / 100f;
+        healthText.text = GameManager.Instance.player.health.ToString();
+        maxHealthText.text = GameManager.Instance.player.maxHealth.ToString();
+        staminaBar.fillAmount = GameManager.Instance.player.stamina / 100f;
+        staminaText.text = GameManager.Instance.player.stamina.ToString();
+        maxStaminaText.text = GameManager.Instance.player.maxStamina.ToString();
+        if (GameManager.Instance.player.isBleeding) bleedingIcon.SetActive(true);
+        else bleedingIcon.SetActive(false);
+        if (GameManager.Instance.player.isPoisoned) poisonedIcon.SetActive(true);
+        else poisonedIcon.SetActive(false);
+        if (GameManager.Instance.player.isDizzy) dizzyIcon.SetActive(true);
+        else dizzyIcon.SetActive(false);
+    }
 
     #endregion
 

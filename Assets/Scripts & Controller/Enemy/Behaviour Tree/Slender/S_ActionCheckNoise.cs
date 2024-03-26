@@ -12,6 +12,7 @@ public class S_ActionCheckNoise : Node
     private Transform transform;
     private NavMeshAgent agent;
     private Animator animator;
+    private AISensor aiSensor;
 
     // Variables for waiting behavior
     private bool isWaiting = false;
@@ -34,6 +35,7 @@ public class S_ActionCheckNoise : Node
         animator = transform.GetComponent<Animator>();
         enemy = transform.GetComponent<Enemy>();
         this.debugMode = debugMode;
+        aiSensor = transform.GetComponent<AISensor>();
     }
 
     #endregion
@@ -43,7 +45,10 @@ public class S_ActionCheckNoise : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return RUNNING to indicate that the action is ongoing
@@ -51,12 +56,28 @@ public class S_ActionCheckNoise : Node
             state = NodeState.RUNNING;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        // Retrieve noise position from blackboard
-        object obj = GetData("noisePosition");
-
-        // Check if there is no noise position or if the player is in sight
-        if (obj == null)
+        ////////////////////////////////////////////////////////////////////////
+        // FAILURE CHECKS
+        ////////////////////////////////////////////////////////////////////////
+        object obj = GetData("target");
+        object objPos = GetData("noisePosition");
+        if (obj != null)
+        {
+            if (debugMode) Debug.Log("A - CheckNoise: FAILURE (target != null)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        else if (aiSensor.playerInSight)
+        {
+            // Set state to FAILURE
+            if (debugMode) Debug.Log("A - CheckNoise: FAILURE (player in sight)");
+            parent.parent.SetData("target", GameManager.Instance.player.transform);
+            state = NodeState.FAILURE;
+            return state;
+        }
+        else if (objPos == null)
         {
             ClearData("noisePosition");
             ClearData("noiseLevel");
@@ -65,9 +86,10 @@ public class S_ActionCheckNoise : Node
             state = NodeState.FAILURE;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
         // Get noise position
-        Vector3 noisePos = (Vector3)obj;
+        Vector3 noisePos = (Vector3)objPos;
 
         // Check if the AI is waiting
         if (isWaiting)
@@ -102,14 +124,6 @@ public class S_ActionCheckNoise : Node
             }
             else
             {
-                /*if (enemy.enteredDoor)
-                {
-                    parent.parent.SetData("destination", noisePos);
-                    animator.SetBool("walk", false);
-                    animator.SetBool("run", false);
-                    return NodeState.FAILURE;
-                }*/
-
                 // Set agent speed, set destination, and start walking animation
                 agent.speed = EnemyBT.walkSpeed;
                 agent.SetDestination(noisePos);

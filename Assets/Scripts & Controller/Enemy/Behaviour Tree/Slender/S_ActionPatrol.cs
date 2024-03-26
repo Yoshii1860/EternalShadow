@@ -48,7 +48,10 @@ public class S_ActionPatrol : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return RUNNING to indicate that the action is ongoing
@@ -56,8 +59,22 @@ public class S_ActionPatrol : Node
             state = NodeState.RUNNING;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        if (sensor.playerInSight)
+        ////////////////////////////////////////////////////////////////////////
+        // FAILURE CHECKS
+        ////////////////////////////////////////////////////////////////////////
+        object obj = GetData("target");
+        object lastKnownPos = GetData("lastKnownPosition");
+        object noisePos = GetData("noisePosition");
+
+        if (obj != null)
+        {
+            if (debugMode) Debug.Log("A - Patrol: FAILURE (target != null)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        else if (sensor.playerInSight)
         {
             // Set state to FAILURE and return
             parent.SetData("target", GameManager.Instance.player.transform);
@@ -65,16 +82,24 @@ public class S_ActionPatrol : Node
             state = NodeState.FAILURE;
             return state;
         }
-
-        // Check if there is a last known position, if yes, abort patrol
-        object lastKnownPos = GetData("lastKnownPosition");
-        if (lastKnownPos != null)
+        else if (lastKnownPos != null)
         {
             // Set state to FAILURE and return
             if (debugMode) Debug.Log("A - Patrol: FAILURE (lastKnownPosition != null)");
             state = NodeState.FAILURE;
             return state;
         }
+        else if (noisePos != null)
+        {
+            // Set state to FAILURE and return
+            if (debugMode) Debug.Log("A - Patrol: FAILURE (noisePosition != null)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        ////////////////////////////////////////////////////////////////////////
+
+        animator.SetBool("run", false);
+        animator.SetBool("walk", true);
 
         // Check if waiting
         if (isWaiting)
@@ -87,6 +112,7 @@ public class S_ActionPatrol : Node
                 isWaiting = false;
                 agent.enabled = true;
                 animator.SetBool("walk", true);
+                animator.SetBool("run", false);
             }
         }
         else
@@ -111,17 +137,11 @@ public class S_ActionPatrol : Node
             }
             else
             {
-                /*if (enemy.enteredDoor)
-                {
-                    parent.SetData("destination", currentWaypoint.position);
-                    animator.SetBool("walk", false);
-                    animator.SetBool("run", false);
-                    return NodeState.FAILURE;
-                }*/
                 // Move towards the current waypoint
                 agent.speed = SlenderBT.walkSpeed;
                 agent.SetDestination(currentWaypoint.position);
                 animator.SetBool("walk", true);
+                animator.SetBool("run", false);
 
                 AudioManager.Instance.ToggleSlenderAudio(transform.gameObject, false);
             }

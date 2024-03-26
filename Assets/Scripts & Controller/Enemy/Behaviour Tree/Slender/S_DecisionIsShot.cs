@@ -33,7 +33,9 @@ public class S_DecisionIsShot : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return FAILURE to indicate that the decision is not satisfied
@@ -41,8 +43,8 @@ public class S_DecisionIsShot : Node
             state = NodeState.FAILURE;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        // Retrieve the target from the blackboard
         object obj = GetData("target");
 
         // Initialize variable to track if the enemy is shot

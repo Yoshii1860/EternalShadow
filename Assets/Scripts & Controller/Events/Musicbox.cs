@@ -37,7 +37,6 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
     YardEvent yardEvent;
 
     [SerializeField] ItemController musicBoxObject;
-    [SerializeField] Transform musicBoxLid;
 
     void Start()
     {
@@ -134,11 +133,6 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
         door.OpenDoor();
         AudioManager.Instance.FadeOut(gameObject.GetInstanceID(), 5f);
         yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(gameObject.GetInstanceID()));
-        for (float i = musicBoxLid.localEulerAngles.x; i > 0; i -= 0.5f)
-        {
-            musicBoxLid.localEulerAngles = new Vector3(i, 0, 0);
-            yield return new WaitForSeconds(0.01f);
-        }
         musicBoxObject.enabled = true;
         AudioManager.Instance.UnpauseAudio(AudioManager.Instance.environment);
         AudioManager.Instance.SetAudioVolume(AudioManager.Instance.environment, 0.1f);

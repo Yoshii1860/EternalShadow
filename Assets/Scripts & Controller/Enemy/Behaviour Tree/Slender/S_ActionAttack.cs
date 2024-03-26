@@ -9,11 +9,10 @@ public class S_ActionAttack : Node
 
     // Reference to the animator component.
     private Animator animator;
-
     private Transform transform;
-
     // Reference to the player instance.
     private Player player = GameManager.Instance.player;
+    private AISensor aiSensor;
 
     // Counter for tracking attack intervals.
     private float attackCounter = 0f;
@@ -27,34 +26,35 @@ public class S_ActionAttack : Node
 
     #region Constructors
 
-    /// <summary>
     /// Initializes a new instance of the <see cref="ActionAttack"/> class.
-    /// </summary>
-    /// <param name="transform">Transform of the attacking entity.</param>
     public S_ActionAttack(bool debugMode, Transform transform)
     {
         this.debugMode = debugMode;
         animator = transform.GetComponent<Animator>();
         damage = transform.GetComponent<Enemy>().damage;
         this.transform = transform;
+        aiSensor = transform.GetComponent<AISensor>();
     }
 
     #endregion
 
     #region Public Methods
 
-    /// <summary>
     /// Evaluates the attack action node.
-    /// </summary>
-    /// <returns>The resulting state after evaluation.</returns>
     public override NodeState Evaluate()
     {
+
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
-            if (debugMode) Debug.Log("A - Attack (Game is paused)");
+            // Return RUNNING to indicate that the decision is ongoing
+            if (debugMode) Debug.Log("A - ActionAttack: FAILURE (Paused)");
             state = NodeState.FAILURE;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
         object obj = GetData("target");
 
@@ -64,6 +64,13 @@ public class S_ActionAttack : Node
             state = NodeState.FAILURE;
             return state;
         }
+        else if (aiSensor.hidden)
+        {
+            if (debugMode) Debug.Log("A - Attack (Hidden)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        ////////////////////////////////////////////////////////////////////////
 
         Transform target = (Transform)obj;
 
@@ -79,7 +86,19 @@ public class S_ActionAttack : Node
             AudioManager.Instance.FadeOut(transform.GetChild(0).gameObject.GetInstanceID(), 0.5f);
 
             // Perform attack and check if the player is dead.
+            // Chances to apply status effects on the player.
             bool playerIsDead = player.TakeDamage(damage);
+
+            int randomizer = Random.Range(0, 100);
+            if (randomizer <= 15)
+            {
+                if (!player.isDizzy) player.Dizzy();
+            }
+            randomizer = Random.Range(0, 100);
+            if (randomizer <= 10)
+            {
+                if (!player.isBleeding) player.Bleeding();
+            }
 
             if (playerIsDead)
             {

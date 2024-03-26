@@ -38,7 +38,10 @@ public class S_DecisionNoiseSensing : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return FAILURE to indicate that the decision cannot be made
@@ -46,9 +49,11 @@ public class S_DecisionNoiseSensing : Node
             state = NodeState.FAILURE;
             return state;
         }
-
-        #region Debug Mode
+        ////////////////////////////////////////////////////////////////////////
         
+        ////////////////////////////////////////////////////////////////////////
+        // No Noise Mode
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.noNoiseMode)
         {
             // If in debug mode, return FAILURE
@@ -56,22 +61,13 @@ public class S_DecisionNoiseSensing : Node
             state = NodeState.FAILURE;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        #endregion
-
-        if (aiSensor.hidden)
-        {
-            ClearData("noisePosition");
-            ClearData("noiseLevel");
-            if (debugMode) Debug.Log("D - NoiseSensing: FAILURE (AISensor Hidden)");
-            state = NodeState.FAILURE;
-            return state;
-        }
-
-        // Retrieve the target from the blackboard
+        ////////////////////////////////////////////////////////////////////////
+        // FAILURE CHECKS
+        ////////////////////////////////////////////////////////////////////////
         object obj = GetData("target");
 
-        // Check if the player is in sight or there's a target
         if (obj != null)
         {
             // Clear noise data and return FAILURE
@@ -81,8 +77,15 @@ public class S_DecisionNoiseSensing : Node
             state = NodeState.FAILURE;
             return state;
         }
-        
-        if (aiSensor.playerInSight)
+        else if (aiSensor.hidden)
+        {
+            ClearData("noisePosition");
+            ClearData("noiseLevel");
+            if (debugMode) Debug.Log("D - NoiseSensing: FAILURE (AISensor Hidden)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        else if (aiSensor.playerInSight)
         {
             // Clear noise data and set the player as the target
             ClearData("noisePosition");
@@ -92,6 +95,10 @@ public class S_DecisionNoiseSensing : Node
             state = NodeState.FAILURE;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
+
+        animator.SetBool("run", false);
+        animator.SetBool("walk", true);
 
         // Retrieve the saved noise level from the blackboard
         object obj2 = GetData("noiseLevel");

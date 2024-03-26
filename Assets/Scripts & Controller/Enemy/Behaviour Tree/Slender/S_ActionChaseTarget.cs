@@ -13,6 +13,7 @@ public class S_ActionChaseTarget : Node
     private NavMeshAgent agent;
     private Enemy enemy;
     private Transform transform;
+    private AISensor aiSensor;
 
     // Timer variables for chasing
     private float chaseTimer = 0f;
@@ -33,6 +34,7 @@ public class S_ActionChaseTarget : Node
         this.agent = agent;
         enemy = transform.GetComponent<Enemy>();
         this.debugMode = debugMode;
+        aiSensor = transform.GetComponent<AISensor>();
     }
 
     #endregion
@@ -42,7 +44,10 @@ public class S_ActionChaseTarget : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return RUNNING to indicate that the action is ongoing
@@ -50,25 +55,31 @@ public class S_ActionChaseTarget : Node
             state = NodeState.RUNNING;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        // Retrieve the target from the blackboard
+        ////////////////////////////////////////////////////////////////////////
+        // FAILURE CHECKS
+        ////////////////////////////////////////////////////////////////////////
         object obj = GetData("target");
 
         if(obj == null)
         {
-            // If there is no target, set state to FAILURE and return
-            if (debugMode) Debug.Log("A - ChaseTarget: FAILURE (target = null)");
+            // Set state to FAILURE and return
+            if (debugMode) Debug.Log("A - ChaseTarget: FAILURE (No Target)");
             state = NodeState.FAILURE;
             return state;
         }
+        else if (aiSensor.hidden)
+        {
+            // Set state to FAILURE and return
+            if (debugMode) Debug.Log("A - ChaseTarget: FAILURE (Hidden)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        ////////////////////////////////////////////////////////////////////////
 
         Transform target = (Transform)obj;
 
-        // Adjust agent speed and set destination for chasing
-        /*if (enemy.enteredDoor)
-        {
-            parent.parent.SetData("destination", target.position);
-        }*/
         agent.speed = EnemyBT.runSpeed;
         agent.SetDestination(target.position);
         animator.SetBool("run", true);
@@ -85,6 +96,7 @@ public class S_ActionChaseTarget : Node
             ClearData("target");
             chaseTimer = 0f;
             animator.SetBool("run", false);
+            animator.SetBool("walk", true);
             if (debugMode) Debug.Log("A - ChaseTarget: SUCCESS (chase duration over)");
             state = NodeState.SUCCESS;
             return state;

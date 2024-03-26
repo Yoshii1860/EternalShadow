@@ -13,6 +13,7 @@ public class S_ActionLastKnownPosition : Node
     private NavMeshAgent agent;
     private Animator animator;
     private Enemy enemy;
+    private AISensor aiSensor;
 
     // Debug mode flag
     private bool debugMode;
@@ -29,6 +30,7 @@ public class S_ActionLastKnownPosition : Node
         animator = transform.GetComponent<Animator>();
         enemy = transform.GetComponent<Enemy>();
         this.debugMode = debugMode;
+        aiSensor = transform.GetComponent<AISensor>();
     }
 
     #endregion
@@ -38,7 +40,9 @@ public class S_ActionLastKnownPosition : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return RUNNING to indicate that the action is ongoing
@@ -46,21 +50,42 @@ public class S_ActionLastKnownPosition : Node
             state = NodeState.RUNNING;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        // Retrieve last known position from blackboard
-        object obj = GetData("lastKnownPosition");
+        ////////////////////////////////////////////////////////////////////////
+        // FAILURE CHECKS
+        ////////////////////////////////////////////////////////////////////////
+        object obj = GetData("target");
+        object objPos = GetData("lastKnownPosition");
 
-        // Check if there is no last known position or if the player is in sight
-        if (obj == null)
+        if (obj != null)
         {
-            // Set state to FAILURE and return
-            if (debugMode) Debug.Log("A - LastKnownPosition: FAILURE (lastKnownPosition = null)");
+            if (debugMode) Debug.Log("A - LastKnownPosition: FAILURE (target = null)");
+            ClearData("lastKnownPosition");
             state = NodeState.FAILURE;
             return state;
         }
+        else if (aiSensor.playerInSight)
+        {
+            // Set state to FAILURE and return
+            if (debugMode) Debug.Log("A - LastKnownPosition: FAILURE (Player in Sight)");
+            ClearData("lastKnownPosition");
+            parent.parent.SetData("target", GameManager.Instance.player.transform);
+            state = NodeState.FAILURE;
+            return state;
+        }
+        if (objPos == null)
+        {
+            // Set state to FAILURE and return
+            if (debugMode) Debug.Log("A - LastKnownPosition: FAILURE (lastKnownPosition = null) or (Player in Sight)");
+            ClearData("lastKnownPosition");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        ////////////////////////////////////////////////////////////////////////
 
         // Get last known position
-        Vector3 lastKnownPosition = (Vector3)obj;
+        Vector3 lastKnownPosition = (Vector3)objPos;
 
         // Check if AI has reached the last known position
         if (Vector3.Distance(transform.position, lastKnownPosition) < 0.1f)
@@ -74,13 +99,6 @@ public class S_ActionLastKnownPosition : Node
             state = NodeState.SUCCESS;
             return state;
         }
-
-        /*if (enemy.enteredDoor)
-        {
-            parent.parent.SetData("destination", lastKnownPosition);
-            state = NodeState.FAILURE;
-            return state;
-        }*/
 
         agent.speed = EnemyBT.walkSpeed;
         agent.SetDestination(lastKnownPosition);

@@ -880,6 +880,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "InspectInteract",
+                    "type": "Button",
+                    "id": "3112a707-6939-4215-a068-6f0a1fce4993",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1089,6 +1098,17 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse;Touch",
                     "action": "Look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3f71a281-7bae-4796-a9e3-07820a0b5c1e",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "InspectInteract",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -37,7 +37,10 @@ public class S_DecisionSensing : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return FAILURE to indicate that the decision cannot be made
@@ -45,10 +48,11 @@ public class S_DecisionSensing : Node
             state = NodeState.FAILURE;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        #region Debug Mode
-
-        // Check if the game is in "No Attack Mode" for debugging
+        ////////////////////////////////////////////////////////////////////////
+        // No Attack Mode
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.noAttackMode)
         {
             // Return FAILURE as the decision is disabled in debug mode
@@ -56,9 +60,11 @@ public class S_DecisionSensing : Node
             state = NodeState.FAILURE;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        #endregion
-
+        ////////////////////////////////////////////////////////////////////////
+        // FAILURE CHECKS
+        ////////////////////////////////////////////////////////////////////////
         if (aiSensor.hidden)
         {
             // Clear the target and last known position, and return FAILURE
@@ -68,6 +74,8 @@ public class S_DecisionSensing : Node
             state = NodeState.FAILURE;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
+
 
         // Retrieve the target and last known position from the blackboard
         object obj = GetData("target");
