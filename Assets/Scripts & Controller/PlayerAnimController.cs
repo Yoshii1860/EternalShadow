@@ -114,6 +114,13 @@ public class PlayerAnimController : MonoBehaviour
         if (pistolBool) animator.gameObject.GetComponentInChildren<WeaponSwitcher>().Execute(1);
     }
 
+    public void ReloadAnimation()
+    {
+        if (debugMode) Debug.Log("PlayerAnim - ReloadAnimation");
+        // Initiates the reload animation
+        if (pistolBool) animator.SetTrigger("Reload");
+    }
+
     #endregion
 
     #region Inverse Kinematics

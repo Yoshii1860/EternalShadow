@@ -94,9 +94,9 @@ public class Weapon : MonoBehaviour
             }
 
             GameObject target = ProcessRaycast();
-            Debug.Log("Target Hit: " + target.name);
             if (target != null)
             {
+                Debug.Log("Target Hit: " + target.name);
                 if (ammoType != Ammo.AmmoType.Infinite)
                 {
                     magazineCount--;
@@ -109,13 +109,16 @@ public class Weapon : MonoBehaviour
                     // Hit animation
                 }
 
-                if (target.GetComponent<Enemy>() != null)
+                // Slender & Girl have script on parent
+                Enemy parentEnemy = target.transform.parent.GetComponent<Enemy>();
+                if (parentEnemy != null)
                 {
-                    target.GetComponent<Enemy>().TakeDamage(damage);
+                    parentEnemy.TakeDamage(damage);
                     // Hit animation
                 }
                 else
                 {
+                    // Recursive hit for Mannequin as it has several children objects for hit detection
                     Transform currentParent = target.transform;
                     while (currentParent != null && currentParent.GetComponent<Mannequin>() == null)
                     {
@@ -130,6 +133,7 @@ public class Weapon : MonoBehaviour
             }
             else
             {
+                Debug.Log("No target hit");
                 if (ammoType != Ammo.AmmoType.Infinite)
                 {
                     magazineCount--;
@@ -182,6 +186,8 @@ public class Weapon : MonoBehaviour
             int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
             Debug.Log("Inventory Ammo: " + inventoryAmmo);
             GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
+
+            GameManager.Instance.playerAnimController.ReloadAnimation();
         }
         else
         {

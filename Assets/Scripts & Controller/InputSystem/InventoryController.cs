@@ -114,6 +114,7 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
         move = context.ReadValue<Vector2>();
 
         if (InventoryManager.Instance.isInspecting) return;
+        if (InventoryManager.Instance.Items.Count == 0) return;
 
         // Debounce the move input
         float deltaTime = Time.deltaTime;

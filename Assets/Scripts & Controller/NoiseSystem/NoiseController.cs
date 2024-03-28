@@ -9,6 +9,7 @@ public class NoiseController : MonoBehaviour
     [SerializeField] NoiseType noiseType;
     int priority = 0;
     float noiseLevel = 0f;
+    [SerializeField] bool debugMode = false;
 
     #endregion
 
@@ -73,7 +74,7 @@ public class NoiseController : MonoBehaviour
                 audioSource = AudioManager.Instance.GetAudioSource(gameObject.GetInstanceID());
                 AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "grass step", audioSource.volume, audioSource.pitch, true);
                 noiseType = newNoiseType;
-                Debug.Log("Grass step");
+                if (debugMode) Debug.Log("Grass step");
                 break;
             case NoiseType.CONCRETE:
                 noiseLevel = NoiseManager.Instance.noiseData.concreteNoiseLevel;
@@ -81,7 +82,7 @@ public class NoiseController : MonoBehaviour
                 audioSource = AudioManager.Instance.GetAudioSource(gameObject.GetInstanceID());
                 AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "stone step", audioSource.volume, audioSource.pitch, true);
                 noiseType = newNoiseType;
-                Debug.Log("Stone step");
+                if (debugMode) Debug.Log("Stone step");
                 break;
             case NoiseType.WOOD:
                 noiseLevel = NoiseManager.Instance.noiseData.woodenPlanksNoiseLevel;
@@ -89,7 +90,7 @@ public class NoiseController : MonoBehaviour
                 audioSource = AudioManager.Instance.GetAudioSource(gameObject.GetInstanceID());
                 AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "wood step", audioSource.volume, audioSource.pitch, true);
                 noiseType = newNoiseType;
-                Debug.Log("Wood step");
+                if (debugMode) Debug.Log("Wood step");
                 break;
             case NoiseType.CARPET:
                 noiseLevel = NoiseManager.Instance.noiseData.carpetNoiseLevel;
@@ -97,7 +98,7 @@ public class NoiseController : MonoBehaviour
                 audioSource = AudioManager.Instance.GetAudioSource(gameObject.GetInstanceID());
                 AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "carpet step", audioSource.volume, audioSource.pitch, true);
                 noiseType = newNoiseType;
-                Debug.Log("Carpet step");
+                if (debugMode) Debug.Log("Carpet step");
                 break;
             case NoiseType.TRASH:
                 noiseLevel = NoiseManager.Instance.noiseData.trashNoiseLevel;
@@ -105,7 +106,7 @@ public class NoiseController : MonoBehaviour
                 audioSource = AudioManager.Instance.GetAudioSource(gameObject.GetInstanceID());
                 AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "trash step", audioSource.volume, audioSource.pitch, true);
                 noiseType = newNoiseType;
-                Debug.Log("Trash step");
+                if (debugMode) Debug.Log("Trash step");
                 break;
             case NoiseType.GLASS:
                 noiseLevel = NoiseManager.Instance.noiseData.glassNoiseLevel;
@@ -113,7 +114,7 @@ public class NoiseController : MonoBehaviour
                 audioSource = AudioManager.Instance.GetAudioSource(gameObject.GetInstanceID());
                 AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "glass step", audioSource.volume, audioSource.pitch, true);
                 noiseType = newNoiseType;
-                Debug.Log("Glass step");
+                if (debugMode) Debug.Log("Glass step");
                 break;
             case NoiseType.PLASTIC:
                 noiseLevel = NoiseManager.Instance.noiseData.plasticNoiseLevel;
@@ -121,7 +122,7 @@ public class NoiseController : MonoBehaviour
                 audioSource = AudioManager.Instance.GetAudioSource(gameObject.GetInstanceID());
                 AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "plastic step", audioSource.volume, audioSource.pitch, true);
                 noiseType = newNoiseType;
-                Debug.Log("Plastic step");
+                if (debugMode) Debug.Log("Plastic step");
                 break;
             case NoiseType.WOODEN_PLANK:
                 noiseLevel = NoiseManager.Instance.noiseData.brokenWoodenPlankNoiseLevel;
@@ -129,11 +130,12 @@ public class NoiseController : MonoBehaviour
                 audioSource = AudioManager.Instance.GetAudioSource(gameObject.GetInstanceID());
                 AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "plank step", audioSource.volume, audioSource.pitch, true);
                 noiseType = newNoiseType;
-                Debug.Log("Plank step");
+                if (debugMode) Debug.Log("Plank step");
                 break;
             case NoiseType.SHOOT:
                 noiseLevel = NoiseManager.Instance.noiseData.shootNoiseLevel;
                 priority = NoiseManager.Instance.noiseData.highPriority;
+                if (debugMode) Debug.Log("Shoot noise");
                 break;
         }
     }

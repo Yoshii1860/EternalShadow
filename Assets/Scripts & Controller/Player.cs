@@ -29,12 +29,14 @@ public class Player : MonoBehaviour, ICustomUpdatable
     [SerializeField] string[] dizzyClips;
 
     [Space(10)]
-    [Header("References")]
+    [Header("UI References")]
     [SerializeField] Image bloodOverlay;
     [SerializeField] Image poisonOverlay;
     [SerializeField] Image dizzyOverlay;
     [SerializeField] TextMeshProUGUI staminaText;
     [SerializeField] TextMeshProUGUI bulletsText;
+    [SerializeField] Image bulletsIcon;
+    Coroutine bulletsDisplayRoutine;
 
     // Stats-related
     private float reducedStamina;
@@ -312,8 +314,9 @@ public class Player : MonoBehaviour, ICustomUpdatable
     IEnumerator BleedingRoutine(int stopBleedingAmount)
     {
         yield return new WaitForSeconds(10f);
-        if (isBleeding)
+        if (isBleeding && !GameManager.Instance.isPaused)
         {
+            yield return new WaitUntil(() => !GameManager.Instance.isPaused);
             AudioManager.Instance.PlaySoundOneShot(speakerID, painClips[Random.Range(0, painClips.Length)], Random.Range(0.3f, 0.5f), Random.Range(0.85f, 1.1f));
             health -= 3f;
             if (health <= stopBleedingAmount) 
@@ -533,7 +536,29 @@ public class Player : MonoBehaviour, ICustomUpdatable
     public void SetBulletsUI(int currentBullets, int bulletsInInventory)
     {
         bulletsText.text = currentBullets + "/" + bulletsInInventory;
+        if (bulletsDisplayRoutine != null) StopCoroutine(bulletsDisplayRoutine);
+        bulletsDisplayRoutine = StartCoroutine(FadeBulletsUI());
     }
+
+
+    IEnumerator FadeBulletsUI()
+    {
+        for (float i = bulletsText.color.a; i <= 1f; i += 0.01f)
+        {
+            bulletsText.color = new Color(bulletsText.color.r, bulletsText.color.g, bulletsText.color.b, i);
+            bulletsIcon.color = new Color(bulletsIcon.color.r, bulletsIcon.color.g, bulletsIcon.color.b, i);
+            yield return new WaitForSeconds(0.01f);
+        }
+
+        yield return new WaitForSeconds(10f);
+
+        for (float i = 1f; i >= 0f; i -= 0.01f)
+        {
+            bulletsText.color = new Color(bulletsText.color.r, bulletsText.color.g, bulletsText.color.b, i);
+            bulletsIcon.color = new Color(bulletsIcon.color.r, bulletsIcon.color.g, bulletsIcon.color.b, i);
+            yield return new WaitForSeconds(0.01f);
+        }
+    }  
 
     #endregion
 }

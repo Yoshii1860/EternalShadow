@@ -220,7 +220,7 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
         randomizer = Random.Range(0,100);
         if (randomizer <= 15)
         {
-            GameManager.Instance.player.Bleeding();
+            if (!GameManager.Instance.player.isBleeding) GameManager.Instance.player.Bleeding();
         }
         yield return new WaitForSeconds(0.5f);
         int randomNum = Random.Range(1, 5);

@@ -67,6 +67,7 @@ public class S_ActionAttack : Node
         else if (aiSensor.hidden)
         {
             if (debugMode) Debug.Log("A - Attack (Hidden)");
+            ClearData("target");
             state = NodeState.FAILURE;
             return state;
         }

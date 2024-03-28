@@ -89,6 +89,10 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
                 CheckPlayerInFOV(colliders[i].transform.position);
                 if (gameObject.activeSelf) Debug.Log($"{colliders[i].gameObject.name} within sensing area!");
             }
+            else
+            {
+                Debug.Log(colliders[i].gameObject.name + " is not a player!");
+            }
         }
     }
 
@@ -119,7 +123,7 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
             }
         }
         {
-            if (gameObject.activeSelf) Debug.Log($"Player not in FOV of {gameObject.name}");
+            if (gameObject.activeSelf) Debug.Log($"Player not in FOV of {gameObject.name}. Angle: {angleToPlayer}");
             playerInSight = false;
         }
     }

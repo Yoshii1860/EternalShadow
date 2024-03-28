@@ -13,6 +13,7 @@ public class S_ActionGoToTarget : Node
     private Transform transform;
     private NavMeshAgent agent;
     private Enemy enemy;
+    private AISensor sensor;
     
     private bool debugMode;
 
@@ -28,6 +29,7 @@ public class S_ActionGoToTarget : Node
         animator = transform.GetComponent<Animator>();
         enemy = transform.GetComponent<Enemy>();
         this.debugMode = debugMode;
+        sensor = transform.GetComponent<AISensor>();
     }
 
     #endregion
@@ -59,6 +61,14 @@ public class S_ActionGoToTarget : Node
         {
             // Set state to FAILURE and return
             if (debugMode) Debug.Log("A - GoToTarget: FAILURE (target = null)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        if (sensor.hidden)
+        {
+            // Set state to FAILURE and return
+            if (debugMode) Debug.Log("A - GoToTarget: FAILURE (Hidden)");
+            ClearData("target");
             state = NodeState.FAILURE;
             return state;
         }

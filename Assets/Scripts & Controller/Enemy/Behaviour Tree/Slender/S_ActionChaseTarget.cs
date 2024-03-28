@@ -73,6 +73,7 @@ public class S_ActionChaseTarget : Node
         {
             // Set state to FAILURE and return
             if (debugMode) Debug.Log("A - ChaseTarget: FAILURE (Hidden)");
+            ClearData("target");
             state = NodeState.FAILURE;
             return state;
         }
@@ -82,6 +83,7 @@ public class S_ActionChaseTarget : Node
 
         agent.speed = EnemyBT.runSpeed;
         agent.SetDestination(target.position);
+        animator.SetBool("walk", false);
         animator.SetBool("run", true);
 
         AudioManager.Instance.ToggleSlenderAudio(transform.gameObject, true);

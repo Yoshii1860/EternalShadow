@@ -17,10 +17,7 @@ public class Enemy : MonoBehaviour
 
     #region Public Methods
 
-    /// <summary>
     /// Inflict damage to the enemy.
-    /// </summary>
-    /// <param name="damage">Amount of damage to be inflicted.</param>
     public void TakeDamage(int damage)
     {
         health -= damage;
@@ -40,21 +37,17 @@ public class Enemy : MonoBehaviour
 
     #region Private Methods
 
-    /// <summary>
     /// Handles the death of the enemy.
-    /// </summary>
     private void Die()
     {
         // Deactivate the enemy game object
         gameObject.SetActive(false);
     }
 
-    /// <summary>
     /// Coroutine to handle the enemy being shot and the chase timer.
-    /// </summary>
-    /// <returns>Yield instruction to wait for the chase timer.</returns>
     private IEnumerator EnemyShot()
     {
+        Debug.Log("Enemy shot!");
         // Set the enemy as shot
         isShot = true;
 

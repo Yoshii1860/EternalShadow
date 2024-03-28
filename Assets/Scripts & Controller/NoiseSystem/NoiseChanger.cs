@@ -12,7 +12,6 @@ public class NoiseChanger : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            Debug.Log("Noise Changer Triggered: " + noiseType.ToString());
             savedNoiseType = other.gameObject.GetComponent<NoiseController>().GetNoiseType();
             other.gameObject.GetComponent<NoiseController>().ChangeNoiseType(noiseType);
         }

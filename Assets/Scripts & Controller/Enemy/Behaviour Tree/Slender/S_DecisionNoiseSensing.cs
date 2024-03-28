@@ -110,6 +110,12 @@ public class S_DecisionNoiseSensing : Node
             parent.parent.SetData("noiseLevel", NoiseManager.Instance.noiseLevel);
             noiseLevel = NoiseManager.Instance.noiseLevel;
         }
+        else
+        {
+            if (debugMode) Debug.Log("D - NoiseSensing: Noise Level Available");
+            state = NodeState.SUCCESS;
+            return state;
+        }
 
         // Check if the distance to the player is within the hearing range
         if (Vector3.Distance(transform.position, GameManager.Instance.player.transform.position) <= noiseLevel)

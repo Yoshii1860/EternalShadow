@@ -34,6 +34,15 @@ public class LockerCode : InteractableObject
         {
             insideCollider = false;
         }
+        ToggleHidden(false);
+    }
+
+    void ToggleHidden(bool hidden)
+    {
+        foreach (AISensor sensor in GameManager.Instance.enemyPool.GetComponentsInChildren<AISensor>())
+        {
+            sensor.hidden = hidden;
+        }
     }
 
     IEnumerator Open()
@@ -51,10 +60,7 @@ public class LockerCode : InteractableObject
 
         if (insideCollider)
         {
-            foreach (AISensor sensor in GameManager.Instance.enemyPool.GetComponentsInChildren<AISensor>())
-            {
-                sensor.hidden = false;
-            }
+            ToggleHidden(false);
         }
 
         locked = false;
@@ -65,11 +71,7 @@ public class LockerCode : InteractableObject
     {
         if (insideCollider)
         {
-            foreach (AISensor sensor in GameManager.Instance.enemyPool.GetComponentsInChildren<AISensor>())
-            {
-                Debug.Log("Hiding!!!");
-                sensor.hidden = true;
-            }
+            ToggleHidden(true);
             
         }
         locked = true;

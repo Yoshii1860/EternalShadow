@@ -431,6 +431,7 @@ public class InventoryManager : MonoBehaviour
 
     public void ShowItemDisplay()
     {
+        if (Items.Count == 0) return;
         selectedItem = Items[highlightNumber];
         Debug.Log("InventoryManager.ShowItemDisplay() for" + selectedItem.displayName);
         ChangeSelectedItemColor(false, false);

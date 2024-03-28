@@ -74,7 +74,7 @@ public class S_ActionPatrol : Node
             state = NodeState.FAILURE;
             return state;
         }
-        else if (sensor.playerInSight)
+        else if (sensor.playerInSight && !sensor.hidden)
         {
             // Set state to FAILURE and return
             parent.SetData("target", GameManager.Instance.player.transform);
@@ -110,7 +110,6 @@ public class S_ActionPatrol : Node
             if (waitCounter >= waitTime)
             {
                 isWaiting = false;
-                agent.enabled = true;
                 animator.SetBool("walk", true);
                 animator.SetBool("run", false);
             }
@@ -122,7 +121,7 @@ public class S_ActionPatrol : Node
             // Check if reached the current waypoint
             if (Vector3.Distance(transform.position, currentWaypoint.position) < 0.1f)
             {
-                transform.position = currentWaypoint.position;
+                transform.position = new Vector3(currentWaypoint.position.x, transform.position.y, currentWaypoint.position.z);
                 waitCounter = 0f;
                 isWaiting = true;
 
@@ -132,8 +131,6 @@ public class S_ActionPatrol : Node
                 // Reset animation states
                 animator.SetBool("run", false);
                 animator.SetBool("walk", false);
-
-                agent.enabled = false;
             }
             else
             {

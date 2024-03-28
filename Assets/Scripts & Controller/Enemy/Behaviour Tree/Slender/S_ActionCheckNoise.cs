@@ -20,6 +20,9 @@ public class S_ActionCheckNoise : Node
     private float waitCounter = 0f;
     private Enemy enemy;
 
+    private float elapsedTime = 0f;
+    private float stuckTimer = 30f;
+
     // Debug mode flag
     private bool debugMode;
 
@@ -104,6 +107,8 @@ public class S_ActionCheckNoise : Node
                 isWaiting = false;
                 ClearData("noisePosition");
                 ClearData("noiseLevel");
+                waitCounter = 0f;
+                elapsedTime = 0f;
                 if (debugMode) Debug.Log("A - CheckNoise: SUCCESS (wait time over)");
                 state = NodeState.SUCCESS;
                 return state;
@@ -112,18 +117,33 @@ public class S_ActionCheckNoise : Node
         else
         {
             // Check if AI has reached the noise position
-            if (Vector3.Distance(transform.position, noisePos) < 0.05f)
+            if (Vector3.Distance(transform.position, noisePos) < 0.1f)
             {
-                // Set AI position to noise position, reset wait counter, and enter waiting state
-                transform.position = noisePos;
-                waitCounter = 0f;
                 isWaiting = true;
-
+                
                 // Stop walking animation
                 animator.SetBool("walk", false);
             }
             else
             {
+                elapsedTime += Time.deltaTime;
+
+                // Check if AI is stuck
+                if (elapsedTime >= stuckTimer)
+                {
+                    isWaiting = true;
+
+                    // Stop walking animation
+                    animator.SetBool("walk", false);
+
+                    if (debugMode) Debug.Log("A - CheckNoise: STUCK");
+                }
+                else
+                {
+                    // Increment elapsed time
+                    elapsedTime += Time.deltaTime;
+                }
+
                 // Set agent speed, set destination, and start walking animation
                 agent.speed = EnemyBT.walkSpeed;
                 agent.SetDestination(noisePos);
