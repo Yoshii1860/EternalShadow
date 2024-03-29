@@ -386,46 +386,6 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         Vector3 currentVelocity = rb.velocity;
         Vector3 targetVelocity = new Vector3(move.x, 0, move.y) * speed;
 
-/*
-        //////////////////////////
-        // Slide on side of objects
-        //////////////////////////
-
-        // Cast rays from the left and right shoulders with a little offset
-        Vector3 rightRayOrigin = transform.position + new Vector3(0.4f, 0.5f, 0f);
-        Vector3 leftRayOrigin = transform.position + new Vector3(-0.4f, 0.5f, 0f);
-        float raycastDistance = 0.6f; // Adjust based on character size
-
-        RaycastHit rightHit;
-        RaycastHit leftHit;
-
-        bool rightCollision = Physics.Raycast(rightRayOrigin, transform.forward, out rightHit, raycastDistance);
-        bool leftCollision = Physics.Raycast(leftRayOrigin, transform.forward, out leftHit, raycastDistance);
-
-        // If either ray hits, we have a collision with a wall or object
-        if (rightCollision || leftCollision)
-        {
-            // Collision detected, adjust movement vector to slide alongside the object
-            Vector3 newMovementDirection;
-            if (rightCollision)
-            {
-                newMovementDirection = Vector3.Reflect(transform.forward, rightHit.normal);
-            }
-            else
-            {
-                newMovementDirection = Vector3.Reflect(transform.forward, leftHit.normal);
-            }
-            
-            // Project original movement vector onto new direction
-            targetVelocity = Vector3.Project(targetVelocity, newMovementDirection);
-        }
-
-        //////////////////////////
-        //////////////////////////
-        //////////////////////////
-
-*/
-
         // Align direction
         targetVelocity = transform.TransformDirection(targetVelocity);
 
@@ -450,7 +410,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
         // Move rigidbody with acceleration instead of force)
         rb.AddForce(velocityChange * SpeedChangeRate, ForceMode.Acceleration);
-        transform.GetComponent<NoiseController>().UpdateNoiseLevel();
+        transform.GetComponent<NoiseController>().UpdateNoiseLevel(rb.velocity.magnitude);
     }
 
     public void PushPlayerBack(float directionBack = 0.5f, float force = 10f)

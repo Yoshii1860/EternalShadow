@@ -102,6 +102,7 @@ public class YardEvent : MonoBehaviour
 
         // Disable AISensor to stop AI updates during the event
         girl.GetComponent<AISensor>().hidden = true;
+        girl.GetComponent<EnemyBT>().enabled = false;
 
         // Activate the girl GameObject
         girl.SetActive(true);

@@ -145,7 +145,7 @@ public class S_ActionCheckNoise : Node
                 }
 
                 // Set agent speed, set destination, and start walking animation
-                agent.speed = EnemyBT.walkSpeed;
+                agent.speed = SlenderBT.walkSpeed;
                 agent.SetDestination(noisePos);
                 animator.SetBool("walk", true);
 

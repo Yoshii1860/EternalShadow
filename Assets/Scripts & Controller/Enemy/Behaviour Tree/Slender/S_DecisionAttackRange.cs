@@ -72,7 +72,7 @@ public class S_DecisionAttackRange : Node
         float distanceToTarget = Vector3.Distance(transform.position, target.position);
 
         // Check if the distance is within the attack range
-        if (distanceToTarget <= EnemyBT.attackRange)
+        if (distanceToTarget <= SlenderBT.attackRange)
         {
             if (debugMode) Debug.Log("D - AttackRange: SUCCESS (Within Attack Range)");
             state = NodeState.SUCCESS;

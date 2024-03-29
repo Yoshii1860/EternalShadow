@@ -527,7 +527,7 @@ public class AudioManager : MonoBehaviour
         string clip = GetAudioClip(slenderID);
 
         if (slenderToggle) return;
-        else if (!IsPlaying(slender.GetInstanceID()))
+        else if (!IsPlaying(slenderID))
         {
             PlayAudio(slenderID);
             PlayAudio(stepID);

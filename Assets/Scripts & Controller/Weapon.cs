@@ -87,7 +87,7 @@ public class Weapon : MonoBehaviour
             GameManager.Instance.playerAnimController.ShootAnimation();
 
             // if weapon has a NoiseController, make noise
-            NoiseController noiseController = GetComponent<NoiseController>();
+            NoiseController noiseController = GameManager.Instance.player.GetComponent<NoiseController>();
             if (noiseController != null)
             {
                 noiseController.ShootNoise();

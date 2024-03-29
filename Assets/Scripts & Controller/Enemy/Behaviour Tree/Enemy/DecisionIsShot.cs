@@ -10,16 +10,22 @@ public class DecisionIsShot : Node
     // References to components
     private Transform transform;
     private Animator animator;
+    private UnityEngine.AI.NavMeshAgent agent;
+
+    // Debug mode flag
+    private bool debugMode;
 
     #endregion
 
     #region Constructors
 
     // Constructor to initialize references
-    public DecisionIsShot(Transform transform)
+    public DecisionIsShot(bool debugMode, Transform transform, UnityEngine.AI.NavMeshAgent agent)
     {
         this.transform = transform;
         this.animator = transform.GetComponent<Animator>();
+        this.debugMode = debugMode;
+        this.agent = agent;
     }
 
     #endregion
@@ -29,15 +35,17 @@ public class DecisionIsShot : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return FAILURE to indicate that the decision is not satisfied
-            return NodeState.FAILURE;
+            if (debugMode) Debug.Log("D - IsShot: FAILURE (Game is paused)");
+            state = NodeState.FAILURE;
+            return state;
         }
-
-        // Retrieve the target from the blackboard
-        object obj = GetData("target");
+        ////////////////////////////////////////////////////////////////////////
 
         // Initialize variable to track if the enemy is shot
         bool isShot = false;
@@ -52,20 +60,22 @@ public class DecisionIsShot : Node
         // If the enemy is shot, set the player as the target
         if (isShot)
         {
-            Debug.Log("DecisionIsShot: Enemy is shot!");
-
-            // If the target is not already set, set it to the player
-            if (obj == null) 
-            {
-                parent.parent.SetData("target", GameManager.Instance.player.transform);
-            }
+            ClearData("target");
+            ClearData("lastKnownPosition");
+            ClearData("noisePosition");
 
             // Set state to SUCCESS
+            if (debugMode) Debug.Log("D - IsShot: SUCCESS (Enemy is shot)");
             state = NodeState.SUCCESS;
             return state;
         }
+        else
+        {
+            agent.isStopped = false;
+        }
 
         // If the enemy is not shot, set state to FAILURE
+        if (debugMode) Debug.Log("D - IsShot: FAILURE (Enemy is not shot)");
         state = NodeState.FAILURE;
         return state;
     }

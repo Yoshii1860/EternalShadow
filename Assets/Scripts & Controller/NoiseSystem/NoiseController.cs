@@ -10,6 +10,7 @@ public class NoiseController : MonoBehaviour
     int priority = 0;
     float noiseLevel = 0f;
     [SerializeField] bool debugMode = false;
+    bool shootTimer = false;
 
     #endregion
 
@@ -42,15 +43,29 @@ public class NoiseController : MonoBehaviour
     // Triggered when a shoot noise occurs
     public void ShootNoise()
     {
-        // Change the noise type to shoot and update the noise data
-        ChangeNoiseType(NoiseType.SHOOT);
-        NoiseManager.Instance.UpdateCurrentNoiseData(noiseLevel, priority);
+        shootTimer = true;
+        StartCoroutine(ShootNoiseCoroutine());
+        UpdateNoiseLevel();
     }
 
     // Update the noise level without changing the noise type
-    public void UpdateNoiseLevel()
+    public void UpdateNoiseLevel(float magnitude = 1f)
     {
-        NoiseManager.Instance.UpdateCurrentNoiseData(noiseLevel, priority);
+        if (!shootTimer)
+        {
+            if (magnitude < 0.1f)
+            {
+                NoiseManager.Instance.UpdateCurrentNoiseData(NoiseManager.Instance.noiseData.stopNoiseLevel, NoiseManager.Instance.noiseData.lowPriority);
+            }
+            else
+            {
+                NoiseManager.Instance.UpdateCurrentNoiseData(noiseLevel, priority);
+            }
+        }
+        else
+        {
+            NoiseManager.Instance.UpdateCurrentNoiseData(NoiseManager.Instance.noiseData.shootNoiseLevel, NoiseManager.Instance.noiseData.highPriority);
+        }
     }
 
     #endregion
@@ -63,7 +78,8 @@ public class NoiseController : MonoBehaviour
     {
         // Update the noiseLevel and priority based on the selected noiseType
 
-        if (newNoiseType == noiseType) return;
+        if (newNoiseType == noiseType || shootTimer) return;
+
         AudioSource audioSource = null;
 
         switch (newNoiseType)
@@ -132,12 +148,15 @@ public class NoiseController : MonoBehaviour
                 noiseType = newNoiseType;
                 if (debugMode) Debug.Log("Plank step");
                 break;
-            case NoiseType.SHOOT:
-                noiseLevel = NoiseManager.Instance.noiseData.shootNoiseLevel;
-                priority = NoiseManager.Instance.noiseData.highPriority;
-                if (debugMode) Debug.Log("Shoot noise");
-                break;
         }
+    }
+
+    IEnumerator ShootNoiseCoroutine()
+    {
+        if (debugMode) Debug.Log("Shoot Noise");
+        yield return new WaitForSeconds(3f);
+        shootTimer = false;
+        if (debugMode) Debug.Log("Shoot Noise End");
     }
 
     #endregion

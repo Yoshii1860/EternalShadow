@@ -75,8 +75,10 @@ public class S_ActionAttack : Node
 
         Transform target = (Transform)obj;
 
+        AudioManager.Instance.ToggleSlenderAudio(transform.gameObject, true);
+
         attackCounter += Time.deltaTime;
-        if (attackCounter >= EnemyBT.attackInterval)
+        if (attackCounter >= SlenderBT.attackInterval)
         {
             animator.SetBool("attack", true);
 

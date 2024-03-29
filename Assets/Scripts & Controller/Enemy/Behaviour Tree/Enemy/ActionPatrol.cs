@@ -13,6 +13,8 @@ public class ActionPatrol : Node
     private Animator animator;
     private Transform[] waypoints;
     private NavMeshAgent agent;
+    private Enemy enemy;
+    private AISensor sensor;
 
     // Patrol-related variables
     private int currentWaypointIndex = 0;
@@ -20,17 +22,23 @@ public class ActionPatrol : Node
     private float waitCounter = 0f;
     private bool isWaiting = true;
 
+    // Debug mode flag
+    private bool debugMode;
+
     #endregion
 
     #region Constructors
 
     // Constructor to initialize references and waypoints
-    public ActionPatrol(Transform transform, Transform[] waypoints, NavMeshAgent agent)
+    public ActionPatrol(bool debugMode, Transform transform, Transform[] waypoints, NavMeshAgent agent)
     {
         this.transform = transform;
         this.animator = transform.GetComponent<Animator>();
         this.waypoints = waypoints;
         this.agent = agent;
+        enemy = transform.GetComponent<Enemy>();
+        sensor = transform.GetComponent<AISensor>();
+        this.debugMode = debugMode;
     }
 
     #endregion
@@ -40,28 +48,58 @@ public class ActionPatrol : Node
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        // Check if the game is paused
+
+        ////////////////////////////////////////////////////////////////////////
+        // PAUSE GAME
+        ////////////////////////////////////////////////////////////////////////
         if (GameManager.Instance.isPaused)
         {
             // Return RUNNING to indicate that the action is ongoing
-            return NodeState.RUNNING;
-        }
-
-        if (waypoints[0] == null)
-        {
-            // Set state to FAILURE and return
-            state = NodeState.FAILURE;
+            if (debugMode) Debug.Log("A - Patrol: RUNNING (game is paused)");
+            state = NodeState.RUNNING;
             return state;
         }
+        ////////////////////////////////////////////////////////////////////////
 
-        // Check if there is a last known position, if yes, abort patrol
+        ////////////////////////////////////////////////////////////////////////
+        // FAILURE CHECKS
+        ////////////////////////////////////////////////////////////////////////
+        object obj = GetData("target");
         object lastKnownPos = GetData("lastKnownPosition");
-        if (lastKnownPos != null)
+        object noisePos = GetData("noisePosition");
+
+        if (obj != null)
         {
-            // Set state to FAILURE and return
+            if (debugMode) Debug.Log("A - Patrol: FAILURE (target != null)");
             state = NodeState.FAILURE;
             return state;
         }
+        else if (sensor.playerInSight && !sensor.hidden)
+        {
+            // Set state to FAILURE and return
+            parent.SetData("target", GameManager.Instance.player.transform);
+            if (debugMode) Debug.Log("A - Patrol: FAILURE (Player in Sight)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        else if (lastKnownPos != null)
+        {
+            // Set state to FAILURE and return
+            if (debugMode) Debug.Log("A - Patrol: FAILURE (lastKnownPosition != null)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        else if (noisePos != null)
+        {
+            // Set state to FAILURE and return
+            if (debugMode) Debug.Log("A - Patrol: FAILURE (noisePosition != null)");
+            state = NodeState.FAILURE;
+            return state;
+        }
+        ////////////////////////////////////////////////////////////////////////
+
+        animator.SetBool("run", false);
+        animator.SetBool("walk", true);
 
         // Check if waiting
         if (isWaiting)
@@ -72,7 +110,8 @@ public class ActionPatrol : Node
             if (waitCounter >= waitTime)
             {
                 isWaiting = false;
-                animator.SetBool("Walk", true);
+                animator.SetBool("walk", true);
+                animator.SetBool("run", false);
             }
         }
         else
@@ -82,7 +121,7 @@ public class ActionPatrol : Node
             // Check if reached the current waypoint
             if (Vector3.Distance(transform.position, currentWaypoint.position) < 0.1f)
             {
-                transform.position = currentWaypoint.position;
+                transform.position = new Vector3(currentWaypoint.position.x, transform.position.y, currentWaypoint.position.z);
                 waitCounter = 0f;
                 isWaiting = true;
 
@@ -90,19 +129,21 @@ public class ActionPatrol : Node
                 currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
 
                 // Reset animation states
-                animator.SetBool("Run", false);
-                animator.SetBool("Walk", false);
+                animator.SetBool("run", false);
+                animator.SetBool("walk", false);
             }
             else
             {
                 // Move towards the current waypoint
                 agent.speed = EnemyBT.walkSpeed;
                 agent.SetDestination(currentWaypoint.position);
-                animator.SetBool("Walk", true);
+                animator.SetBool("walk", true);
+                animator.SetBool("run", false);
             }
         }
 
         // Return RUNNING to indicate that the action is ongoing
+        if (debugMode) Debug.Log("A - Patrol: RUNNING (Patrolling)");
         state = NodeState.RUNNING;
         return state;
     }

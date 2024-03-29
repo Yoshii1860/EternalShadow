@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+    using System.Collections.Generic;
 using BehaviorTree;
 
 public class EnemyBT : Tree
@@ -11,12 +11,15 @@ public class EnemyBT : Tree
     // Reference to the NavMeshAgent
     public UnityEngine.AI.NavMeshAgent agent;
 
+    // Debug mode for the behavior tree
+    public bool debugMode = false;
+
     #endregion
 
     #region Static Fields
 
     // Speed values and ranges for the enemy behavior
-    public static float walkSpeed = 0.8f;
+    public static float walkSpeed = 0.4f;
     public static float runSpeed = 2.1f;
     public static float attackRange = 3f;
     public static float attackInterval = 1f;
@@ -35,40 +38,40 @@ public class EnemyBT : Tree
             // Sequence for attacking behavior
             new Sequence(new List<Node>
             {
-                new DecisionAttackRange(transform),
-                new ActionAttack(transform)
+                new S_DecisionAttackRange(debugMode, transform),
+                new S_ActionAttack(debugMode, transform)
             }),
 
             // Sequence for chasing behavior when shot
             new Sequence(new List<Node>
             {
-                new DecisionIsShot(transform),
-                new ActionChaseTarget(transform, agent)
+                new S_DecisionIsShot(debugMode, transform, agent),
+                new S_ActionShot(debugMode, transform, agent)
             }),
 
             // Sequence for responding to noise
             new Sequence(new List<Node>
             {
-                new DecisionNoiseSensing(transform),
-                new ActionCheckNoise(transform, agent)
+                new S_DecisionNoiseSensing(debugMode, transform),
+                new S_ActionCheckNoise(debugMode, transform, agent)
             }),
 
             // Sequence for moving to the last known position
             new Sequence(new List<Node>
             {
-                new DecisionLastKnownPosition(transform),
-                new ActionLastKnownPosition(transform, agent)
+                new S_DecisionLastKnownPosition(debugMode, transform),
+                new S_ActionLastKnownPosition(debugMode, transform, agent)
             }),
 
             // Sequence for general sensing and moving towards the target
             new Sequence(new List<Node>
             {
-                new DecisionSensing(transform),
-                new ActionGoToTarget(transform, agent)
+                new S_DecisionSensing(debugMode, transform),
+                new S_ActionGoToTarget(debugMode, transform, agent)
             }),
 
             // Action node for patrolling
-            new ActionPatrol(transform, waypoints, agent)
+            new S_ActionPatrol(debugMode, transform, waypoints, agent)
         });
 
         return root;

@@ -19,11 +19,10 @@ public class SlenderBT : Tree
     #region Static Fields
 
     // Speed values and ranges for the enemy behavior
-    public static float crouchSpeed = 0.75f;
-    public static float walkSpeed = 1.2f;
+    public static float walkSpeed = 0.6f;
     public static float runSpeed = 4f;
     public static float attackRange = 3f;
-    public static float attackInterval = 1f;
+    public static float attackInterval = 5f;
     public static float chaseRange = 30f;
 
     #endregion
@@ -46,8 +45,8 @@ public class SlenderBT : Tree
             // Sequence for chasing behavior when shot
             new Sequence(new List<Node>
             {
-                new S_DecisionIsShot(debugMode, transform),
-                new S_ActionChaseTarget(debugMode, transform, agent)
+                new S_DecisionIsShot(debugMode, transform, agent),
+                new S_ActionShot(debugMode, transform, agent)
             }),
 
             // Sequence for responding to noise

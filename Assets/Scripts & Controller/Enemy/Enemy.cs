@@ -11,7 +11,10 @@ public class Enemy : MonoBehaviour
     public bool isDead = false;
     public bool isShot = false;
     public float damage = 10f;
-    [SerializeField] float chaseTimer = 10f;
+    [Tooltip("The time the enemy stays down after being shot.")]
+    [SerializeField] float downTimer = 30f;
+    [Tooltip("The time the enemy starts with get up animation after being shot.")]
+    [SerializeField] float reducedTimer = 25f;
 
     #endregion
 
@@ -47,15 +50,24 @@ public class Enemy : MonoBehaviour
     /// Coroutine to handle the enemy being shot and the chase timer.
     private IEnumerator EnemyShot()
     {
-        Debug.Log("Enemy shot!");
         // Set the enemy as shot
         isShot = true;
 
+        transform.GetComponent<Animator>().SetTrigger("die");
+
+        StartCoroutine(EnemyGetUp());
+
         // Wait for the specified chase timer duration
-        yield return new WaitForSeconds(chaseTimer);
+        yield return new WaitForSeconds(downTimer);
 
         // Reset the shot state
         isShot = false;
+    }
+
+    IEnumerator EnemyGetUp()
+    {
+        yield return new WaitForSeconds(reducedTimer);
+        transform.GetComponent<Animator>().SetTrigger("getup");
     }
 
     #endregion

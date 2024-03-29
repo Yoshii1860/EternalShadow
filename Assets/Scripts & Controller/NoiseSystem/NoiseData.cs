@@ -14,8 +14,7 @@ public enum NoiseType
     TRASH,
     GLASS,
     PLASTIC,
-    WOODEN_PLANK,
-    SHOOT
+    WOODEN_PLANK
 }
 
 #endregion
@@ -39,6 +38,7 @@ public class NoiseData : ScriptableObject
 
     #region Surface Noise Levels
 
+    public float stopNoiseLevel = 1f;
     public float grassNoiseLevel = 5f;
     public float concreteNoiseLevel = 8f;
     public float woodenPlanksNoiseLevel = 7f;
@@ -57,7 +57,7 @@ public class NoiseData : ScriptableObject
 
     #region Shooting Noise Level
 
-    public float shootNoiseLevel = 25f;
+    public float shootNoiseLevel = 20f;
 
     #endregion
 

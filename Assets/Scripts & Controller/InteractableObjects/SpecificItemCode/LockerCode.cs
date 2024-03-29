@@ -7,9 +7,16 @@ public class LockerCode : InteractableObject
     [Space(10)]
     [Header("RUN ITEM CODE")]
     [SerializeField] Transform door;
+    MeshRenderer doorMesh;
     bool insideCollider = false;
     bool open = false;
     bool locked = false;
+
+    void Start()
+    {
+        doorMesh = door.GetComponent<MeshRenderer>();
+    }
+
     // Override the base class method for specific implementation
     protected override void RunItemCode()
     {
@@ -25,6 +32,7 @@ public class LockerCode : InteractableObject
         if (other.CompareTag("Player"))
         {
             insideCollider = true;
+            ToggleMeshEmission(true);
         }
     }
 
@@ -33,8 +41,9 @@ public class LockerCode : InteractableObject
         if (other.CompareTag("Player"))
         {
             insideCollider = false;
+            ToggleHidden(false);
+            ToggleMeshEmission(false);
         }
-        ToggleHidden(false);
     }
 
     void ToggleHidden(bool hidden)
@@ -44,6 +53,20 @@ public class LockerCode : InteractableObject
             sensor.hidden = hidden;
         }
     }
+
+    void ToggleMeshEmission(bool emission)
+    {
+        if (emission)
+        {
+            doorMesh.material.EnableKeyword("_EMISSION");
+            doorMesh.material.SetColor("_EmissionColor", new Color(0.1f, 0.1f, 0.1f));
+        }
+        else
+        {
+            doorMesh.material.DisableKeyword("_EMISSION");
+        }
+    }
+
 
     IEnumerator Open()
     {
