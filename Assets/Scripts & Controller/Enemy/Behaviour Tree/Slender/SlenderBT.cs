@@ -14,6 +14,9 @@ public class SlenderBT : Tree
     // Debug mode for the behavior tree
     public bool debugMode = false;
 
+    // Type of the enemy: 0 - Slender, 1 - Girl
+    public int enemyType = 0;
+
     #endregion
 
     #region Static Fields
@@ -39,7 +42,7 @@ public class SlenderBT : Tree
             new Sequence(new List<Node>
             {
                 new S_DecisionAttackRange(debugMode, transform),
-                new S_ActionAttack(debugMode, transform)
+                new S_ActionAttack(debugMode, transform, enemyType)
             }),
 
             // Sequence for chasing behavior when shot
@@ -53,25 +56,25 @@ public class SlenderBT : Tree
             new Sequence(new List<Node>
             {
                 new S_DecisionNoiseSensing(debugMode, transform),
-                new S_ActionCheckNoise(debugMode, transform, agent)
+                new S_ActionCheckNoise(debugMode, transform, agent, enemyType)
             }),
 
             // Sequence for moving to the last known position
             new Sequence(new List<Node>
             {
                 new S_DecisionLastKnownPosition(debugMode, transform),
-                new S_ActionLastKnownPosition(debugMode, transform, agent)
+                new S_ActionLastKnownPosition(debugMode, transform, agent, enemyType)
             }),
 
             // Sequence for general sensing and moving towards the target
             new Sequence(new List<Node>
             {
                 new S_DecisionSensing(debugMode, transform),
-                new S_ActionGoToTarget(debugMode, transform, agent)
+                new S_ActionGoToTarget(debugMode, transform, agent, enemyType)
             }),
 
             // Action node for patrolling
-            new S_ActionPatrol(debugMode, transform, waypoints, agent)
+            new S_ActionPatrol(debugMode, transform, waypoints, agent, enemyType)
         });
 
         return root;

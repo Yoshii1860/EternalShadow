@@ -11,6 +11,7 @@ public class ObjectHandler : MonoBehaviour
     [SerializeField] float pickupDistance = 5f;
     private ItemActions action;
     public bool lightSwitchActive = false;
+    LayerMask allLayersExceptCharacter = ~(1 << 7);
 
     #endregion
 
@@ -46,7 +47,7 @@ public class ObjectHandler : MonoBehaviour
     private void DetectObjects()
     {
         RaycastHit hit;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, pickupDistance))
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, pickupDistance, allLayersExceptCharacter))
         {
             Debug.Log("ObjectHandler.DetectObjects: " + hit.collider.gameObject.name);
             PaintingEvent paintingEvent = hit.collider.gameObject.GetComponent<PaintingEvent>();

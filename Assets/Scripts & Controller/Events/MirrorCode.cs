@@ -89,7 +89,7 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
                     Vector3 playerEulerAngles = GameManager.Instance.player.transform.eulerAngles;
                     StartCoroutine(EndEvent(playerPosition, playerEulerAngles));
                 }
-                else Debug.Log("MirrorEvent: The flashlight is not pointing at the mirror!");
+                else Debug.Log("MirrorEvent: spotAngle, roomLights or once false!");
             }
             else
             {
@@ -109,11 +109,14 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
             time -= Time.deltaTime;
             yield return null;
         }
+        transform.GetComponent<BoxCollider>().enabled = false;
         GameManager.Instance.GameplayEvent();
         secondSpotlight.SetActive(true);
         GameManager.Instance.playerController.SetFollowTarget(newFollowTarget);
         yield return new WaitForSeconds(1.5f);
         particles.SetActive(true);
+        AudioManager.Instance.SetAudioClip(particles.transform.parent.gameObject.GetInstanceID(), "cross burn", 1f, 1f, false);
+        AudioManager.Instance.PlayAudio(particles.transform.parent.gameObject.GetInstanceID());
         yield return new WaitForSeconds(1f);
         animator.SetTrigger("Fall");
         yield return new WaitForSeconds(9f);

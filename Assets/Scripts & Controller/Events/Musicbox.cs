@@ -135,7 +135,7 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
         yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(gameObject.GetInstanceID()));
         musicBoxObject.enabled = true;
         AudioManager.Instance.UnpauseAudio(AudioManager.Instance.environment);
-        AudioManager.Instance.SetAudioVolume(AudioManager.Instance.environment, 0.1f);
+        AudioManager.Instance.SetVolumeOverTime(AudioManager.Instance.environment, 0.1f);
         this.enabled = false;
     }
 
@@ -251,7 +251,7 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
         volume = Mathf.Clamp(volume, 0.25f, 1f);
 
         // Set music box volume
-        AudioManager.Instance.SetAudioVolume(gameObject.GetInstanceID(), volume);
+        AudioManager.Instance.SetVolume(gameObject.GetInstanceID(), volume);
     }
 
     void AdjustEnvironmentVolume()
@@ -263,6 +263,6 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
         float targetVolume = Mathf.Lerp(0.02f, 0.1f, Mathf.Clamp01(distance / 5f)); // Adjust values as needed
 
         // Set environment music volume
-        AudioManager.Instance.SetAudioVolume(AudioManager.Instance.environment, targetVolume);
+        AudioManager.Instance.SetVolumeOverTime(AudioManager.Instance.environment, targetVolume);
     }
 }

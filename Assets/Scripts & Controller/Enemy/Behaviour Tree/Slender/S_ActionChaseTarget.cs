@@ -22,12 +22,14 @@ public class S_ActionChaseTarget : Node
     // Debug mode flag
     private bool debugMode;
 
+    private int enemyType;
+
     #endregion
 
     #region Constructors
 
     // Constructor to initialize references
-    public S_ActionChaseTarget(bool debugMode, Transform transform, NavMeshAgent agent)
+    public S_ActionChaseTarget(bool debugMode, Transform transform, NavMeshAgent agent, int enemyType)
     {
         this.transform = transform;
         animator = transform.GetComponent<Animator>();
@@ -35,6 +37,7 @@ public class S_ActionChaseTarget : Node
         enemy = transform.GetComponent<Enemy>();
         this.debugMode = debugMode;
         aiSensor = transform.GetComponent<AISensor>();
+        this.enemyType = enemyType;
     }
 
     #endregion
@@ -81,12 +84,12 @@ public class S_ActionChaseTarget : Node
 
         Transform target = (Transform)obj;
 
-        agent.speed = EnemyBT.runSpeed;
+        agent.speed = SlenderBT.runSpeed;
         agent.SetDestination(target.position);
         animator.SetBool("walk", false);
         animator.SetBool("run", true);
 
-        AudioManager.Instance.ToggleSlenderAudio(transform.gameObject, true);
+        AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, true, enemyType);
 
         // Update the chase timer
         chaseTimer += Time.deltaTime;

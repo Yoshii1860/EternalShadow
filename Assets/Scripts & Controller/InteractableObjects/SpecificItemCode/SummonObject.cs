@@ -8,6 +8,7 @@ public class SummonObject : InteractableObject
     [Header("RUN ITEM CODE")]
     [SerializeField] Item summoningItem;
     [SerializeField] SummonEvent summonEvent;
+    [SerializeField] GameObject redCircle;
 
     // Override the base class method for specific implementation
     protected override void RunItemCode()
@@ -18,7 +19,9 @@ public class SummonObject : InteractableObject
         {
             transform.GetChild(0).gameObject.SetActive(true);
             InventoryManager.Instance.RemoveItem(item);
-        }       
+            redCircle.SetActive(false);
+        }
+        else GameManager.Instance.DisplayMessage("You need \"" + summoningItem.displayName + "\" to proceed with the summoning.", 2f);       
 
         summonEvent.CheckItems();
     }

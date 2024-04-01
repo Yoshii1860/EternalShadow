@@ -18,12 +18,14 @@ public class ActionLastKnownPosition : Node
     // Debug mode flag
     private bool debugMode;
 
+    private int enemyType;
+
     #endregion
 
     #region Constructors
 
     // Constructor to initialize references
-    public ActionLastKnownPosition(bool debugMode, Transform transform, NavMeshAgent agent)
+    public ActionLastKnownPosition(bool debugMode, Transform transform, NavMeshAgent agent, int enemyType)
     {
         this.transform = transform;
         this.agent = agent;
@@ -31,6 +33,7 @@ public class ActionLastKnownPosition : Node
         enemy = transform.GetComponent<Enemy>();
         this.debugMode = debugMode;
         aiSensor = transform.GetComponent<AISensor>();
+        this.enemyType = enemyType;
     }
 
     #endregion
@@ -103,6 +106,8 @@ public class ActionLastKnownPosition : Node
         agent.speed = EnemyBT.walkSpeed;
         agent.SetDestination(lastKnownPosition);
         animator.SetBool("walk", true);
+
+        AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, false, enemyType);
 
         // Return RUNNING to indicate that the action is ongoing
         if (debugMode) Debug.Log("A - LastKnownPosition: RUNNING (Moving to Last Known Position)");

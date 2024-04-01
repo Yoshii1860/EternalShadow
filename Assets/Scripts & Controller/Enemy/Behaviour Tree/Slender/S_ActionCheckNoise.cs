@@ -26,12 +26,14 @@ public class S_ActionCheckNoise : Node
     // Debug mode flag
     private bool debugMode;
 
+    private int enemyType;
+
     #endregion
 
     #region Constructors
 
     // Constructor to initialize references
-    public S_ActionCheckNoise(bool debugMode, Transform transform, NavMeshAgent agent)
+    public S_ActionCheckNoise(bool debugMode, Transform transform, NavMeshAgent agent, int enemyType)
     {
         this.transform = transform;
         this.agent = agent;
@@ -39,6 +41,7 @@ public class S_ActionCheckNoise : Node
         enemy = transform.GetComponent<Enemy>();
         this.debugMode = debugMode;
         aiSensor = transform.GetComponent<AISensor>();
+        this.enemyType = enemyType;
     }
 
     #endregion
@@ -149,7 +152,7 @@ public class S_ActionCheckNoise : Node
                 agent.SetDestination(noisePos);
                 animator.SetBool("walk", true);
 
-                AudioManager.Instance.ToggleSlenderAudio(transform.gameObject, false);
+                AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, false, enemyType);
             }
         }
 

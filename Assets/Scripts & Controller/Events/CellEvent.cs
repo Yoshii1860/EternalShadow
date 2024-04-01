@@ -12,6 +12,13 @@ public class CellEvent : MonoBehaviour
     [Tooltip("The horror doll that will only be there when it`s flipped")]
     [SerializeField] GameObject horrorDoll;
 
+    // If key was picked up and used before flipped
+    [SerializeField] Door door;
+    // If key was picked up before flipped
+    [SerializeField] GameObject key;
+    // Key of flipped room
+    [SerializeField] GameObject keyFlipped;
+
     void Start()
     {
         foreach (GameObject mannequin in mannequins)
@@ -27,11 +34,13 @@ public class CellEvent : MonoBehaviour
             // if the player is looking at the lookAtObject or at least less then 30 degrees away from it
             if (Vector3.Angle(other.transform.forward, lookAtObject.position - other.transform.position) < 30)
             {
+                if (!door.locked || key == null) keyFlipped.SetActive(false);
                 unflippedCell.SetActive(true);
                 flippedCell.SetActive(false);
                 horrorDoll.SetActive(false);
                 for (int i = 0; i < mannequins.Length; i++)
                 {
+                    Debug.Log("Mannequin " + i + " activated");
                     mannequins[i].SetActive(true);
                 }
                 StartCoroutine(StartMannequins());

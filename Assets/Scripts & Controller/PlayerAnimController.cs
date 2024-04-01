@@ -66,7 +66,11 @@ public class PlayerAnimController : MonoBehaviour
         if (debugMode) Debug.Log("PlayerAnim - AimAnimation: " + isAiming);
 
         // Sets the aiming state of the animation
-        if (pistolBool || lightSwitch) animator.SetBool("Aim", isAiming);
+        if (pistolBool || lightSwitch) 
+        {
+            animator.SetBool("Aim", isAiming);
+            GameManager.Instance.player.ShowBulletsUI(isAiming);
+        }
     }
 
     public void ShootAnimation()
@@ -118,7 +122,7 @@ public class PlayerAnimController : MonoBehaviour
     {
         if (debugMode) Debug.Log("PlayerAnim - ReloadAnimation");
         // Initiates the reload animation
-        if (pistolBool) animator.SetTrigger("Reload");
+        animator.SetTrigger("Reload");
     }
 
     #endregion

@@ -80,6 +80,11 @@ public class ItemActions : MonoBehaviour
     /// <param name="item">The item to be thrown away.</param>
     public void ThrowAway(Item item)
     {
+        if (item.type == ItemType.Object || item.type == ItemType.Weapon)
+        {
+            InventoryManager.Instance.DisplayMessage("You cannot throw this away.");
+            return;
+        }
         Debug.Log("ItemActions.ThrowAway(" + item.name + ")");
         InventoryManager.Instance.DropItem(item);
     }

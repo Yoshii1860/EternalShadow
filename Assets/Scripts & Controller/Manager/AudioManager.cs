@@ -62,7 +62,8 @@ public class AudioManager : MonoBehaviour
     public int playerSpeaker;
     public int playerSpeaker2;
 
-    bool slenderToggle = false;
+    public bool girlToggle = false;
+    public bool slenderToggle = false;
 
     #endregion
 
@@ -109,12 +110,6 @@ public class AudioManager : MonoBehaviour
         environment = environmentObject.GetInstanceID();
         playerSpeaker = playerSpeakerObject.GetInstanceID();
         playerSpeaker2 = playerSpeaker2Object.GetInstanceID();
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        // Set the environment audio volume (if needed)
     }
 
     #endregion
@@ -257,13 +252,21 @@ public class AudioManager : MonoBehaviour
     {
         AudioSource audioSource = GetAudioSource(gameObjectID);
 
-        if (audioSource != null)
+        if (audioSource == null)
+        {
+            if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
+            return;
+        }
+        else if (!audioSource.isPlaying)
+        {
+            return;
+        }
+        else
         {
             audioSource.Stop();
             audioSource.clip.UnloadAudioData();
             if (debugSettings) Debug.Log($"AudioManager: Stopping {audioSource.gameObject.name}");
         }
-        else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
     }
 
 
@@ -382,7 +385,6 @@ public class AudioManager : MonoBehaviour
 
         if (audioSource != null)
         {
-            if (debugSettings) Debug.Log($"AudioManager: Checking if Audio Source {audioSource.gameObject.name} is playing ({audioSource.isPlaying})");
             return audioSource.isPlaying;
         }
         else
@@ -392,8 +394,19 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    public void SetVolume(int gameObjectID, float volume)
+    {
+        AudioSource audioSource = GetAudioSource(gameObjectID);
+
+        if (audioSource != null)
+        {
+            audioSource.volume = volume;
+        }
+        else if (debugSettings) Debug.LogWarning($"AudioManager: AudioSource not found - {gameObjectID}");
+    }
+
     // Set the audio volume for an AudioSource gradually
-    public void SetAudioVolume(int gameObjectID, float volume, float duration = 0.5f)
+    public void SetVolumeOverTime(int gameObjectID, float volume, float duration = 0.5f)
     {
         AudioSource audioSource = GetAudioSource(gameObjectID);
 
@@ -520,33 +533,102 @@ public class AudioManager : MonoBehaviour
 
     #region Character Specific Audio
 
-    public void ToggleSlenderAudio(GameObject slender, bool isChasing)
+    // Changing Volume based on the floor level
+    public IEnumerator VolumeFloorChanger(int enemyID, int stepID, Transform enemy, int enemyType)
     {
-        int slenderID = slender.GetInstanceID();
-        int stepID = slender.transform.GetChild(0).gameObject.GetInstanceID();
-        string clip = GetAudioClip(slenderID);
-
-        if (slenderToggle) return;
-        else if (!IsPlaying(slenderID))
+        if (debugSettings) Debug.Log(enemy.gameObject.name + ": Starting volume floor changer!");
+        Transform player = GameManager.Instance.player.transform;
+        switch (enemyType)
         {
-            PlayAudio(slenderID);
-            PlayAudio(stepID);
-            return;
+            case 0:
+                while (!slenderToggle)
+                {   
+                    float volume = 1.0f - Mathf.Abs(player.position.y - enemy.position.y) / 4.0f;
+                    volume = Mathf.Clamp(volume, 0.25f, 1.0f);
+                    SetVolume(enemyID, volume);
+                    SetVolume(stepID, volume);
+                    yield return new WaitForSeconds(0.1f);
+                }
+                break;
+            case 1:
+                while (!girlToggle)
+                {   
+                    float volume = 1.0f - Mathf.Abs(player.position.y - enemy.position.y) / 4.0f;
+                    volume = Mathf.Clamp(volume, 0.25f, 1.0f);
+                    SetVolume(enemyID, volume);
+                    SetVolume(stepID, volume);
+                    yield return new WaitForSeconds(0.1f);
+                }
+                break;
         }
-        else if (isChasing && string.Compare(clip, "slender scream") == 0)
-        {
-            return;
-        }
-        else if (!isChasing && string.Compare(clip, "slender hello") == 0)
-        {
-            return;
-        }
-
-        slenderToggle = true;
-        StartCoroutine(SlenderToggle(slenderID, stepID, isChasing));
+        if (debugSettings) Debug.Log(enemy.gameObject.name + ": Volume floor changer stopped!");
     }
 
-    IEnumerator SlenderToggle(int slenderID, int stepID, bool isChasing)
+    public void ToggleEnemyAudio(GameObject enemy, bool isChasing, int enemyType)
+    {
+        int enemyID = enemy.GetInstanceID();
+        int stepID = enemy.transform.GetChild(0).gameObject.GetInstanceID();
+        string clip = GetAudioClip(enemyID);
+
+        switch (enemyType)
+        {
+            case 0:
+                
+                if (slenderToggle) return;
+                else if (!IsPlaying(enemyID))
+                {
+                    if (debugSettings) Debug.Log("Enemy not playing - starting audio!");
+                    StartCoroutine(VolumeFloorChanger(enemyID, stepID, enemy.transform, enemyType));
+                    PlayAudio(enemyID);
+                    PlayAudio(stepID);
+                    return;
+                }
+                else if (isChasing && string.Compare(clip, "slender scream") == 0)
+                {
+                    return;
+                }
+                else if (!isChasing && string.Compare(clip, "slender hello") == 0)
+                {
+                    return;
+                }
+
+                if (!slenderToggle) 
+                {
+                    StartCoroutine(EnemyToggle(enemyID, stepID, isChasing, enemyType));
+                    if (debugSettings) Debug.Log("Slender audio toggle started!");
+                }
+                return;
+
+            case 1:
+
+                if (girlToggle) return;
+                else if (!IsPlaying(enemyID))
+                {
+                    if (debugSettings) Debug.Log("Enemy not playing - starting audio!");
+                    StartCoroutine(VolumeFloorChanger(enemyID, stepID, enemy.transform, enemyType));
+                    PlayAudio(enemyID);
+                    PlayAudio(stepID);
+                    return;
+                }
+                else if (isChasing && string.Compare(clip, "woman scream") == 0)
+                {
+                    return;
+                }
+                else if (!isChasing && string.Compare(clip, "weeping ghost woman") == 0)
+                {
+                    return;
+                }
+
+                if (!girlToggle) 
+                {
+                    StartCoroutine(EnemyToggle(enemyID, stepID, isChasing, enemyType));
+                    if (debugSettings) Debug.Log("Girl audio toggle started!");
+                }
+                return;
+        }
+    }
+
+    IEnumerator EnemyToggle(int enemyID, int stepID, bool isChasing, int enemyType)
     {
         string talkClip = "";
         string walkClip = "";
@@ -554,32 +636,72 @@ public class AudioManager : MonoBehaviour
         float volume = 1f;
         float pitch = 1f;
 
-        if (isChasing)
+        switch (enemyType)
         {
-            talkClip = "slender scream";
-            walkClip = "slender run";
-            fadeTime = 1f;
-            volume = 1f;
-        }
-        else
-        {
-            talkClip = "slender hello";
-            walkClip = "slender walk";
-            fadeTime = 5f;
-            volume = 0.4f;
-            pitch = 0.9f;
+            case 0:
+
+                slenderToggle = true;
+
+                if (isChasing)
+                {
+                    if (debugSettings) Debug.Log("Slender is chasing - changing audio!");
+                    talkClip = "slender scream";
+                    walkClip = "slender run";
+                    fadeTime = 1f;
+                }
+                else
+                {
+                    if (debugSettings) Debug.Log("Slender is not chasing - changing audio!");
+                    talkClip = "slender hello";
+                    walkClip = "slender walk";
+                    fadeTime = 5f;
+                    pitch = 0.8f;
+                }
+                break;
+
+            case 1:
+
+                girlToggle = true;
+
+                if (isChasing)
+                {
+                    if (debugSettings) Debug.Log("Girl is chasing - changing audio!");
+                    talkClip = "woman scream";
+                    walkClip = "woman step";
+                    fadeTime = 1f;
+                    pitch = 2f;
+                }
+                else
+                {
+                    if (debugSettings) Debug.Log("Girl is not chasing - changing audio!");
+                    talkClip = "weeping ghost woman";
+                    walkClip = "woman step";
+                    fadeTime = 5f;
+                    pitch = 1f;
+                }
+                break;
         }
 
-        FadeOut(slenderID, fadeTime);
+        FadeOut(enemyID, fadeTime);
         FadeOut(stepID, fadeTime);
-        AudioSource audioSource = GetAudioSource(slenderID);
+        AudioSource audioSource = GetAudioSource(enemyID);
         yield return new WaitUntil(() => !audioSource.isPlaying);
-        SetAudioClip(slenderID, talkClip, volume, 1f, true);
+        SetAudioClip(enemyID, talkClip, volume, 1f, true);
         SetAudioClip(stepID, walkClip, volume, pitch, true);
         yield return new WaitForSeconds(0.25f);
-        PlayAudio(slenderID, volume, 1f, true);
+        PlayAudio(enemyID, volume, 1f, true);
         PlayAudio(stepID, volume, pitch, true);
-        slenderToggle = false;
+        switch (enemyType)
+        {
+            case 0:
+                slenderToggle = false;
+                break;
+            case 1:
+                girlToggle = false;
+                break;
+        }
+        StartCoroutine(VolumeFloorChanger(enemyID, stepID, GetAudioSource(enemyID).transform, enemyType));
+        if (debugSettings) Debug.Log("Enemy audio change DONE!");
     }
 
     #endregion

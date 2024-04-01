@@ -42,6 +42,9 @@ public class SkullCode : InteractableObject
 
     IEnumerator CutSkull()
     {
+        // properly aligning the audio with the animation
+        yield return new WaitForSeconds(0.4f);
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "bonesaw cut", 0.6f, 1f);
         yield return new WaitForSeconds(cutTimer);
 
         // translate skullcap to desired position and rotation over time

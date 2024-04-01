@@ -18,19 +18,21 @@ public class S_ActionPatrol : Node
 
     // Patrol-related variables
     private int currentWaypointIndex = 0;
-    private float waitTime = 1f;
+    private float waitTime = 10f;
     private float waitCounter = 0f;
     private bool isWaiting = true;
 
     // Debug mode flag
     private bool debugMode;
 
+    private int enemyType;
+
     #endregion
 
     #region Constructors
 
     // Constructor to initialize references and waypoints
-    public S_ActionPatrol(bool debugMode, Transform transform, Transform[] waypoints, NavMeshAgent agent)
+    public S_ActionPatrol(bool debugMode, Transform transform, Transform[] waypoints, NavMeshAgent agent, int enemyType)
     {
         this.transform = transform;
         this.animator = transform.GetComponent<Animator>();
@@ -39,6 +41,7 @@ public class S_ActionPatrol : Node
         enemy = transform.GetComponent<Enemy>();
         sensor = transform.GetComponent<AISensor>();
         this.debugMode = debugMode;
+        this.enemyType = enemyType;
     }
 
     #endregion
@@ -77,7 +80,6 @@ public class S_ActionPatrol : Node
         else if (sensor.playerInSight && !sensor.hidden)
         {
             // Set state to FAILURE and return
-            parent.SetData("target", GameManager.Instance.player.transform);
             if (debugMode) Debug.Log("A - Patrol: FAILURE (Player in Sight)");
             state = NodeState.FAILURE;
             return state;
@@ -98,12 +100,11 @@ public class S_ActionPatrol : Node
         }
         ////////////////////////////////////////////////////////////////////////
 
-        animator.SetBool("run", false);
-        animator.SetBool("walk", true);
-
         // Check if waiting
         if (isWaiting)
         {
+            animator.SetBool("walk", false);
+            animator.SetBool("run", false);
             waitCounter += Time.deltaTime;
 
             // Check if waiting time is over
@@ -116,6 +117,9 @@ public class S_ActionPatrol : Node
         }
         else
         {
+            animator.SetBool("run", false);
+            animator.SetBool("walk", true);
+
             Transform currentWaypoint = waypoints[currentWaypointIndex];
 
             // Check if reached the current waypoint
@@ -140,7 +144,7 @@ public class S_ActionPatrol : Node
                 animator.SetBool("walk", true);
                 animator.SetBool("run", false);
 
-                AudioManager.Instance.ToggleSlenderAudio(transform.gameObject, false);
+                AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, false, enemyType);
             }
         }
 

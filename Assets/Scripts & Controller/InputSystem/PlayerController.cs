@@ -238,6 +238,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     public void OnAim(InputAction.CallbackContext context)
     {
         aim = context.ReadValueAsButton();
+        if (aim) interact = false;
     }
 
     public void OnFire(InputAction.CallbackContext context)
@@ -354,7 +355,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             }
             player.ReduceStamina();
 
-            AudioManager.Instance.SetAudioVolume(audioSourceID, sprintVolume, 0.1f);
+            AudioManager.Instance.SetVolumeOverTime(audioSourceID, sprintVolume, 0.1f);
             AudioManager.Instance.SetAudioPitch(audioSourceID, sprintPitch);
         }
         else if (crouch)
@@ -366,7 +367,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             }
             player.IncreaseStamina();
 
-            AudioManager.Instance.SetAudioVolume(audioSourceID, crouchVolume, 0.1f);
+            AudioManager.Instance.SetVolumeOverTime(audioSourceID, crouchVolume, 0.1f);
             AudioManager.Instance.SetAudioPitch(audioSourceID, crouchPitch);
         }
         else
@@ -378,7 +379,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             }
             player.IncreaseStamina();
 
-            AudioManager.Instance.SetAudioVolume(audioSourceID, normalVolume, 0.1f);
+            AudioManager.Instance.SetVolumeOverTime(audioSourceID, normalVolume, 0.1f);
             AudioManager.Instance.SetAudioPitch(audioSourceID, normalPitch);
         }
 

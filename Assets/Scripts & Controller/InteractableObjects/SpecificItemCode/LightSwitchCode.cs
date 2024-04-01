@@ -15,10 +15,12 @@ public class LightSwitchCode : InteractableObject
     [SerializeField] PaintingEvent paintingEvent;
     [SerializeField] Door doorToUnlock;
     [SerializeField] Door doorToUnlock2;
+    private bool eventStarted = false;
 
     // Override the base class method for specific implementation
     protected override void RunItemCode()
     {
+        if (eventStarted) return;
         paintingEvent.active = true;
         doorToUnlock.locked = false;
         doorToUnlock2.locked = false;
@@ -34,6 +36,7 @@ public class LightSwitchCode : InteractableObject
 
     IEnumerator RotateHandleGradually()
     {
+        eventStarted = true;
         // Rotate the handle from -35° to -125°
         for (int i = 0; i < 90; i++)
         {

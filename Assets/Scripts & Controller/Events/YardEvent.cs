@@ -101,7 +101,7 @@ public class YardEvent : MonoBehaviour
         firstTime = false;
 
         // Disable AISensor to stop AI updates during the event
-        girl.GetComponent<AISensor>().hidden = true;
+        GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(girl.GetComponent<AISensor>());
         girl.GetComponent<EnemyBT>().enabled = false;
 
         // Activate the girl GameObject
@@ -372,7 +372,7 @@ public class YardEvent : MonoBehaviour
         girl.SetActive(false);
         girl.transform.position = new Vector3(-10.1878738f,-1.7069f,-13.7854099f);
         girl.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
-        girl.GetComponent<AISensor>().hidden = false;
+        GameManager.Instance.customUpdateManager.AddCustomUpdatable(girl.GetComponent<AISensor>());
         girl.GetComponent<EnemyBT>().enabled = false;
         girl.GetComponentInChildren<Collider>().enabled = false;
 

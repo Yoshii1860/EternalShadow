@@ -7,6 +7,7 @@ public class LockerCode : InteractableObject
     [Space(10)]
     [Header("RUN ITEM CODE")]
     [SerializeField] Transform door;
+    [SerializeField] GameObject wall;
     MeshRenderer doorMesh;
     bool insideCollider = false;
     bool open = false;
@@ -95,7 +96,6 @@ public class LockerCode : InteractableObject
         if (insideCollider)
         {
             ToggleHidden(true);
-            
         }
         locked = true;
         

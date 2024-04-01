@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class DoorCheck : MonoBehaviour, ICustomUpdatable
 {
+    void Start()
+    {
+        GameManager.Instance.customUpdateManager.AddCustomUpdatable(this);
+    }
+
     public void CustomUpdate(float deltaTime)
     {
         CheckDoor();

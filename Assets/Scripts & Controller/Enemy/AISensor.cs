@@ -26,10 +26,12 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
     private float scanTimer;
 
     private Enemy enemy;
+    private UnityEngine.AI.NavMeshAgent agent;
 
     private Coroutine coroutine;
 
     public bool hidden = false;
+    bool once = false;
 
     #endregion
 
@@ -44,6 +46,7 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
         }
 
         enemy = GetComponent<Enemy>();
+        agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
     }
 
     #endregion
@@ -54,19 +57,30 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
     {
         if (!paused && !hidden) 
         {
-            if (hidden)
-            {
-                playerInSight = false;
-                if (gameObject.activeSelf) Debug.Log("AISensor: Player hidden from enemy!");
-                return;
-            }
             ScanUpdate(deltaTime);
         }
+
+        if (hidden)
+        {
+            Hidden();
+        }
+        else once = false;
     }
 
     #endregion
 
     #region Private Methods
+
+    private void Hidden()
+    {
+        if (!once)
+        {
+            StartCoroutine(StopChase());
+            if (gameObject.activeSelf) Debug.Log("AISensor: Player hidden from enemy!");
+        }
+        once = true;
+        playerInSight = false;
+    }
 
     private void ScanUpdate(float deltaTime)
     {
@@ -141,7 +155,7 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
         StartCoroutine(ForcedPlayerInSight(time));
     }
 
-    private IEnumerator ForcedPlayerInSight(float time)
+    IEnumerator ForcedPlayerInSight(float time)
     {
         savePlayerInSight = playerInSight;
         while (time > 0)
@@ -151,6 +165,22 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
             yield return null;
         }
         playerInSight = savePlayerInSight;
+    }
+
+    IEnumerator StopChase()
+    {
+        agent.SetDestination(transform.position);
+        agent.isStopped = true;
+        Vector3 lastPosition = transform.position;
+        float elpasedTime = 0;
+        while (elpasedTime < 1.0f)
+        {
+            Debug.Log("Stopping chase");
+            elpasedTime += Time.deltaTime;
+            transform.position = lastPosition;
+            yield return null;
+        }
+        agent.isStopped = false;
     }
 
     private Mesh CreateWedgeMesh() 

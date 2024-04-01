@@ -9,6 +9,7 @@ public class ActionChaseTarget : Node
     #region Fields
 
     // References to components
+    private Transform transform;
     private Animator animator;
     private NavMeshAgent agent;
 
@@ -16,15 +17,19 @@ public class ActionChaseTarget : Node
     private float chaseTimer = 0f;
     private float chaseDuration = 10f; // Same as in Enemy.cs
 
+    private int enemyType;
+
     #endregion
 
     #region Constructors
 
     // Constructor to initialize references
-    public ActionChaseTarget(Transform transform, NavMeshAgent agent)
+    public ActionChaseTarget(Transform transform, NavMeshAgent agent, int enemyType)
     {
+        this.transform = transform;
         animator = transform.GetComponent<Animator>();
         this.agent = agent;
+        this.enemyType = enemyType;
     }
 
     #endregion
@@ -60,6 +65,8 @@ public class ActionChaseTarget : Node
         agent.speed = EnemyBT.runSpeed;
         agent.SetDestination(target.position);
         animator.SetBool("Run", true);
+
+        AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, true, enemyType);
 
         // Update the chase timer
         chaseTimer += Time.deltaTime;

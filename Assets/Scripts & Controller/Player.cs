@@ -57,6 +57,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
     bool waitTimer = false;
     bool timerIsRunning = false;
     int waitingTime = 15;
+    bool formerShowBool = false;
 
     #endregion
 
@@ -536,6 +537,14 @@ public class Player : MonoBehaviour, ICustomUpdatable
     public void SetBulletsUI(int currentBullets, int bulletsInInventory)
     {
         bulletsText.text = currentBullets + "/" + bulletsInInventory;
+
+        if (bulletsDisplayRoutine != null) StopCoroutine(bulletsDisplayRoutine);
+        bulletsDisplayRoutine = StartCoroutine(FadeBulletsUI());
+    }
+
+    public void ShowBulletsUI(bool show)
+    {
+        if (!show || formerShowBool) return;
         if (bulletsDisplayRoutine != null) StopCoroutine(bulletsDisplayRoutine);
         bulletsDisplayRoutine = StartCoroutine(FadeBulletsUI());
     }
@@ -543,6 +552,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
 
     IEnumerator FadeBulletsUI()
     {
+        formerShowBool = true;
         for (float i = bulletsText.color.a; i <= 1f; i += 0.01f)
         {
             bulletsText.color = new Color(bulletsText.color.r, bulletsText.color.g, bulletsText.color.b, i);
@@ -551,6 +561,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
         }
 
         yield return new WaitForSeconds(10f);
+        formerShowBool = false;
 
         for (float i = 1f; i >= 0f; i -= 0.01f)
         {

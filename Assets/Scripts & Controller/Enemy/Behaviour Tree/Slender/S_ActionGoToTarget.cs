@@ -17,12 +17,14 @@ public class S_ActionGoToTarget : Node
     
     private bool debugMode;
 
+    private int enemyType;
+
     #endregion
 
     #region Constructors
 
     // Constructor to initialize references
-    public S_ActionGoToTarget(bool debugMode, Transform transform, NavMeshAgent agent)
+    public S_ActionGoToTarget(bool debugMode, Transform transform, NavMeshAgent agent, int enemyType)
     {
         this.transform = transform;
         this.agent = agent;
@@ -30,6 +32,7 @@ public class S_ActionGoToTarget : Node
         enemy = transform.GetComponent<Enemy>();
         this.debugMode = debugMode;
         sensor = transform.GetComponent<AISensor>();
+        this.enemyType = enemyType;
     }
 
     #endregion
@@ -77,13 +80,21 @@ public class S_ActionGoToTarget : Node
         // Get target transform
         Transform target = (Transform)obj;
 
+        float distanceToTarget = Vector3.Distance(transform.position, target.position);
+        if (distanceToTarget < SlenderBT.attackRange)
+        {
+            if (debugMode) Debug.Log("A - GoToTarget: SUCCESS (Target in Attack Range)");
+            state = NodeState.SUCCESS;
+            return state;
+        }
+
         // Set agent speed, set destination, and trigger running animation
         agent.speed = SlenderBT.runSpeed;
         animator.SetBool("walk", false);
         animator.SetBool("run", true);
         agent.SetDestination(target.position);
 
-        AudioManager.Instance.ToggleSlenderAudio(transform.gameObject, true);
+        AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, true, enemyType);
 
         // Return RUNNING to indicate that the action is ongoing
         if (debugMode) Debug.Log("A - GoToTarget: RUNNING (Going to target)");

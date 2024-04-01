@@ -74,13 +74,13 @@ public class DecisionAttackRange : Node
         // Check if the distance is within the attack range
         if (distanceToTarget <= EnemyBT.attackRange)
         {
+            animator.SetBool("walk", false);
+            animator.SetBool("run", false);
             if (debugMode) Debug.Log("D - AttackRange: SUCCESS (Within Attack Range)");
             state = NodeState.SUCCESS;
             return state;
         }
 
-        // If not within attack range, update animator and set state to FAILURE
-        animator.SetBool("attack", false);
         if (debugMode) Debug.Log("D - AttackRange: FAILURE (Not Within Attack Range)");
         state = NodeState.FAILURE;
         return state;

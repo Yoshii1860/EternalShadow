@@ -22,18 +22,21 @@ public class ActionAttack : Node
 
     private bool debugMode;
 
+    private int enemyType;
+
     #endregion
 
     #region Constructors
 
     /// Initializes a new instance of the <see cref="ActionAttack"/> class.
-    public ActionAttack(bool debugMode, Transform transform)
+    public ActionAttack(bool debugMode, Transform transform, int enemyType)
     {
         this.debugMode = debugMode;
         animator = transform.GetComponent<Animator>();
         damage = transform.GetComponent<Enemy>().damage;
         this.transform = transform;
         aiSensor = transform.GetComponent<AISensor>();
+        this.enemyType = enemyType;
     }
 
     #endregion
@@ -75,14 +78,19 @@ public class ActionAttack : Node
 
         Transform target = (Transform)obj;
 
+        AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, true, enemyType);
+
         attackCounter += Time.deltaTime;
         if (attackCounter >= EnemyBT.attackInterval)
         {
-            animator.SetBool("attack", true);
+            animator.SetTrigger("attack");
+
+            AudioManager.Instance.FadeOut(transform.GetChild(0).gameObject.GetInstanceID(), 0.5f);
 
             // Perform attack and check if the player is dead.
             // Chances to apply status effects on the player.
-            bool playerIsDead = player.TakeDamage(damage);
+            
+            //bool playerIsDead = player.TakeDamage(damage);
 
             int randomizer = Random.Range(0, 100);
             if (randomizer <= 15)
@@ -95,6 +103,7 @@ public class ActionAttack : Node
                 if (!player.isBleeding) player.Bleeding();
             }
 
+            /*
             if (playerIsDead)
             {
                 // Player is dead, reset and return success state.
@@ -106,11 +115,10 @@ public class ActionAttack : Node
                 state = NodeState.SUCCESS;
                 return state;
             }
-            else
-            {
-                // Player is alive, reset attack counter.
-                attackCounter = 0f;
-            }
+            */
+
+            attackCounter = 0f;
+
         }
 
         // Still in the process of attacking.

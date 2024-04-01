@@ -23,6 +23,8 @@ public class Weapon : MonoBehaviour
     public int magazineCount = 5;
     [Tooltip("If the weapon is currently equipped.")]
     public bool isEquipped = false;
+    [Tooltip("The blood particle effect.")]
+    [SerializeField] GameObject bloodEffect;
 
     [Space(10)]
     [Header("Ammo Settings")]
@@ -33,6 +35,7 @@ public class Weapon : MonoBehaviour
 
     bool canShoot = true;
     bool canReload = true;
+    LayerMask allLayersExceptCharacter = ~(1 << 7);
 
     #endregion
 
@@ -93,10 +96,12 @@ public class Weapon : MonoBehaviour
                 noiseController.ShootNoise();
             }
 
-            GameObject target = ProcessRaycast();
-            if (target != null)
+            RaycastHit hit;
+            Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, range, allLayersExceptCharacter);
+
+            if (hit.transform != null)
             {
-                Debug.Log("Target Hit: " + target.name);
+                Debug.Log("Target Hit: " + hit.transform.gameObject.name);
                 if (ammoType != Ammo.AmmoType.Infinite)
                 {
                     magazineCount--;
@@ -109,25 +114,32 @@ public class Weapon : MonoBehaviour
                     // Hit animation
                 }
 
-                // Slender & Girl have script on parent
-                Enemy parentEnemy = target.transform.parent.GetComponent<Enemy>();
-                if (parentEnemy != null)
+                // Check if target is an enemy by Layer "Enemies"
+                if (hit.transform.gameObject.layer == 8)
                 {
-                    parentEnemy.TakeDamage(damage);
-                    // Hit animation
-                }
-                else
-                {
-                    // Recursive hit for Mannequin as it has several children objects for hit detection
-                    Transform currentParent = target.transform;
-                    while (currentParent != null && currentParent.GetComponent<Mannequin>() == null)
+                    GameObject obj = Instantiate(bloodEffect, hit.point, Quaternion.LookRotation(hit.normal), hit.transform);
+                    Destroy(obj, 0.6f);
+                    
+                    // Slender & Girl have script on parent
+                    Enemy parentEnemy = hit.transform.parent.GetComponent<Enemy>();
+                    if (parentEnemy != null)
                     {
-                        currentParent = currentParent.parent;
+                        parentEnemy.TakeDamage(damage);
+                        // Hit animation
                     }
-
-                    if (currentParent != null)
+                    else
                     {
-                        currentParent.GetComponent<Mannequin>().Hit(target);
+                        // Recursive hit for Mannequin as it has several children objects for hit detection
+                        Transform currentParent = hit.transform;
+                        while (currentParent != null && currentParent.GetComponent<Mannequin>() == null)
+                        {
+                            currentParent = currentParent.parent;
+                        }
+
+                        if (currentParent != null)
+                        {
+                            currentParent.GetComponent<Mannequin>().Hit(hit.transform.gameObject);
+                        }
                     }
                 }
             }
@@ -197,23 +209,6 @@ public class Weapon : MonoBehaviour
         yield return new WaitForSeconds(timeOfReload);
         canShoot = true;
         canReload = true;
-    }
-
-    #endregion
-
-    #region Private Methods
-
-    GameObject ProcessRaycast()
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, range))
-        {
-            return hit.transform.gameObject;
-        }
-        else
-        {
-            return null;
-        }
     }
 
     #endregion

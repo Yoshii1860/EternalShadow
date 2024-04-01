@@ -58,6 +58,16 @@ public class InteractableObject : MonoBehaviour
         // Create Duplicate Object on Canvas
         GameObject newItem = Instantiate(gameObject, GameManager.Instance.pickupCanvas.transform);
 
+        // Deactivate Collider
+        Collider[] collider = newItem.GetComponents<Collider>();
+        if (collider.Length > 0) 
+        {
+            foreach (Collider c in collider)
+            {
+                c.enabled = false;
+            }
+        }
+
         // Deactivate all lights from showcase object
         DeactivateLights(newItem);
 
@@ -70,10 +80,6 @@ public class InteractableObject : MonoBehaviour
 
         // Run Item Code
         StartCoroutine(ItemCode(newItem));
-
-        // Deactivate Collider
-        Collider collider = newItem.GetComponent<Collider>();
-        if (collider != null) collider.enabled = false;
 
         // Set world position and rotation
         newItem.transform.position = objectPosition.position;

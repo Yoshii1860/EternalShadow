@@ -10,6 +10,11 @@ public class BathroomEvent : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            if (!girl.gameObject.activeSelf)
+            {
+                girl.gameObject.SetActive(true);
+            }
+            GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(girl.GetComponent<AISensor>());
             girl.SetTrigger("GetOut");
             Invoke("StartGirl", 7f);
         }
@@ -17,7 +22,7 @@ public class BathroomEvent : MonoBehaviour
 
     void StartGirl()
     {
-        girl.GetComponent<AISensor>().hidden = false;
+        GameManager.Instance.customUpdateManager.AddCustomUpdatable(girl.GetComponent<AISensor>());
         girl.GetComponent<EnemyBT>().enabled = true;
         girl.GetComponentInChildren<Collider>().enabled = true;
     }

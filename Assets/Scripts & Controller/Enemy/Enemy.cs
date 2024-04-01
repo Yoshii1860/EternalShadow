@@ -15,6 +15,11 @@ public class Enemy : MonoBehaviour
     [SerializeField] float downTimer = 30f;
     [Tooltip("The time the enemy starts with get up animation after being shot.")]
     [SerializeField] float reducedTimer = 25f;
+    [SerializeField] string deathClip = "";
+    [SerializeField] string fallClip = "";
+    [SerializeField] float deathToFallTime = 1f;
+    [SerializeField] float fallVolume = 1f;
+    [SerializeField] string hitClip = "";
 
     #endregion
 
@@ -54,6 +59,15 @@ public class Enemy : MonoBehaviour
         isShot = true;
 
         transform.GetComponent<Animator>().SetTrigger("die");
+        AudioSource[] audioSources = GetComponentsInChildren<AudioSource>();
+        Debug.Log("AudioSources length of enemy: " + audioSources.Length);
+        foreach (AudioSource audioSource in audioSources)
+        {
+            AudioManager.Instance.StopAudio(audioSource.gameObject.GetInstanceID());
+        }
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), deathClip);
+        yield return new WaitForSeconds(deathToFallTime);
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), fallClip, fallVolume);
 
         StartCoroutine(EnemyGetUp());
 
@@ -68,6 +82,12 @@ public class Enemy : MonoBehaviour
     {
         yield return new WaitForSeconds(reducedTimer);
         transform.GetComponent<Animator>().SetTrigger("getup");
+    }
+
+    private void Hit() 
+    {
+        AudioManager.Instance.PlaySoundOneShot(transform.gameObject.GetInstanceID(), "slender punch", 0.6f);
+        GameManager.Instance.player.TakeDamage(damage);
     }
 
     #endregion

@@ -122,7 +122,7 @@ public class DecisionSensing : Node
                 return state;
             }
             // If the target is within range, return SUCCESS
-            else
+            else 
             {
                 if (debugMode) Debug.Log("D - Sensing: SUCCESS (Target in Range)");
                 state = NodeState.SUCCESS;
