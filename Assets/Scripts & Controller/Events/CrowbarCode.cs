@@ -11,11 +11,18 @@ public class CrowbarCode : MonoBehaviour
     public void BreakFirst()
     {
         firstRailing.SetTrigger("Fall");
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "rails removal 2", 0.6f, 1f);
     }
 
     public void BreakSecond()
     {
         secondRailing.SetTrigger("Fall");
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "rails removal 2", 0.6f, 1f);
+    }
+
+    public void RemovalAudio()
+    {
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "rails removal 1", 0.6f, 1f);
     }
 
     public void DeactivateCrowbar()

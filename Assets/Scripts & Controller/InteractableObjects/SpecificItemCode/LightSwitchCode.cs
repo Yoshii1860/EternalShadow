@@ -36,6 +36,8 @@ public class LightSwitchCode : InteractableObject
 
     IEnumerator RotateHandleGradually()
     {
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "lever pull", 0.6f, 1f);
+        AudioManager.Instance.FadeOut(AudioManager.Instance.environment, 2f);
         eventStarted = true;
         // Rotate the handle from -35° to -125°
         for (int i = 0; i < 90; i++)
@@ -49,6 +51,10 @@ public class LightSwitchCode : InteractableObject
 
     IEnumerator TurnOnLights()
     {
+        yield return new WaitForSeconds(1f);
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "hospital music");
+        yield return new WaitForSeconds(0.1f);
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.5f, 1f, true);
         // Turn on all the lights with a delay
         foreach (Light l in allLights.GetComponentsInChildren<Light>())
         {

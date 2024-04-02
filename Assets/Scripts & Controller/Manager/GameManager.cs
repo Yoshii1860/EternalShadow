@@ -327,6 +327,7 @@ public class GameManager : MonoBehaviour
     public void Inventory()
     {
         InventoryManager.Instance.StatsUpdate();
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "open inventory", 1f, 1f);
         SetGameState(GameState.Inventory);
         // Add code to display the inventory
     }

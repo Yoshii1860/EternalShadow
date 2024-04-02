@@ -68,6 +68,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
         flashlight.enabled = false;
         speakerID = AudioManager.Instance.playerSpeaker;
         speaker2ID = AudioManager.Instance.playerSpeaker2;
+        Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("Enemies"));
     }
 
     public void CustomUpdate(float deltaTime)

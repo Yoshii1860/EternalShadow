@@ -119,10 +119,15 @@ public class Weapon : MonoBehaviour
                 {
                     GameObject obj = Instantiate(bloodEffect, hit.point, Quaternion.LookRotation(hit.normal), hit.transform);
                     Destroy(obj, 0.6f);
-                    
+
+                    Boss boss = hit.transform.GetComponent<Boss>();
                     // Slender & Girl have script on parent
                     Enemy parentEnemy = hit.transform.parent.GetComponent<Enemy>();
-                    if (parentEnemy != null)
+                    if (boss != null)
+                    {
+                        boss.GetHit();
+                    }
+                    else if (parentEnemy != null)
                     {
                         parentEnemy.TakeDamage(damage);
                         // Hit animation
@@ -161,6 +166,7 @@ public class Weapon : MonoBehaviour
         else
         {
             Debug.Log("Shoot: Out of ammo");
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "empty shot", 1f, 1f);
         }
 
         yield return new WaitForSeconds(timeBetweenShots);
@@ -204,6 +210,7 @@ public class Weapon : MonoBehaviour
         else
         {
             Debug.Log("Reload failed.");
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "error", 0.6f, 1f);
         }
 
         yield return new WaitForSeconds(timeOfReload);

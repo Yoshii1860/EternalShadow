@@ -57,7 +57,11 @@ public class ItemActions : MonoBehaviour
             potion.Painkillers(item);
         else if (item.type == ItemType.Weapon)
             InventoryManager.Instance.weapons.GetComponent<WeaponSwitcher>().SelectWeapon(item);
-        else InventoryManager.Instance.DisplayMessage("You cannot use this right now.");
+        else 
+        {
+            InventoryManager.Instance.DisplayMessage("You cannot use this right now.");
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "error", 0.6f, 1f);
+        }
     }
 
     /*
@@ -74,6 +78,7 @@ public class ItemActions : MonoBehaviour
     public void Inspect(Item item)
     {
         InventoryManager.Instance.Inspect(item);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "interact", 0.6f, 1f);
     }
 
     /// Throw away the specified item.
@@ -83,10 +88,12 @@ public class ItemActions : MonoBehaviour
         if (item.type == ItemType.Object || item.type == ItemType.Weapon)
         {
             InventoryManager.Instance.DisplayMessage("You cannot throw this away.");
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "error", 0.6f, 1f);
             return;
         }
         Debug.Log("ItemActions.ThrowAway(" + item.name + ")");
         InventoryManager.Instance.DropItem(item);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "interact", 0.6f, 1f);
     }
 
     #endregion

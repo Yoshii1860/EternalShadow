@@ -128,6 +128,7 @@ public class ObjectHandler : MonoBehaviour
         // Check if the player has space in the inventory
         if (InventoryManager.Instance.ItemCount() >= InventoryManager.Instance.maxItems)
         {
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "error", 0.6f, 1f);
             return true;
         }
         return false;

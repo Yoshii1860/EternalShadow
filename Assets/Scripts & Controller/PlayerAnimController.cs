@@ -123,6 +123,7 @@ public class PlayerAnimController : MonoBehaviour
         if (debugMode) Debug.Log("PlayerAnim - ReloadAnimation");
         // Initiates the reload animation
         animator.SetTrigger("Reload");
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "reload pistol", 0.6f, 1f);
     }
 
     #endregion

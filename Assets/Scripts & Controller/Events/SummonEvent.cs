@@ -6,9 +6,10 @@ public class SummonEvent : MonoBehaviour
 {
     [SerializeField] GameObject[] summoningObjects;
     [SerializeField] ParticleSystem summoningParticles;
-    [SerializeField] Transform girl;
-    [SerializeField] Vector3 girlPosition;
-    [SerializeField] Vector3 girlRotation;
+    [SerializeField] GameObject slender;
+    [SerializeField] GameObject girl;
+    [SerializeField] GameObject priest;
+    [SerializeField] GameObject loot;
 
     public void CheckItems()
     {
@@ -20,32 +21,35 @@ public class SummonEvent : MonoBehaviour
             }
         }
 
+        AudioManager.Instance.FadeOut(AudioManager.Instance.environment, 3f);
         summoningParticles.Play();
-        girl.gameObject.SetActive(false);
+
+        girl.SetActive(false);
+        slender.SetActive(false);
+        GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(girl.GetComponent<AISensor>());
+        GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(slender.GetComponent<AISensor>());
+
+        loot.SetActive(true);
+
         StartCoroutine(PlaySummoningAnimation());
     }
 
     IEnumerator PlaySummoningAnimation()
     {
-        girl.GetComponent<EnemyBT>().enabled = false;
-        girl.rotation = Quaternion.Euler(girlRotation);
-        girl.position = girlPosition;
-        girl.GetComponentInChildren<Renderer>().enabled = false;
+        priest.GetComponent<CapsuleCollider>().enabled = true;
+        priest.GetComponent<BoxCollider>().enabled = true; 
 
         yield return new WaitForSeconds(3f);
 
-        girl.gameObject.SetActive(true);
-        girl.GetComponent<Animator>().SetTrigger("Summon");
-
-        yield return new WaitForSeconds(0.5f);
-
-        girl.GetComponentInChildren<Renderer>().enabled = true;
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "horror chase music 3");
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.4f, 1f, true);
+        
+        priest.GetComponent<Animator>().SetTrigger("summon");
+        priest.GetComponent<AudioSource>().Play();
 
         yield return new WaitForSeconds(7f);
 
-        girl.GetComponent<EnemyBT>().ResetTree();
-        girl.GetComponent<EnemyBT>().enabled = true;
-        girl.GetComponent<Animator>().SetTrigger("Release");
+        priest.GetComponent<Boss>().FollowPlayer();
     }
 }
 

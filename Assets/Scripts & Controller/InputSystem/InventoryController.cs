@@ -229,6 +229,7 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
         inventoryClosing = true;
 
         // Resume the game
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "close inventory", 1f, 1f);
         GameManager.Instance.ResumeGame();
     }
 

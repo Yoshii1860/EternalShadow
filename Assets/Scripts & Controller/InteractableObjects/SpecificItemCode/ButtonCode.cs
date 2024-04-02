@@ -31,6 +31,8 @@ public class ButtonCode : InteractableObject
 
     IEnumerator StartEvent()
     {
+        AudioManager.Instance.FadeOut(AudioManager.Instance.environment, 2f);
+
         yield return new WaitForSeconds(1f);
 
         blackScreenCanvas.SetActive(true);
@@ -43,9 +45,13 @@ public class ButtonCode : InteractableObject
         }
         image.color = new Color(0, 0, 0, 1);
 
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "horror chase music 1");
+
         StartCoroutine(TextFade());
 
         yield return new WaitUntil(() => textFaded);
+
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.35f, 1f, true);
 
         for (float i = image.color.a; i > 0; i -= 0.01f)
         {

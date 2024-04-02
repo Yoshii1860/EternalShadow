@@ -10,6 +10,8 @@ public class BathroomEvent : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            AudioManager.Instance.FadeOut(AudioManager.Instance.environment, 2f);
+            Invoke("PlayNewAudio", 2f);
             if (!girl.gameObject.activeSelf)
             {
                 girl.gameObject.SetActive(true);
@@ -25,6 +27,12 @@ public class BathroomEvent : MonoBehaviour
         GameManager.Instance.customUpdateManager.AddCustomUpdatable(girl.GetComponent<AISensor>());
         girl.GetComponent<EnemyBT>().enabled = true;
         girl.GetComponentInChildren<Collider>().enabled = true;
+    }
+
+    void PlayNewAudio()
+    {
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "horror chase music 2");
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.35f, 1f, true);
     }
 }
 

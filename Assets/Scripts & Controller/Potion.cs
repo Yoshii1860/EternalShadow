@@ -57,10 +57,12 @@ public class Potion : MonoBehaviour
             InventoryManager.Instance.DisplayMessage("The effects of the poison start to fade away.");
             player.isPoisoned = false;
             InventoryManager.Instance.RemoveItem(item);
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "pills", 0.6f, 1f);
         }
         else
         {
             InventoryManager.Instance.DisplayMessage("You don`t have an infection.");
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "error", 0.6f, 1f);
         }
     }
 
@@ -79,10 +81,12 @@ public class Potion : MonoBehaviour
             player.isBleeding = false;
             player.health += 50;
             InventoryManager.Instance.RemoveItem(item);
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "bandage", 0.6f, 1f);
         }
         else
         {
             InventoryManager.Instance.DisplayMessage("You don`t have any wounds.");
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "error", 0.6f, 1f);
         }
     }
 
@@ -97,10 +101,12 @@ public class Potion : MonoBehaviour
             InventoryManager.Instance.DisplayMessage("The pain starts to fade away.");
             player.isDizzy = false;
             InventoryManager.Instance.RemoveItem(item);
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "pills", 0.6f, 1f);
         }
         else
         {
             InventoryManager.Instance.DisplayMessage("You don`t need those pills right now.");
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "error", 0.6f, 1f);
         }
     }
 
