@@ -9,7 +9,8 @@ public class LightSwitchCode : InteractableObject
     [Tooltip("All Lights to turn on/off")]
     [SerializeField] GameObject allLights;
     [Tooltip("The door to unlock")]
-    [SerializeField] ReflectionProbe[] reflectionProbes;
+    [SerializeField] GameObject reflectionProbes;
+    [SerializeField] GameObject reflectionProbesDark;
     [Tooltip("The handle to switch on the light")]
     [SerializeField] GameObject handle;
     [SerializeField] PaintingEvent paintingEvent;
@@ -62,16 +63,7 @@ public class LightSwitchCode : InteractableObject
             yield return null;
         }
 
-        //StartCoroutine(ActivateProbesGradually());
-    }
-
-    IEnumerator ActivateProbesGradually()
-    {
-        // Iterate through each reflection probe and render it with a delay
-        for (int i = 0; i < reflectionProbes.Length; i++)
-        {
-            reflectionProbes[i].RenderProbe();
-            yield return new WaitForSeconds(0.5f);
-        }
+        reflectionProbesDark.SetActive(false);
+        reflectionProbes.SetActive(true);
     }
 }

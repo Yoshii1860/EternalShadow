@@ -10,6 +10,9 @@ public class SummonEvent : MonoBehaviour
     [SerializeField] GameObject girl;
     [SerializeField] GameObject priest;
     [SerializeField] GameObject loot;
+    [SerializeField] GameObject speaker;
+    [SerializeField] Door[] doors;
+    [SerializeField] GameObject[] lockers;
 
     public void CheckItems()
     {
@@ -20,9 +23,11 @@ public class SummonEvent : MonoBehaviour
                 return;
             }
         }
-
+        AudioManager.Instance.PlayAudio(speaker.GetInstanceID(), 0.8f, 1f, false);
         AudioManager.Instance.FadeOut(AudioManager.Instance.environment, 3f);
         summoningParticles.Play();
+
+        CloseDoors();
 
         girl.SetActive(false);
         slender.SetActive(false);
@@ -36,8 +41,9 @@ public class SummonEvent : MonoBehaviour
 
     IEnumerator PlaySummoningAnimation()
     {
-        priest.GetComponent<CapsuleCollider>().enabled = true;
-        priest.GetComponent<BoxCollider>().enabled = true; 
+        yield return new WaitForSeconds(1f);
+
+        AudioManager.Instance.PlaySoundOneShot(priest.GetInstanceID(), "summoning", 0.8f, 1f);
 
         yield return new WaitForSeconds(3f);
 
@@ -45,11 +51,28 @@ public class SummonEvent : MonoBehaviour
         AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.4f, 1f, true);
         
         priest.GetComponent<Animator>().SetTrigger("summon");
-        priest.GetComponent<AudioSource>().Play();
 
         yield return new WaitForSeconds(7f);
 
+        AudioManager.Instance.FadeIn(priest.GetInstanceID(), 3f);
         priest.GetComponent<Boss>().FollowPlayer();
+        priest.GetComponent<CapsuleCollider>().enabled = true;
+        priest.GetComponent<BoxCollider>().enabled = true; 
+    }
+
+    void CloseDoors()
+    {
+        foreach (Door door in doors)
+        {
+            door.CloseDoor();
+            door.locked = true;
+            door.displayMessage = "This door cannot be opened!";
+        }
+
+        foreach (GameObject locker in lockers)
+        {
+            locker.GetComponent<LockerCode>().CloseLocker();
+        }
     }
 }
 

@@ -3,36 +3,89 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+public enum BossState { Chase, Attack, Stunned, Teleporting, Half, Die };
+
 public class Boss : MonoBehaviour, ICustomUpdatable
 {
     #region Fields
+    
+    public BossState currentState;
 
+    [Header("Boss Attributes")]
+    [Tooltip("Health of the boss")]
     public int health = 100;
-    public bool isDead = false;
+    [Tooltip("Damage dealt to the player")]
     public float damage = 25f;
+    [Space(10)]
+
+    [Header("Light Components")]
+    [Tooltip("Sun object in the scene")]
+    public GameObject sun;
+    [Tooltip("Reflection probes object in the scene")]
+    public GameObject reflectionProbes;
+    [Tooltip("Reflection probes object in the scene when half health is reached")]
+    public GameObject reflectionProbesDark;
+    [Tooltip("Lights container containing all the lights in the scene")]
+    public Transform lightsContainer;
+    [Space(10)]
+
+    [Header("Teleport Points")]
+    [Tooltip("Teleport points for the boss to move around the scene upstairs and downstairs")]
     public Transform[] teleportPointsUpstairs;
     public Transform[] teleportPointsDownstairs;
-    public ParticleSystem particleEffect;
-    public GameObject particlePrefab;
-    public GameObject priestMesh;
-    public bool chaseDEBUG = false;
-    public Transform player;
-    public AudioSource footsteps;
-    public AudioSource speaker;
-    private AudioSource breath;
 
+    [Header("Particles")]
+    [Tooltip("Dissolve particle system")]
+    public ParticleSystem dissolveParticle;
+    [Tooltip("Explosion particle system")]
+    public ParticleSystem explosionParticle;
+    [Tooltip("Steam particle system")]
+    public ParticleSystem steamParticle;
+    [Tooltip("Teleport particle system prefab")]
+    public GameObject particlePrefab;
+    [Tooltip("Steam particle system prefab")]
+    public GameObject steamPrefab;
+    [Tooltip("Fire particle system prefab")]
+    public GameObject firePrefab;
+    [Space(10)]
+
+    [Header("Other Components")]
+    [Tooltip("Mesh of the boss")]
+    public GameObject priestMesh;
+    [Tooltip("Player object")]
+    public Transform player;
+    [Space(10)]
+
+    [Header("Audio Components")]
+    [Tooltip("Footsteps audio source")]
+    public AudioSource footsteps;
+    [Tooltip("Speaker audio source")]
+    public AudioSource speaker;
+    [Tooltip("Breath audio source")]
+    private AudioSource breath;
+    [Space(10)]
+
+    [Header("Debug")]
+    [Tooltip("Debug mode")]
+    public bool debugMode = false;
+
+    // Other Boss components
     private Animator animator;
     private NavMeshAgent agent;
+    private Collider[] colliders;
 
-    private float scanFrequency = 1f;
-    private float timer = 0f;
-    private bool teleporting = false;
-    private bool started = false;
-
+    // Variables for calculations of teleport points
     private float distanceToPlayer = 100f;
     private int teleportPoint = 0;
 
+    // Booleans for states
     private bool hitted = false;
+    private bool teleporting = false;
+    private bool halfHealth = false;
+    private bool isDead = false;
+    private bool halfEventPlayed = false;
+    private bool halfEventStarted = false;
+
 
     #endregion
 
@@ -41,64 +94,115 @@ public class Boss : MonoBehaviour, ICustomUpdatable
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         breath = GetComponent<AudioSource>();
-        GameManager.Instance.customUpdateManager.AddCustomUpdatable(this);
+        colliders = GetComponents<Collider>();
     }
+
+    //////////////////////////////////////////////
+    // STATE MACHINE
+    //////////////////////////////////////////////
 
     public void CustomUpdate(float deltaTime)
     {
-        if (timer >= scanFrequency)
+        switch (currentState)
         {
-            timer = 0f;
-            if (!teleporting && started) Attack();
-        }
-        else
-        {
-            timer += deltaTime;
+            case BossState.Chase:
+                if (debugMode) Debug.Log("Chase");
+
+                if (Vector3.Distance(transform.position, player.position) < 3f)
+                {
+                    currentState = BossState.Attack;
+                }
+                else if (Vector3.Distance(transform.position, player.position) > 10f)
+                {
+                    animator.SetTrigger("idle");
+                    currentState = BossState.Teleporting;
+                }
+                Chase();
+                break;
+    //////////////////////////////////////////////
+            case BossState.Attack:
+                if (debugMode) Debug.Log("Attack");
+                if (Vector3.Distance(transform.position, player.position) > 3f && Vector3.Distance(transform.position, player.position) < 10f)
+                {
+                    animator.SetTrigger("walk");
+                    currentState = BossState.Chase;
+                }
+                else if (Vector3.Distance(transform.position, player.position) > 10f)
+                {
+                    animator.SetTrigger("idle");
+                    currentState = BossState.Teleporting;
+                }
+                else animator.SetTrigger("attack");
+                break;
+    //////////////////////////////////////////////
+            case BossState.Stunned:
+                if (debugMode) Debug.Log("Stunned");
+                Stunned();
+                break;
+    //////////////////////////////////////////////
+            case BossState.Teleporting:
+                if (debugMode) Debug.Log("Teleporting");
+                if (!teleporting) StartCoroutine(TeleportCoroutine());
+                break;
+    //////////////////////////////////////////////
+            case BossState.Half:
+                if (debugMode) Debug.Log("Half");
+                if (!halfEventStarted) StartCoroutine(HalfEventRoutine());
+                break;
+    //////////////////////////////////////////////
+            case BossState.Die:
+                if (debugMode) Debug.Log("Die");
+                if (!isDead) Die();
+                break;
         }
 
-        if (chaseDEBUG) FollowPlayer();
-
-        if (started) agent.SetDestination(player.position);
+        if (health <= 50 && !halfHealth)
+        {
+            halfHealth = true;
+            currentState = BossState.Half;
+        }
+        else if (health <= 0 && !isDead)
+        {
+            currentState = BossState.Die;
+        }
     }
 
-    void Attack()
+    //////////////////////////////////////////////
+    // STATE MACHINE END
+    //////////////////////////////////////////////
+
+
+
+    //////////////////////////////////////////////
+    //  Chase START
+    //////////////////////////////////////////////
+
+    void Chase()
     {
-        if (Vector3.Distance(transform.position, player.position) < 3f)
-        {
-            // play animation
-            animator.SetTrigger("attack");
-        }
-        else if (Vector3.Distance(transform.position, player.position) > 10f)
-        {
-            // teleport
-            Teleport();
-        }
-        else
-        {
-            animator.SetTrigger("walk");
-        }
+        agent.isStopped = false;
+        agent.SetDestination(player.position);
+        animator.SetTrigger("walk");
     }
 
-    void AttackAnim()
-    {
-        // deal damage to player
-        GameManager.Instance.player.TakeDamage(damage);
-        // play a sound
-        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "boss attack", 0.6f, 1f);
-    }
+    //////////////////////////////////////////////
+    //  Chase END
+    //////////////////////////////////////////////
 
-    public void GetHit()
+
+
+    //////////////////////////////////////////////
+    //  Stunned START
+    //////////////////////////////////////////////
+
+    void Stunned()
     {
-        if (!hitted)
-        {
-            footsteps.Pause();
-            hitted = true;
-            agent.isStopped = true;
-            teleporting = true;
-            animator.SetTrigger("hit");
-            StartCoroutine(ResetMovement());
-        }
-        health -= 10;
+        if (!hitted) hitted = true;
+        else return;
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "priest hit", 1f, 1f);
+        animator.SetTrigger("hit");
+        footsteps.Pause();
+        agent.isStopped = true;
+        StartCoroutine(ResetMovement());
     }
 
     IEnumerator ResetMovement()
@@ -106,57 +210,101 @@ public class Boss : MonoBehaviour, ICustomUpdatable
         yield return new WaitForSeconds(2f);
         breath.Pause();
         speaker.Play();
-        animator.SetTrigger("walk");
-        agent.isStopped = true;
         footsteps.UnPause();
-        teleporting = false;
+        currentState = BossState.Chase;
         yield return new WaitUntil (() => speaker.isPlaying == false);
         breath.UnPause();
+        yield return new WaitForSeconds(1f);
         hitted = false;
     }
 
-    void Teleport()
-    {
-        if (!teleporting) StartCoroutine(TeleportCoroutine());
-    }
+    //////////////////////////////////////////////
+    //  Stunned END
+    //////////////////////////////////////////////
+
+
+
+    //////////////////////////////////////////////
+    //  TELEPORT START
+    //////////////////////////////////////////////
 
     IEnumerator TeleportCoroutine()
     {
         teleporting = true;
+        foreach (Collider col in colliders) col.enabled = false;
         // Stop the priest
+        dissolveParticle.Play();
+        yield return new WaitForSeconds(3f);
+        animator.SetTrigger("idle");
         footsteps.Pause();
         agent.isStopped = true;
-        animator.SetTrigger("idle");
-        yield return new WaitForSeconds(0.5f);
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "explosion", 1f, 1f);
+        explosionParticle.Play();
+        GameObject firePS = Instantiate(firePrefab, transform.position, Quaternion.identity);
+        steamParticle.Play();
+        yield return new WaitForSeconds(0.3f);
         // play particle effect
-        particleEffect.Play();
+        priestMesh.SetActive(false);
         AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "teleport forth", 1f, 1f);
         // when particle effect is done, disable priest
-        yield return new WaitUntil(() => particleEffect.isStopped);
-        priestMesh.SetActive(false);
+        yield return new WaitForSeconds(1f);
         // move priest to another location
-        Transform teleporter = ScanPositions();
+        dissolveParticle.Stop();
+        explosionParticle.Stop();
+        steamParticle.Stop();
+        Transform[] teleporters = ScanPositions();
         yield return new WaitForSeconds(0.25f);
         // instantiate particle prefab
-        GameObject obj = Instantiate(particlePrefab, teleporter.position, Quaternion.identity);
+        GameObject obj = Instantiate(particlePrefab, teleporters[0].position, Quaternion.identity);
+        GameObject obj2 = null;
+        if (halfHealth) obj2 = Instantiate(particlePrefab, teleporters[1].position, Quaternion.identity);
+
+        if (halfHealth && !halfEventPlayed)
+        {
+            StartCoroutine(HalfEventRoutine());
+            yield return new WaitUntil(() => halfEventPlayed == true);
+        }
+
         obj.GetComponent<ParticleSystem>().Play();
+        GameObject steamPS = Instantiate(steamPrefab, teleporters[0].position, Quaternion.identity);
+        GameObject steamPS2 = null;
+        if (halfHealth) 
+        {
+            obj2.GetComponent<ParticleSystem>().Play();
+            steamPS2 = Instantiate(steamPrefab, teleporters[1].position, Quaternion.identity);
+        }
+        yield return new WaitForSeconds(2f);
         AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "teleport back", 1f, 1f);
-        transform.position = teleporter.position;
-        // after 1-2 seconds, enable priest
-        yield return new WaitForSeconds(1.5f);
+        // random number between 0 and 1   
+        int random = 0;
+        if (halfHealth) random = Random.Range(0, 2);
+        transform.position = teleporters[random].position;
         priestMesh.SetActive(true);
+        hitted = true;
+        Destroy(firePS);
+        foreach (Collider col in colliders) col.enabled = true;
         // follow player
         yield return new WaitForSeconds(0.5f);
         footsteps.UnPause();
-        animator.SetTrigger("walk");
         agent.isStopped = false;
+        animator.SetTrigger("walk");
+        currentState = BossState.Chase;
         // destroy particle prefab
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1.5f);
+        hitted = false;
+        yield return new WaitForSeconds(0.5f);
         Destroy(obj);
+        Destroy(steamPS);
+        if (halfHealth) 
+        {
+            Destroy(obj2);
+            Destroy(steamPS2);
+        }
         teleporting = false;
+
     }
 
-    Transform ScanPositions()
+    Transform[] ScanPositions()
     {
         if (player.position.y < -3.76f)
         {
@@ -170,7 +318,14 @@ public class Boss : MonoBehaviour, ICustomUpdatable
                 }
             }
             StartCoroutine(ResetDistance());
-            return teleportPointsDownstairs[teleportPoint];
+
+            Transform[] teleportPoints = new Transform[2];
+            teleportPoints[0] = teleportPointsDownstairs[teleportPoint];
+            if (teleportPoint + 1 != teleportPointsDownstairs.Length) 
+                teleportPoints[1] = teleportPointsDownstairs[teleportPoint + 1];
+            else if (teleportPoint - 1 != -1)
+                teleportPoints[1] = teleportPointsDownstairs[teleportPoint - 1];
+            return teleportPoints;
         }
         else
         {
@@ -184,7 +339,14 @@ public class Boss : MonoBehaviour, ICustomUpdatable
                 }
             }
             StartCoroutine(ResetDistance());
-            return teleportPointsUpstairs[teleportPoint];
+
+            Transform[] teleportPoints = new Transform[2];
+            teleportPoints[0] = teleportPointsUpstairs[teleportPoint];
+            if (teleportPoint + 1 != teleportPointsUpstairs.Length) 
+                teleportPoints[1] = teleportPointsUpstairs[teleportPoint + 1];
+            else if (teleportPoint - 1 != -1)
+                teleportPoints[1] = teleportPointsUpstairs[teleportPoint - 1];
+            return teleportPoints;
         }
     }
 
@@ -194,19 +356,112 @@ public class Boss : MonoBehaviour, ICustomUpdatable
         distanceToPlayer = 100f;
     }
 
-    public void FollowPlayer()
+    //////////////////////////////////////////////
+    //  TELEPORT END
+    //////////////////////////////////////////////
+
+
+
+    //////////////////////////////////////////////
+    //  Half Event START
+    //////////////////////////////////////////////
+
+    IEnumerator HalfEventRoutine()
     {
-        started = true;
-        animator.SetTrigger("walk");
-        agent.SetDestination(player.position);
-        Debug.Log("START TO FOLLOW PLAYER");
-        footsteps.Play();
+        halfEventStarted = true;
+        yield return new WaitUntil(() => teleporting == false);
+
+        LightsOff(lightsContainer);
+        yield return new WaitForSeconds(0.5f);
+        reflectionProbes.SetActive(false);
+        reflectionProbesDark.SetActive(true);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "power down", 0.5f, 1f);
+        yield return new WaitForSeconds(5f);
+        agent.speed = 5f;
+        halfEventPlayed = true;
     }
+
+    void LightsOff(Transform lights)
+    {
+        for (int i = 0; i < lights.childCount; i++)
+        {
+            Transform lightChild = lights.GetChild(i);
+            Light light = lightChild.GetComponent<Light>();
+            if (light != null)
+            {
+                light.enabled = false;
+            }
+            else if (lightChild.childCount > 0)
+            {
+                LightsOff(lightChild);
+            }
+        }
+        sun.SetActive(false);
+    }
+
+    //////////////////////////////////////////////
+    //  Half Event END
+    //////////////////////////////////////////////
+
+
+
+    //////////////////////////////////////////////
+    //  DIE START
+    //////////////////////////////////////////////
 
     void Die()
     {
-        
+        isDead = true;
+        agent.isStopped = true;
+        speaker.Stop();
+        footsteps.Stop();
+        AudioManager.Instance.FadeOut(breath.gameObject.GetInstanceID(), 1f);
+        AudioManager.Instance.FadeOut(AudioManager.Instance.environment, 5f);
+        dissolveParticle.Stop();
+        explosionParticle.Stop();
+        steamParticle.Stop();
+        animator.SetTrigger("die");
+        GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(this);
     }
 
+    //////////////////////////////////////////////
+    //  DIE END
+    //////////////////////////////////////////////
 
+
+
+    //////////////////////////////////////////////
+    //  PUBLIC AND EVENT METHODS
+    //////////////////////////////////////////////
+
+    // Used to start the event
+    public void FollowPlayer()
+    {
+        GameManager.Instance.customUpdateManager.AddCustomUpdatable(this);
+        currentState = BossState.Chase;
+        footsteps.Play();
+        Debug.Log("START TO FOLLOW PLAYER");
+    }
+
+    // called by weapon script
+    public void GetHit()
+    {
+        health -= 10;
+        if (health <= 50 && !halfHealth) return;
+        if (currentState != BossState.Stunned && health > 0 && !hitted) currentState = BossState.Stunned;
+        else if (health <= 0) currentState = BossState.Die;
+    }
+
+    // called by animation event
+    void AttackAnim()
+    {
+        // deal damage to player
+        GameManager.Instance.player.TakeDamage(damage);
+        // play a sound
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "mannequin hit", 0.6f, 1f);
+    }
+
+    //////////////////////////////////////////////
+    //  PUBLIC AND EVENT METHODS END
+    //////////////////////////////////////////////
 }

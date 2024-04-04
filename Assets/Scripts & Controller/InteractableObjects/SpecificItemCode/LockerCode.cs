@@ -7,7 +7,6 @@ public class LockerCode : InteractableObject
     [Space(10)]
     [Header("RUN ITEM CODE")]
     [SerializeField] Transform door;
-    [SerializeField] GameObject wall;
     MeshRenderer doorMesh;
     bool insideCollider = false;
     bool open = false;
@@ -68,6 +67,15 @@ public class LockerCode : InteractableObject
         }
     }
 
+    public void CloseLocker()
+    {
+        if (open)
+        {
+            StartCoroutine(ShutDown());
+        }
+        else locked = true;
+    }
+
 
     IEnumerator Open()
     {
@@ -110,5 +118,19 @@ public class LockerCode : InteractableObject
 
         locked = false;
         open = false;
+    }
+
+    IEnumerator ShutDown()
+    {
+        locked = true;
+        
+        // close the door of the locker
+        float t = 0;
+        while (t < 1f)
+        {
+            t += Time.deltaTime;
+            door.localRotation = Quaternion.Lerp(door.localRotation, Quaternion.Euler(0, 0, 0), t);
+            yield return null;
+        }
     }
 }

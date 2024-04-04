@@ -21,7 +21,9 @@ public class YardEvent : MonoBehaviour
     [Tooltip("The main light above the enemy")]
     [SerializeField] GameObject mainLight;
     [Tooltip("The reflection probes inside the house")]
-    [SerializeField] ReflectionProbe[] reflectionProbes;
+    [SerializeField] GameObject reflectionProbes;
+    [Tooltip("The reflection probes inside the house after the event")]
+    [SerializeField] GameObject reflectionProbesDark;
     [Tooltip("All red lights inside and outside the house")]
     [SerializeField] GameObject[] alertLights;
     [Tooltip("The head object of the girl")]
@@ -183,7 +185,8 @@ public class YardEvent : MonoBehaviour
         AudioManager.Instance.FadeOut(girl.GetInstanceID(), 0.5f);
 
         // Start a coroutine to activate reflection probes gradually
-        StartCoroutine(ActivateProbesGradually());
+        reflectionProbes.SetActive(false);
+        reflectionProbesDark.SetActive(true);
     }
 
     #endregion
@@ -414,17 +417,6 @@ public class YardEvent : MonoBehaviour
         // Play the player's voice audio after a short delay
         AudioManager.Instance.PlayAudioWithDelay(AudioManager.Instance.playerSpeaker, 2f);
     }
-
-    /// Gradually activates reflection probes, adjusting to the changing environment.
-    IEnumerator ActivateProbesGradually()
-    {
-        // Iterate through each reflection probe and render it with a delay
-        for (int i = 0; i < reflectionProbes.Length; i++)
-        {
-            reflectionProbes[i].RenderProbe();
-            yield return new WaitForSeconds(0.5f);
-        }
-    }
-
+    
     #endregion
 }

@@ -125,10 +125,12 @@ public class Weapon : MonoBehaviour
                     Enemy parentEnemy = hit.transform.parent.GetComponent<Enemy>();
                     if (boss != null)
                     {
+                        AudioManager.Instance.PlaySoundOneShot(boss.gameObject.GetInstanceID(), "bullet hit", 0.6f, 1f);
                         boss.GetHit();
                     }
                     else if (parentEnemy != null)
                     {
+                        AudioManager.Instance.PlaySoundOneShot(parentEnemy.gameObject.GetInstanceID(), "bullet hit", 0.6f, 1f);
                         parentEnemy.TakeDamage(damage);
                         // Hit animation
                     }
