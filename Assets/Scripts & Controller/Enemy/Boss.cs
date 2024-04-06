@@ -3,19 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public enum BossState { Chase, Attack, Stunned, Teleporting, Half, Die };
+public enum BossState { Chase, Attack, Stunned, Teleporting, Half, Die, Pause };
 
 public class Boss : MonoBehaviour, ICustomUpdatable
 {
     #region Fields
     
     public BossState currentState;
+    private BossState previousState;
 
     [Header("Boss Attributes")]
     [Tooltip("Health of the boss")]
     public int health = 100;
     [Tooltip("Damage dealt to the player")]
     public float damage = 25f;
+    [Tooltip("Attack range of the boss")]
+    public float attackRange = 2.5f;
+    [Tooltip("Teleport range of the boss")]
+    public float teleportRange = 11f;
     [Space(10)]
 
     [Header("Light Components")]
@@ -86,7 +91,6 @@ public class Boss : MonoBehaviour, ICustomUpdatable
     private bool halfEventPlayed = false;
     private bool halfEventStarted = false;
 
-
     #endregion
 
     void Start()
@@ -103,16 +107,24 @@ public class Boss : MonoBehaviour, ICustomUpdatable
 
     public void CustomUpdate(float deltaTime)
     {
+        if (GameManager.Instance.isPaused && currentState != BossState.Pause) 
+        {
+            previousState = currentState;
+            currentState = BossState.Pause;
+        }
+        else if (GameManager.Instance.isPaused) return;
+        else if (!GameManager.Instance.isPaused && currentState == BossState.Pause) return;
+
         switch (currentState)
         {
             case BossState.Chase:
                 if (debugMode) Debug.Log("Chase");
 
-                if (Vector3.Distance(transform.position, player.position) < 3f)
+                if (Vector3.Distance(transform.position, player.position) < attackRange)
                 {
                     currentState = BossState.Attack;
                 }
-                else if (Vector3.Distance(transform.position, player.position) > 10f)
+                else if (Vector3.Distance(transform.position, player.position) > teleportRange)
                 {
                     animator.SetTrigger("idle");
                     currentState = BossState.Teleporting;
@@ -122,12 +134,12 @@ public class Boss : MonoBehaviour, ICustomUpdatable
     //////////////////////////////////////////////
             case BossState.Attack:
                 if (debugMode) Debug.Log("Attack");
-                if (Vector3.Distance(transform.position, player.position) > 3f && Vector3.Distance(transform.position, player.position) < 10f)
+                if (Vector3.Distance(transform.position, player.position) > attackRange && Vector3.Distance(transform.position, player.position) < teleportRange)
                 {
                     animator.SetTrigger("walk");
                     currentState = BossState.Chase;
                 }
-                else if (Vector3.Distance(transform.position, player.position) > 10f)
+                else if (Vector3.Distance(transform.position, player.position) > teleportRange)
                 {
                     animator.SetTrigger("idle");
                     currentState = BossState.Teleporting;
@@ -154,6 +166,10 @@ public class Boss : MonoBehaviour, ICustomUpdatable
                 if (debugMode) Debug.Log("Die");
                 if (!isDead) Die();
                 break;
+            case BossState.Pause:
+                if (debugMode) Debug.Log("Pause");
+                StartCoroutine(PauseGame());
+                break;
         }
 
         if (health <= 50 && !halfHealth)
@@ -169,6 +185,28 @@ public class Boss : MonoBehaviour, ICustomUpdatable
 
     //////////////////////////////////////////////
     // STATE MACHINE END
+    //////////////////////////////////////////////
+
+
+
+    //////////////////////////////////////////////
+    //  PAUSE START
+    //////////////////////////////////////////////
+
+    IEnumerator PauseGame()
+    {
+        agent.isStopped = true;
+        breath.Pause();
+        footsteps.Pause();
+        yield return new WaitUntil(() => GameManager.Instance.isPaused == false);
+        breath.UnPause();
+        footsteps.UnPause();
+        agent.isStopped = false;
+        currentState = previousState;
+    }
+
+    //////////////////////////////////////////////
+    //  PAUSE END
     //////////////////////////////////////////////
 
 

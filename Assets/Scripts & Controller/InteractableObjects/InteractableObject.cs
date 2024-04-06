@@ -35,6 +35,8 @@ public class InteractableObject : MonoBehaviour
     {
         Debug.Log("Interacting with the base interactable object.");
 
+        if (active) active = false;
+
         if (!isPickup) 
         {
             RunItemCode();

@@ -27,6 +27,8 @@ public class CrowbarCode : MonoBehaviour
 
     public void DeactivateCrowbar()
     {
+        GameManager.Instance.eventData.SetEvent("Rails");
+        GameManager.Instance.playerController.ToggleArms(true);
         firstRailing.transform.GetComponentInChildren<Collider>().enabled = false;
         secondRailing.transform.GetComponentInChildren<Collider>().enabled = false;
         GameManager.Instance.playerController.SetFollowTarget();
@@ -34,5 +36,11 @@ public class CrowbarCode : MonoBehaviour
         mirrorCode.enabled = true;
         GameManager.Instance.customUpdateManager.AddCustomUpdatable(mirrorCode);
         gameObject.SetActive(false);
+    }
+
+    public void EventLoad()
+    {
+        firstRailing.gameObject.SetActive(false);
+        secondRailing.gameObject.SetActive(false);
     }
 }

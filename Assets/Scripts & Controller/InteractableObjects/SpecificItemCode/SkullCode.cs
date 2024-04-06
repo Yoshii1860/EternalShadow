@@ -22,10 +22,13 @@ public class SkullCode : InteractableObject
     // Override the base class method for specific implementation
     protected override void RunItemCode()
     {
+        if (GameManager.Instance.eventData.CheckEvent("Skull")) return;
+
         Item item = InventoryManager.Instance.FindItem("Bonesaw");
 
         if (item != null)
         {
+            GameManager.Instance.eventData.SetEvent("Skull");
             InventoryManager.Instance.RemoveItem(item);
             bonesaw.SetActive(true);
             GameManager.Instance.GameplayEvent();
@@ -38,6 +41,14 @@ public class SkullCode : InteractableObject
         {
             GameManager.Instance.DisplayMessage(displayMessage, 2f);
         }
+    }
+
+    public void EventLoad()
+    {
+        bonesaw.SetActive(false);
+        skullcap.transform.localPosition = new Vector3(0, 0.022f, -0.007f);
+        skullcap.transform.localRotation = Quaternion.Euler(-15.45f, 16.68f, 102.13f);
+        skullcap.transform.parent.GetComponent<Collider>().enabled = false;
     }
 
     IEnumerator CutSkull()

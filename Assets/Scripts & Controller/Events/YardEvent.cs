@@ -189,6 +189,36 @@ public class YardEvent : MonoBehaviour
         reflectionProbesDark.SetActive(true);
     }
 
+    public void EventLoad()
+    {
+        if (!GameManager.Instance.eventData.CheckEvent("Light"))
+        {
+            foreach (Light l in allLights.GetComponentsInChildren<Light>())
+            {
+                l.enabled = false;
+            }
+
+            reflectionProbesDark.SetActive(true);
+            reflectionProbes.SetActive(false);
+
+            LightSwitch[] lightSwitches = FindObjectsOfType<LightSwitch>();
+            foreach (LightSwitch lightSwitch in lightSwitches)
+            {
+                lightSwitch.noCurrent = true;
+            }
+
+            for (int i = 0; i < alertLights.Length; i++)
+            {
+                alertLights[i].GetComponent<Light>().enabled = true;
+            }
+        }
+
+        if (!GameManager.Instance.eventData.CheckEvent("Musicbox"))
+        {
+            musicBox = true;
+        }
+    }
+
     #endregion
 
     #region Coroutines
@@ -410,6 +440,8 @@ public class YardEvent : MonoBehaviour
         // Wait until the game state transitions to the default state
         Debug.Log("Waiting for game state to transition to default...");
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
+
+        GameManager.Instance.eventData.SetEvent("Yard");
 
         // Start Audio for Musicbox
         musicBox = true;

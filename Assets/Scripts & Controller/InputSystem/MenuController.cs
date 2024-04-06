@@ -57,6 +57,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     [SerializeField] Transform exitButton;
     [SerializeField] Transform loadMenu;
     [SerializeField] Transform saveMenu;
+    [SerializeField] Transform deathScreen;
     [SerializeField] Transform saveFileContainer;
     [SerializeField] Transform loadFileContainer;
     [SerializeField] Button returnFromLoadButton;
@@ -68,6 +69,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     Button[] buttons;
     Button selectedButton;
     int buttonNumber;
+    bool isDead = false;
     public bool canCloseMenu = true;
     public float customTimer = 0f;
 
@@ -109,7 +111,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
         #endregion
 
-        menus = new Transform[] { mainMenu, loadMenu, saveMenu };
+        menus = new Transform[] { mainMenu, loadMenu, saveMenu, deathScreen };
         initialButtonPositions[newGameButton.transform] = newGameButton.transform.position;
         initialButtonPositions[loadGameButton.transform] = loadGameButton.transform.position;
         initialButtonPositions[exitButton.transform] = exitButton.transform.position;
@@ -148,6 +150,22 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
     #endregion
 
+
+
+    #region Public Methods
+
+    public void DeathScreen()
+    {
+        Debug.Log("Death Screen!!!!!");
+        isDead = true;
+        ActivateMenu(deathScreen, false);
+        //menuCanvas.SetActive(true);
+    }
+
+    #endregion
+
+    
+
     #region Input Handling
 
     public void OnInteract(InputAction.CallbackContext context)
@@ -184,13 +202,16 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         if (selectedButton == null) return;
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.playerSpeaker, "woosh");
         AudioManager.Instance.PlayAudio(AudioManager.Instance.playerSpeaker, 0.8f, 1f, false);
-        if (selectedButton.gameObject.CompareTag("NewGameButton"))              StartCoroutine(StartNewGame());
-        else if (selectedButton.gameObject.CompareTag("LoadGameButton"))        ActivateMenu(loadMenu);
-        else if (selectedButton.gameObject.CompareTag("LoadReturnButton"))      Return(returnFromLoadButton);
-        else if (selectedButton.gameObject.CompareTag("SaveReturnButton"))      Return(returnFromSaveButton);
-        else if (selectedButton.gameObject.CompareTag("LoadFileButton"))        LoadFile();
-        else if (selectedButton.gameObject.CompareTag("SaveFileButton"))        SaveFile();
-        else if (selectedButton.gameObject.CompareTag("ExitButton"))            ExitGame();
+        if (string.Compare(selectedButton.gameObject.name, "NewGame") == 0)                     StartCoroutine(StartNewGame());
+        else if (string.Compare(selectedButton.gameObject.name, "LoadGame") == 0)               ActivateMenu(loadMenu);
+        else if (string.Compare(selectedButton.gameObject.name, "Return") == 0 
+                && loadMenu.gameObject.activeSelf)                                              Return(returnFromLoadButton);
+        else if (string.Compare(selectedButton.gameObject.name, "Return") == 0 
+                && saveMenu.gameObject.activeSelf)                                              Return(returnFromSaveButton);
+        else if (selectedButton.gameObject.CompareTag("LoadFileButton"))                        LoadFile();
+        else if (selectedButton.gameObject.CompareTag("SaveFileButton"))                        SaveFile();
+        else if (string.Compare(selectedButton.gameObject.name, "ExitGame") == 0)               ExitGame();
+        else if (string.Compare(selectedButton.gameObject.name, "Retry") == 0)                  LoadAuotsave();
     }
 
     void Move()
@@ -262,14 +283,16 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
         bool mainMenuActive = SceneManager.GetActiveScene().name == "MainMenu";
 
-        if (mainMenu.gameObject.activeSelf && canCloseMenu)         
+        if (mainMenu.gameObject.activeSelf && canCloseMenu && !isDead)         
         {
             ActivateMenu(mainMenu, false);
             GameManager.Instance.ResumeGame();
             menuCanvas.SetActive(false);
         }
-        else if (loadMenu.gameObject.activeSelf)    ActivateMenu(mainMenu, mainMenuActive);
-        else if (saveMenu.gameObject.activeSelf)    ActivateMenu(mainMenu, mainMenuActive);
+        else if (loadMenu.gameObject.activeSelf && !isDead)     ActivateMenu(mainMenu, mainMenuActive);
+        else if (loadMenu.gameObject.activeSelf && isDead)      ActivateMenu(deathScreen, mainMenuActive);
+        else if (saveMenu.gameObject.activeSelf && !isDead)     ActivateMenu(mainMenu, mainMenuActive);
+        else if (saveMenu.gameObject.activeSelf && isDead)      ActivateMenu(deathScreen, mainMenuActive);
     }
 
     #endregion
@@ -449,6 +472,20 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         GameManager.Instance.SaveData(filename);
         ActivateMenu(mainMenu, false);
         menuCanvas.SetActive(false);
+    }
+
+    public void LoadAuotsave()
+    {
+        string[] savedFiles = GetSavedFiles();
+        string autosave = "autosave";
+        foreach (string file in savedFiles)
+        {
+            if (file.Contains(autosave))
+            {
+                GameManager.Instance.LoadNewScene(file, false);
+                return;
+            }
+        }
     }
 
     #endregion

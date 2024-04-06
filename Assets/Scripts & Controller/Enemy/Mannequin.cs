@@ -15,7 +15,7 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     [SerializeField] Transform[] bodyParts;
     [SerializeField] Transform[] deathParts;
     [Tooltip("Maximum distance at which the mannequin can follow the player")]
-    [SerializeField] float maxDistance = 18f;
+    [SerializeField] float maxDistance = 12f;
     #endregion
 
     #region Private Fields

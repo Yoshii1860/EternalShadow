@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class Duplicate : MonoBehaviour
 {
-    [SerializeField] string duplicateID;
-    [SerializeField] GameObject duplicateObject;
+    public string duplicateID;
+    public GameObject duplicateObject;
+
+    void Start()
+    {
+        duplicateID = duplicateObject.GetComponent<UniqueIDComponent>().UniqueID;
+    }
 }

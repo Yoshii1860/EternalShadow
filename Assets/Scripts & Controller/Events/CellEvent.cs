@@ -27,6 +27,19 @@ public class CellEvent : MonoBehaviour
         }
     }
 
+    public void EventLoad()
+    {
+        unflippedCell.SetActive(false);
+        flippedCell.SetActive(true);
+        for (int i = 0; i < mannequins.Length; i++)
+        {
+            if (!mannequins[i].activeSelf) continue;
+            Mannequin mannequinCode = mannequins[i].GetComponent<Mannequin>();
+            mannequinCode.started = true;
+            mannequinCode.move = true;
+        }
+    }
+
     void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Player")
@@ -38,6 +51,7 @@ public class CellEvent : MonoBehaviour
                 unflippedCell.SetActive(true);
                 flippedCell.SetActive(false);
                 horrorDoll.SetActive(false);
+                GameManager.Instance.eventData.SetEvent("Flipped");
                 for (int i = 0; i < mannequins.Length; i++)
                 {
                     Debug.Log("Mannequin " + i + " activated");

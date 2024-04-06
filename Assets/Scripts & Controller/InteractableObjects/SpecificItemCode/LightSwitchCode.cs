@@ -22,12 +22,32 @@ public class LightSwitchCode : InteractableObject
     protected override void RunItemCode()
     {
         if (eventStarted) return;
+        if (GameManager.Instance.eventData.CheckEvent("Light")) return;
+        GameManager.Instance.eventData.SetEvent("Light");
         paintingEvent.active = true;
         doorToUnlock.locked = false;
         doorToUnlock2.locked = false;
         StartCoroutine(RotateHandleGradually());
 
         // Find All scripts "LightSwitch" in scene
+        LightSwitch[] lightSwitches = FindObjectsOfType<LightSwitch>();
+        foreach (LightSwitch lightSwitch in lightSwitches)
+        {
+            lightSwitch.noCurrent = false;
+        }
+    }
+
+    public void EventLoad()
+    {
+        paintingEvent.active = true;
+        foreach (Light l in allLights.GetComponentsInChildren<Light>())
+        {
+            l.enabled = true;
+        }
+
+        reflectionProbesDark.SetActive(false);
+        reflectionProbes.SetActive(true);
+
         LightSwitch[] lightSwitches = FindObjectsOfType<LightSwitch>();
         foreach (LightSwitch lightSwitch in lightSwitches)
         {

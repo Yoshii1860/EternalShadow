@@ -21,6 +21,8 @@ public class ButtonCode : InteractableObject
     // Override the base class method for specific implementation
     protected override void RunItemCode()
     {
+        if (GameManager.Instance.eventData.CheckEvent("Button")) return;
+        GameManager.Instance.eventData.SetEvent("Button");
         animator = GetComponent<Animator>();
         animator.SetTrigger("Button");
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "push button", 1f, 1f);

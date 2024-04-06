@@ -16,7 +16,7 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
     [SerializeField] Door door; // Reference to the door object to see if it´s closed
     [SerializeField] Light roomLights; // Reference to the room lights to see if they are on
 
-    bool once = true; // Flag to track if the event has been triggered
+    bool once = false; // Flag to track if the event has been triggered
 
     void Start()
     {
@@ -30,6 +30,13 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
     
     public void CustomUpdate(float deltaTime)
     {
+        if (GameManager.Instance.eventData.CheckEvent("Mirror") && !once)
+        {
+            once = true;
+            animator.transform.position = new Vector3(6.61549997f, 0.888799667f, 2.56540012f);
+            animator.transform.eulerAngles = new Vector3(0, 0, 277.630005f);
+        }
+
         if (GameManager.Instance.player.flashlight.enabled) RaycastOnMirror();
     }
 
@@ -62,7 +69,7 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
             // Smoothly rotate the spotlight towards the target rotation
             spotlightTransform.localEulerAngles = angle;
 
-            CheckMirrorHit(angleDegreesNormal);
+            if (!GameManager.Instance.eventData.CheckEvent("Mirror")) CheckMirrorHit(angleDegreesNormal);
         }
         else
         {
@@ -82,9 +89,9 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
             && angle                                > 14.2 
             && angle                                < 14.6)
             {
-                if (GameManager.Instance.player.flashlight.spotAngle < 35f && !roomLights.enabled && once)
+                if (GameManager.Instance.player.flashlight.spotAngle < 35f && !roomLights.enabled && !once)
                 {
-                    once = false;
+                    once = true;
                     Vector3 playerPosition = GameManager.Instance.player.transform.position;
                     Vector3 playerEulerAngles = GameManager.Instance.player.transform.eulerAngles;
                     StartCoroutine(EndEvent(playerPosition, playerEulerAngles));
@@ -123,6 +130,7 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
         GameManager.Instance.playerController.SetFollowTarget();
         secondSpotlight.SetActive(false);
         GameManager.Instance.ResumeGame();
+        GameManager.Instance.eventData.SetEvent("Mirror");
         this.enabled = false;
     }
 }

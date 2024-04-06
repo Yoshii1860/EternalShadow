@@ -77,9 +77,11 @@ public class GameManager : MonoBehaviour
     public Player player;
     public PlayerController playerController;
     public PlayerAnimController playerAnimController;
-    public Transform objectPool;
     public Transform enemyPool;
-    public Transform interactObjectPool;
+    public Transform interactableObjectPool;    
+    public Transform interactStaticObjectPool;
+    public Transform doorObjectPool;
+    public EventData eventData;
     public GameObject blackScreen;
     public GameObject fpsArms;
 
@@ -113,6 +115,10 @@ public class GameManager : MonoBehaviour
     public bool noNoiseMode = false;
     [Tooltip("When set to true, all saved files will be deleted and the bool sets back to false. Set during gameplay.")]
     [SerializeField] bool _deleteSaveFiles = false;
+    [Tooltip("When set to true, the game will be saved and the bool sets back to false. Set during gameplay.")]
+    public bool saveGame = false;
+    [Tooltip("When set to true, the game will be loaded and the bool sets back to false. Set during gameplay.")]
+    public bool loadGame = false;
 
     // Public property for deleteSaveFiles
     public bool DeleteSaveFiles
@@ -147,9 +153,8 @@ public class GameManager : MonoBehaviour
         inventoryCanvas = inventory.transform.GetChild(0).gameObject;
 
         // Find and assign object pools
-        objectPool = GameObject.FindWithTag("ObjectPool").transform;
         enemyPool = GameObject.FindWithTag("EnemyPool").transform;
-        interactObjectPool = GameObject.FindWithTag("InteractObjectPool").transform;
+        interactableObjectPool = GameObject.FindWithTag("InteractableObjectPool").transform;
 
         // Update references in InventoryManager
         if(InventoryManager.Instance != null)
@@ -245,6 +250,18 @@ public class GameManager : MonoBehaviour
         {
             DeleteAllSaveFiles();
             DeleteSaveFiles = false;
+        }
+
+        if (saveGame)
+        {
+            saveGame = false;
+            SaveData("debugSaveName");
+        }
+
+        if (loadGame)
+        {
+            loadGame = false;
+            LoadData("debugSaveName");
         }
     }
 
@@ -344,6 +361,15 @@ public class GameManager : MonoBehaviour
         MenuController.Instance.customTimer = 0f;
         MenuController.Instance.canCloseMenu = false;
         MenuController.Instance.menuCanvas.SetActive(true);
+        SetGameState(GameState.MainMenu);
+    }
+
+    public void OpenDeathScreen()
+    {
+        MenuController.Instance.customTimer = 0f;
+        MenuController.Instance.canCloseMenu = false;
+        MenuController.Instance.menuCanvas.SetActive(true);
+        MenuController.Instance.DeathScreen();
         SetGameState(GameState.MainMenu);
     }
 
@@ -613,7 +639,7 @@ public class GameManager : MonoBehaviour
 
     public void SaveData(string filename = "autosave")
     {
-        SaveSystem.SaveGameFile(filename, player, InventoryManager.Instance.weapons.transform, objectPool, enemyPool, interactObjectPool);
+        SaveSystem.SaveGameFile(filename, player, InventoryManager.Instance.weapons.transform, enemyPool, interactableObjectPool, interactStaticObjectPool, doorObjectPool, eventData);
         Debug.Log("GameManager.cs: Player data saved!");
     }
 
@@ -683,33 +709,6 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-
-            ////////////////////////////
-            // Load Pickup Objects
-            ////////////////////////////
-            ItemController[] pickupObjectsPool = objectPool.GetComponentsInChildren<ItemController>();
-
-            foreach (PickupObjectData pickupObjectData in data.pickupObjects)
-            {
-                foreach (ItemController pickupObject in pickupObjectsPool)
-                {
-                    if (pickupObject.GetComponent<UniqueIDComponent>().UniqueID == pickupObjectData.uniqueID)
-                    {
-                        pickupObject.isPickedUp = pickupObjectData.isPickedUp;
-                        if (pickupObject.isPickedUp)
-                        {
-                            // Move the object to a position far away
-                            pickupObject.transform.position = new Vector3(0, -1000f, 0);
-                        }
-                        else
-                        {
-                            // If it's not picked up, reset its position to its initial position.
-                            pickupObject.transform.position = pickupObject.originalPosition;
-                        }
-                    }
-                }
-            }
-
             ////////////////////////////
             // Load Enemies
             ////////////////////////////
@@ -741,23 +740,108 @@ public class GameManager : MonoBehaviour
             ////////////////////////////
             // Load Interactable Objects
             ////////////////////////////
-            InteractableObject[] intObjPool = interactObjectPool.GetComponentsInChildren<InteractableObject>(true);
+            InteractableObject[] intObjectsPool = interactableObjectPool.GetComponentsInChildren<InteractableObject>();
+            Duplicate[] duplicatesPool = interactableObjectPool.GetComponentsInChildren<Duplicate>();
 
-            foreach (InteractableObjectData intObjData in data.interactableObjects)
+            foreach (InteractableObjectData intObjectsData in data.interactableObjects)
             {
-                foreach (InteractableObject intObj in intObjPool)
+                foreach (InteractableObject pickupObject in intObjectsPool)
                 {
-                    if (intObj.GetComponent<UniqueIDComponent>().UniqueID == intObjData.uniqueID)
+                    if (pickupObject.GetComponent<UniqueIDComponent>().UniqueID == intObjectsData.uniqueID)
                     {
-                        if (intObj.active != intObjData.active)
+                        pickupObject.active = intObjectsData.active;
+                        if (!pickupObject.active)
                         {
-                            intObj.Interact();
+                            // Move the object to a position far away
+                            pickupObject.transform.position = new Vector3(0, -1000f, 0);
+                        }
+                    }
+                }
+
+                foreach (HorrorDollCode horrorDoll in intObjectsPool)
+                {
+                    if (horrorDoll.GetComponent<UniqueIDComponent>().UniqueID == intObjectsData.uniqueID)
+                    {
+                        if (horrorDoll.active)
+                        {
+                            horrorDoll.EventLoad();
+                        }
+                    }
+                }
+
+                foreach (Duplicate duplicate in duplicatesPool)
+                {
+                    if (duplicate.duplicateID == intObjectsData.uniqueID)
+                    {
+                        duplicate.duplicateObject.GetComponent<InteractableObject>().active = intObjectsData.active;
+                        if (!duplicate.duplicateObject.GetComponent<InteractableObject>().active)
+                        {
+                            // Move the object to a position far away
+                            duplicate.duplicateObject.transform.position = new Vector3(0, -1000f, 0);
                         }
                     }
                 }
             }
 
+            ////////////////////////////
+            // Load Interactable Static Objects
+            ////////////////////////////
+            Drawer[] intObjPool;
 
+            foreach (Transform staticObject in interactStaticObjectPool.GetComponentsInChildren<Transform>())
+            {
+                intObjPool = staticObject.GetComponentsInChildren<Drawer>();
+
+                foreach (InteractStaticObjectData intObjData in data.interactStaticObjects)
+                {
+                    foreach (Drawer drawer in intObjPool)
+                    {
+                        if (drawer.GetComponent<UniqueIDComponent>().UniqueID == intObjData.uniqueID)
+                        {
+                            drawer.open = intObjData.open;
+                            if (drawer.isDrawer) drawer.transform.position = new Vector3(intObjData.position[0], intObjData.position[1], intObjData.position[2]);
+                            else drawer.transform.rotation = Quaternion.Euler(intObjData.rotation[0], intObjData.rotation[1], intObjData.rotation[2]);
+                        }
+                    }
+                }
+            }
+
+            ////////////////////////////
+            // Load Door Objects
+            ////////////////////////////
+
+            foreach (DoorObjectData doorData in data.doors)
+            {
+                foreach (Duplicate door in doorObjectPool.GetComponentsInChildren<Duplicate>())
+                {
+                    if (door.duplicateID == doorData.uniqueID)
+                    {
+                        Door doorScript = door.duplicateObject.GetComponent<Door>();
+                        doorScript.open = doorData.open;
+                        doorScript.locked = doorData.locked;
+                        door.transform.rotation = Quaternion.Euler(doorData.rotation[0], doorData.rotation[1], doorData.rotation[2]);
+                    }
+                }
+            }
+
+            ////////////////////////////
+            // Load Event Data
+            ////////////////////////////
+
+            foreach (SavedEventData savedEventData in data.events)
+            {
+                foreach (string name in eventData.eventNames)
+                {
+                    if (savedEventData.eventName == name)
+                    {
+                        if (savedEventData.eventState == true)
+                        {
+                            eventData.SetEvent(name);
+                            eventData.TriggerEvent(name);
+                        }
+                    }
+                }
+            }
 
             Debug.Log("GameManager.cs: Player data loaded!");
         }

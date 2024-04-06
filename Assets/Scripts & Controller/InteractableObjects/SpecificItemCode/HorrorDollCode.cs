@@ -15,4 +15,9 @@ public class HorrorDollCode : InteractableObject
         itemCount.text = (int.Parse(itemCount.text) + 1).ToString();
         Debug.Log("Horror Doll picked up");
     }
+
+    public void EventLoad()
+    {
+        itemCount.text = (int.Parse(itemCount.text) + 1).ToString();
+    }
 }

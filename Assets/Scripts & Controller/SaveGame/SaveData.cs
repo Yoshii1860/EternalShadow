@@ -29,10 +29,10 @@ public class WeaponData
 }
 
 [System.Serializable]
-public class PickupObjectData
+public class InteractableObjectData
 {
     public string uniqueID;
-    public bool isPickedUp;
+    public bool active;
 }
 
 [System.Serializable]
@@ -41,16 +41,36 @@ public class EnemyData
     public string uniqueID;
     public int health;
     public bool isDead;
+    public bool isActive;
     public float[] position;
     public float[] rotation;
     public string lastBehaviorState;
 }
 
 [System.Serializable]
-public class InteractableObjectData
+public class InteractStaticObjectData
 {
     public string uniqueID;
     public bool active;
+    public bool open;
+    public float[] position;
+    public float[] rotation;
+}
+
+[System.Serializable]
+public class DoorObjectData
+{
+    public string uniqueID;
+    public bool open;
+    public bool locked;
+    public float[] rotation;
+}
+
+[System.Serializable]
+public class SavedEventData
+{
+    public string eventName;
+    public bool eventState;
 }
 
 #endregion
@@ -65,13 +85,15 @@ public class SaveData
     public float[] position;
     public List<ItemData> items;
     public List<WeaponData> weapons;
-    public List<PickupObjectData> pickupObjects;
     public List<EnemyData> enemies;
     public List<InteractableObjectData> interactableObjects;
+    public List<InteractStaticObjectData> interactStaticObjects;
+    public List<DoorObjectData> doors;
+    public List<SavedEventData> events;
 
     #endregion
 
-    public SaveData (Player player, Transform weaponPool, Transform objectPool, Transform enemyPool, Transform interactableObjectsPool)
+    public SaveData (Player player, Transform weaponPool, Transform enemyPool, Transform interactableObjectPool, Transform interactStaticObjectPool, Transform doorObjectPool, EventData eventData)
     {
         #region Save Scene
 
@@ -127,20 +149,6 @@ public class SaveData
 
         #endregion
 
-        #region Save Pickup Objects
-
-        pickupObjects = new List<PickupObjectData>();
-        foreach (ItemController pickupObject in objectPool.GetComponentsInChildren<ItemController>())
-        {
-            PickupObjectData objectData = new PickupObjectData();
-            objectData.uniqueID = pickupObject.GetComponent<UniqueIDComponent>().UniqueID;
-            objectData.isPickedUp = pickupObject.isPickedUp;
-
-            pickupObjects.Add(objectData);
-        }
-
-        #endregion
-
         #region Save Enemies
 
         enemies = new List<EnemyData>();
@@ -150,6 +158,7 @@ public class SaveData
             enemyData.uniqueID = enemy.GetComponent<UniqueIDComponent>().UniqueID;
             enemyData.health = enemy.health;
             enemyData.isDead = enemy.isDead;
+            enemyData.isActive = enemy.gameObject.activeSelf;
             Debug.Log("SAVE Enemy is Dead? " + enemy.isDead);
             enemyData.position = new float[3];
             enemyData.position[0] = enemy.transform.position.x;
@@ -168,13 +177,86 @@ public class SaveData
         #region Save Interactable Objects
 
         interactableObjects = new List<InteractableObjectData>();
-        foreach (InteractableObject intObj in interactableObjectsPool.GetComponentsInChildren<InteractableObject>())
+        foreach (InteractableObject pickupObject in interactableObjectPool.GetComponentsInChildren<InteractableObject>())
         {
-            InteractableObjectData intObjData = new InteractableObjectData();
-            intObjData.uniqueID = intObj.GetComponent<UniqueIDComponent>().UniqueID;
-            intObjData.active = intObj.active;
+            InteractableObjectData objectData = new InteractableObjectData();
+            objectData.uniqueID = pickupObject.GetComponent<UniqueIDComponent>().UniqueID;
+            objectData.active = pickupObject.active;
 
-            interactableObjects.Add(intObjData);
+            interactableObjects.Add(objectData);
+        }
+        foreach (Duplicate duplicate in interactableObjectPool.GetComponentsInChildren<Duplicate>())
+        {
+            InteractableObjectData objectData = new InteractableObjectData();
+            objectData.uniqueID = duplicate.duplicateID;
+            objectData.active = duplicate.duplicateObject.GetComponent<InteractableObject>().active;
+
+            interactableObjects.Add(objectData);
+        }
+
+        #endregion
+
+        #region Save Interactable Static Objects
+
+        interactStaticObjects = new List<InteractStaticObjectData>();
+        foreach (Transform drawer in interactStaticObjectPool)
+        {
+            foreach (Drawer drawerScript in drawer.GetComponentsInChildren<Drawer>())
+            {
+                InteractStaticObjectData drawerData = new InteractStaticObjectData();
+                drawerData.uniqueID = drawerScript.GetComponent<UniqueIDComponent>().UniqueID;
+                drawerData.open = drawerScript.open;
+                drawerData.position = new float[3];
+                drawerData.position[0] = drawerScript.transform.position.x;
+                drawerData.position[1] = drawerScript.transform.position.y;
+                drawerData.position[2] = drawerScript.transform.position.z;
+                drawerData.rotation = new float[3];
+                drawerData.rotation[0] = drawerScript.transform.rotation.x;
+                drawerData.rotation[1] = drawerScript.transform.rotation.y;
+                drawerData.rotation[2] = drawerScript.transform.rotation.z;
+
+                interactStaticObjects.Add(drawerData);
+            }
+        }
+
+        #endregion
+
+        #region Save Doors
+
+        doors = new List<DoorObjectData>();
+        foreach (Duplicate door in doorObjectPool.GetComponentsInChildren<Duplicate>())
+        {
+            Door doorScript = door.duplicateObject.GetComponent<Door>();
+            if (doorScript == null) 
+            {
+                Debug.LogError("SaveData: Door script is null");
+                continue;
+            }
+            DoorObjectData doorData = new DoorObjectData();
+            doorData.uniqueID = doorScript.GetComponent<UniqueIDComponent>().UniqueID;
+            doorData.open = doorScript.open;
+            doorData.locked = doorScript.locked;
+            doorData.rotation = new float[3];
+            doorData.rotation[0] = doorScript.transform.rotation.x;
+            doorData.rotation[1] = doorScript.transform.rotation.y;
+            doorData.rotation[2] = doorScript.transform.rotation.z;
+
+            doors.Add(doorData);
+        }
+
+        #endregion
+
+        #region Save Events
+
+        events = new List<SavedEventData>();
+
+        foreach (string name in eventData.eventNames)
+        {
+            SavedEventData savedEventData = new SavedEventData();
+            savedEventData.eventName = name;
+            savedEventData.eventState = eventData.CheckEvent(name);
+
+            events.Add(savedEventData);
         }
 
         #endregion

@@ -89,6 +89,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
     public bool poisonDebug = false;
     public bool dizzyDebug = false;
     public bool bleedingDebug = false;
+    public bool dieDebug = false;
 
     // Just for DEBUG
     void Update()
@@ -109,6 +110,12 @@ public class Player : MonoBehaviour, ICustomUpdatable
         {
             Bleeding();
             bleedingDebug = true;
+        }
+
+        if (dieDebug)
+        {
+            Die();
+            dieDebug = false;
         }
     }
 
@@ -527,8 +534,32 @@ public class Player : MonoBehaviour, ICustomUpdatable
 
     private void Die()
     {
-        Destroy(transform.GetComponent<CapsuleCollider>());
+        StartCoroutine(DieRoutine());
         Debug.Log("Player died.");
+    }
+
+    IEnumerator DieRoutine()
+    {
+        GameManager.Instance.GameplayEvent();
+        AudioManager.Instance.PlaySoundOneShot(speakerID, "player die", 1f, 1f);
+        yield return new WaitForSeconds(1f);
+        AudioManager.Instance.FadeOutAll(5f);
+        Image blackscreenImage = GameManager.Instance.blackScreen.GetComponent<Image>();
+        blackscreenImage.color = new Color(0f, 0f, 0f, 0f);
+        GameManager.Instance.blackScreen.gameObject.SetActive(true);
+        for (float i = 0f; i <= 1f; i += 0.005f)
+        {
+            blackscreenImage.color = new Color(0f, 0f, 0f, i);
+            yield return new WaitForSeconds(0.01f);
+        }
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "death music", 0.5f, 1f);
+        GameManager.Instance.OpenDeathScreen();
+        for (float i = 1f; i >= 0f; i -= 0.01f)
+        {
+            blackscreenImage.color = new Color(0f, 0f, 0f, i);
+            yield return new WaitForSeconds(0.01f);
+        }
+        GameManager.Instance.blackScreen.gameObject.SetActive(false);
     }
 
     #endregion

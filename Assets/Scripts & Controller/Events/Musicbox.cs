@@ -47,6 +47,12 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
 
     public void CustomUpdate(float deltaTime)
     {
+        if (GameManager.Instance.eventData.CheckEvent("Musicbox") && !end) 
+        {
+            AudioManager.Instance.StopAudio(gameObject.GetInstanceID());
+            GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(this);
+        }
+
         if (!started && yardEvent.musicBox) GetCloser();
         if (waypoints[waypointIndex].childCount > 0) exited = waypoints[waypointIndex].GetComponentInChildren<MusicboxWay>().exited;
         if (yardEvent.musicBox) MusicBoxVolume();
@@ -83,6 +89,7 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
                 itemLight.SetActive(true);
                 GameManager.Instance.player.lightAvail = true;
                 end = true;
+                GameManager.Instance.eventData.SetEvent("Musicbox");
                 return;
             }
             if (inside) return;

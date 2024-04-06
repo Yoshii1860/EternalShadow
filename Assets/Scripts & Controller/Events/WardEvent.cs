@@ -27,6 +27,8 @@ public class WardEvent : InteractableObject
         Item crowbarItem = InventoryManager.Instance.FindItem("Crowbar");
         if (crowbarItem != null)
         {
+            InventoryManager.Instance.RemoveItem(crowbarItem);
+            GameManager.Instance.playerController.ToggleArms(false);
             crowbar.SetActive(true);
             crowbar.GetComponent<Animator>().SetTrigger("Break");
             GameManager.Instance.playerController.SetFollowTarget(followTarget);

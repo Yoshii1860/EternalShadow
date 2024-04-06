@@ -690,7 +690,7 @@ public class InventoryManager : MonoBehaviour
     public void DropItem(Item item)
     {
         Debug.Log("InventoryManager.DropItem(" + item.displayName + ")");
-        GameObject obj = Instantiate(item.prefab, player.transform.position + player.transform.forward, Quaternion.identity, GameManager.Instance.objectPool);
+        GameObject obj = Instantiate(item.prefab, player.transform.position + player.transform.forward, Quaternion.identity, GameManager.Instance.interactableObjectPool);
         Rigidbody itemRigidbody = obj.AddComponent<Rigidbody>();
         itemRigidbody.AddForce(player.transform.forward * dropForce, ForceMode.Impulse);
         StartCoroutine(RemoveRigidbody(obj));

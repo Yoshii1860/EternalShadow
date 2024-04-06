@@ -269,6 +269,14 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    public void FadeOutAll(float fadeOutDuration)
+    {
+        foreach (AudioSource audioSource in audioSourcesList)
+        {
+            if (audioSource.isPlaying) StartCoroutine(FadeOutCo(audioSource, fadeOutDuration));
+        }
+    }
+
 
     // Fade out audio for an AudioSource
     public void FadeOut(int gameObjectID, float fadeOutDuration)
