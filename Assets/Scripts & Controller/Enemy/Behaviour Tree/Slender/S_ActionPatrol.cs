@@ -21,6 +21,7 @@ public class S_ActionPatrol : Node
     private float waitTime = 10f;
     private float waitCounter = 0f;
     private bool isWaiting = true;
+    private int stepID;
 
     // Debug mode flag
     private bool debugMode;
@@ -42,6 +43,7 @@ public class S_ActionPatrol : Node
         sensor = transform.GetComponent<AISensor>();
         this.debugMode = debugMode;
         this.enemyType = enemyType;
+        stepID = transform.GetChild(0).gameObject.GetInstanceID();
     }
 
     #endregion
@@ -135,6 +137,7 @@ public class S_ActionPatrol : Node
                 // Reset animation states
                 animator.SetBool("run", false);
                 animator.SetBool("walk", false);
+                AudioManager.Instance.StopAudio(transform.GetChild(0).gameObject.GetInstanceID());
             }
             else
             {
@@ -144,6 +147,7 @@ public class S_ActionPatrol : Node
                 animator.SetBool("walk", true);
                 animator.SetBool("run", false);
 
+                if (!AudioManager.Instance.IsPlaying(stepID)) AudioManager.Instance.PlayAudio(stepID);
                 AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, false, enemyType);
             }
         }

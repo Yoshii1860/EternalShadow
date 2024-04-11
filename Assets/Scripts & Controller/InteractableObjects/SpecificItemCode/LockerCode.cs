@@ -79,6 +79,7 @@ public class LockerCode : InteractableObject
 
     IEnumerator Open()
     {
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "open locker", 0.8f);
         locked = true;
 
         // slowly open door of the locker
@@ -101,6 +102,8 @@ public class LockerCode : InteractableObject
 
     IEnumerator Close()
     {
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "close locker", 0.8f);
+
         if (insideCollider)
         {
             ToggleHidden(true);

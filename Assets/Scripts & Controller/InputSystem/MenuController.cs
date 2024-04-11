@@ -77,6 +77,13 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     [SerializeField] Color selectedColor;
     [SerializeField] Color unselectedColor;
 
+    // Audio Source and Clips
+    AudioSource audioSource;
+    AudioClip wooshClip;
+    AudioClip clickClip;
+    AudioClip menuDieClip;
+    AudioClip menuMusic;
+
     #endregion
 
     #region Menu Controller Variables
@@ -115,6 +122,11 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         initialButtonPositions[newGameButton.transform] = newGameButton.transform.position;
         initialButtonPositions[loadGameButton.transform] = loadGameButton.transform.position;
         initialButtonPositions[exitButton.transform] = exitButton.transform.position;
+        audioSource = GetComponent<AudioSource>();
+        wooshClip = Resources.Load<AudioClip>("SFX/woosh");
+        clickClip = Resources.Load<AudioClip>("SFX/click");
+        menuDieClip = Resources.Load<AudioClip>("SFX/menu die");
+        menuMusic = Resources.Load<AudioClip>("SFX/menu music");
     }
 
     void Start()
@@ -159,7 +171,6 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         Debug.Log("Death Screen!!!!!");
         isDead = true;
         ActivateMenu(deathScreen, false);
-        //menuCanvas.SetActive(true);
     }
 
     #endregion
@@ -200,8 +211,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         interact = false;
         
         if (selectedButton == null) return;
-        AudioManager.Instance.SetAudioClip(AudioManager.Instance.playerSpeaker, "woosh");
-        AudioManager.Instance.PlayAudio(AudioManager.Instance.playerSpeaker, 0.8f, 1f, false);
+        audioSource.PlayOneShot(wooshClip);
         if (string.Compare(selectedButton.gameObject.name, "NewGame") == 0)                     StartCoroutine(StartNewGame());
         else if (string.Compare(selectedButton.gameObject.name, "LoadGame") == 0)               ActivateMenu(loadMenu);
         else if (string.Compare(selectedButton.gameObject.name, "Return") == 0 
@@ -283,11 +293,14 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
         bool mainMenuActive = SceneManager.GetActiveScene().name == "MainMenu";
 
+        if (mainMenuActive && mainMenu.gameObject.activeSelf) return;
+
         if (mainMenu.gameObject.activeSelf && canCloseMenu && !isDead)         
         {
             ActivateMenu(mainMenu, false);
             GameManager.Instance.ResumeGame();
             menuCanvas.SetActive(false);
+            audioSource.PlayOneShot(clickClip, 0.8f);
         }
         else if (loadMenu.gameObject.activeSelf && !isDead)     ActivateMenu(mainMenu, mainMenuActive);
         else if (loadMenu.gameObject.activeSelf && isDead)      ActivateMenu(deathScreen, mainMenuActive);
@@ -301,13 +314,29 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
     void ActivateMenu(Transform menu, bool mainMenuState = false)
     {
+        if (mainMenuState) 
+        {
+            if (!audioSource.isPlaying)
+            {
+                audioSource.volume = 0f;
+                audioSource.clip = menuMusic;
+                audioSource.loop = true;
+                audioSource.Play();
+                while (audioSource.volume < 1f)
+                {
+                    audioSource.volume += Time.deltaTime;
+                }
+                audioSource.volume = 1f;
+            }
+        }
+
         newGameButton.gameObject.SetActive(true);
         foreach (Transform m in menus)
         {
             if (m == menu)  
             {
                 m.gameObject.SetActive(true);
-                buttons = m.GetComponentsInChildren<Button>(); // Initialize buttons array here
+                buttons = m.GetComponentsInChildren<Button>();
             }
             else     
             {       
@@ -368,18 +397,24 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         returnFromLoadButton.GetComponentInChildren<Image>().color = unselectedColor;
         returnFromSaveButton.GetComponentInChildren<Image>().color = unselectedColor;
         button.GetComponentInChildren<Image>().color = selectedColor;
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "click", 0.8f);
+        audioSource.PlayOneShot(clickClip, 0.8f);
     }
 
     IEnumerator StartNewGame()
     {
-        yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(AudioManager.Instance.playerSpeaker));
-        AudioManager.Instance.SetAudioClip(AudioManager.Instance.playerSpeaker, "menu die");
-        AudioManager.Instance.PlayAudio(AudioManager.Instance.playerSpeaker, 0.8f, 1f, false);
-        yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(AudioManager.Instance.playerSpeaker));
+        yield return new WaitForSeconds(2f);
+        audioSource.PlayOneShot(menuDieClip, 0.8f);
         GameManager.Instance.LoadNewGame();
         ActivateMenu(mainMenu, false);
         menuCanvas.SetActive(false);
+        yield return new WaitForSeconds(1f);
+        while (audioSource.volume > 0)
+        {
+            audioSource.volume -= Time.deltaTime;
+            yield return null;
+        }
+        audioSource.Stop();
+        audioSource.volume = 1f;
     }
 
     #endregion
@@ -388,6 +423,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
     public void SaveGame()
     {
+        audioSource.PlayOneShot(clickClip, 0.8f);
         ActivateMenu(saveMenu);
     }
 
@@ -445,9 +481,24 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         {
             Destroy(file.gameObject);
         }
+        StartCoroutine(FadeOut());
         ActivateMenu(mainMenu, false);
         menuCanvas.SetActive(false);
         GameManager.Instance.LoadNewScene(filename);
+    }
+
+    IEnumerator FadeOut()
+    {
+        if (audioSource.isPlaying)
+        {
+            while (audioSource.volume > 0)
+            {
+                audioSource.volume -= Time.deltaTime;
+                yield return null;
+            }
+            audioSource.Stop();
+            audioSource.volume = 1f;
+        }
     }
 
     void SaveFile()
@@ -477,15 +528,17 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     public void LoadAuotsave()
     {
         string[] savedFiles = GetSavedFiles();
-        string autosave = "autosave";
+        string autosave = "Asylum-autosave";
         foreach (string file in savedFiles)
         {
             if (file.Contains(autosave))
             {
                 GameManager.Instance.LoadNewScene(file, false);
-                return;
             }
         }
+        deathScreen.gameObject.SetActive(false);
+        ActivateMenu(mainMenu, false);
+        menuCanvas.SetActive(false);
     }
 
     #endregion
@@ -511,6 +564,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
                 Destroy(file.gameObject);
             }
             ActivateMenu(mainMenu, false);
+            audioSource.PlayOneShot(clickClip, 0.8f);
             GameManager.Instance.ResumeGame();
             menuCanvas.SetActive(false);
         }
@@ -524,6 +578,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         }
         else
         {
+            GameManager.Instance.RemoveEnemyCustomUpdatables();
             SceneManager.LoadScene("MainMenu");
             ActivateMenu(mainMenu, true);
         }

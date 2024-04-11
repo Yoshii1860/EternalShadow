@@ -47,6 +47,8 @@ public class AudioManager : MonoBehaviour
     [Header("Debug Settings")]
     [Tooltip("Enable debug messages and warnings")]
     public bool debugSettings = true;
+    [Tooltip("Print the list of AudioSources")]
+    public bool debugPrintSources = false;
     [Space(10)]
 
     // GameObject references for environment and player speakers
@@ -73,6 +75,7 @@ public class AudioManager : MonoBehaviour
     void Awake()
     {
         // Ensure only one instance of AudioManager exists
+        /*
         if (instance != null && instance != this)
         {
             Destroy(this.gameObject);
@@ -81,35 +84,38 @@ public class AudioManager : MonoBehaviour
 
         instance = this;
         DontDestroyOnLoad(this.gameObject);
+        */
 
-        // Initialize the list of AudioSources
-        AudioSource[] audioSources = FindObjectsOfType<AudioSource>();
-        foreach (AudioSource audioSource in audioSources)
-        {
-            audioSourcesList.Add(audioSource);
-        }
-        if (debugSettings)
-        {
-            Debug.Log($"AUDIO: Found {audioSources.Length} AudioSources in the scene.");
-            for (int i = 0; i < audioSources.Length; i++)
-            {
-                Debug.Log($"AUDIO: AudioSource {i + 1} - {audioSources[i].gameObject.name}");
-            }
-        }
+        // Load audio sources and audio files
+        LoadAudioSources();
 
         // Load audio files dynamically from Resources folder
         LoadAudioFiles();
 
         // Set default environmentObject if not assigned
-        if (environmentObject == null)
-        {
-            environmentObject = transform.gameObject.GetComponentInChildren<AudioSource>().gameObject;
-        }
+        if (environmentObject == null) environmentObject = transform.GetChild(0).GetComponent<AudioSource>().gameObject;
+        if (playerSpeakerObject == null) playerSpeakerObject = transform.GetChild(1).GetComponent<AudioSource>().gameObject;
+        if (playerSpeaker2Object == null) playerSpeaker2Object = transform.GetChild(2).GetComponent<AudioSource>().gameObject;
 
         // Set instance IDs for environment and player speakers
         environment = environmentObject.GetInstanceID();
         playerSpeaker = playerSpeakerObject.GetInstanceID();
         playerSpeaker2 = playerSpeaker2Object.GetInstanceID();
+    }
+
+    void Update()
+    {
+        if (debugPrintSources)
+        {
+            string[] audioSourceNames = new string[audioSourcesList.Count];
+            foreach (AudioSource audioSource in audioSourcesList)
+            {
+                if (audioSource.gameObject.name == "MenuManager") continue;
+                audioSourceNames[audioSourcesList.IndexOf(audioSource)] = audioSource.gameObject.name;
+            }
+            Debug.Log("AudioManager: AudioSources in the list - " + string.Join(", ", audioSourceNames));
+            debugPrintSources = false;
+        } 
     }
 
     #endregion
@@ -130,15 +136,18 @@ public class AudioManager : MonoBehaviour
     public void LoadAudioSources()
     {
         // Initialize the array of AudioSources
-        AudioSource[] audioSources = FindObjectsOfType<AudioSource>();
+        AudioSource[] audioSources = FindObjectsOfType<AudioSource>(true);
+        string[] audioSourceNames = new string[audioSources.Length];
         foreach (AudioSource audioSource in audioSources)
         {
+            if (audioSource.gameObject.name == "MenuManager") continue;
             if (!audioSourcesList.Contains(audioSource))
             {
                 audioSourcesList.Add(audioSource);
+                audioSourceNames[audioSourcesList.IndexOf(audioSource)] = audioSource.gameObject.name;
             }
         }
-        if (debugSettings) Debug.Log($"AudioManager: Found {audioSources.Length} AudioSources in the scene.");
+        if (debugSettings) Debug.Log($"AudioManager: Found {audioSources.Length} AudioSources in the scene. - " + string.Join(", ", audioSourceNames));
     }
 
     // Play a sound by name

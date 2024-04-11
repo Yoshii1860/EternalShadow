@@ -53,7 +53,7 @@ public class ButtonCode : InteractableObject
 
         yield return new WaitUntil(() => textFaded);
 
-        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.35f, 1f, true);
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.15f, 1f, true);
 
         for (float i = image.color.a; i > 0; i -= 0.01f)
         {

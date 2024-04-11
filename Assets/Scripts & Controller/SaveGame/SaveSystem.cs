@@ -17,7 +17,7 @@ public static class SaveSystem
     /// <param name="interactableObjectPool">Reference to the object pool.</param>
     /// <param name="enemyPool">Reference to the enemy pool.</param>
     /// <param name="interactableObjectPool">Reference to the interactable objects pool.</param>
-    public static void SaveGameFile(string filename, Player player, Transform weaponPool, Transform enemyPool, Transform interactableObjectPool, Transform interactStaticObjectPool, Transform doorObjectPool, EventData eventData)
+    public static void SaveGameFile(string filename, Player player, Transform weaponPool, Transform enemyPool, Transform interactableObjectPool, Transform interactStaticObjectPool, Transform doorObjectPool, Transform autoSavePool)
     {
         Debug.Log("SaveSystem.cs - SAVE - filename: " + filename);
 
@@ -31,7 +31,7 @@ public static class SaveSystem
         using (FileStream stream = new FileStream(path, FileMode.Create))
         {
             // Create save data
-            SaveData data = new SaveData(player, weaponPool, enemyPool, interactableObjectPool, interactStaticObjectPool, doorObjectPool, eventData);
+            SaveData data = new SaveData(player, weaponPool, enemyPool, interactableObjectPool, interactStaticObjectPool, doorObjectPool, autoSavePool);
 
             // Serialize and write the data to the file
             formatter.Serialize(stream, data);

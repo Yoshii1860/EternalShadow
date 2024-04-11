@@ -50,6 +50,15 @@ public class ObjectHandler : MonoBehaviour
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, pickupDistance, allLayersExceptCharacter))
         {
             Debug.Log("ObjectHandler.DetectObjects: " + hit.collider.gameObject.name);
+
+            if (hit.collider.gameObject.tag == "Save")
+            {
+                // Open UI to save game
+                Debug.Log("ObjectHandler - Save");
+                GameManager.Instance.OpenSaveScreen();
+                return;
+            }
+
             PaintingEvent paintingEvent = hit.collider.gameObject.GetComponent<PaintingEvent>();
 
             if (paintingEvent != null)

@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Reflection;
+using System;
 
 #region Save Data Classes
 
@@ -63,14 +65,28 @@ public class DoorObjectData
     public string uniqueID;
     public bool open;
     public bool locked;
-    public float[] rotation;
 }
 
 [System.Serializable]
 public class SavedEventData
 {
-    public string eventName;
-    public bool eventState;
+    public string EventName;
+    public Type ScriptType;
+    public bool Active;
+}
+
+[System.Serializable]
+public class VariousData
+{
+    public string environmentMusicClip;
+    public bool flashlightEnabled;
+}
+
+[System.Serializable]
+public class AutoSaveData
+{
+    public bool active;
+    public string uniqueID;
 }
 
 #endregion
@@ -90,10 +106,12 @@ public class SaveData
     public List<InteractStaticObjectData> interactStaticObjects;
     public List<DoorObjectData> doors;
     public List<SavedEventData> events;
+    public VariousData variousData;
+    public List<AutoSaveData> autoSaveData;
 
     #endregion
 
-    public SaveData (Player player, Transform weaponPool, Transform enemyPool, Transform interactableObjectPool, Transform interactStaticObjectPool, Transform doorObjectPool, EventData eventData)
+    public SaveData (Player player, Transform weaponPool, Transform enemyPool, Transform interactableObjectPool, Transform interactStaticObjectPool, Transform doorObjectPool, Transform autoSavePool)
     {
         #region Save Scene
 
@@ -152,7 +170,7 @@ public class SaveData
         #region Save Enemies
 
         enemies = new List<EnemyData>();
-        foreach (Enemy enemy in enemyPool.GetComponentsInChildren<Enemy>())
+        foreach (Enemy enemy in enemyPool.GetComponentsInChildren<Enemy>(true))
         {
             EnemyData enemyData = new EnemyData();
             enemyData.uniqueID = enemy.GetComponent<UniqueIDComponent>().UniqueID;
@@ -172,12 +190,32 @@ public class SaveData
             enemies.Add(enemyData);
         }
 
+        foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>(true))
+        {
+            EnemyData enemyData = new EnemyData();
+            enemyData.uniqueID = mannequin.GetComponent<UniqueIDComponent>().UniqueID;
+            enemyData.health = 0;
+            enemyData.isDead = mannequin.isDead;
+            enemyData.isActive = mannequin.gameObject.activeSelf;
+            Debug.Log("SAVE Enemy is Dead? " + mannequin.isDead);
+            enemyData.position = new float[3];
+            enemyData.position[0] = mannequin.transform.position.x;
+            enemyData.position[1] = mannequin.transform.position.y;
+            enemyData.position[2] = mannequin.transform.position.z;
+            enemyData.rotation = new float[3];
+            enemyData.rotation[0] = mannequin.transform.rotation.x;
+            enemyData.rotation[1] = mannequin.transform.rotation.y;
+            enemyData.rotation[2] = mannequin.transform.rotation.z;
+
+            enemies.Add(enemyData);
+        }
+
         #endregion
 
         #region Save Interactable Objects
 
         interactableObjects = new List<InteractableObjectData>();
-        foreach (InteractableObject pickupObject in interactableObjectPool.GetComponentsInChildren<InteractableObject>())
+        foreach (InteractableObject pickupObject in interactableObjectPool.GetComponentsInChildren<InteractableObject>(true))
         {
             InteractableObjectData objectData = new InteractableObjectData();
             objectData.uniqueID = pickupObject.GetComponent<UniqueIDComponent>().UniqueID;
@@ -236,10 +274,6 @@ public class SaveData
             doorData.uniqueID = doorScript.GetComponent<UniqueIDComponent>().UniqueID;
             doorData.open = doorScript.open;
             doorData.locked = doorScript.locked;
-            doorData.rotation = new float[3];
-            doorData.rotation[0] = doorScript.transform.rotation.x;
-            doorData.rotation[1] = doorScript.transform.rotation.y;
-            doorData.rotation[2] = doorScript.transform.rotation.z;
 
             doors.Add(doorData);
         }
@@ -250,13 +284,38 @@ public class SaveData
 
         events = new List<SavedEventData>();
 
-        foreach (string name in eventData.eventNames)
+        foreach (EventDataEntry eventDataEntry in GameManager.Instance.eventData.eventDataEntries)
         {
             SavedEventData savedEventData = new SavedEventData();
-            savedEventData.eventName = name;
-            savedEventData.eventState = eventData.CheckEvent(name);
+            savedEventData.EventName = eventDataEntry.EventName;
+            savedEventData.ScriptType = eventDataEntry.ScriptType;
+            savedEventData.Active = eventDataEntry.Active;
 
             events.Add(savedEventData);
+        }
+
+        #endregion
+
+        #region Save Various Data
+
+        variousData = new VariousData();
+        AudioSource environmentAudio = AudioManager.Instance.GetAudioSource(AudioManager.Instance.environment);
+        variousData.environmentMusicClip = environmentAudio.clip.name;
+        variousData.flashlightEnabled = GameManager.Instance.player.lightAvail;
+
+        #endregion
+
+        #region Save AutoSave Data
+
+        autoSaveData = new List<AutoSaveData>();
+
+        foreach (AutoSave autoSave in autoSavePool.GetComponentsInChildren<AutoSave>())
+        {
+            AutoSaveData autoSaveEntry = new AutoSaveData();
+            autoSaveEntry.active = autoSave.active;
+            autoSaveEntry.uniqueID = autoSave.GetComponent<UniqueIDComponent>().UniqueID;
+
+            autoSaveData.Add(autoSaveEntry);
         }
 
         #endregion

@@ -10,16 +10,23 @@ public class BathroomEvent : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            AudioManager.Instance.FadeOut(AudioManager.Instance.environment, 2f);
-            Invoke("PlayNewAudio", 2f);
-            if (!girl.gameObject.activeSelf)
-            {
-                girl.gameObject.SetActive(true);
-            }
-            GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(girl.GetComponent<AISensor>());
-            girl.SetTrigger("GetOut");
-            Invoke("StartGirl", 7f);
+            GetComponent<Collider>().enabled = false;
+            StartCoroutine(StartEvent());
         }
+    }
+
+    IEnumerator StartEvent()
+    {
+        if (!girl.gameObject.activeSelf) girl.gameObject.SetActive(true);
+        AudioManager.Instance.FadeOut(AudioManager.Instance.environment, 2f);
+        GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(girl.GetComponent<AISensor>());
+        girl.SetTrigger("GetOut");
+        GameManager.Instance.eventData.CheckEvent("Bathroom");
+        yield return new WaitForSeconds(3f);
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "horror chase music 2");
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.30f, 1f, true);
+        yield return new WaitForSeconds(4f);
+        StartGirl();
     }
 
     void StartGirl()
@@ -29,10 +36,11 @@ public class BathroomEvent : MonoBehaviour
         girl.GetComponentInChildren<Collider>().enabled = true;
     }
 
-    void PlayNewAudio()
+    public void EventLoad()
     {
-        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "horror chase music 2");
-        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.35f, 1f, true);
+        girl.GetComponent<EnemyBT>().enabled = true;
+        girl.GetComponentInChildren<Collider>().enabled = true;
+        GetComponent<Collider>().enabled = false;
     }
 }
 

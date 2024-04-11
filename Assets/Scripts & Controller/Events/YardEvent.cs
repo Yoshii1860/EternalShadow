@@ -34,6 +34,8 @@ public class YardEvent : MonoBehaviour
     [SerializeField] Transform girlDestinationPosition;
     [Tooltip("The sun object in the environment")]
     [SerializeField] GameObject sun;
+    [Tooltip("The music box object in the environment")]
+    [SerializeField] Musicbox musicbox;
 
     #endregion
 
@@ -72,7 +74,6 @@ public class YardEvent : MonoBehaviour
     bool firstTime = true;
     bool secondTime = true;
     bool endEvent = false;
-    public bool musicBox = false;
 
     List<int> audioSourceIDList = new List<int>();
 
@@ -215,7 +216,16 @@ public class YardEvent : MonoBehaviour
 
         if (!GameManager.Instance.eventData.CheckEvent("Musicbox"))
         {
-            musicBox = true;
+            GameManager.Instance.customUpdateManager.AddCustomUpdatable(musicbox);
+        }
+
+        if (!GameManager.Instance.eventData.CheckEvent("Bathroom"))
+        {
+            AudioManager.Instance.SetAudioClip(girl.GetInstanceID(), "weeping ghost woman", 0.6f, 1f, true);
+            AudioManager.Instance.SetAudioClip(girl.transform.GetChild(0).gameObject.GetInstanceID(), "woman step", 1f, 1f, true);
+            girl.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+            girl.GetComponent<EnemyBT>().enabled = false;
+            girl.GetComponentInChildren<Collider>().enabled = false;
         }
     }
 
@@ -238,6 +248,7 @@ public class YardEvent : MonoBehaviour
             float pitch = Random.Range(0.8f, 1.2f);
 
             // Play audio with a delay and store audio source ID for future control
+            Debug.Log("Playing audio for light " + yardLightsArray[i].gameObject.name + "...");
             bool availableSource = AudioManager.Instance.PlayAudio(yardLightsArray[i].gameObject.GetInstanceID(), volume, pitch, true);
             if (availableSource)
             {
@@ -423,7 +434,7 @@ public class YardEvent : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         // Fade in the black screen to transition to the next phase
-        GameManager.Instance.StartCoroutine(GameManager.Instance.StartGameWithBlackScreen(false));
+        GameManager.Instance.StartCoroutine(GameManager.Instance.LoadGameWithBlackScreen());
 
         // Play background music associated with the next phase
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "hospital music", 0.15f, 1f, true);
@@ -444,7 +455,7 @@ public class YardEvent : MonoBehaviour
         GameManager.Instance.eventData.SetEvent("Yard");
 
         // Start Audio for Musicbox
-        musicBox = true;
+        GameManager.Instance.customUpdateManager.AddCustomUpdatable(musicbox);
 
         // Play the player's voice audio after a short delay
         AudioManager.Instance.PlayAudioWithDelay(AudioManager.Instance.playerSpeaker, 2f);

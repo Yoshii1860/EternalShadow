@@ -11,32 +11,31 @@ public class CellEvent : MonoBehaviour
     [SerializeField] Transform lookAtObject;
     [Tooltip("The horror doll that will only be there when it`s flipped")]
     [SerializeField] GameObject horrorDoll;
-
-    // If key was picked up and used before flipped
-    [SerializeField] Door door;
-    // If key was picked up before flipped
-    [SerializeField] GameObject key;
-    // Key of flipped room
-    [SerializeField] GameObject keyFlipped;
+    [SerializeField] GameObject groundFog;
 
     void Start()
     {
         foreach (GameObject mannequin in mannequins)
         {
+            //GameManager.Instance.customUpdateManager.AddCustomUpdatable(mannequin.GetComponent<Mannequin>());
             mannequin.SetActive(false);
         }
     }
 
     public void EventLoad()
     {
-        unflippedCell.SetActive(false);
-        flippedCell.SetActive(true);
+        unflippedCell.SetActive(true);
+        flippedCell.SetActive(false);
+        groundFog.SetActive(false);
         for (int i = 0; i < mannequins.Length; i++)
         {
-            if (!mannequins[i].activeSelf) continue;
             Mannequin mannequinCode = mannequins[i].GetComponent<Mannequin>();
-            mannequinCode.started = true;
-            mannequinCode.move = true;
+            if (!mannequinCode.isDead)
+            {
+                mannequins[i].SetActive(true);
+                mannequinCode.started = true;
+                mannequinCode.move = true;
+            }
         }
     }
 
@@ -47,10 +46,10 @@ public class CellEvent : MonoBehaviour
             // if the player is looking at the lookAtObject or at least less then 30 degrees away from it
             if (Vector3.Angle(other.transform.forward, lookAtObject.position - other.transform.position) < 30)
             {
-                if (!door.locked || key == null) keyFlipped.SetActive(false);
                 unflippedCell.SetActive(true);
                 flippedCell.SetActive(false);
                 horrorDoll.SetActive(false);
+                groundFog.SetActive(false);
                 GameManager.Instance.eventData.SetEvent("Flipped");
                 for (int i = 0; i < mannequins.Length; i++)
                 {
@@ -78,6 +77,6 @@ public class CellEvent : MonoBehaviour
 
     void FinishEvent()
     {
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 }

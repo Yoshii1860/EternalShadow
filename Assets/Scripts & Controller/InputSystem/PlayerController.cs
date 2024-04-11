@@ -100,7 +100,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     // Player Input
     Vector2 move, look;
-    bool sprint, crouch, aim, fire, interact, reload, inventory, menu;
+    bool sprint, crouch, aim, fire, interact, reload, inventory, menu, lightVar;
     float weaponSwitch;
 
     #endregion
@@ -131,6 +131,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             if (reload) Reload();
             if (inventory) Inventory();
             if (menu) Menu();
+            if (lightVar) Light();
         }
     }
 
@@ -273,10 +274,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     public void OnLight(InputAction.CallbackContext context)
     {
-        if (context.performed)
-        {
-            Light();
-        }
+        lightVar = context.ReadValueAsButton();
     }
 
     #endregion
@@ -296,6 +294,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         fire = false;
         interact = false;
         reload = false;
+        lightVar = false;
     }
 
     public void MoveSpeedChange(float speedChangeRate, float duration)
@@ -344,7 +343,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     void MoveDefault()
     {
-        int audioSourceID = transform.gameObject.GetInstanceID();
+        int audioSourceID = gameObject.GetInstanceID();
 
         if (sprint && !crouch && !player.isOutOfStamina)
         {
@@ -582,6 +581,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     void Light()
     {
+        lightVar = false;
         GameManager.Instance.player.LightSwitch();
     }
 

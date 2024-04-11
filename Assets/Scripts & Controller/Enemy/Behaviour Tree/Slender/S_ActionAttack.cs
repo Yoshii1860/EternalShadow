@@ -90,20 +90,8 @@ public class S_ActionAttack : Node
             // Perform attack and check if the player is dead.
             // Chances to apply status effects on the player.
             
-            // bool playerIsDead = player.TakeDamage(damage);
+            bool playerIsDead = player.isDead;
 
-            int randomizer = Random.Range(0, 100);
-            if (randomizer <= 15)
-            {
-                if (!player.isDizzy) player.Dizzy();
-            }
-            randomizer = Random.Range(0, 100);
-            if (randomizer <= 10)
-            {
-                if (!player.isBleeding) player.Bleeding();
-            }
-
-            /*
             if (playerIsDead)
             {
                 // Player is dead, reset and return success state.
@@ -115,7 +103,17 @@ public class S_ActionAttack : Node
                 state = NodeState.SUCCESS;
                 return state;
             }
-            */
+
+            int randomizer = Random.Range(0, 100);
+            if (randomizer <= 15)
+            {
+                if (!player.isDizzy) player.Dizzy();
+            }
+            randomizer = Random.Range(0, 100);
+            if (randomizer <= 10)
+            {
+                if (!player.isBleeding) player.Bleeding();
+            }
 
             attackCounter = 0f;
         }

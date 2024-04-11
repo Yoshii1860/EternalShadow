@@ -97,6 +97,7 @@ public class PlayerAnimController : MonoBehaviour
         if (debugMode) Debug.Log("PlayerAnim - BlindnessAnimation");
 
         // Initiates the blindness animation and plays a sound
+        SetAnimLayer("None");
         animator.SetBool("Blinded", true);
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "player2", .8f, 1f);
     }

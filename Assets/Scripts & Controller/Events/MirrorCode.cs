@@ -20,7 +20,7 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
 
     void Start()
     {
-        playerLayer = 1 << GameManager.Instance.player.gameObject.layer; // Set the player layer to the layer of the player object
+        playerLayer = 1 << LayerMask.NameToLayer("Characters"); // Set the player layer to the layer of the player object
         spotlightTransform = transform.GetChild(0); // Get the spotlight transform from the child object
         mirrorLayer = 1 << gameObject.layer; // Set the mirror layer to the layer of the mirror object
         spotlightTransform.gameObject.SetActive(false); // Disable the spotlight initially

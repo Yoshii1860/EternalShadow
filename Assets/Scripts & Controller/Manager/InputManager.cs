@@ -56,11 +56,23 @@ public class InputManager : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
 
         playerInput = GetComponent<PlayerInput>();
+    }
+
+    #endregion
+
+    #region Action Map Binding
+
+    public void UpdateReferences()
+    {
         playerController = FindObjectOfType<PlayerController>();
         menuController = FindObjectOfType<MenuController>();
         inventoryController = FindObjectOfType<InventoryController>();
         paintingController = FindObjectOfType<PaintingController>();
+        BindAllActionMaps();
+    }
 
+    void BindAllActionMaps()
+    {
         // Iterate through all action maps
         foreach (var actionMap in playerInput.actions.actionMaps)
         {
@@ -92,10 +104,6 @@ public class InputManager : MonoBehaviour
             }
         }
     }
-
-    #endregion
-
-    #region Action Map Binding
 
     public void Rebind(string actionMapName)
     {
@@ -196,6 +204,72 @@ public class InputManager : MonoBehaviour
         }
     }
 
+    void UnbindPlayerActions(InputActionMap actionMap)
+    {
+        if (playerController == null)
+        {
+            playerController = FindObjectOfType<PlayerController>();
+        }
+        // Unsubscribe to actions within this action map
+        foreach (var action in actionMap.actions)
+        {
+            if (action.name == "Move")
+            {
+                action.performed -= playerController.OnMove;
+                action.canceled -= playerController.OnMove;
+            }
+            else if (action.name == "Look")
+            {
+                action.performed -= playerController.OnLook;
+                action.canceled -= playerController.OnLook;
+            }
+            else if (action.name == "Fire")
+            {
+                action.performed -= playerController.OnFire;
+            }
+            else if (action.name == "Sprint")
+            {
+                action.performed -= playerController.OnSprint;
+            }
+            else if (action.name == "Crouch")
+            {
+                action.performed -= playerController.OnCrouch;
+            }
+            else if (action.name == "Aim")
+            {
+                action.performed -= playerController.OnAim;
+            }
+            else if (action.name == "Interact")
+            {
+                action.performed -= playerController.OnInteract;
+            }
+            else if (action.name == "Light")
+            {
+                action.performed -= playerController.OnLight;
+            }
+            else if (action.name == "WeaponSwitch")
+            {
+                action.performed -= playerController.OnWeaponSwitch;
+            }
+            else if (action.name == "Reload")
+            {
+                action.performed -= playerController.OnReload;
+            }
+            else if (action.name == "Inventory")
+            {
+                action.performed -= playerController.OnInventory;
+            }
+            else if (action.name == "Menu")
+            {
+                action.performed -= playerController.OnMenu;
+            }
+            else
+            {
+                Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
+            }
+        }
+    }
+
     void BindMenuActions(InputActionMap actionMap)
     {
         if (menuController == null)
@@ -217,6 +291,35 @@ public class InputManager : MonoBehaviour
             else if (action.name == "Back")
             {
                 action.performed += menuController.OnBack;
+            }
+            else
+            {
+                Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
+            }
+        }
+    }
+
+    void UnbindMenuActions(InputActionMap actionMap)
+    {
+        if (menuController == null)
+        {
+            menuController = FindObjectOfType<MenuController>();
+        }
+        // Unsubscribe to actions within this action map
+        foreach (var action in actionMap.actions)
+        {
+            // Check if it's the action you're interested in
+            if (action.name == "Move")
+            {
+                action.performed -= menuController.OnMove;
+            }
+            else if (action.name == "Interact")
+            {
+                action.performed -= menuController.OnInteract;
+            }
+            else if (action.name == "Back")
+            {
+                action.performed -= menuController.OnBack;
             }
             else
             {
@@ -270,6 +373,51 @@ public class InputManager : MonoBehaviour
         }
     }
 
+    void UnbindInventoryActions(InputActionMap actionMap)
+    {
+        if (inventoryController == null)
+        {
+            inventoryController = FindObjectOfType<InventoryController>();
+        }
+        // Unsubscribe to actions within this action map
+        foreach (var action in actionMap.actions)
+        {
+            // Check if it's the action you're interested in
+            if (action.name == "Move")
+            {
+                action.performed -= inventoryController.OnMove;
+            }
+            else if (action.name == "Interact")
+            {
+                action.performed -= inventoryController.OnInteract;
+            }
+            else if (action.name == "Back")
+            {
+                action.performed -= inventoryController.OnBack;
+            }
+            else if (action.name == "Exit")
+            {
+                action.performed -= inventoryController.OnExit;
+            }
+            else if (action.name == "Look")
+            {
+                action.performed -= inventoryController.OnLook;
+            }
+            else if (action.name == "Scroll")
+            {
+                action.performed -= inventoryController.OnScroll;
+            }
+            else if (action.name == "InspectInteract")
+            {
+                action.performed -= inventoryController.OnInspectInteract;
+            }
+            else
+            {
+                Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
+            }
+        }
+    }
+
     void BindPickupActions(InputActionMap actionMap)
     {
         if (playerController == null)
@@ -283,6 +431,27 @@ public class InputManager : MonoBehaviour
             if (action.name == "Interact")
             {
                 action.performed += playerController.OnInteract;
+            }
+            else
+            {
+                Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
+            }
+        }
+    }
+
+    void UnbindPickupActions(InputActionMap actionMap)
+    {
+        if (playerController == null)
+        {
+            playerController = FindObjectOfType<PlayerController>();
+        }
+        // Unsubscribe to actions within this action map
+        foreach (var action in actionMap.actions)
+        {
+            // Check if it's the action you're interested in
+            if (action.name == "Interact")
+            {
+                action.performed -= playerController.OnInteract;
             }
             else
             {
@@ -312,6 +481,35 @@ public class InputManager : MonoBehaviour
             else if (action.name == "Back")
             {
                 action.performed += paintingController.OnBack;
+            }
+            else
+            {
+                Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
+            }
+        }
+    }
+
+    void UnbindPaintingActions(InputActionMap actionMap)
+    {
+        if (paintingController == null)
+        {
+            paintingController = FindObjectOfType<PaintingController>();
+        }
+        // Unsubscribe to actions within this action map
+        foreach (var action in actionMap.actions)
+        {
+            // Check if it's the action you're interested in
+            if (action.name == "Move")
+            {
+                action.performed -= paintingController.OnMove;
+            }
+            else if (action.name == "Interact")
+            {
+                action.performed -= paintingController.OnInteract;
+            }
+            else if (action.name == "Back")
+            {
+                action.performed -= paintingController.OnBack;
             }
             else
             {

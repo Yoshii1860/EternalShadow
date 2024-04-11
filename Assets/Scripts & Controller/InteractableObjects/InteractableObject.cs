@@ -174,7 +174,7 @@ public class InteractableObject : MonoBehaviour
         RunItemCode();
 
         // Destroy the interactable object
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 
     IEnumerator RotateObject(GameObject itemToRotate)

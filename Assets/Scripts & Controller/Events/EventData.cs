@@ -4,122 +4,78 @@ using System.Reflection;
 using UnityEngine;
 using System;
 
+public class EventDataEntry
+{
+    public string EventName;
+    public Type ScriptType;
+    public bool Active;
+}
+
 public class EventData : MonoBehaviour
 {
-    public string[] eventNames;
-    public Dictionary<string, bool> eventDictionary;
-    public Dictionary<string, string> scriptNames = new Dictionary<string, string>(); // Map event names to script names
+    public bool debugMode = false;
 
-    void Start()
+    void Update()
     {
-        eventDictionary = new Dictionary<string, bool>();
-
-        for (int i = 0; i < eventNames.Length; i++)
+        if (debugMode)
         {
-            eventDictionary.Add(eventNames[i], false);
-        }
-
-        // Add the script names to the dictionary
-        for (int i = 0; i < eventNames.Length; i++)
-        {
-            switch (eventNames[i])
+            debugMode = false;
+            Debug.Log("Event Data Entries:");
+            foreach (EventDataEntry eventDataEntry in eventDataEntries)
             {
-                case "Button":
-                    AddScript(eventNames[i], "");
-                    break;
-                case "Light":
-                    AddScript(eventNames[i], "LightSwitchCode");
-                    break;
-                case "Skull":
-                    AddScript(eventNames[i], "SkullCode");
-                    break;
-                case "Musicbox":
-                    AddScript(eventNames[i], "");
-                    break;
-                case "Mirror":
-                    AddScript(eventNames[i], "");
-                    break;
-                case "Flipped":
-                    AddScript(eventNames[i], "CellEvent");
-                    break;
-                case "Keypad":
-                    AddScript(eventNames[i], "Keypad");
-                    break;
-                case "Rails":
-                    AddScript(eventNames[i], "CrowbarCode");
-                    break;
-                case "Yard":
-                    AddScript(eventNames[i], "YardEvent");
-                    break;
-                case "Mannequin":
-                    AddScript(eventNames[i], "MannequinEvent");
-                    break;
-                default:
-                    Debug.LogWarning($"No script found for event '{eventNames[i]}'.");
-                    break;
+                Debug.Log("Event Name: " + eventDataEntry.EventName + " - Active: " + eventDataEntry.Active);
             }
         }
     }
 
+    public List<EventDataEntry> eventDataEntries = new List<EventDataEntry>()
+    {
+        new EventDataEntry() { EventName = "Button", ScriptType = null, Active = false },
+        new EventDataEntry() { EventName = "Light", ScriptType = typeof(LightSwitchCode), Active = false },
+        new EventDataEntry() { EventName = "Skull", ScriptType = typeof(SkullCode), Active = false },
+        new EventDataEntry() { EventName = "Musicbox", ScriptType = null, Active = false },
+        new EventDataEntry() { EventName = "Mirror", ScriptType = null, Active = false },
+        new EventDataEntry() { EventName = "Bathroom", ScriptType = typeof(BathroomEvent), Active = false },
+        new EventDataEntry() { EventName = "Flipped", ScriptType = typeof(CellEvent), Active = false },
+        new EventDataEntry() { EventName = "Keypad", ScriptType = typeof(NavKeypad.Keypad), Active = false },
+        new EventDataEntry() { EventName = "Rails", ScriptType = typeof(CrowbarCode), Active = false },
+        new EventDataEntry() { EventName = "Yard", ScriptType = typeof(YardEvent), Active = false },
+        new EventDataEntry() { EventName = "Mannequin", ScriptType = typeof(MannequinEvent), Active = false }
+    };   
+
     public void SetEvent(string eventName)
     {
-        eventDictionary[eventName] = true;
+        EventDataEntry eventDataEntry = eventDataEntries.Find(x => x.EventName == eventName);
+        if (eventDataEntry != null)
+        {
+            eventDataEntry.Active = true;
+        }
     }
 
     public bool CheckEvent(string eventName)
     {
-        return eventDictionary[eventName];
-    }
-
-    public void AddScript(string eventName, string scriptName)
-    {
-        scriptNames.Add(eventName, scriptName);
+        EventDataEntry eventDataEntry = eventDataEntries.Find(x => x.EventName == eventName);
+        if (eventDataEntry != null)
+        {
+            return eventDataEntry.Active;
+        }
+        return false;
     }
 
     public void TriggerEvent(string eventName)
     {
-        if (eventDictionary.TryGetValue(eventName, out bool isActive) && isActive)
+        EventDataEntry eventDataEntry = eventDataEntries.Find(x => x.EventName == eventName);
+        if (eventDataEntry != null)
         {
-            // Get the script name from the dictionary
-            if (scriptNames.TryGetValue(eventName, out string scriptName))
+            GameObject[] taggedObjects = GameObject.FindGameObjectsWithTag("EventTrigger");
+            foreach (GameObject go in taggedObjects)
             {
-                if (string.IsNullOrEmpty(scriptName))
+                if (go.GetComponent(eventDataEntry.ScriptType) != null)
                 {
-                    Debug.LogWarning($"No script found for event '{eventName}'.");
-                    return;
+                    go.GetComponent(eventDataEntry.ScriptType).SendMessage("EventLoad");
+                    Debug.Log("Event triggered: " + eventName);
+                    break;
                 }
-                
-                // Load the script type dynamically
-                Type scriptType = Type.GetType(scriptName);
-                if (scriptType == null)
-                {
-                    Debug.LogError($"Script '{scriptName}' not found.");
-                    return;
-                }
-
-                // Call the EventLoad method
-                MethodInfo methodInfo = scriptType.GetMethod("EventLoad");
-                if (methodInfo != null)
-                {
-                    // Find the GameObject with the script (assuming a single instance)
-                    GameObject scriptObject = (GameObject)GameObject.FindObjectOfType(scriptType);  // Add explicit cast to GameObject
-                    if (scriptObject != null)
-                    {
-                        methodInfo.Invoke(scriptObject.GetComponent(scriptType), null); // Invoke the method
-                    }
-                    else
-                    {
-                        Debug.LogError($"GameObject with script '{scriptName}' not found.");
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning($"Script '{scriptName}' does not have a 'EventLoad' method.");
-                }
-            }
-            else
-            {
-                Debug.LogError($"Script name not found for event '{eventName}'.");
             }
         }
     }

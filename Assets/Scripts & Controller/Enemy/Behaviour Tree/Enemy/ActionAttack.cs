@@ -81,7 +81,7 @@ public class ActionAttack : Node
         AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, true, enemyType);
 
         attackCounter += Time.deltaTime;
-        if (attackCounter >= EnemyBT.attackInterval)
+        if (attackCounter >= SlenderBT.attackInterval)
         {
             animator.SetTrigger("attack");
 
@@ -90,20 +90,8 @@ public class ActionAttack : Node
             // Perform attack and check if the player is dead.
             // Chances to apply status effects on the player.
             
-            //bool playerIsDead = player.TakeDamage(damage);
+            bool playerIsDead = player.isDead;
 
-            int randomizer = Random.Range(0, 100);
-            if (randomizer <= 15)
-            {
-                if (!player.isPoisoned) player.Poisoned();
-            }
-            randomizer = Random.Range(0, 100);
-            if (randomizer <= 10)
-            {
-                if (!player.isBleeding) player.Bleeding();
-            }
-
-            /*
             if (playerIsDead)
             {
                 // Player is dead, reset and return success state.
@@ -115,10 +103,19 @@ public class ActionAttack : Node
                 state = NodeState.SUCCESS;
                 return state;
             }
-            */
+
+            int randomizer = Random.Range(0, 100);
+            if (randomizer <= 15)
+            {
+                if (!player.isDizzy) player.Dizzy();
+            }
+            randomizer = Random.Range(0, 100);
+            if (randomizer <= 10)
+            {
+                if (!player.isBleeding) player.Bleeding();
+            }
 
             attackCounter = 0f;
-
         }
 
         // Still in the process of attacking.

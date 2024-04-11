@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+[RequireComponent(typeof(UniqueIDComponent))]
 public class Mannequin : MonoBehaviour, ICustomUpdatable
 {
     #region Serialized Fields
@@ -23,7 +24,7 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     NavMeshAgent navMeshAgent;
     Animator animator;
     bool stopped = true; // Flag to track if the mannequin has stopped moving
-    bool dead = false;
+    public bool isDead = false;
     public bool move = false;
     public bool started = false;
     bool firstAudio = false;
@@ -35,14 +36,19 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     void Start()
     {
         // Initialize references
-        player = GameManager.Instance.player.transform;
+        player = GameObject.FindGameObjectWithTag("Player").transform;
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
     }
 
     public void CustomUpdate(float deltaTime)
     {
-        if (dead) return;
+        if (GameManager.Instance.isPaused) 
+        {
+            StopAnimation();
+            return;
+        }
+        if (isDead) return;
         // Update mannequin behaviors
         if (!started) return;
         TurnHead(); // Rotate the mannequin's head to face the player
@@ -176,7 +182,7 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     {
         if (string.Compare(hitObject.name, "head") == 0)
         {
-            dead = true;
+            isDead = true;
             hitObject.GetComponent<Rigidbody>().AddForce(-transform.forward * 5f, ForceMode.Impulse);
             AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "mannequin death", 1f, 1f, false);
 
@@ -252,7 +258,7 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
         AudioManager.Instance.RemoveAudioSource(gameObject.GetInstanceID());
         yield return new WaitForSeconds(30f);
         
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 
     private void SwitchBodyPart(Transform bodyPart, Transform deathPart)

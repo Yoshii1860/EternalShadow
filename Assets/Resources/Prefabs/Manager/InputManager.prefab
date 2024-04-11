@@ -142,6 +142,30 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 05e752a0-4476-470d-80bf-d0f7f10b6889
     m_ActionName: Event/New action
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 8ef8b64e-9153-4faf-8f7a-a1a3bd08bd3a
+    m_ActionName: Painting/Move[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: c2d2462d-77f6-42f7-bd00-c453c5ca759d
+    m_ActionName: Painting/Interact[/Mouse/leftButton,/Keyboard/e]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 5423d3ca-7c22-46ca-af61-ae6aaa28f05e
+    m_ActionName: Painting/Back[/Keyboard/escape]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 7c0c30be-b6fa-4939-b0db-bd0d357417ae
+    m_ActionName: Inventory/Scroll[/Mouse/scroll/y]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 1fc7eed1-c619-4108-b55f-cd025d29dc95
+    m_ActionName: Inventory/Look[/Mouse/delta]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 3112a707-6939-4215-a068-6f0a1fce4993
+    m_ActionName: Inventory/InspectInteract[/Mouse/leftButton]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player

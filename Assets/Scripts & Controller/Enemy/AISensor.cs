@@ -78,6 +78,7 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
             StartCoroutine(StopChase());
             if (gameObject.activeSelf) Debug.Log("AISensor: Player hidden from enemy!");
         }
+        else Debug.Log("AISensor: Player already hidden!");
         once = true;
         playerInSight = false;
     }
@@ -169,13 +170,14 @@ public class AISensor : MonoBehaviour, ICustomUpdatable
 
     IEnumerator StopChase()
     {
+        Debug.Log("AISensor: Stopping chase");
         agent.SetDestination(transform.position);
         agent.isStopped = true;
         Vector3 lastPosition = transform.position;
         float elpasedTime = 0;
         while (elpasedTime < 1.0f)
         {
-            Debug.Log("Stopping chase");
+            Debug.Log("AISensor: Stopping chase");
             elpasedTime += Time.deltaTime;
             transform.position = lastPosition;
             yield return null;

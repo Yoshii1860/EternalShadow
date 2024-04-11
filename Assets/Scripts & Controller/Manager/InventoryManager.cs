@@ -70,6 +70,8 @@ public class InventoryManager : MonoBehaviour
         public GameObject messageCanvas;
         [Tooltip("The text that will be used to display messages")]
         public TextMeshProUGUI messageText;
+        [Tooltip("The text that will be used to display the amount of horror dolls")]
+        public TextMeshProUGUI horrorDollCount;
         [Tooltip("The force that will be applied to the dropped item")]
         public float dropForce;
         [Tooltip("The maximum amount of items that can be stored in the inventory")]
@@ -115,6 +117,12 @@ public class InventoryManager : MonoBehaviour
         public bool itemActionsOpen;
         public int actionsChildCount;
         public bool isInspecting = false;
+
+        // names of items need to meet the conditions to autosave the game before boss fight
+        [SerializeField] AutoSave autoSave;
+        public int uniqueAutoSaveID;
+        public string[] autoSaveCondition;
+        public int conditionCounter = 0;
 
         // The Image components of the item actions
         Image[] itemCanvasActions;
@@ -180,6 +188,18 @@ public class InventoryManager : MonoBehaviour
         player = GameManager.Instance.player.gameObject;
         weapons = FindObjectOfType<WeaponSwitcher>().gameObject;
         ammo = player.GetComponent<Ammo>();
+        if (autoSave == null)
+        {
+            GameObject autoSavePool = GameObject.FindWithTag("SaveGamePool");
+            foreach (AutoSave autoSaveObj in autoSavePool.GetComponentsInChildren<AutoSave>())
+            {
+                if (autoSaveObj.GetComponent<UniqueIDComponent>().UniqueID == uniqueAutoSaveID.ToString())
+                {
+                    autoSave = autoSaveObj;
+                    break;
+                }
+            }
+        }
 
         GetComponent<ItemActions>().UpdateReferences();
         GetComponent<ObjectHandler>().UpdateReferences();
@@ -188,10 +208,33 @@ public class InventoryManager : MonoBehaviour
 
     #endregion
 
+    #region AutoSaveCondition
+
+    void AutoSaveCondition(Item item)
+    {
+        foreach (string condition in autoSaveCondition)
+        {
+            if (item.name == condition)
+            {
+                conditionCounter++;
+                break;
+            }
+        }
+
+        if (conditionCounter == autoSaveCondition.Length)
+        {
+            autoSave.conditionMet = true;
+        }
+    }
+
+    #endregion
+
     #region Item Management
 
     public void AddItem(Item item)
     {
+        AutoSaveCondition(item);
+
         if (item.type == ItemType.Ammo || item.type == ItemType.Potion)
         {
             Item existingItem = Items.Find(existingItem => existingItem.displayName == item.displayName);

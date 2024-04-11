@@ -52,6 +52,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
     bool breathLoudest = false;
     bool isMoaning = false;
     bool heartbeat = false;
+    public bool isDead = false;
 
     // Timer-related
     bool waitTimer = false;
@@ -73,6 +74,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
 
     public void CustomUpdate(float deltaTime)
     {
+        if (isDead) return;
         Breathing();
         LowLife();
         if (waitTimer && !timerIsRunning)
@@ -534,6 +536,11 @@ public class Player : MonoBehaviour, ICustomUpdatable
 
     private void Die()
     {
+        if (isDead) return;
+        isDead = true;
+        isDizzy = false;
+        isPoisoned = false;
+        isBleeding = false;
         StartCoroutine(DieRoutine());
         Debug.Log("Player died.");
     }
@@ -554,12 +561,12 @@ public class Player : MonoBehaviour, ICustomUpdatable
         }
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "death music", 0.5f, 1f);
         GameManager.Instance.OpenDeathScreen();
-        for (float i = 1f; i >= 0f; i -= 0.01f)
-        {
-            blackscreenImage.color = new Color(0f, 0f, 0f, i);
-            yield return new WaitForSeconds(0.01f);
-        }
-        GameManager.Instance.blackScreen.gameObject.SetActive(false);
+        isDizzy = false;
+        isPoisoned = false;
+        isBleeding = false;
+        health = 100f;
+        yield return new WaitForSeconds(0.5f);
+        GameManager.Instance.blackScreen.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
     }
 
     #endregion

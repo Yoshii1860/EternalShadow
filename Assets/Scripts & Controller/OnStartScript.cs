@@ -12,6 +12,5 @@ public class OnStartScript : MonoBehaviour
     {
         girl.SetActive(false);
         slender.SetActive(false);
-        GameManager.Instance.StartGame();
     }
 }

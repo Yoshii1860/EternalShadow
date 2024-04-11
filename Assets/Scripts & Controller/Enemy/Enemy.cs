@@ -19,7 +19,6 @@ public class Enemy : MonoBehaviour
     [SerializeField] string fallClip = "";
     [SerializeField] float deathToFallTime = 1f;
     [SerializeField] float fallVolume = 1f;
-    [SerializeField] string hitClip = "";
 
     #endregion
 

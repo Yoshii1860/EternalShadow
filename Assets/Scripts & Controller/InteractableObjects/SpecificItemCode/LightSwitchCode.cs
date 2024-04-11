@@ -75,7 +75,7 @@ public class LightSwitchCode : InteractableObject
         yield return new WaitForSeconds(1f);
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "hospital music");
         yield return new WaitForSeconds(0.1f);
-        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.5f, 1f, true);
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.15f, 1f, true);
         // Turn on all the lights with a delay
         foreach (Light l in allLights.GetComponentsInChildren<Light>())
         {

@@ -34,29 +34,27 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
 
     bool once = false;
 
-    YardEvent yardEvent;
-
     [SerializeField] ItemController musicBoxObject;
 
     void Start()
     {
-        GameManager.Instance.customUpdateManager.AddCustomUpdatable(this);
         monsterAudioID = monsterAudio.GetInstanceID();
-        yardEvent = FindObjectOfType<YardEvent>();
     }
 
     public void CustomUpdate(float deltaTime)
     {
+        Debug.Log("Musicbox event CustomUpdate");
         if (GameManager.Instance.eventData.CheckEvent("Musicbox") && !end) 
         {
+            Debug.Log("Musicbox event ended due to event data");
             AudioManager.Instance.StopAudio(gameObject.GetInstanceID());
             GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(this);
+            return;
         }
-
-        if (!started && yardEvent.musicBox) GetCloser();
+        if (!started) GetCloser();
         if (waypoints[waypointIndex].childCount > 0) exited = waypoints[waypointIndex].GetComponentInChildren<MusicboxWay>().exited;
-        if (yardEvent.musicBox) MusicBoxVolume();
-        if (!started && yardEvent.musicBox) AdjustEnvironmentVolume();
+        MusicBoxVolume();
+        if (!started) AdjustEnvironmentVolume();
         else if (started && !once) 
         {
             AudioManager.Instance.PauseAudio(AudioManager.Instance.environment);
@@ -215,7 +213,8 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
         if (warningCounter == 3)
         {
             AudioManager.Instance.PlaySoundOneShot(monsterAudioID, "MB attack", 1f, 1f);
-            Debug.Log("DEATH!!!!!!!!!!!!!");
+            yield return new WaitForSeconds(0.5f);
+            GameManager.Instance.player.TakeDamage(101);
         }
     }
 
@@ -241,7 +240,8 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
         if (exited && counter == warningCounter)
         {
             AudioManager.Instance.PlaySoundOneShot(monsterAudioID, "MB attack", 1f, 1f);
-            Debug.Log("DEATH!!!!!!!!!!!!!");
+            yield return new WaitForSeconds(0.5f);
+            GameManager.Instance.player.TakeDamage(101);
         }
     }
 

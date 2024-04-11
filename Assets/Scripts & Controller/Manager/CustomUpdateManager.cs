@@ -14,6 +14,7 @@ public class CustomUpdateManager : MonoBehaviour
 {
     // List to store custom updatable objects
     private List<ICustomUpdatable> customUpdatables = new List<ICustomUpdatable>();
+    public bool debugBool;
 
     // Add a custom updatable object to the list
     public void AddCustomUpdatable(ICustomUpdatable updatable)
@@ -32,7 +33,16 @@ public class CustomUpdateManager : MonoBehaviour
 
     // Unity's Update method, called every frame
     private void Update()
-    {
+    {   
+        if (debugBool)
+        {
+            debugBool = false;
+            string[] allCustomUpdateables = AllCustomUpdateables();
+            Debug.Log("All Custom Updateables: " + string.Join(", ", allCustomUpdateables));
+        }
+
+        if (GameManager.Instance.Loading) return;
+        
         // Calculate deltaTime once for all custom updates
         float deltaTime = Time.deltaTime;
 
@@ -41,6 +51,16 @@ public class CustomUpdateManager : MonoBehaviour
         {
             updatable.CustomUpdate(deltaTime);
         }
+    }
+
+    public string[] AllCustomUpdateables()
+    {
+        string[] allCustomUpdateables = new string[customUpdatables.Count];
+        for (int i = 0; i < customUpdatables.Count; i++)
+        {
+            allCustomUpdateables[i] = customUpdatables[i].ToString();
+        }
+        return allCustomUpdateables;
     }
 
     // Get a string representation of all custom updatable objects
@@ -63,5 +83,10 @@ public class CustomUpdateManager : MonoBehaviour
 
         // Return the final string
         return customUpdatablesString;
+    }
+
+    public void ClearCustomUpdatables()
+    {
+        customUpdatables.Clear();
     }
 }

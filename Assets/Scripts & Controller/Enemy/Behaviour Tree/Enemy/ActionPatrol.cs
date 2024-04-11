@@ -21,6 +21,7 @@ public class ActionPatrol : Node
     private float waitTime = 10f;
     private float waitCounter = 0f;
     private bool isWaiting = true;
+    private int stepID;
 
     // Debug mode flag
     private bool debugMode;
@@ -42,6 +43,7 @@ public class ActionPatrol : Node
         sensor = transform.GetComponent<AISensor>();
         this.debugMode = debugMode;
         this.enemyType = enemyType;
+        stepID = transform.GetChild(0).gameObject.GetInstanceID();
     }
 
     #endregion
@@ -136,6 +138,7 @@ public class ActionPatrol : Node
                 // Reset animation states
                 animator.SetBool("run", false);
                 animator.SetBool("walk", false);
+                AudioManager.Instance.StopAudio(stepID);
             }
             else
             {
@@ -145,6 +148,7 @@ public class ActionPatrol : Node
                 animator.SetBool("walk", true);
                 animator.SetBool("run", false);
 
+                if (!AudioManager.Instance.IsPlaying(stepID)) AudioManager.Instance.PlayAudio(stepID);
                 AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, false, enemyType);
             }
         }
