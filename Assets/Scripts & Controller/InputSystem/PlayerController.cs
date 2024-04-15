@@ -118,6 +118,9 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
         startYPosition = camRoot.transform.localPosition.y;
         startFocalLength = cmVirtualCamera.m_Lens.FieldOfView;
+
+        if (camRoot == null) camRoot = transform.GetChild(0).gameObject;
+        if (camRoot == null) Debug.LogError("No camRoot found!");
     }
 
     public void CustomUpdate(float deltaTime)

@@ -564,7 +564,9 @@ public class Player : MonoBehaviour, ICustomUpdatable
         isDizzy = false;
         isPoisoned = false;
         isBleeding = false;
-        health = 100f;
+        dizzyOverlay.color = new Color(dizzyOverlay.color.r, dizzyOverlay.color.g, dizzyOverlay.color.b, 0f);
+        poisonOverlay.color = new Color(poisonOverlay.color.r, poisonOverlay.color.g, poisonOverlay.color.b, 0f);
+        bloodOverlay.color = new Color(bloodOverlay.color.r, bloodOverlay.color.g, bloodOverlay.color.b, 0f);
         yield return new WaitForSeconds(0.5f);
         GameManager.Instance.blackScreen.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
     }

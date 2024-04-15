@@ -331,14 +331,20 @@ public class InventoryManager : MonoBehaviour
             if (Items[Items.IndexOf(item)].quantity > 1)
             {
                 Items[Items.IndexOf(item)].quantity -= 1;
-                BackToSelection();
-                ListItems();
+                if (GameManager.Instance.inventoryCanvas.activeSelf)
+                {
+                    BackToSelection();
+                    ListItems();
+                }
             }
             else
             {
                 Items.Remove(item);
-                BackToSelection();
-                ListItems();
+                if (GameManager.Instance.inventoryCanvas.activeSelf)
+                {
+                    BackToSelection();
+                    ListItems();
+                }
             }
         }
     }

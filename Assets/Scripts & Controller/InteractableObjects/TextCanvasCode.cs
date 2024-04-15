@@ -31,6 +31,12 @@ public class TextCanvasCode : MonoBehaviour
     [SerializeField] TextMeshProUGUI subBody;
     string subBodyString;
 
+    [Space(10)]
+
+    public string speakerClipName = "";
+    public float delay = 0f;
+    public bool audioPlayable = false;
+
     void Start()
     {
         gameObject.SetActive(false);
@@ -95,10 +101,22 @@ public class TextCanvasCode : MonoBehaviour
         }
     }
 
+    public void SetAudioClip(string clipName, float delay)
+    {
+        speakerClipName = clipName;
+        this.delay = delay;
+        audioPlayable = true;
+    }
+
     // function to run text toggle
     IEnumerator ToggleText()
     {
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
+        if (audioPlayable)
+        {
+            AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, speakerClipName, delay);
+            audioPlayable = false;
+        }
         gameObject.SetActive(false);
         RendererToggle(GameManager.Instance.fpsArms, true);
     }

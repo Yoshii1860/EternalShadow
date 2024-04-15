@@ -221,7 +221,8 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     IEnumerator AttackHit()
     {
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "mannequin hit", 1f); // Play attack sound
-        float randomizer = Random.Range(15, 33f);
+        float randomizer = Mathf.FloorToInt(Random.Range(15, 33f));
+        // convert randomizier to float
         GameManager.Instance.player.TakeDamage(randomizer);
         randomizer = Random.Range(0,100);
         if (randomizer <= 15)

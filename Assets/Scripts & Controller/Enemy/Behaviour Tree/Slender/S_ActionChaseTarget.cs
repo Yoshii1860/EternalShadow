@@ -89,7 +89,7 @@ public class S_ActionChaseTarget : Node
         animator.SetBool("walk", false);
         animator.SetBool("run", true);
 
-        AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, true, enemyType);
+        AudioManager.Instance.VolumeFloorChanger(transform, enemyType);
 
         // Update the chase timer
         chaseTimer += Time.deltaTime;

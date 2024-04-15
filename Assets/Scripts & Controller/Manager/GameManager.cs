@@ -149,7 +149,7 @@ public class GameManager : MonoBehaviour
         if (playerAnimController == null) playerAnimController = FindObjectOfType<PlayerAnimController>();
         if (playerController == null)  playerController = FindObjectOfType<PlayerController>();
         if (pickupCanvas == null) pickupCanvas = GameObject.FindWithTag("PickupCanvas");
-        pickupCanvas.SetActive(false);
+            pickupCanvas.SetActive(false);
         if (textCanvas == null) 
         {
             TextCanvasCode textCanvasCode = Resources.FindObjectsOfTypeAll<TextCanvasCode>()[0];
@@ -182,6 +182,12 @@ public class GameManager : MonoBehaviour
             InputManager.Instance.UpdateReferences();
         } 
         else Debug.LogWarning("GameManager.cs: InputManager is null!");
+
+        if (EnemyManager.Instance != null)
+        {
+            EnemyManager.Instance.InitializeEnemyPool();
+        }
+        else Debug.LogWarning("GameManager.cs: EnemyManager is null!");
 
         AudioManager.Instance.LoadAudioSources();
 
@@ -756,8 +762,8 @@ public class GameManager : MonoBehaviour
                         {
                             enemy.gameObject.SetActive(true);
                         }
-                        if (enemyData.isActive) enemy.GetComponent<EnemyBT>().ResetTree();
-                        else enemy.gameObject.SetActive(false);
+                        // if (enemyData.isActive) enemy.GetComponent<EnemyBT>().ResetTree();
+                        if (!enemyData.isActive) enemy.gameObject.SetActive(false);
                     }
                 }
 

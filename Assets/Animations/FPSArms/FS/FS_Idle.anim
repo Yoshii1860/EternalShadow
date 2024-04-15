@@ -67,7 +67,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: {x: -90.996, y: -66.994995, z: -17.52002}
+        value: {x: -88.522, y: 112.025, z: 171.72}
         inSlope: {x: 0, y: 0, z: 0}
         outSlope: {x: 0, y: 0, z: 0}
         tangentMode: 0
@@ -904,7 +904,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -90.996
+        value: -88.522
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -923,7 +923,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -66.994995
+        value: 112.025
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -942,7 +942,7 @@ AnimationClip:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: -17.52002
+        value: 171.72
         inSlope: 0
         outSlope: 0
         tangentMode: 136
@@ -2270,7 +2270,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: FPSArms/Body/Shoulder.R/Arm.R/Forearm.R
+    path: FPSArms/Body/Shoulder.R/Arm.R
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -2280,7 +2280,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: FPSArms/Body/Shoulder.R/Arm.R/Forearm.R
+    path: FPSArms/Body/Shoulder.R/Arm.R
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -2290,7 +2290,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: FPSArms/Body/Shoulder.R/Arm.R/Forearm.R
+    path: FPSArms/Body/Shoulder.R/Arm.R
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -2330,7 +2330,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: FPSArms/Body/Shoulder.R/Arm.R
+    path: FPSArms/Body/Shoulder.R
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -2340,7 +2340,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: FPSArms/Body/Shoulder.R/Arm.R
+    path: FPSArms/Body/Shoulder.R
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -2350,7 +2350,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: FPSArms/Body/Shoulder.R/Arm.R
+    path: FPSArms/Body/Shoulder.R
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -2360,7 +2360,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: FPSArms/Body/Shoulder.R
+    path: Flashlight
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -2370,7 +2370,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: FPSArms/Body/Shoulder.R
+    path: Flashlight
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -2380,7 +2380,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: FPSArms/Body/Shoulder.R
+    path: Flashlight
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -2420,7 +2420,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.x
-    path: Flashlight
+    path: FPSArms/Body/Shoulder.R/Arm.R/Forearm.R
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -2430,7 +2430,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.y
-    path: Flashlight
+    path: FPSArms/Body/Shoulder.R/Arm.R/Forearm.R
     classID: 4
     script: {fileID: 0}
   - curve:
@@ -2440,7 +2440,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_LocalEulerAngles.z
-    path: Flashlight
+    path: FPSArms/Body/Shoulder.R/Arm.R/Forearm.R
     classID: 4
     script: {fileID: 0}
   m_HasGenericRootTransform: 0

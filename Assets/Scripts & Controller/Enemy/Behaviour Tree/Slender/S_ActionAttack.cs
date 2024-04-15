@@ -10,12 +10,11 @@ public class S_ActionAttack : Node
     // Reference to the animator component.
     private Animator animator;
     private Transform transform;
-    // Reference to the player instance.
-    private Player player = GameManager.Instance.player;
     private AISensor aiSensor;
 
     // Counter for tracking attack intervals.
     private float attackCounter = 0f;
+    private float attackInterval = 0f;
 
     // Damage value for the attack.
     private float damage;
@@ -64,6 +63,7 @@ public class S_ActionAttack : Node
         if (obj == null)
         {
             if (debugMode) Debug.Log("A - Attack (No target found)");
+            attackInterval = 0f;
             state = NodeState.FAILURE;
             return state;
         }
@@ -71,6 +71,7 @@ public class S_ActionAttack : Node
         {
             if (debugMode) Debug.Log("A - Attack (Hidden)");
             ClearData("target");
+            attackInterval = 0f;
             state = NodeState.FAILURE;
             return state;
         }
@@ -78,19 +79,16 @@ public class S_ActionAttack : Node
 
         Transform target = (Transform)obj;
 
-        AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, true, enemyType);
-
         attackCounter += Time.deltaTime;
-        if (attackCounter >= SlenderBT.attackInterval)
+        if (attackCounter >= attackInterval)
         {
+            attackInterval = SlenderBT.attackInterval;
             animator.SetTrigger("attack");
-
-            AudioManager.Instance.FadeOut(transform.GetChild(0).gameObject.GetInstanceID(), 0.5f);
 
             // Perform attack and check if the player is dead.
             // Chances to apply status effects on the player.
             
-            bool playerIsDead = player.isDead;
+            bool playerIsDead = GameManager.Instance.player.isDead;
 
             if (playerIsDead)
             {
@@ -107,12 +105,12 @@ public class S_ActionAttack : Node
             int randomizer = Random.Range(0, 100);
             if (randomizer <= 15)
             {
-                if (!player.isDizzy) player.Dizzy();
+                if (!GameManager.Instance.player.isDizzy) GameManager.Instance.player.Dizzy();
             }
             randomizer = Random.Range(0, 100);
             if (randomizer <= 10)
             {
-                if (!player.isBleeding) player.Bleeding();
+                if (!GameManager.Instance.player.isBleeding) GameManager.Instance.player.Bleeding();
             }
 
             attackCounter = 0f;

@@ -4,44 +4,35 @@ using UnityEngine;
 
 public class EnemyManager : MonoBehaviour
 {
+    static EnemyManager instance;
+
     // Singleton pattern to ensure only one instance exists
-    public static EnemyManager Instance { get; private set; }
+    public static EnemyManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<EnemyManager>();
+
+                if (instance == null)
+                {
+                    GameObject obj = new GameObject("EnemyManager");
+                    instance = obj.AddComponent<EnemyManager>();
+                }
+            }
+
+            return instance;
+        }
+    }
 
     // Store enemy-related data here
     public Dictionary<Transform, Enemy> enemyDataDictionary = new Dictionary<Transform, Enemy>();
 
-    #region Singleton Pattern
-
-    // Awake is called before Start
-    private void Awake()
-    {
-        // Singleton pattern to ensure only one instance exists
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        // Keep the EnemyManager between scene changes
-        DontDestroyOnLoad(gameObject);
-    }
-
-    #endregion
-
     #region Enemy Manager
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        InitializeEnemyPool();
-    }
-
     // Initialize enemy pool either from GameManager or find by tag
-    private void InitializeEnemyPool()
+    public void InitializeEnemyPool()
     {
         if (GameManager.Instance.enemyPool != null)
         {

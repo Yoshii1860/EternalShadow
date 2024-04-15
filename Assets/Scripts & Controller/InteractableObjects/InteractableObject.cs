@@ -13,6 +13,10 @@ public class InteractableObject : MonoBehaviour
     public bool active = false;
     public bool inventoryItem = true;
     public bool useEmission = true;
+    [SerializeField] bool audioAfterPickup = false;
+    [SerializeField] string audioClipName = "";
+    [SerializeField] float delay = 0f;
+    [Space(10)]
 
     [Header("Object Properties")]
     [SerializeField] Transform objectPosition;
@@ -172,6 +176,8 @@ public class InteractableObject : MonoBehaviour
 
         // Run object-specific code
         RunItemCode();
+
+        if (audioAfterPickup) AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, audioClipName, delay);
 
         // Destroy the interactable object
         gameObject.SetActive(false);

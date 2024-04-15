@@ -8,6 +8,7 @@ public class MannequinEvent : MonoBehaviour
     [SerializeField] Mannequin secondMannequin;
     [SerializeField] Weapon weapon;
     bool firstEnter = false;
+    bool playOnce = false;
 
     void OnTriggerExit(Collider other) 
     {
@@ -26,6 +27,11 @@ public class MannequinEvent : MonoBehaviour
                     GameManager.Instance.eventData.SetEvent("Mannequin");
                     firstMannequin.move = true;
                     secondMannequin.move = true;
+                    if (!playOnce) 
+                    {
+                        AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, "speaker mannequins", 1.5f);
+                        playOnce = true;
+                    }
                     Destroy(gameObject);
                 }
             }
@@ -45,5 +51,7 @@ public class MannequinEvent : MonoBehaviour
             secondMannequin.started = true;
             secondMannequin.move = true;
         }
+
+        playOnce = true;
     }
 }

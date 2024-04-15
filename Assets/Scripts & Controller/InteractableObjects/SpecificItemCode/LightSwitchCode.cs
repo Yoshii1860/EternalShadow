@@ -66,7 +66,7 @@ public class LightSwitchCode : InteractableObject
             handle.transform.Rotate(Vector3.forward, -1);
             yield return new WaitForSeconds(0.01f);
         }
-
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "power up", 0.6f, 1f);
         StartCoroutine(TurnOnLights());
     }
 

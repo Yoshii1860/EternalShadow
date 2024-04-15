@@ -446,7 +446,6 @@ public class YardEvent : MonoBehaviour
         // Stop all sounds, play ambient audio, and set player's voice audio
         AudioManager.Instance.StopAll();
         AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.1f, 1f, true);
-        AudioManager.Instance.SetAudioClip(AudioManager.Instance.playerSpeaker, "player3", 0.8f, 1f, false);
 
         // Wait until the game state transitions to the default state
         Debug.Log("Waiting for game state to transition to default...");
@@ -458,7 +457,7 @@ public class YardEvent : MonoBehaviour
         GameManager.Instance.customUpdateManager.AddCustomUpdatable(musicbox);
 
         // Play the player's voice audio after a short delay
-        AudioManager.Instance.PlayAudioWithDelay(AudioManager.Instance.playerSpeaker, 2f);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "player3", 0.8f, 1f);
     }
     
     #endregion

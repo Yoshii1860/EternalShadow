@@ -5,6 +5,7 @@ using UnityEngine;
 public class BathroomEvent : MonoBehaviour
 {
     [SerializeField] Animator girl;
+    bool playOnce = false;
 
     void OnTriggerEnter(Collider other) 
     {
@@ -22,6 +23,11 @@ public class BathroomEvent : MonoBehaviour
         GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(girl.GetComponent<AISensor>());
         girl.SetTrigger("GetOut");
         GameManager.Instance.eventData.CheckEvent("Bathroom");
+        if (!playOnce)
+        {
+            AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, "speaker girl", 1.5f);
+            playOnce = true;
+        }
         yield return new WaitForSeconds(3f);
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "horror chase music 2");
         AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.30f, 1f, true);
@@ -41,6 +47,7 @@ public class BathroomEvent : MonoBehaviour
         girl.GetComponent<EnemyBT>().enabled = true;
         girl.GetComponentInChildren<Collider>().enabled = true;
         GetComponent<Collider>().enabled = false;
+        playOnce = true;
     }
 }
 

@@ -59,6 +59,10 @@ public class Boss : MonoBehaviour, ICustomUpdatable
     public GameObject priestMesh;
     [Tooltip("Player object")]
     public Transform player;
+    [Tooltip("Main key object")]
+    public Transform mainKey;
+    [Tooltip("Game end object")]
+    public GameEnd gameEnd;
     [Space(10)]
 
     [Header("Audio Components")]
@@ -164,7 +168,7 @@ public class Boss : MonoBehaviour, ICustomUpdatable
     //////////////////////////////////////////////
             case BossState.Die:
                 if (debugMode) Debug.Log("Die");
-                if (!isDead) Die();
+                if (!isDead) StartCoroutine(Die());
                 break;
             case BossState.Pause:
                 if (debugMode) Debug.Log("Pause");
@@ -408,12 +412,11 @@ public class Boss : MonoBehaviour, ICustomUpdatable
     {
         halfEventStarted = true;
         yield return new WaitUntil(() => teleporting == false);
-
         LightsOff(lightsContainer);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "power down", 0.8f, 1f);
         yield return new WaitForSeconds(0.5f);
         reflectionProbes.SetActive(false);
         reflectionProbesDark.SetActive(true);
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "power down", 0.5f, 1f);
         yield return new WaitForSeconds(5f);
         agent.speed = 5f;
         halfEventPlayed = true;
@@ -447,7 +450,7 @@ public class Boss : MonoBehaviour, ICustomUpdatable
     //  DIE START
     //////////////////////////////////////////////
 
-    void Die()
+    IEnumerator Die()
     {
         isDead = true;
         agent.isStopped = true;
@@ -460,6 +463,18 @@ public class Boss : MonoBehaviour, ICustomUpdatable
         steamParticle.Stop();
         animator.SetTrigger("die");
         GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(this);
+        yield return new WaitForSeconds(7f);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "speaker after boss");
+        yield return new WaitForSeconds(3f);
+        dissolveParticle.Play();
+        mainKey.position = transform.position;
+        yield return new WaitForSeconds(3f);
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "teleport forth", 0.6f, 1f);
+        transform.position = new Vector3(0f, -1000f, 0f);
+        GameManager.Instance.customUpdateManager.AddCustomUpdatable(gameEnd);
+        yield return new WaitForSeconds(1f);
+        GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(this);
+        gameObject.SetActive(false);
     }
 
     //////////////////////////////////////////////

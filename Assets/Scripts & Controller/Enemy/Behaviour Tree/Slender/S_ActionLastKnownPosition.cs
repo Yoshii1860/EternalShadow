@@ -107,7 +107,7 @@ public class S_ActionLastKnownPosition : Node
         agent.SetDestination(lastKnownPosition);
         animator.SetBool("walk", true);
 
-        AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, false, enemyType);
+        AudioManager.Instance.VolumeFloorChanger(transform, enemyType);
 
         // Return RUNNING to indicate that the action is ongoing
         if (debugMode) Debug.Log("A - LastKnownPosition: RUNNING (Moving to Last Known Position)");

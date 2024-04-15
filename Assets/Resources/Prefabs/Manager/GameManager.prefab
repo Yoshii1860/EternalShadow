@@ -336,14 +336,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.54901963, b: 0.54901963, a: 0.019607844}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ac464c14dd4e3b0458a48f9df995784b, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -515,12 +515,14 @@ MonoBehaviour:
   interactStaticObjectPool: {fileID: 0}
   doorObjectPool: {fileID: 0}
   eventData: {fileID: 0}
+  autoSavePool: {fileID: 0}
   blackScreen: {fileID: 1129416956}
   fpsArms: {fileID: 0}
   messageCanvas: {fileID: 1308355269}
   messageText: {fileID: 632777479}
   progressBar: {fileID: 0}
   customUpdateManager: {fileID: 0}
+  debugUpdateManager: 0
   Loading: 0
   isPaused: 0
   canvasActive: 0
@@ -541,3 +543,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ccb4c89576c1c245bfad1f2eb1608e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugBool: 0

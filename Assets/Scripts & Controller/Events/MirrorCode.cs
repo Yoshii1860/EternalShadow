@@ -133,4 +133,9 @@ public class MirrorCode : MonoBehaviour, ICustomUpdatable
         GameManager.Instance.eventData.SetEvent("Mirror");
         this.enabled = false;
     }
+
+    public void EventLoad()
+    {
+        Debug.Log("Mirror event loaded");
+    }
 }

@@ -152,7 +152,7 @@ public class S_ActionCheckNoise : Node
                 agent.SetDestination(noisePos);
                 animator.SetBool("walk", true);
 
-                AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, false, enemyType);
+                AudioManager.Instance.VolumeFloorChanger(transform, enemyType);
             }
         }
 

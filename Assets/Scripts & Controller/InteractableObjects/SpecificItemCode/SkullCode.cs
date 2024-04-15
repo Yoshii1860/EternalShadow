@@ -53,6 +53,7 @@ public class SkullCode : InteractableObject
 
     IEnumerator CutSkull()
     {
+        AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, "speaker cut head", 1f);
         // properly aligning the audio with the animation
         yield return new WaitForSeconds(0.4f);
         AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "bonesaw cut", 0.6f, 1f);

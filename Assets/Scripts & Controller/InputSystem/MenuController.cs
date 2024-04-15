@@ -58,6 +58,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     [SerializeField] Transform loadMenu;
     [SerializeField] Transform saveMenu;
     [SerializeField] Transform deathScreen;
+    [SerializeField] Transform messageDisplay;
     [SerializeField] Transform saveFileContainer;
     [SerializeField] Transform loadFileContainer;
     [SerializeField] Button returnFromLoadButton;
@@ -67,6 +68,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     Dictionary<Transform, Vector3> initialButtonPositions = new Dictionary<Transform, Vector3>();
     Transform[] menus;
     Button[] buttons;
+    Button[] decisionButtons;
     Button selectedButton;
     int buttonNumber;
     bool isDead = false;
@@ -83,6 +85,8 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     AudioClip clickClip;
     AudioClip menuDieClip;
     AudioClip menuMusic;
+    AudioClip bootPC;
+    AudioClip shutdownPC;
 
     #endregion
 
@@ -90,6 +94,9 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
     [Header("Menu Controller Settings")]
     public float moveDebounceTime = 0.3f;
+    bool cantMove = false;
+    bool decision = false;
+    bool yes = false;
 
     bool interact, back;
     Vector2 move;
@@ -127,6 +134,8 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         clickClip = Resources.Load<AudioClip>("SFX/click");
         menuDieClip = Resources.Load<AudioClip>("SFX/menu die");
         menuMusic = Resources.Load<AudioClip>("SFX/menu music");
+        bootPC = Resources.Load<AudioClip>("SFX/boot pc");
+        shutdownPC = Resources.Load<AudioClip>("SFX/shutdown pc");
     }
 
     void Start()
@@ -193,7 +202,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         if (Time.time - moveDebounceTime > deltaTime)
         {
             moveDebounceTime = Time.time;
-            Move();
+            if (!cantMove) Move();
         }
     }
 
@@ -211,6 +220,23 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         interact = false;
         
         if (selectedButton == null) return;
+        if (decision) 
+        {
+            if (selectedButton.gameObject.CompareTag("Yes"))
+            {
+                yes = true;
+                decision = false;
+                audioSource.PlayOneShot(wooshClip);
+                return;
+            }
+            else if (selectedButton.gameObject.CompareTag("No"))
+            {
+                yes = false;
+                decision = false;
+                audioSource.PlayOneShot(clickClip);
+                return;
+            }
+        }
         audioSource.PlayOneShot(wooshClip);
         if (string.Compare(selectedButton.gameObject.name, "NewGame") == 0)                     StartCoroutine(StartNewGame());
         else if (string.Compare(selectedButton.gameObject.name, "LoadGame") == 0)               ActivateMenu(loadMenu);
@@ -218,23 +244,49 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
                 && loadMenu.gameObject.activeSelf)                                              Return(returnFromLoadButton);
         else if (string.Compare(selectedButton.gameObject.name, "Return") == 0 
                 && saveMenu.gameObject.activeSelf)                                              Return(returnFromSaveButton);
-        else if (selectedButton.gameObject.CompareTag("LoadFileButton"))                        LoadFile();
-        else if (selectedButton.gameObject.CompareTag("SaveFileButton"))                        SaveFile();
-        else if (string.Compare(selectedButton.gameObject.name, "ExitGame") == 0)               ExitGame();
+        else if (selectedButton.gameObject.CompareTag("LoadFileButton"))                        StartCoroutine(LoadFile());
+        else if (selectedButton.gameObject.CompareTag("SaveFileButton"))                        StartCoroutine(SaveFile());
+        else if (string.Compare(selectedButton.gameObject.name, "ExitGame") == 0)               StartCoroutine(ExitGame());
         else if (string.Compare(selectedButton.gameObject.name, "Retry") == 0)                  LoadAuotsave();
     }
 
     void Move()
     {
+        if (decision)
+        {
+            if (move.x > 0.5f)
+            {
+                selectedButton = decisionButtons[1];
+                ChangeSelectedButtonColor(selectedButton);
+            }
+            else if (move.x < -0.5f)
+            {
+                selectedButton = decisionButtons[0];
+                ChangeSelectedButtonColor(selectedButton);
+            }
+            return;
+        }
+
         if (selectedButton == null) 
         {
+            if (buttons.Length == 0)
+            {
+                if (selectedButton != returnFromLoadButton || selectedButton != returnFromSaveButton)
+                {
+                    if (saveMenu.gameObject.activeSelf) selectedButton = returnFromSaveButton;
+                    else if (loadMenu.gameObject.activeSelf) selectedButton = returnFromLoadButton;
+                    buttonNumber = 0;
+                    ChangeSelectedButtonColor(selectedButton);
+                    return;
+                }
+            }
             selectedButton = buttons[0];
             buttonNumber = 0;
             ChangeSelectedButtonColor(selectedButton);
             return;
         }
 
-        if (move.y > 0.5f)
+        if (move.y > 0.5f && buttons.Length > 0)
         {
             if (buttonNumber - 1 >= 0)
             {
@@ -249,7 +301,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
                 ChangeSelectedButtonColor(selectedButton);
             }
         }
-        else if (move.y < -0.5f)
+        else if (move.y < -0.5f && buttons.Length > 0)
         {
             if (buttonNumber + 1 < buttons.Length)
             {
@@ -264,7 +316,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
                 ChangeSelectedButtonColor(selectedButton);
             }
         }
-        else if (move.x > 0.5f)
+        else if (move.x > 0.5f && buttons.Length > 0)
         {
             if (selectedButton != returnFromLoadButton || selectedButton != returnFromSaveButton)
             {
@@ -274,7 +326,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
                 ChangeSelectedButtonColor(selectedButton);
             }
         }
-        else if (move.x < -0.5f)
+        else if (move.x < -0.5f && buttons.Length > 0)
         {
             if (selectedButton == returnFromLoadButton || selectedButton == returnFromSaveButton)
             {
@@ -390,6 +442,17 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
     void ChangeSelectedButtonColor(Button button)
     {
+        if (decision)
+        {
+            foreach (Button b in decisionButtons)
+            {
+                b.GetComponentInChildren<Image>().color = unselectedColor;
+            }
+            button.GetComponentInChildren<Image>().color = selectedColor;
+            audioSource.PlayOneShot(clickClip, 0.8f);
+            return;
+        }
+
         foreach (Button b in buttons)
         {
             b.GetComponentInChildren<Image>().color = unselectedColor;
@@ -402,8 +465,12 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
     IEnumerator StartNewGame()
     {
+        interact = false;
+        selectedButton = null;
+        cantMove = true;
         yield return new WaitForSeconds(2f);
         audioSource.PlayOneShot(menuDieClip, 0.8f);
+        cantMove = false;
         GameManager.Instance.LoadNewGame();
         ActivateMenu(mainMenu, false);
         menuCanvas.SetActive(false);
@@ -423,7 +490,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
     public void SaveGame()
     {
-        audioSource.PlayOneShot(clickClip, 0.8f);
+        audioSource.PlayOneShot(bootPC, 0.6f);
         ActivateMenu(saveMenu);
     }
 
@@ -474,8 +541,32 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         return savedFiles;
     }
 
-    void LoadFile()
+    IEnumerator LoadFile()
     {
+        if (SceneManager.GetActiveScene().name != "MainMenu")
+        {
+            Button saveButton = selectedButton;
+
+            ////////////////////////////
+            // Decision
+            ////////////////////////////
+            decision = true;
+            MessageDisplay("Unsaved progress will be lost. Continue?");
+            yield return new WaitUntil(() => !decision);
+            messageDisplay.gameObject.SetActive(false);
+            selectedButton = saveButton;
+            if (!yes)
+            {
+                yield break;
+            }
+            else
+            {
+                yes = false;
+            }
+            ////////////////////////////
+            // Decision End
+            ////////////////////////////
+        }
         string filename = selectedButton.GetComponentInChildren<TextMeshProUGUI>().text;
         foreach (Transform file in loadFileContainer)
         {
@@ -485,6 +576,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         ActivateMenu(mainMenu, false);
         menuCanvas.SetActive(false);
         GameManager.Instance.LoadNewScene(filename);
+        yield return null;
     }
 
     IEnumerator FadeOut()
@@ -501,14 +593,36 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         }
     }
 
-    void SaveFile()
+    IEnumerator SaveFile()
     {
         // Get the file name from the button text
         string filename = selectedButton.GetComponentInChildren<TextMeshProUGUI>().text;
-        if (filename != " ")
+        if (filename != "" && filename != "Asylum-autosave")
         {
-            // Delete File
-            File.Delete(Path.Combine(Application.persistentDataPath, filename + ".shadow"));
+            ////////////////////////////
+            // Decision
+            ////////////////////////////
+            decision = true;
+            MessageDisplay("Overwrite file?");
+            yield return new WaitUntil(() => !decision);
+            messageDisplay.gameObject.SetActive(false);
+            if (yes)
+            {
+                File.Delete(Path.Combine(Application.persistentDataPath, filename + ".shadow"));
+                yes = false;
+            }
+            else
+            {
+                yield break;
+            }
+            ////////////////////////////
+            // Decision End
+            ////////////////////////////
+        }
+        else if (filename == "Asylum-autosave")
+        {
+            GameManager.Instance.DisplayMessage("Can`t overwrite autosave", 2f);
+            yield break;
         }
         // Get Scene Name and Date/Time
         Scene scene = SceneManager.GetActiveScene();
@@ -521,6 +635,13 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         }
         // Save the game data
         GameManager.Instance.SaveData(filename);
+        interact = false;
+        cantMove = true;
+        selectedButton = null;
+        yield return new WaitForSeconds(1f);
+        audioSource.PlayOneShot(shutdownPC, 0.6f);
+        yield return new WaitForSeconds(1f);
+        cantMove = false;
         ActivateMenu(mainMenu, false);
         menuCanvas.SetActive(false);
     }
@@ -539,6 +660,13 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         deathScreen.gameObject.SetActive(false);
         ActivateMenu(mainMenu, false);
         menuCanvas.SetActive(false);
+    }
+
+    private void MessageDisplay(string message)
+    {
+        messageDisplay.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = message;
+        decisionButtons = messageDisplay.GetComponentsInChildren<Button>(true);
+        messageDisplay.gameObject.SetActive(true);
     }
 
     #endregion
@@ -570,7 +698,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         }
     }
 
-    void ExitGame()
+    IEnumerator ExitGame()
     {
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
@@ -578,9 +706,29 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         }
         else
         {
-            GameManager.Instance.RemoveEnemyCustomUpdatables();
-            SceneManager.LoadScene("MainMenu");
-            ActivateMenu(mainMenu, true);
+            ////////////////////////////
+            // Decision
+            ////////////////////////////
+            decision = true;
+            MessageDisplay("Exit to Main Menu?");
+            yield return new WaitUntil(() => !decision);
+            messageDisplay.gameObject.SetActive(false);
+
+            if (yes)
+            {
+                yes = false;
+                GameManager.Instance.RemoveEnemyCustomUpdatables();
+                SceneManager.LoadScene("MainMenu");
+                ActivateMenu(mainMenu, true);
+                audioSource.Play();
+            }
+            else
+            {
+                yield break;
+            }
+            ////////////////////////////
+            // Decision End
+            ////////////////////////////
         }
     }
 

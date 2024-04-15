@@ -12,6 +12,7 @@ public class CellEvent : MonoBehaviour
     [Tooltip("The horror doll that will only be there when it`s flipped")]
     [SerializeField] GameObject horrorDoll;
     [SerializeField] GameObject groundFog;
+    bool playOnce = false;
 
     void Start()
     {
@@ -27,6 +28,7 @@ public class CellEvent : MonoBehaviour
         unflippedCell.SetActive(true);
         flippedCell.SetActive(false);
         groundFog.SetActive(false);
+        playOnce = true;
         for (int i = 0; i < mannequins.Length; i++)
         {
             Mannequin mannequinCode = mannequins[i].GetComponent<Mannequin>();
@@ -58,6 +60,14 @@ public class CellEvent : MonoBehaviour
                 }
                 StartCoroutine(StartMannequins());
             }
+            else
+            {
+                if (!playOnce) 
+                {
+                    AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, "speaker flipped", 0.5f);
+                    playOnce = true;
+                }
+            }
         }
     }
 
@@ -71,6 +81,10 @@ public class CellEvent : MonoBehaviour
             mannequinCode.started = true;
             mannequinCode.move = true;
         }
+
+        yield return new WaitForSeconds(1f);
+
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "speaker mannequins 2");
 
         FinishEvent();
     }

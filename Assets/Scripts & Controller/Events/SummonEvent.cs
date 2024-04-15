@@ -43,7 +43,7 @@ public class SummonEvent : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
 
-        AudioManager.Instance.PlaySoundOneShot(priest.GetInstanceID(), "summoning", 0.8f, 1f);
+        AudioManager.Instance.PlaySoundOneShot(priest.GetInstanceID(), "summoning", 0.7f, 1f);
 
         yield return new WaitForSeconds(3f);
 
@@ -52,7 +52,11 @@ public class SummonEvent : MonoBehaviour
         
         priest.GetComponent<Animator>().SetTrigger("summon");
 
-        yield return new WaitForSeconds(7f);
+        yield return new WaitForSeconds(2f);
+
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "speaker summon", 1f);
+
+        yield return new WaitForSeconds(5f);
 
         AudioManager.Instance.FadeIn(priest.GetInstanceID(), 3f);
         priest.GetComponent<Boss>().FollowPlayer();

@@ -43,7 +43,6 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
 
     public void CustomUpdate(float deltaTime)
     {
-        Debug.Log("Musicbox event CustomUpdate");
         if (GameManager.Instance.eventData.CheckEvent("Musicbox") && !end) 
         {
             Debug.Log("Musicbox event ended due to event data");
@@ -58,6 +57,7 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
         else if (started && !once) 
         {
             AudioManager.Instance.PauseAudio(AudioManager.Instance.environment);
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "speaker musicbox");
             once = true;
         }
     }
@@ -115,8 +115,10 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
         GameManager.Instance.GameplayEvent();
         if (GameManager.Instance.player.flashlight.enabled) GameManager.Instance.player.LightSwitch();
         GameManager.Instance.player.lightAvail = false;
+        yield return new WaitForSeconds(0.5f);
         AudioManager.Instance.PlaySoundOneShot(monsterAudioID, "MB grunt", 0.8f, 1f);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
+        AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, "speaker musicbox 2", 3f);
         StartCoroutine(TextFade());
         StartCoroutine(MoveMusicbox());
     }
@@ -193,6 +195,7 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
 
         GameManager.Instance.GameplayEvent();
 
+        PushSounds();
         while (Vector3.Distance(transform.position, currentWaypoint.position) > 0.1f)
         {
             transform.position = Vector3.MoveTowards(transform.position, currentWaypoint.position, 0.1f);
@@ -216,6 +219,15 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
             yield return new WaitForSeconds(0.5f);
             GameManager.Instance.player.TakeDamage(101);
         }
+    }
+
+    void PushSounds()
+    {
+        int random = Random.Range(1, 4);
+        string sound = "push " + random;
+        float volume = GetComponent<AudioSource>().volume;
+        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), sound, volume);
+        if (GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.EventScene) Invoke("PushSounds", 2f);
     }
 
     IEnumerator LeavingWay()
@@ -251,11 +263,17 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
         Vector3 direction = transform.position - GameManager.Instance.player.transform.position;
         float angle = Vector3.Angle(GameManager.Instance.player.transform.forward, direction);
 
-        // Inverse relationship: lower angle (facing) -> higher volume, higher angle (looking away) -> lower volume
-        float volume = Mathf.SmoothStep(1f, 0.25f, angle / 180f); // Reverse order of arguments
+        float volume = 0f;
 
-        // Clamp volume to your desired range (0.5f minimum, 1f maximum)
-        volume = Mathf.Clamp(volume, 0.25f, 1f);
+        if (angle < 10f) volume = 1f;
+        else
+        {
+            // Inverse relationship: lower angle (facing) -> higher volume, higher angle (looking away) -> lower volume
+            volume = Mathf.SmoothStep(0.7f, 0.2f, angle / 180f); // Reverse order of arguments
+
+            // Clamp volume to your desired range (0.5f minimum, 1f maximum)
+            volume = Mathf.Clamp(volume, 0.2f, 0.7f);
+        }
 
         // Set music box volume
         AudioManager.Instance.SetVolume(gameObject.GetInstanceID(), volume);
@@ -271,5 +289,10 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
 
         // Set environment music volume
         AudioManager.Instance.SetVolumeOverTime(AudioManager.Instance.environment, targetVolume);
+    }
+
+    public void EventLoad()
+    {
+        Debug.Log("Musicbox event loaded");
     }
 }

@@ -94,7 +94,7 @@ public class ActionGoToTarget : Node
         animator.SetBool("run", true);
         agent.SetDestination(target.position);
 
-        AudioManager.Instance.ToggleEnemyAudio(transform.gameObject, true, enemyType);
+        AudioManager.Instance.VolumeFloorChanger(transform, enemyType);
 
         // Return RUNNING to indicate that the action is ongoing
         if (debugMode) Debug.Log("A - GoToTarget: RUNNING (Going to target)");

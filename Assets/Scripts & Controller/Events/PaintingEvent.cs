@@ -26,6 +26,7 @@ public class PaintingEvent : MonoBehaviour
     [SerializeField] GameObject door;
 
     public bool active = false;
+    bool playOnce = false;
 
     public int paintingSelector
     {
@@ -73,6 +74,12 @@ public class PaintingEvent : MonoBehaviour
         AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "pen click", 1f, 1f);
 
         yield return new WaitForSeconds(0.5f);
+
+        if (!playOnce) 
+        {
+            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "speaker paintings");
+            playOnce = true;
+        }
 
         // Undo flashlight and weapon if enabled
         GameManager.Instance.playerAnimController.PenholderAnimation();

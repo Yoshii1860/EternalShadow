@@ -43,7 +43,7 @@ public class S_ActionShot : Node
         if (GameManager.Instance.isPaused)
         {
             // Return RUNNING to indicate that the action is ongoing
-            if (debugMode) Debug.Log("A - ChaseTarget: RUNNING (game is paused)");
+            if (debugMode) Debug.Log("A - isShot: RUNNING (game is paused)");
             state = NodeState.RUNNING;
             return state;
         }
@@ -54,7 +54,7 @@ public class S_ActionShot : Node
         animator.SetBool("run", false);
 
         // If the chase is still ongoing, return RUNNING
-        if (debugMode) Debug.Log("A - ChaseTarget: RUNNING (dead)");
+        if (debugMode) Debug.Log("A - isShot: RUNNING (dead)");
         state = NodeState.RUNNING;
         return state;
     }

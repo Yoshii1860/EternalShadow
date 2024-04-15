@@ -30,11 +30,11 @@ public class EventData : MonoBehaviour
 
     public List<EventDataEntry> eventDataEntries = new List<EventDataEntry>()
     {
-        new EventDataEntry() { EventName = "Button", ScriptType = null, Active = false },
+        new EventDataEntry() { EventName = "Button", ScriptType = typeof(ButtonCode), Active = false },
         new EventDataEntry() { EventName = "Light", ScriptType = typeof(LightSwitchCode), Active = false },
         new EventDataEntry() { EventName = "Skull", ScriptType = typeof(SkullCode), Active = false },
-        new EventDataEntry() { EventName = "Musicbox", ScriptType = null, Active = false },
-        new EventDataEntry() { EventName = "Mirror", ScriptType = null, Active = false },
+        new EventDataEntry() { EventName = "Musicbox", ScriptType = typeof(Musicbox), Active = false },
+        new EventDataEntry() { EventName = "Mirror", ScriptType = typeof(ButtonCode), Active = false },
         new EventDataEntry() { EventName = "Bathroom", ScriptType = typeof(BathroomEvent), Active = false },
         new EventDataEntry() { EventName = "Flipped", ScriptType = typeof(CellEvent), Active = false },
         new EventDataEntry() { EventName = "Keypad", ScriptType = typeof(NavKeypad.Keypad), Active = false },

@@ -68,6 +68,10 @@ public class ButtonCode : InteractableObject
 
         slenderman.SetActive(true);
         slenderman.GetComponent<AISensor>().PlayerInSightForced(6f);
+
+        yield return new WaitForSeconds(2f);
+
+        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "speaker slender");
     }
 
     IEnumerator TextFade(bool alpha = true)
@@ -98,5 +102,10 @@ public class ButtonCode : InteractableObject
             text.gameObject.SetActive(false);
             textFaded = true;
         }
+    }
+
+    public void EventLoad()
+    {
+        Debug.Log("Button event loaded");
     }
 }

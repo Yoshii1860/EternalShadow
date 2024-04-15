@@ -40,6 +40,8 @@ TagManager:
   - HorrorDollCount
   - SaveGamePool
   - TextCanvas
+  - Yes
+  - No
   layers:
   - Default
   - TransparentFX

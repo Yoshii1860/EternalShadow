@@ -363,8 +363,6 @@ public class PlayerAnimController : MonoBehaviour
             {
                 foreach (Transform flashlightPoint in flashlightPoints)
                 {
-                    // Overwriting the flashlightPoint renderer until find the cause of its activation
-                    flashlightPoint.GetComponent<Renderer>().enabled = false;
                     
                     if (flashlightPoint.name.Contains(baseName))
                     {
