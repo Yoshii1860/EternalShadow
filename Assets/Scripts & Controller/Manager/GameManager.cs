@@ -118,10 +118,6 @@ public class GameManager : MonoBehaviour
     public bool noNoiseMode = false;
     [Tooltip("When set to true, all saved files will be deleted and the bool sets back to false. Set during gameplay.")]
     [SerializeField] bool _deleteSaveFiles = false;
-    [Tooltip("When set to true, the game will be saved and the bool sets back to false. Set during gameplay.")]
-    public bool saveGame = false;
-    [Tooltip("When set to true, the game will be loaded and the bool sets back to false. Set during gameplay.")]
-    public bool loadGame = false;
 
     // Public property for deleteSaveFiles
     public bool DeleteSaveFiles
@@ -298,18 +294,6 @@ public class GameManager : MonoBehaviour
             DeleteSaveFiles = false;
         }
 
-        if (saveGame)
-        {
-            saveGame = false;
-            SaveData("Asylum-debugSaveName");
-        }
-
-        if (loadGame)
-        {
-            loadGame = false;
-            LoadData("Asylum-debugSaveName");
-        }
-
         if (debugUpdateManager)
         {
             debugUpdateManager = false;
@@ -422,6 +406,14 @@ public class GameManager : MonoBehaviour
         AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "click", 1f, 1f);
         MenuController.Instance.customTimer = 0f;
         MenuController.Instance.canCloseMenu = false;
+        MenuController.Instance.menuCanvas.SetActive(true);
+        SetGameState(GameState.MainMenu);
+    }
+
+    public void BackToMainMenu()
+    {
+        MenuController.Instance.MainMenu();
+        SceneManager.LoadScene("MainMenu");
         MenuController.Instance.menuCanvas.SetActive(true);
         SetGameState(GameState.MainMenu);
     }

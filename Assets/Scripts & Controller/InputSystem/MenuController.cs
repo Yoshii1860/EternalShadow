@@ -182,6 +182,11 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         ActivateMenu(deathScreen, false);
     }
 
+    public void MainMenu()
+    {
+        ActivateMenu(mainMenu, true);
+    }
+
     #endregion
 
     
