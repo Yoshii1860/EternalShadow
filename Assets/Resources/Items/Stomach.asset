@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: Stomach
   m_EditorClassIdentifier: 
-  displayName: "A Virgin\xB4s Stomach"
-  description: This stomach seems like it had been starved to death..
-  icon: {fileID: 21300000, guid: 8a435e239bee0b74f9d4a67378d692c7, type: 3}
-  iconPath: VFX/ItemIcons/stomach
-  unique: 1
-  quantity: 1
-  prefab: {fileID: 100000, guid: 19f86204bedd345a59c0ffdcc945d950, type: 3}
-  prefabPath: Assets/Gibs N Gore - Complete/Extra Gore (FBX)/Gibs N Organs/Gibs N
-    Organs - FBX Prefabs/gib_stomach
-  type: 3
+  DisplayName: "A Virgin\xB4s Stomach"
+  Description: The untouched stomach of a virgin holds a dark secret, potentially
+    pivotal in your quest for survival.
+  Icon: {fileID: 21300000, guid: 8a435e239bee0b74f9d4a67378d692c7, type: 3}
+  IconPath: VFX/ItemIcons/stomach
+  IsUnique: 1
+  Quantity: 1
+  Prefab: {fileID: 100000, guid: a519d9df33aa1b645aaf76dee5b93a4e, type: 3}
+  PrefabPath: Prefabs/Items/stomach
+  Type: 3
   ammoType: 0
   potionType: 0

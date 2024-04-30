@@ -6,133 +6,159 @@ public class PaintingEvent : MonoBehaviour
 {
     #region Fields
 
+    [Header("Painting Event Variables")]
     // Painting order: Mind - 1, Heart - 2, Hand - 3, Foot - 4, Eye - 5
-    [SerializeField] int[] solvedOrder = new int[5] { 4, 2, 3, 0, 1 };
+    [Tooltip("The correct order of the paintings")]
+    [SerializeField] private int[] _solvedOrder = new int[5] { 4, 2, 3, 0, 1 };
+    [Tooltip("List of all paintings in the room")]
+    [SerializeField] private List<PaintingCode> _paintingList = new List<PaintingCode>();
+    [Space(10)]
 
-    [SerializeField] List<PaintingCode> paintingList = new List<PaintingCode>();
-
-    // Currently marked paintings for switching
-    public GameObject markedPainting;
-    public GameObject markedPaintingToSwitch;
+    [Tooltip("Currently marked painting")]
+    public GameObject MarkedPainting;
+    [Tooltip("Painting to switch with the marked painting")]
+    public GameObject MarkedPaintingToSwitch;
 
     // Selected painting index
     private int _paintingSelector;
-    private int lastSelector;
+    private int _lastSelector;
+    [Space(10)]
 
-    [SerializeField] GameObject pen;
-    [SerializeField] GameObject drawer;
+    [Header("Painting Event Objects")]
+    [Tooltip("The pen object of the penholder that will start the event")]
+    [SerializeField] private GameObject _penObject;
+    [Tooltip("The drawer object that will be interacted with after the event")]
+    [SerializeField] private GameObject _drawerObject;
+    [Tooltip("The girl that will be activated after the event")]
+    [SerializeField] private GameObject _girlObject;
+    [Tooltip("The door in the room so it can be disabled during the event")]
+    [SerializeField] private GameObject _doorObject;
+    [Tooltip("The camera that will follow the paintings during the event")]
+    [SerializeField] private Transform _vCamFollow;
+    [Space(10)]
 
-    [SerializeField] GameObject girl;
-    [SerializeField] GameObject door;
+    [Tooltip("Is the painting event active?")]
+    public bool IsActive = false;
+    [Tooltip("Is the painting event paused?")]
+    public bool IsPaused = false;
+    [Tooltip("Debug mode for the painting event")]
+    [SerializeField] private bool _debugMode = false;
 
-    public bool active = false;
-    bool playOnce = false;
-
-    public int paintingSelector
+    // The current and last selected painting
+    public int PaintingSelector
     {
         get { return _paintingSelector; }
         set
         {
-            lastSelector = _paintingSelector;
+            _lastSelector = _paintingSelector;
             _paintingSelector = value;
             HighlightPainting();
         }
     }
-
-    [SerializeField] Transform vCamFollow;
-
-    public bool pause = false;
+        
+    private bool _playOnce = false;
 
     #endregion
 
-    #region Painting Event Methods
+
+
+
+    #region Unity Methods
 
     // Start the painting event
     public void StartPaintingEvent()
     {
-        pause = true;
+        IsPaused = true;
 
         StartCoroutine(StartingEvent());    
     }
 
-    IEnumerator StartingEvent()
+    #endregion
+
+
+
+
+    #region Public Methods
+
+    // Mark a painting for switching - called by painting controller
+    public void MarkPainting()
     {
-        // Transform pens x-rotation from 0 to -25
-        float time = 0;
-        float duration = 2f;
-        Quaternion startRotation = pen.transform.localRotation;
-        Quaternion targetRotation = Quaternion.Euler(-25, 0, 0);
+        if (_debugMode) Debug.Log("Mark Painting " + PaintingSelector);
 
-        while (time < duration)
+        // If no painting is marked, mark the first painting
+        if (MarkedPainting == null)
         {
-            time += Time.deltaTime;
-            float t = time / duration;
-            pen.transform.localRotation = Quaternion.Lerp(startRotation, targetRotation, t);
-            yield return null;
+            MarkedPainting = GetPainting().gameObject;
+
+            if (_debugMode) Debug.Log("First Painting " + PaintingSelector + " is marked");
+        }
+        else
+        {
+            if (_debugMode) Debug.Log("Second Painting " + PaintingSelector + " is marked");
+
+            MarkedPaintingToSwitch = GetPainting().gameObject;
+
+            // If two different paintings are marked, switch them
+            if (MarkedPaintingToSwitch != MarkedPainting) 
+            {
+                StartCoroutine(SwitchPaintings());
+            }
+            // If the same painting is marked twice, unmark it
+            else 
+            {
+                MarkedPaintingToSwitch = null;
+                MarkedPainting.GetComponent<PaintingCode>().SpotLight.SetActive(false);
+                MarkedPainting = null;
+            }
+        }
+    }
+
+    #endregion
+
+
+
+
+    #region Private Methods
+
+    // Check if the paintings are in the correct order
+    private void CheckPaintingOrder()
+    {
+        if (_debugMode) Debug.Log("Check Painting Order");
+
+        // Check if the paintings are in the correct order
+        for (int i = 0; i < _solvedOrder.Length; i++)
+        {
+            if (_paintingList[i].PaintingNumber != _solvedOrder[i]) return;
         }
 
-        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "pen click", 1f, 1f);
-
-        yield return new WaitForSeconds(0.5f);
-
-        if (!playOnce) 
-        {
-            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "speaker paintings");
-            playOnce = true;
-        }
-
-        // Undo flashlight and weapon if enabled
-        GameManager.Instance.playerAnimController.PenholderAnimation();
+        if (_debugMode) Debug.Log("Painting Event Solved!");
         
-        pause = false;
+        IsPaused = true;
 
-        door.GetComponent<Renderer>().enabled = false;
+        // Activate all spotlights if paintings are in correct order
+        foreach (PaintingCode painting in _paintingList)
+        {
+            painting.SpotLight.SetActive(true);
+        }
 
-        // change LookAtDirection
-        GameManager.Instance.playerController.SetFollowTarget(vCamFollow);
-        GameManager.Instance.playerController.ToggleArms(false);
-        // Reset painting selection
-        paintingSelector = 0;
-        // Adjust camera field of view
-        GameManager.Instance.playerController.cmVirtualCamera.m_Lens.FieldOfView = Mathf.Lerp(GameManager.Instance.playerController.cmVirtualCamera.m_Lens.FieldOfView, 20f, Time.deltaTime * 10f);
+        // Start the end painting event
+        StartCoroutine(EndPaintingEvent());
     }
 
     // Highlight the selected painting
     private void HighlightPainting()
     {
-        Debug.Log("Painting " + paintingSelector + " is highlighted");
-        for (int i = 0; i < paintingList.Count; i++)
-        {
-            if (i == paintingSelector)
-            {
-                paintingList[i].spotLight.SetActive(true);
-            }
-            else if (i == lastSelector && paintingList[i].gameObject != markedPainting)
-            {
-                paintingList[i].spotLight.SetActive(false);
-            }
-        }
-    }
+        if (_debugMode) Debug.Log("Painting " + PaintingSelector + " is highlighted");
 
-    // Mark a painting for switching
-    public void MarkPainting()
-    {
-        Debug.Log("Mark Painting " + paintingSelector);
-        if (markedPainting == null)
+        for (int i = 0; i < _paintingList.Count; i++)
         {
-            markedPainting = GetPainting().gameObject;
-            Debug.Log("First Painting " + paintingSelector + " is marked");
-        }
-        else
-        {
-            Debug.Log("Second Painting " + paintingSelector + " is marked");
-            markedPaintingToSwitch = GetPainting().gameObject;
-            if (markedPaintingToSwitch != markedPainting) StartCoroutine(SwitchPaintings());
-            else 
+            if (i == PaintingSelector)
             {
-                markedPaintingToSwitch = null;
-                markedPainting.GetComponent<PaintingCode>().spotLight.SetActive(false);
-                markedPainting = null;
+                _paintingList[i].SpotLight.SetActive(true);
+            }
+            else if (i == _lastSelector && _paintingList[i].gameObject != MarkedPainting)
+            {
+                _paintingList[i].SpotLight.SetActive(false);
             }
         }
     }
@@ -140,57 +166,23 @@ public class PaintingEvent : MonoBehaviour
     // Get the selected painting
     private PaintingCode GetPainting()
     {
-        Debug.Log("Get Painting");
+        if (_debugMode) Debug.Log("Get Painting");
 
-        for (int i = 0; i < paintingList.Count; i++)
+        for (int i = 0; i < _paintingList.Count; i++)
         {
-            if (i == paintingSelector)
+            if (i == PaintingSelector)
             {
-                return paintingList[i];
+                return _paintingList[i];
             }
         }
-        Debug.LogError("Painting not found");
+        if (_debugMode) Debug.LogError("Painting not found");
         return null;
-    }
-
-    // Switch the positions of the marked paintings
-    IEnumerator SwitchPaintings()
-    {
-        Debug.Log("Switch Paintings");
-        pause = true;
-        
-        Vector3 tempPaintingPosition = new Vector3(markedPainting.transform.position.x, markedPainting.transform.position.y, markedPainting.transform.position.z);
-        Vector3 tempMarkedPaintingPosition = new Vector3(markedPaintingToSwitch.transform.position.x, markedPaintingToSwitch.transform.position.y, markedPaintingToSwitch.transform.position.z);
-
-        float time = 0;
-        float duration = 0.5f;
-
-        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "switch painting", 1f, 1f);
-        while (time < duration)
-        {
-            markedPainting.transform.position = Vector3.Lerp(markedPainting.transform.position, tempMarkedPaintingPosition, time / duration);
-            markedPaintingToSwitch.transform.position = Vector3.Lerp(markedPaintingToSwitch.transform.position, tempPaintingPosition, time / duration);
-            time += Time.deltaTime;
-            yield return null;
-        }
-
-        markedPainting.transform.position = tempMarkedPaintingPosition;
-        markedPaintingToSwitch.transform.position = tempPaintingPosition;
-
-        markedPainting.GetComponent<PaintingCode>().spotLight.SetActive(false);
-        markedPaintingToSwitch.GetComponent<PaintingCode>().spotLight.SetActive(false);
-
-        lastSelector = paintingSelector;
-
-        SwitchListPlace();
-
-        CheckPaintingOrder();
     }
 
     // Switch the positions of the marked paintings in the list
     private void SwitchListPlace()
     {
-        Debug.Log("Switch List Place");
+        if (_debugMode) Debug.Log("Switch List Place");
 
         // Find positions of marked paintings in the list and switch them
         PaintingCode tempOne = null;
@@ -198,86 +190,168 @@ public class PaintingEvent : MonoBehaviour
         PaintingCode tempTwo = null;
         int intTwo = 0;
 
-        for (int i = 0; i < paintingList.Count; i++)
+        for (int i = 0; i < _paintingList.Count; i++)
         {
-            if (paintingList[i].paintingNumber == markedPainting.GetComponent<PaintingCode>().paintingNumber)
+            if (_paintingList[i].PaintingNumber == MarkedPainting.GetComponent<PaintingCode>().PaintingNumber)
             {
-                tempOne = paintingList[i];
+                tempOne = _paintingList[i];
                 intOne = i;
             }
-            else if (paintingList[i].paintingNumber == markedPaintingToSwitch.GetComponent<PaintingCode>().paintingNumber)
+            else if (_paintingList[i].PaintingNumber == MarkedPaintingToSwitch.GetComponent<PaintingCode>().PaintingNumber)
             {
-                tempTwo = paintingList[i];
+                tempTwo = _paintingList[i];
                 intTwo = i;
             }
         }
-        paintingList.RemoveAt(intOne);
-        paintingList.Insert(intOne, tempTwo);
-        paintingList.RemoveAt(intTwo);
-        paintingList.Insert(intTwo, tempOne);
 
-        markedPainting = null;
-        markedPaintingToSwitch = null;
+        // Switch the positions of the marked paintings
+        _paintingList.RemoveAt(intOne);
+        _paintingList.Insert(intOne, tempTwo);
+        _paintingList.RemoveAt(intTwo);
+        _paintingList.Insert(intTwo, tempOne);
 
-        pause = false;
+        // Reset the painting selector
+        MarkedPainting = null;
+        MarkedPaintingToSwitch = null;
+
+        IsPaused = false;
     }
 
-    // Check if the paintings are in the correct order
-    public void CheckPaintingOrder()
+    #endregion
+
+
+
+
+    #region Coroutines
+
+    // Start the painting event
+    private IEnumerator StartingEvent()
     {
-        Debug.Log("Check Painting Order");
+        // Transform pens x-rotation from 0 to -25, similar to a switch
+        float time = 0;
+        float duration = 2f;
+        Quaternion startRotation = _penObject.transform.localRotation;
+        Quaternion targetRotation = Quaternion.Euler(-25, 0, 0);
 
-        for (int i = 0; i < solvedOrder.Length; i++)
+        while (time < duration)
         {
-            if (paintingList[i].paintingNumber != solvedOrder[i]) return;
+            time += Time.deltaTime;
+            float t = time / duration;
+            _penObject.transform.localRotation = Quaternion.Lerp(startRotation, targetRotation, t);
+            yield return null;
         }
 
-        Debug.Log("Painting Event Solved!");
-        
-        pause = true;
+        // Start the painting event with a sound
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), "pen click", 1f, 1f);
 
-        // Activate all spotlights if paintings are in correct order
-        foreach (PaintingCode painting in paintingList)
+        yield return new WaitForSeconds(0.5f);
+
+        // Play the speaker sound once
+        if (!_playOnce) 
         {
-            painting.spotLight.SetActive(true);
+            AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "speaker paintings");
+            _playOnce = true;
         }
 
-        StartCoroutine(EndPaintingEvent());
+        // Undo flashlight and weapon if enabled
+        GameManager.Instance.PlayerAnimManager.PenholderAnimation();
+        // disable the doors renderer
+        _doorObject.GetComponent<Renderer>().enabled = false;
+
+        IsPaused = false;
+
+        // change LookAtDirection
+        GameManager.Instance.PlayerController.SetFollowTarget(_vCamFollow);
+        GameManager.Instance.PlayerController.ToggleArms(false);
+
+        // Reset painting selection
+        PaintingSelector = 0;
+
+        // Adjust camera field of view
+        GameManager.Instance.PlayerController.CMVirtualCamera.m_Lens.FieldOfView = Mathf.Lerp(GameManager.Instance.PlayerController.CMVirtualCamera.m_Lens.FieldOfView, 20f, Time.deltaTime * 10f);
     }
 
-    IEnumerator EndPaintingEvent()
+    // Switch the positions of the marked paintings
+    private IEnumerator SwitchPaintings()
+    {
+        if (_debugMode) Debug.Log("Switch Paintings");
+        IsPaused = true;
+        
+        // create temporary positions for the paintings
+        Vector3 tempPaintingPosition = new Vector3(MarkedPainting.transform.position.x, MarkedPainting.transform.position.y, MarkedPainting.transform.position.z);
+        Vector3 tempMarkedPaintingPosition = new Vector3(MarkedPaintingToSwitch.transform.position.x, MarkedPaintingToSwitch.transform.position.y, MarkedPaintingToSwitch.transform.position.z);
+
+        // Play sound for switching paintings
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), "switch painting", 1f, 1f);
+
+        // Move the paintings to their new positions
+        float time = 0;
+        float duration = 0.5f;
+        while (time < duration)
+        {
+            MarkedPainting.transform.position = Vector3.Lerp(MarkedPainting.transform.position, tempMarkedPaintingPosition, time / duration);
+            MarkedPaintingToSwitch.transform.position = Vector3.Lerp(MarkedPaintingToSwitch.transform.position, tempPaintingPosition, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        // Swap the positions of the paintings
+        MarkedPainting.transform.position = tempMarkedPaintingPosition;
+        MarkedPaintingToSwitch.transform.position = tempPaintingPosition;
+
+        // Reset the spotlights
+        MarkedPainting.GetComponent<PaintingCode>().SpotLight.SetActive(false);
+        MarkedPaintingToSwitch.GetComponent<PaintingCode>().SpotLight.SetActive(false);
+
+        // save the last selected painting
+        _lastSelector = PaintingSelector;
+
+        // Switch the positions of the paintings in the list
+        SwitchListPlace();
+
+        // Check if the paintings are in the correct order
+        CheckPaintingOrder();
+    }
+
+    // End the painting event
+    private IEnumerator EndPaintingEvent()
     {
         yield return new WaitForSeconds(1f);
 
+        // Disable the pens collider to prevent further interaction
         transform.GetComponent<Collider>().enabled = false;
+        // Enable the doors renderer
+        _doorObject.GetComponent<Renderer>().enabled = true;
 
-        door.GetComponent<Renderer>().enabled = true;
-
-        GameManager.Instance.playerController.SetFollowTarget();
-        GameManager.Instance.playerController.ToggleArms(true);
+        // Reset the camera follow target, the arms and resume the game
+        GameManager.Instance.PlayerController.SetFollowTarget();
+        GameManager.Instance.PlayerController.ToggleArms(true);
         GameManager.Instance.ResumeGame();
 
-        girl.GetComponent<EnemyBT>().ResetTree();
-        girl.SetActive(true);
-        girl.GetComponent<Animator>().SetTrigger("Bath");
+        // Prepare the girl for the bathroom event
+        _girlObject.GetComponent<EnemyBT>().ResetTree();
+        _girlObject.SetActive(true);
+        _girlObject.GetComponent<Animator>().SetTrigger("Bath");
 
-        // Transform pens x-rotation from -25 to 0
+        // Transform pens x-rotation from -25 to 0, switch the pen back
         float time = 0;
         float duration = 2f;
-        Quaternion startRotation = pen.transform.localRotation;
+        Quaternion startRotation = _penObject.transform.localRotation;
         Quaternion targetRotation = Quaternion.Euler(0, 0, 0);
 
         while (time < duration)
         {
             time += Time.deltaTime;
             float t = time / duration;
-            pen.transform.localRotation = Quaternion.Lerp(startRotation, targetRotation, t);
+            _penObject.transform.localRotation = Quaternion.Lerp(startRotation, targetRotation, t);
             yield return null;
         }
 
         yield return new WaitForSeconds(1f);
 
-        drawer.GetComponent<Drawer>().Interact();
+        // Open the drawer after the event
+        _drawerObject.GetComponent<Drawer>().Interact();
     }
+
     #endregion
 }

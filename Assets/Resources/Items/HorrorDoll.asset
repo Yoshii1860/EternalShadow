@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
+  m_Name: HorrorDoll
+  m_EditorClassIdentifier: 
+  DisplayName: Horror Doll
+  Description: A haunting memento of the asylum's dark past, collect these eerie
+    dolls scattered throughout the asylum.
+  Icon: {fileID: 21300000, guid: de8c57f0be3d7c54796f849fd0ae77f6, type: 3}
+  IconPath: VFX/ItemIcons/horrordoll
+  IsUnique: 0
+  Quantity: 1
+  Prefab: {fileID: 129278, guid: 848098b20205e584ba1d61f0ce0ffb61, type: 3}
+  PrefabPath: Prefabs/HorrorDoll
+  Type: 3
+  ammoType: 0
+  potionType: 0

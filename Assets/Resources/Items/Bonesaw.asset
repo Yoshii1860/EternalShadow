@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: Bonesaw
   m_EditorClassIdentifier: 
-  displayName: Bonesaw
-  description: This looks pretty solid. Might cut through everything, even human
-    bones.
-  icon: {fileID: 21300000, guid: bdd80b6835daac64aa9d82ec42ba4225, type: 3}
-  iconPath: VFX/ItemIcons/bonesaw
-  unique: 1
-  quantity: 1
-  prefab: {fileID: 6446087884125340742, guid: d8b559ce09ff1e846881e3a6a1486d39, type: 3}
-  prefabPath: Assets/Hospital/Prefabs/Props/Surgery/Saw
-  type: 3
+  DisplayName: Bonesaw
+  Description: A chilling tool designed for the macabre task of cutting through bones,
+    its presence hinting at darker deeds within the asylum's walls.
+  Icon: {fileID: 21300000, guid: bdd80b6835daac64aa9d82ec42ba4225, type: 3}
+  IconPath: VFX/ItemIcons/bonesaw
+  IsUnique: 1
+  Quantity: 1
+  Prefab: {fileID: 3010039345913057461, guid: 9eaa8e249a8a4e444a5b24a71c3cc3ca, type: 3}
+  PrefabPath: Prefabs/Items/Saw
+  Type: 3
   ammoType: 0
   potionType: 0

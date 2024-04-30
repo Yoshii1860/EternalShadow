@@ -4,15 +4,23 @@ using UnityEngine;
 
 public class MusicboxWay : MonoBehaviour
 {
-    public bool exited = false;
+    #region Variables
 
+    public bool Exited = false;
+
+    #endregion
+
+
+
+
+    #region Collider
 
     public void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             Debug.Log("Exited");
-            exited = true;
+            Exited = true;
         }
     }
 
@@ -21,7 +29,9 @@ public class MusicboxWay : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             Debug.Log("Entered");
-            exited = false;
+            Exited = false;
         }
     }
+
+    #endregion
 }

@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: Pistol
   m_EditorClassIdentifier: 
-  displayName: Glock 22
-  description: The Glock 22 is a self-loading pistol  in .40 S&W caliber.
-  icon: {fileID: 21300000, guid: 9fcc2841600cace42a9b1ba01e7d14ca, type: 3}
-  iconPath: VFX/ItemIcons/Pistol
-  unique: 1
-  quantity: 1
-  prefab: {fileID: 1992975004011356937, guid: 86cea8363b043b64982fe48a97486c74, type: 3}
-  prefabPath: Prefabs/Items/Pistol
-  type: 0
+  DisplayName: Pistol
+  Description: A weapon of last resort, wield it with caution against the horrors
+    lurking in the shadows.
+  Icon: {fileID: 21300000, guid: 9fcc2841600cace42a9b1ba01e7d14ca, type: 3}
+  IconPath: VFX/ItemIcons/Pistol
+  IsUnique: 1
+  Quantity: 1
+  Prefab: {fileID: 1992975004011356937, guid: 86cea8363b043b64982fe48a97486c74, type: 3}
+  PrefabPath: Prefabs/Items/Pistol
+  Type: 0
   ammoType: 1
   potionType: 0

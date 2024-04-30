@@ -12,16 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: Painkillers
   m_EditorClassIdentifier: 
-  displayName: Painkillers
-  description: "Eqvilibrion are analgesics, also called painkillers, a medication
-    that relieves different types of pain \u2014 from headaches to injuries. Manufactured
-    by Umbrella.."
-  icon: {fileID: 21300000, guid: 875181bf9f9557a48b5c37b28730069b, type: 3}
-  iconPath: VFX/ItemIcons/Painkillers
-  unique: 0
-  quantity: 1
-  prefab: {fileID: 3310036295106835783, guid: e0dc79125343cba47a8b7aa9a658b1d8, type: 3}
-  prefabPath: Prefabs/Items/Painkillers
-  type: 2
+  DisplayName: Painkillers
+  Description: Alleviate the agony of concussion with these essential medications,
+    restoring clarity to your fractured mind.
+  Icon: {fileID: 21300000, guid: 875181bf9f9557a48b5c37b28730069b, type: 3}
+  IconPath: VFX/ItemIcons/Painkillers
+  IsUnique: 0
+  Quantity: 1
+  Prefab: {fileID: 3310036295106835783, guid: e0dc79125343cba47a8b7aa9a658b1d8, type: 3}
+  PrefabPath: Prefabs/Items/Painkillers
+  Type: 2
   ammoType: 0
   potionType: 3

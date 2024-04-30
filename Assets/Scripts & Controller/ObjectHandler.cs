@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,13 +8,22 @@ public class ObjectHandler : MonoBehaviour
 {
     #region Fields
 
-    // [SerializeField] private InputActionReference input;
-    [SerializeField] float pickupDistance = 5f;
-    private ItemActions action;
-    public bool lightSwitchActive = false;
-    LayerMask allLayersExceptCharacter = ~(1 << 7);
+    [Header("Object Detection Settings")]
+    [Tooltip("The distance to detect objects in front of the camera")]
+    [SerializeField] private float _interactionDistance  = 5f;
+    // Reference to the ItemActions component
+    private ItemActions _itemAction;
+    // Layer mask to ignore the character layer
+    private LayerMask _allLayersExceptCharacter = ~(1 << 7);
+    // Dictionary to map object tags to actions
+    private Dictionary<string, Action> _interactionMap;
+    // Raycast hit information
+    private RaycastHit interactionHit;  
 
     #endregion
+
+
+
 
     #region Unity Lifecycle Methods
 
@@ -25,129 +35,126 @@ public class ObjectHandler : MonoBehaviour
 
     #endregion
 
+
+
+
     #region Public Methods
 
-    /// Execute the ObjectHandler functionality.
+    // Performs the object interaction logic based on raycast hit
+    // This method is called from the PlayerController component.
     public void Execute()
     {
-        DetectObjects();
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out interactionHit, _interactionDistance, _allLayersExceptCharacter))
+        {
+            if (_interactionMap.TryGetValue(interactionHit.collider.gameObject.tag, out Action Interaction))
+            {
+                Interaction();
+            }
+        }
     }
 
     /// Update references to other components.
+    /// To be called when the GameManager is initialized.
     public void UpdateReferences()
     {
-        action = GetComponent<ItemActions>();
+        _itemAction = GetComponent<ItemActions>();
+
+        _interactionMap = new Dictionary<string, Action>()
+        {
+            { "Save", () => GameManager.Instance.OpenSaveScreen() },
+            { "Painting", () => GameManager.Instance.PaintingEvent() },
+            { "Item", () => 
+                {
+                    var itemController = interactionHit.collider.GetComponent<ItemController>();
+                    if (itemController != null)
+                    {
+                        if (itemController.InventoryItem)
+                        {
+                            if (InventoryManager.Instance.InventorySpaceCheck()) 
+                            {
+                                AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "error", 0.6f, 1f);
+                                return;
+                            }
+                        }
+                        itemController.Interact();
+                        _itemAction.PickUp(interactionHit);
+                    }   
+                }
+            },
+            { "Door", () => 
+                {
+                    var door = interactionHit.collider.GetComponent<Door>();
+                    if (door != null)
+                    {
+                        door.Interact();
+                    }
+                }
+            },
+            { "Text", () => 
+                {
+                    var textCode = interactionHit.collider.GetComponent<TextCode>();
+                    if (textCode != null)
+                    {
+                        textCode.ReadText();
+                    }
+                }
+            },
+            { "Locker", () => 
+                {
+                    var lockerCode = interactionHit.collider.GetComponent<LockerCode>();
+                    if (lockerCode != null)
+                    {
+                        lockerCode.Interact();
+                    }
+                    else
+                    {
+                        interactionHit.collider.transform.parent.GetComponent<LockerCode>().Interact();
+                    }
+                }
+            },
+            { "LightSwitch", () => 
+                {
+                    var lightSwitch = interactionHit.collider.GetComponent<LightSwitch>();
+                    if (lightSwitch != null)
+                    {
+                        lightSwitch.SwitchLights();
+                    }
+                }
+            },
+            { "EventTrigger", () =>
+                {
+                    var interactableEventObject = interactionHit.collider.GetComponent<InteractableObject>();
+                    if (interactableEventObject != null)
+                    {
+                        interactableEventObject.Interact();
+                    }
+                }
+
+            },
+            { "Untagged", () => 
+                {
+                    var interactableObject = interactionHit.collider.GetComponent<InteractableObject>();
+                    if (interactableObject != null)
+                    {
+                        interactableObject.Interact();
+                    }
+                }
+            }
+        };
     }
 
     #endregion
 
-    #region Private Methods
 
-    /// Detect objects in front of the camera.
-    private void DetectObjects()
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, pickupDistance, allLayersExceptCharacter))
-        {
-            Debug.Log("ObjectHandler.DetectObjects: " + hit.collider.gameObject.name);
 
-            if (hit.collider.gameObject.tag == "Save")
-            {
-                // Open UI to save game
-                Debug.Log("ObjectHandler - Save");
-                GameManager.Instance.OpenSaveScreen();
-                return;
-            }
 
-            PaintingEvent paintingEvent = hit.collider.gameObject.GetComponent<PaintingEvent>();
-
-            if (paintingEvent != null)
-            {
-                GameManager.Instance.PaintingEvent();
-                return;
-            }
-
-            ItemController itemController = hit.collider.gameObject.GetComponent<ItemController>();
-
-            if (itemController != null)
-            {
-                if (itemController.inventoryItem)
-                {
-                    if (InventoryCheck()) return;
-                }
-                itemController.Interact();
-                // Use PickUp() method from ItemActions class
-                Debug.Log("ObjectHandler - PickUp");
-                action.PickUp(hit);
-                return;
-            }
-
-            if (hit.collider.gameObject.tag == "Save")
-            {
-                // Open UI to save game
-                Debug.Log("ObjectHandler - Save");
-                GameManager.Instance.OpenSaveScreen();
-                return;
-            }
-
-            if (hit.collider.gameObject.layer == 6)
-            {
-                Debug.Log("ObjectHandler - Interact");
-
-                InteractableObject intObj = hit.collider.gameObject.GetComponent<InteractableObject>();
-                if (intObj != null)
-                {
-                    if (intObj.inventoryItem)
-                    {
-                        if (InventoryCheck()) return;
-                    }
-                    intObj.Interact();
-                    return;
-                }
-                
-                Door door = hit.collider.gameObject.GetComponent<Door>();
-                if (door != null)
-                {
-                    door.Interact();
-                    return;
-                }
-
-                TextCode textCode = hit.collider.gameObject.GetComponent<TextCode>();
-                if (textCode != null)
-                {
-                    textCode.ReadText();
-                    return;
-                }
-
-                LightSwitch lightSwitch = hit.collider.gameObject.GetComponent<LightSwitch>();
-                if (lightSwitch != null)
-                {
-                    lightSwitch.SwitchLights();
-                    return;
-                }
-                
-                intObj = hit.collider.gameObject.GetComponentInParent<InteractableObject>();
-                intObj.Interact();
-            }
-        }
-    }
-
-    private bool InventoryCheck()
-    {
-        // Check if the player has space in the inventory
-        if (InventoryManager.Instance.ItemCount() >= InventoryManager.Instance.maxItems)
-        {
-            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "error", 0.6f, 1f);
-            return true;
-        }
-        return false;
-    }
+    #region Gizmos
 
     /// Draw a ray in the Scene view for visualization.
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * pickupDistance);
+        Gizmos.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * _interactionDistance);
     }
 
     #endregion

@@ -9,42 +9,48 @@ public class ActionPatrol : Node
     #region Fields
 
     // References to components
-    private Transform transform;
-    private Animator animator;
-    private Transform[] waypoints;
-    private NavMeshAgent agent;
-    private Enemy enemy;
-    private AISensor sensor;
+    private Transform _transform;
+    private Animator _animator;
+    private Transform[] _waypoints;
+    private NavMeshAgent _agent;
+    private AISensor _aiSensor;
+    private EnemyAudio _enemyAudio;
 
     // Patrol-related variables
-    private int currentWaypointIndex = 0;
-    private float waitTime = 10f;
-    private float waitCounter = 0f;
-    private bool isWaiting = true;
+    private int _currentWaypointIndex = 0;
+    private float _waitTime = 10f;
+    private float _waitCounter = 0f;
+    private bool _isWaiting = true;
 
-    // Debug mode flag
-    private bool debugMode;
+    // Enemy attributes
+    private float _walkSpeed;
 
-    private int enemyType;
+    private bool _debugMode;
 
     #endregion
+
+
+
 
     #region Constructors
 
     // Constructor to initialize references and waypoints
-    public ActionPatrol(bool debugMode, Transform transform, Transform[] waypoints, NavMeshAgent agent, int enemyType)
+    public ActionPatrol(bool debugMode, Transform transform, Transform[] waypoints, NavMeshAgent agent)
     {
-        this.transform = transform;
-        this.animator = transform.GetComponent<Animator>();
-        this.waypoints = waypoints;
-        this.agent = agent;
-        enemy = transform.GetComponent<Enemy>();
-        sensor = transform.GetComponent<AISensor>();
-        this.debugMode = debugMode;
-        this.enemyType = enemyType;
+        _transform = transform;
+        _animator = transform.GetComponent<Animator>();
+        _waypoints = waypoints;
+        _agent = agent;
+        _walkSpeed = transform.GetComponent<Enemy>().WalkSpeed;
+        _aiSensor = transform.GetComponent<AISensor>();
+        _enemyAudio = transform.GetComponent<EnemyAudio>();
+        _debugMode = debugMode;
     }
 
     #endregion
+
+
+
 
     #region Public Methods
 
@@ -52,108 +58,101 @@ public class ActionPatrol : Node
     public override NodeState Evaluate()
     {
 
-        ////////////////////////////////////////////////////////////////////////
-        // PAUSE GAME
-        ////////////////////////////////////////////////////////////////////////
-        if (GameManager.Instance.isPaused)
+        #region FAILURE CHECKS
+
+        if (GameManager.Instance.IsGamePaused)
         {
             // Return RUNNING to indicate that the action is ongoing
-            if (debugMode) Debug.Log("A - Patrol: RUNNING (game is paused)");
-            state = NodeState.RUNNING;
-            return state;
+            if (_debugMode) Debug.Log("A - Patrol: RUNNING (game is paused)");
+            return NodeState.RUNNING;
         }
-        ////////////////////////////////////////////////////////////////////////
-
-        ////////////////////////////////////////////////////////////////////////
-        // FAILURE CHECKS
-        ////////////////////////////////////////////////////////////////////////
-        object obj = GetData("target");
-        object lastKnownPos = GetData("lastKnownPosition");
-        object noisePos = GetData("noisePosition");
-
-        if (obj != null)
-        {
-            if (debugMode) Debug.Log("A - Patrol: FAILURE (target != null)");
-            state = NodeState.FAILURE;
-            return state;
-        }
-        else if (sensor.playerInSight && !sensor.hidden)
+        
+        if (_aiSensor.IsPlayerInSight && !_aiSensor.IsPlayerHidden)
         {
             // Set state to FAILURE and return
-            parent.SetData("target", GameManager.Instance.player.transform);
-            if (debugMode) Debug.Log("A - Patrol: FAILURE (Player in Sight)");
-            state = NodeState.FAILURE;
-            return state;
+            parent.SetData("target", GameManager.Instance.Player.transform);
+            if (_debugMode) Debug.Log("A - Patrol: FAILURE (Player in Sight)");
+            return NodeState.FAILURE;
         }
-        else if (lastKnownPos != null)
+        
+        if (HasOtherPatrolDisruptions())
         {
             // Set state to FAILURE and return
-            if (debugMode) Debug.Log("A - Patrol: FAILURE (lastKnownPosition != null)");
-            state = NodeState.FAILURE;
-            return state;
+            if (_debugMode) Debug.Log("A - Patrol: FAILURE (Last known position, target or noise position exists)");
+            return NodeState.FAILURE;
         }
-        else if (noisePos != null)
-        {
-            // Set state to FAILURE and return
-            if (debugMode) Debug.Log("A - Patrol: FAILURE (noisePosition != null)");
-            state = NodeState.FAILURE;
-            return state;
-        }
-        ////////////////////////////////////////////////////////////////////////
+        
+        #endregion
 
-        // Check if waiting
-        if (isWaiting)
+
+
+
+        #region ACTION
+
+        if (_isWaiting)
         {
-            animator.SetBool("walk", false);
-            animator.SetBool("run", false);
-            waitCounter += Time.deltaTime;
+            _animator.SetBool("walk", false);
+            _animator.SetBool("run", false);
+            _waitCounter += Time.deltaTime;
 
             // Check if waiting time is over
-            if (waitCounter >= waitTime)
+            if (_waitCounter >= _waitTime)
             {
-                isWaiting = false;
-                animator.SetBool("walk", true);
-                animator.SetBool("run", false);
+                _isWaiting = false;
+                _animator.SetBool("walk", true);
+                _animator.SetBool("run", false);
             }
         }
         else
         {
-            animator.SetBool("run", false);
-            animator.SetBool("walk", true);
+            _animator.SetBool("run", false);
+            _animator.SetBool("walk", true);
 
-            Transform currentWaypoint = waypoints[currentWaypointIndex];
+            Transform currentWaypoint = _waypoints[_currentWaypointIndex];
 
             // Check if reached the current waypoint
-            if (Vector3.Distance(transform.position, currentWaypoint.position) < 0.1f)
+            if (Vector3.Distance(_transform.position, currentWaypoint.position) < 0.1f)
             {
-                transform.position = new Vector3(currentWaypoint.position.x, transform.position.y, currentWaypoint.position.z);
-                waitCounter = 0f;
-                isWaiting = true;
+                _transform.position = new Vector3(currentWaypoint.position.x, _transform.position.y, currentWaypoint.position.z);
+                _waitCounter = 0f;
+                _isWaiting = true;
 
-                // Switch to the next waypoint in a loop
-                currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
+                // Switch to the next waypoint
+                _currentWaypointIndex = (_currentWaypointIndex + 1) % _waypoints.Length;
 
-                // Reset animation states
-                animator.SetBool("run", false);
-                animator.SetBool("walk", false);
+                _animator.SetBool("run", false);
+                _animator.SetBool("walk", false);
             }
             else
             {
                 // Move towards the current waypoint
-                agent.speed = EnemyBT.walkSpeed;
-                agent.SetDestination(currentWaypoint.position);
-                animator.SetBool("walk", true);
-                animator.SetBool("run", false);
+                _agent.speed = _walkSpeed;
+                _agent.SetDestination(currentWaypoint.position);
+                _animator.SetBool("walk", true);
+                _animator.SetBool("run", false);
 
-                AudioManager.Instance.VolumeFloorChanger(transform, enemyType);
+                _enemyAudio.VolumeFloorChanger();
             }
         }
 
-        // Return RUNNING to indicate that the action is ongoing
-        if (debugMode) Debug.Log("A - Patrol: RUNNING (Patrolling)");
-        state = NodeState.RUNNING;
-        return state;
+        if (_debugMode) Debug.Log("A - Patrol: RUNNING (Patrolling)");
+        return NodeState.RUNNING;
+
+        #endregion
     }
 
     #endregion
+
+
+
+
+    #region Helper Methods
+
+    private bool HasOtherPatrolDisruptions()
+    {
+        return GetData("target") != null || GetData("lastKnownPosition") != null || GetData("noisePosition") != null;
+    }
+
+    #endregion
+
 }

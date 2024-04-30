@@ -13,13 +13,24 @@ public class EventDataEntry
 
 public class EventData : MonoBehaviour
 {
-    public bool debugMode = false;
+    #region Fields
 
+    [Tooltip("Debug mode will print all event data entries to the console.")]
+    [SerializeField] private bool _debugMode = false;
+
+    #endregion
+
+
+
+
+    #region Unity Methods
+
+    // Update is called once per frame - just for debug
     void Update()
     {
-        if (debugMode)
+        if (_debugMode)
         {
-            debugMode = false;
+            _debugMode = false;
             Debug.Log("Event Data Entries:");
             foreach (EventDataEntry eventDataEntry in eventDataEntries)
             {
@@ -27,6 +38,13 @@ public class EventData : MonoBehaviour
             }
         }
     }
+
+    #endregion
+
+
+
+
+    #region Event Data
 
     public List<EventDataEntry> eventDataEntries = new List<EventDataEntry>()
     {
@@ -36,13 +54,21 @@ public class EventData : MonoBehaviour
         new EventDataEntry() { EventName = "Musicbox", ScriptType = typeof(Musicbox), Active = false },
         new EventDataEntry() { EventName = "Mirror", ScriptType = typeof(ButtonCode), Active = false },
         new EventDataEntry() { EventName = "Bathroom", ScriptType = typeof(BathroomEvent), Active = false },
-        new EventDataEntry() { EventName = "Flipped", ScriptType = typeof(CellEvent), Active = false },
+        new EventDataEntry() { EventName = "Flipped", ScriptType = typeof(FlippedEvent), Active = false },
         new EventDataEntry() { EventName = "Keypad", ScriptType = typeof(NavKeypad.Keypad), Active = false },
         new EventDataEntry() { EventName = "Rails", ScriptType = typeof(CrowbarCode), Active = false },
         new EventDataEntry() { EventName = "Yard", ScriptType = typeof(YardEvent), Active = false },
         new EventDataEntry() { EventName = "Mannequin", ScriptType = typeof(MannequinEvent), Active = false }
     };   
 
+    #endregion
+
+
+
+
+    #region Event Methods
+
+    // Set the event to active
     public void SetEvent(string eventName)
     {
         EventDataEntry eventDataEntry = eventDataEntries.Find(x => x.EventName == eventName);
@@ -52,6 +78,7 @@ public class EventData : MonoBehaviour
         }
     }
 
+    // Check if the event is active
     public bool CheckEvent(string eventName)
     {
         EventDataEntry eventDataEntry = eventDataEntries.Find(x => x.EventName == eventName);
@@ -62,6 +89,7 @@ public class EventData : MonoBehaviour
         return false;
     }
 
+    // Trigger the event
     public void TriggerEvent(string eventName)
     {
         EventDataEntry eventDataEntry = eventDataEntries.Find(x => x.EventName == eventName);
@@ -79,4 +107,6 @@ public class EventData : MonoBehaviour
             }
         }
     }
+
+    #endregion
 }

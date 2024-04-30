@@ -30,42 +30,42 @@ public class NoiseData : ScriptableObject
 {
     #region PlayerController Modifiers
 
-    public float walkModifier = 1f;
-    public float runModifier = 1.5f;
-    public float crouchModifier = 0.5f;
+    public float WalkModifier = 1f;
+    public float RunModifier = 1.5f;
+    public float CrouchModifier = 0.5f;
 
     #endregion
 
     #region Surface Noise Levels
 
-    public float stopNoiseLevel = 1f;
-    public float grassNoiseLevel = 5f;
-    public float concreteNoiseLevel = 8f;
-    public float woodenPlanksNoiseLevel = 7f;
-    public float carpetNoiseLevel = 4f;
+    public float StopNoiseLevel = 1f;
+    public float GrassNoiseLevel = 5f;
+    public float ConcreteNoiseLevel = 8f;
+    public float WoodenPlanksNoiseLevel = 7f;
+    public float CarpetNoiseLevel = 4f;
 
     #endregion
 
     #region Object Noise Levels
 
-    public float trashNoiseLevel = 10f;
-    public float glassNoiseLevel = 14f;
-    public float plasticNoiseLevel = 12f;
-    public float brokenWoodenPlankNoiseLevel = 15f;
+    public float TrashNoiseLevel = 10f;
+    public float GlassNoiseLevel = 14f;
+    public float PlasticNoiseLevel = 12f;
+    public float BrokenWoodenPlankNoiseLevel = 15f;
 
     #endregion
 
     #region Shooting Noise Level
 
-    public float shootNoiseLevel = 20f;
+    public float ShootNoiseLevel = 20f;
 
     #endregion
 
     #region Priority Levels
 
-    public int lowPriority = 1;
-    public int mediumPriority = 2;
-    public int highPriority = 3;
+    public int LowPriority = 1;
+    public int MediumPriority = 2;
+    public int HighPriority = 3;
 
     #endregion
 }

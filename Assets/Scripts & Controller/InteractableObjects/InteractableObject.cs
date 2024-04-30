@@ -8,30 +8,38 @@ public class InteractableObject : MonoBehaviour
 {
     #region Variables
 
-    [Header("If not Pickup - no base code will be run")]
-    public bool isPickup = true;
-    public bool active = false;
-    public bool inventoryItem = true;
-    public bool useEmission = true;
-    [SerializeField] bool audioAfterPickup = false;
-    [SerializeField] string audioClipName = "";
-    [SerializeField] float delay = 0f;
+    [Header("Object Properties")]
+    [Tooltip("Does the object need the pickup canvas?")]
+    public bool IsPickup = true;
+    [Tooltip("Is the object active?")] // used for enable/disable objects on save/load
+    public bool IsActive = false;
+    // checked by ObjectHandler to determine if the object is to be put in the inventory
+    [Tooltip("Is the object an item stored in the inventory?")]
+    public bool InventoryItem = true;
+    // checked by SimpleCameraController to determine if the object is to be highlighted
+    [Tooltip("Does the object have to be highlighted?")]
+    public bool UseEmission = true;
+    [Tooltip("The item that the object represents")]
+    public Item Item = null;
     [Space(10)]
 
-    [Header("Object Properties")]
-    [SerializeField] Transform objectPosition;
-    [SerializeField] bool rotateX = false;
-    [SerializeField] bool rotateY = false;
-    [SerializeField] bool rotateZ = false;
-    [SerializeField] TextMeshProUGUI objectName;
-    [SerializeField] TextMeshProUGUI objectDescription;
-    [SerializeField] string objectNameString;
-    [SerializeField] string objectDescriptionString;
-    public string clipName;
+    [Tooltip("Does the object play audio after pickup?")]
+    [SerializeField] bool _audioAfterPickup = false;
+    [Tooltip("The name of the audio clip to play after pickup")]
+    [SerializeField] string _audioClipName = "";
+    [Tooltip("The delay before playing the audio clip")]
+    [SerializeField] float _delay = 0f;
+    [Space(10)]
 
-    Coroutine rotationCoroutine;
+    [Tooltip("The name of the audio clip to play when the object is picked up - if not set, the default is 'pickup item'")]
+    public string ClipNameOnPickup;
+
+    Coroutine _rotationCoroutine;
 
     #endregion
+
+
+
 
     #region Interaction
 
@@ -39,30 +47,30 @@ public class InteractableObject : MonoBehaviour
     {
         Debug.Log("Interacting with the base interactable object.");
 
-        if (active) active = false;
+        if (IsActive) IsActive = false;
 
-        if (!isPickup) 
+        if (!IsPickup) 
         {
             RunItemCode();
             return;
         }
 
         // loop through all active children and grand children of fpsArms and disable mesh renderer
-        GameManager.Instance.playerController.ToggleArms(false);
+        GameManager.Instance.PlayerController.ToggleArms(false);
 
         // Open Canvas
-        GameManager.Instance.pickupCanvas.SetActive(true);
+        GameManager.Instance.PickupCanvas.SetActive(true);
 
         // Pause UpdateManager
         GameManager.Instance.PickUp();
 
-        if (clipName == "") clipName = "pickup item";
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, clipName, 0.6f, 1f);
+        if (ClipNameOnPickup == "") ClipNameOnPickup = "pickup item";
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, ClipNameOnPickup, 0.6f, 1f);
 
         DeactivateEmission();
 
         // Create Duplicate Object on Canvas
-        GameObject newItem = Instantiate(gameObject, GameManager.Instance.pickupCanvas.transform);
+        GameObject newItem = Instantiate(gameObject, GameManager.Instance.PickupCanvas.transform);
 
         // Deactivate Collider
         Collider[] collider = newItem.GetComponents<Collider>();
@@ -78,8 +86,8 @@ public class InteractableObject : MonoBehaviour
         DeactivateLights(newItem);
 
         // Show Object Details on Screen
-        objectName.text = objectNameString;
-        objectDescription.text = objectDescriptionString;
+        GameManager.Instance.PickupName.text = Item.DisplayName;
+        GameManager.Instance.PickupDescription.text = Item.Description;
 
         // Make in-scene object invisible
         DeactivateRendererAndLights(transform);
@@ -87,13 +95,24 @@ public class InteractableObject : MonoBehaviour
         // Run Item Code
         StartCoroutine(ItemCode(newItem));
 
+        Transform objectPosition = null;
+        foreach (Transform child in GameManager.Instance.PickupPositions.GetComponentsInChildren<Transform>(true))
+        {
+            if (child.name == "Position" + Item.name)
+            {
+                objectPosition = child;
+                Debug.Log("INTERACTABLE OBJECT: OBJECT POSITION FOUND");
+                break;
+            }
+        }
+
         // Set world position and rotation
         newItem.transform.position = objectPosition.position;
         newItem.transform.rotation = objectPosition.rotation;
         newItem.transform.localScale = objectPosition.localScale;
 
         // Rotate the object
-        rotationCoroutine = StartCoroutine(RotateObject(newItem));
+        _rotationCoroutine = StartCoroutine(RotateObject(newItem));
     }
 
     void DeactivateRendererAndLights(Transform objTransform)
@@ -157,27 +176,30 @@ public class InteractableObject : MonoBehaviour
 
     #endregion
 
+
+
+
     #region Coroutines
 
     IEnumerator ItemCode(GameObject newItemToDestroy)
     {
         // Wait for the player to return to gameplay mode
-        yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
+        yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.DEFAULT);
 
         // Stop coroutine to prevent errors before deleting
-        StopCoroutine(rotationCoroutine);
+        StopCoroutine(_rotationCoroutine);
 
         // Destroy duplicated object
         Destroy(newItemToDestroy);
 
         // Deactivate Canvas
-        GameManager.Instance.playerController.ToggleArms(true);
-        GameManager.Instance.pickupCanvas.SetActive(false);
+        GameManager.Instance.PlayerController.ToggleArms(true);
+        GameManager.Instance.PickupCanvas.SetActive(false);
 
         // Run object-specific code
         RunItemCode();
 
-        if (audioAfterPickup) AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, audioClipName, delay);
+        if (_audioAfterPickup) AudioManager.Instance.PlayClipOneShotWithDelay(AudioManager.Instance.PlayerSpeaker2, _audioClipName, _delay);
 
         // Destroy the interactable object
         gameObject.SetActive(false);
@@ -192,9 +214,7 @@ public class InteractableObject : MonoBehaviour
         {
             Vector3 rotation = Vector3.zero;
 
-            if (rotateX) rotation.x = (360 / rotateTime) * Time.deltaTime;
-            if (rotateY) rotation.y = (360 / rotateTime) * Time.deltaTime;
-            if (rotateZ) rotation.z = (360 / rotateTime) * Time.deltaTime;
+            rotation.x = (360 / rotateTime) * Time.deltaTime;
 
             itemToRotate.transform.rotation *= Quaternion.Euler(rotation);
 
@@ -204,6 +224,9 @@ public class InteractableObject : MonoBehaviour
     }
 
     #endregion
+
+
+
 
     #region Item-Specific Code
 

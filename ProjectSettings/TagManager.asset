@@ -42,6 +42,17 @@ TagManager:
   - TextCanvas
   - Yes
   - No
+  - Painting
+  - Item
+  - Door
+  - Text
+  - LightSwitch
+  - PickupObjectName
+  - PickupObjectDescription
+  - PickupObjectPosition
+  - Locker
+  - TextObjectPool
+  - SummonObjectPool
   layers:
   - Default
   - TransparentFX

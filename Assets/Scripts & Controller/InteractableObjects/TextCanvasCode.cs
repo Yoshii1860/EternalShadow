@@ -5,130 +5,121 @@ using TMPro;
 using System;
 
 public class TextCanvasCode : MonoBehaviour
-{
-    // 1 header
-    // 0-3 subheader
-    // 1 main body
-    // 0-3 subbody
-    // Restrict body 1 to 12 lines (if no other body)
-    // Restrict body 1 to 5 lines (if other body)
-    // Restrict each other body to 5 lines
-    // Restrict subBody2 to 12 lines (if twoPageBody)
+{   
+    #region Variables
 
-    // if only mainHeader & Main body, deactivate all subheaders and bodies
+    [Header("Texts")]
+    [SerializeField] private TextMeshProUGUI _mainHeader;
+    [SerializeField] private TextMeshProUGUI _mainBody;
+    [SerializeField] private TextMeshProUGUI _subHeader;
+    [SerializeField] private TextMeshProUGUI _subBody;
 
-    
-    [SerializeField] TextMeshProUGUI mainHeader;
-    string mainHeaderString;
-    [SerializeField] TextMeshProUGUI mainBody;
-    string mainBodyString;
+    private string _mainHeaderText;
+    private string _mainBodyText;
+    private string _subHeaderText;
+    private string _subBodyText;
 
-    [Space(10)]
+    // Audio
+    [HideInInspector]
+    public string SpeakerClipName = "";
+    [HideInInspector]
+    public float Delay = 0f;
 
-    bool twoBodies;
-    [SerializeField] TextMeshProUGUI subHeader;
-    string subHeaderString;
-    [SerializeField] TextMeshProUGUI subBody;
-    string subBodyString;
+    private bool IsAudioReady = false;
 
-    [Space(10)]
+    #endregion
 
-    public string speakerClipName = "";
-    public float delay = 0f;
-    public bool audioPlayable = false;
 
-    void Start()
+
+
+    #region Public Methods
+
+    // function to set text - used by Text Code Scripts
+    public void SetText(string newHeader, string newBody, string newSubHeader = "", string newSubBody = "")
     {
-        gameObject.SetActive(false);
-    }
+        _mainHeaderText = newHeader;
+        _mainBodyText = newBody;
+        _subHeaderText = newSubHeader;
+        _subBodyText = newSubBody;
 
-    // function to set up text
-    public void NewText(string newHeader, string newBody, string newSubHeader = "", string newSubBody = "")
-    {
-        mainHeaderString = newHeader;
-        mainBodyString = newBody;
-        subHeaderString = newSubHeader;
-        subBodyString = newSubBody;
-
-        if (subHeaderString == "" && subBodyString == "") twoBodies = false;
-        else twoBodies = true;
-
+        UpdateTextVisibility();
         SetTexts();
-        
-        if (twoBodies)
-        {
-            subHeader.gameObject.SetActive(true);
-            subBody.gameObject.SetActive(true);
-        }
-        else
-        {
-            subHeader.gameObject.SetActive(false);
-            subBody.gameObject.SetActive(false);
-        }
-
-        RendererToggle(GameManager.Instance.fpsArms, false);
-        GameManager.Instance.PickUp();
-        gameObject.SetActive(true);
-        GameManager.Instance.canvasActive = true;
         StartCoroutine(ToggleText());
     }
 
-    // function to restrict text length
-    void SetTexts()
-    {
-        mainBodyString = mainBodyString.Replace("\\n", "\n");
-
-        //change rect transform bottom and top
-        mainBody.rectTransform.offsetMin = new Vector2(mainBody.rectTransform.offsetMin.x, 90);
-        mainBody.rectTransform.offsetMax = new Vector2(mainBody.rectTransform.offsetMax.x, -140);
-
-        mainHeader.text = mainHeaderString;
-        mainBody.text = mainBodyString;
-
-        if (twoBodies)
-        {
-            //change rect transform bottom to 350
-            mainBody.rectTransform.offsetMin = new Vector2(mainBody.rectTransform.offsetMin.x, 350);
-
-            subBodyString = subBodyString.Replace("\\n", "\n");
-            subHeader.text = subHeaderString;
-            subBody.text = subBodyString;
-        }
-
-        if (mainHeaderString == "")
-        {
-            mainBody.rectTransform.offsetMax = new Vector2(mainBody.rectTransform.offsetMax.x, -80);
-        }
-    }
-
+    // function to set audio clip - used by Text Code Scripts
     public void SetAudioClip(string clipName, float delay)
     {
-        speakerClipName = clipName;
-        this.delay = delay;
-        audioPlayable = true;
+        SpeakerClipName = clipName;
+        this.Delay = delay;
+        IsAudioReady = true;
     }
+
+    #endregion
+
+
+
+
+    #region Private Methods
+
+    // function to update text visibility depending on text presence
+    private void UpdateTextVisibility()
+    {
+        _subHeader.gameObject.SetActive(_subHeaderText != string.Empty && _subBodyText != string.Empty);
+        _subBody.gameObject.SetActive(_subHeaderText != string.Empty && _subBodyText != string.Empty);
+    }
+
+
+    // function to set up text
+    private void SetTexts()
+    {
+        // Fix new lines
+        _mainBodyText = _mainBodyText.Replace("\\n", "\n");
+
+        // Adjust main body position based on sub-text presence
+        _mainBody.rectTransform.offsetMin = new Vector2(_mainBody.rectTransform.offsetMin.x, _subHeaderText == string.Empty ? 90 : 350);
+        _mainBody.rectTransform.offsetMax = new Vector2(_mainBody.rectTransform.offsetMax.x, -140);
+
+        _mainHeader.text = _mainHeaderText;
+        _mainBody.text = _mainBodyText;
+
+        if (_subHeaderText != string.Empty)
+        {
+            _subBodyText = _subBodyText.Replace("\\n", "\n");
+            _subHeader.text = _subHeaderText;
+            _subBody.text = _subBodyText;
+        }
+
+        // Adjust main body position based on sub-text presence
+        _mainBody.rectTransform.offsetMax = new Vector2(_mainBody.rectTransform.offsetMax.x, _mainHeaderText == string.Empty ? -80 : -140);
+
+        // Toogle arm visibility, change to pickup state and set text active
+        GameManager.Instance.PlayerController.ToggleArms(false);
+        GameManager.Instance.PickUp();
+        gameObject.SetActive(true);
+        GameManager.Instance.IsCanvasActive = true;
+        StartCoroutine(ToggleText());
+    }
+
+    #endregion
+
+
+
+
+    #region Coroutines
 
     // function to run text toggle
     IEnumerator ToggleText()
     {
-        yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.Default);
-        if (audioPlayable)
+        yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.DEFAULT);
+        if (IsAudioReady)
         {
-            AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, speakerClipName, delay);
-            audioPlayable = false;
+            AudioManager.Instance.PlayClipOneShotWithDelay(AudioManager.Instance.PlayerSpeaker2, SpeakerClipName, Delay);
+            IsAudioReady = false;
         }
         gameObject.SetActive(false);
-        RendererToggle(GameManager.Instance.fpsArms, true);
+        GameManager.Instance.PlayerController.ToggleArms(true);
     }
 
-    // function to toggle players renderer
-    public virtual void RendererToggle(GameObject go, bool active)
-    {
-        for (int i = 0; i < go.transform.childCount; i++)
-        {
-            Renderer renderer = go.transform.GetChild(i).gameObject.GetComponent<Renderer>();
-            if (renderer != null && renderer.gameObject.activeSelf) renderer.enabled = active;
-            if (go.transform.GetChild(i).childCount > 0) RendererToggle(go.transform.GetChild(i).gameObject, active);
-        }
-    }
+    #endregion
 }

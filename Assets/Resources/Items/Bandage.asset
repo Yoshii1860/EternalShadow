@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: Bandage
   m_EditorClassIdentifier: 
-  displayName: Bandage
-  description: Bandages can be used to support injured joints, secure dressings and
-    control bleeding.
-  icon: {fileID: 21300000, guid: d60ec07df7820234789fa0f6d8efdbb6, type: 3}
-  iconPath: VFX/ItemIcons/Bandage
-  unique: 0
-  quantity: 1
-  prefab: {fileID: 4001121234425887939, guid: d6d929bd16f5e3f4e988ff2888c41071, type: 3}
-  prefabPath: Prefabs/Items/Bandage
-  type: 2
+  DisplayName: Bandage
+  Description: Apply to wounds to staunch bleeding and promote healing, offering
+    a vital lifeline in dire situations.
+  Icon: {fileID: 21300000, guid: d60ec07df7820234789fa0f6d8efdbb6, type: 3}
+  IconPath: VFX/ItemIcons/Bandage
+  IsUnique: 0
+  Quantity: 1
+  Prefab: {fileID: 4001121234425887939, guid: d6d929bd16f5e3f4e988ff2888c41071, type: 3}
+  PrefabPath: Prefabs/Items/Bandage
+  Type: 2
   ammoType: 0
   potionType: 2

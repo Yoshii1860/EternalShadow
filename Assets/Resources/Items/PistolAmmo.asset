@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: PistolAmmo
   m_EditorClassIdentifier: 
-  displayName: 9mm Bullets
-  description: These 9mm handgun rounds are rimless bullets for the most common pistols.
-  icon: {fileID: 21300000, guid: 88ea4b58abe34ad4ba7b60ed7ae5b9a5, type: 3}
-  iconPath: VFX/ItemIcons/Bullets
-  unique: 0
-  quantity: 3
-  prefab: {fileID: 496015967415131217, guid: 9060b108bf149744e81dc8b9857575ec, type: 3}
-  prefabPath: Prefabs/Items/bullets
-  type: 1
+  DisplayName: Bullets
+  Description: Stock up on ammunition to ensure you're never caught defenseless against
+    the terrors that roam the asylum.
+  Icon: {fileID: 21300000, guid: 88ea4b58abe34ad4ba7b60ed7ae5b9a5, type: 3}
+  IconPath: VFX/ItemIcons/Bullets
+  IsUnique: 0
+  Quantity: 3
+  Prefab: {fileID: 496015967415131217, guid: 9060b108bf149744e81dc8b9857575ec, type: 3}
+  PrefabPath: Prefabs/Items/bullets
+  Type: 1
   ammoType: 1
   potionType: 0

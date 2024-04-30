@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 290fd5ed8e1a7b545918f0676da99a37, type: 3}
   m_Name: NoiseData
   m_EditorClassIdentifier: 
-  walkModifier: 1
-  runModifier: 1.5
-  crouchModifier: 0.5
-  grassNoiseLevel: 3
-  concreteNoiseLevel: 6
-  woodenPlanksNoiseLevel: 10
-  carpetNoiseLevel: 2
-  trashNoiseLevel: 10
-  glassNoiseLevel: 15
-  plasticNoiseLevel: 12
-  brokenWoodenPlankNoiseLevel: 15
-  shootNoiseLevel: 25
-  lowPriority: 1
-  mediumPriority: 2
-  highPriority: 3
+  WalkModifier: 1
+  RunModifier: 1.5
+  CrouchModifier: 0.5
+  StopNoiseLevel: 1
+  GrassNoiseLevel: 3
+  ConcreteNoiseLevel: 6
+  WoodenPlanksNoiseLevel: 10
+  CarpetNoiseLevel: 2
+  TrashNoiseLevel: 10
+  GlassNoiseLevel: 15
+  PlasticNoiseLevel: 12
+  BrokenWoodenPlankNoiseLevel: 15
+  ShootNoiseLevel: 25
+  LowPriority: 1
+  MediumPriority: 2
+  HighPriority: 3

@@ -6,10 +6,13 @@ public class ItemActions : MonoBehaviour
 {
     #region Fields
 
-    private Player player;
-    private Potion potion;
+    // Reference to the potion component
+    private Potion _potion;
 
     #endregion
+
+
+
 
     #region Unity Lifecycle Methods
 
@@ -21,13 +24,15 @@ public class ItemActions : MonoBehaviour
 
     #endregion
 
+
+
+
     #region Public Methods
 
-    /// Update references to other components.
+    /// Update references to other components. To be called when the GameManager is initialized.
     public void UpdateReferences()
     {
-        potion = GetComponent<Potion>();
-        player = GameManager.Instance.player;
+        _potion = GetComponent<Potion>();
     }
 
     /// Pick up the item and add it to the inventory.
@@ -35,65 +40,79 @@ public class ItemActions : MonoBehaviour
     public void PickUp(RaycastHit item)
     {
         ItemController itemController = item.collider.gameObject.GetComponent<ItemController>();
-        Item itemData = itemController.item;
-        Debug.Log("ItemActions.PickUp(" + itemData.name + ")");
-
-        // Add the Item instance to the inventory
-        InventoryManager.Instance.AddItem(itemData);
-        itemController.isPickedUp = true;
+        if (itemController != null)
+        {
+            Item itemData = itemController.Item;
+            // Add the Item instance to the inventory
+            InventoryManager.Instance.AddItem(itemData);
+            itemController.IsPickedUp = true;
+            Debug.Log("ItemActions.PickUp(" + itemData.name + ")");
+        }
+        else Debug.LogError("ItemController component not found on " + item.collider.gameObject.name);
     }
 
     /// Use the specified item.
     /// <param name="item">The item to be used.</param>
     public void Use(Item item)
     {
-        Debug.Log("ItemActions.Use(" + item.name + ")");
-
-        if (item.PotionType == Potion.PotionType.Antibiotics)
-            potion.Antibiotics(item);
-        else if (item.PotionType == Potion.PotionType.Bandage)
-            potion.Bandage(item);
-        else if (item.PotionType == Potion.PotionType.Painkillers)
-            potion.Painkillers(item);
-        else if (item.type == ItemType.Weapon)
-            InventoryManager.Instance.weapons.GetComponent<WeaponSwitcher>().SelectWeapon(item);
-        else 
+        switch (item.Type)
         {
-            InventoryManager.Instance.DisplayMessage("You cannot use this right now.");
-            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "error", 0.6f, 1f);
+            case ItemType.Potion:
+                UsePotion(item);
+                break;
+            case ItemType.Weapon:
+                InventoryManager.Instance.Weapons.GetComponent<WeaponSwitcher>().SelectWeapon(item);
+                break;
+            default:
+                InventoryManager.Instance.DisplayMessage("You cannot use this right now.");
+                AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "error", 0.6f, 1f);
+                break;
         }
     }
 
-    /*
-    /// Combine the specified item.
-    /// <param name="item">The item to be combined.</param>
-    public void Combine(Item item)
+    /// Use the potion.
+    /// <param name="item">The potion to be used.</param>
+    private void UsePotion(Item item)
     {
-        Debug.Log("Combined: " + item.name);
+        switch (item.PotionType)
+        {
+            case Potion.PotionType.Antibiotics:
+                _potion.Antibiotics(item);
+                break;
+            case Potion.PotionType.Bandage:
+                _potion.Bandage(item);
+                break;
+            case Potion.PotionType.Painkillers:
+                _potion.Painkillers(item);
+                break;
+            default:
+                Debug.LogError("Unhandled potion type: " + item.PotionType);
+                break;
+        }
     }
-    */
 
     /// Inspect the specified item.
     /// <param name="item">The item to be inspected.</param>
     public void Inspect(Item item)
     {
         InventoryManager.Instance.Inspect(item);
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "interact", 0.6f, 1f);
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "interact", 0.6f, 1f);
     }
 
     /// Throw away the specified item.
     /// <param name="item">The item to be thrown away.</param>
     public void ThrowAway(Item item)
     {
-        if (item.type == ItemType.Object || item.type == ItemType.Weapon)
+        if (item.Type == ItemType.Object || item.Type == ItemType.Weapon)
         {
             InventoryManager.Instance.DisplayMessage("You cannot throw this away.");
-            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "error", 0.6f, 1f);
+            AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "error", 0.6f, 1f);
             return;
         }
+
         Debug.Log("ItemActions.ThrowAway(" + item.name + ")");
         InventoryManager.Instance.DropItem(item);
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "interact", 0.6f, 1f);
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "interact", 0.6f, 1f);
     }
 
     #endregion

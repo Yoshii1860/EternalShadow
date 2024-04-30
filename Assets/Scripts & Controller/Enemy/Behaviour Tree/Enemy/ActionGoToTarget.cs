@@ -9,97 +9,100 @@ public class ActionGoToTarget : Node
     #region Fields
 
     // References to components
-    private Animator animator;
-    private Transform transform;
-    private NavMeshAgent agent;
-    private Enemy enemy;
-    private AISensor sensor;
-    
-    private bool debugMode;
+    private Animator _animator;
+    private Transform _transform;
+    private NavMeshAgent _agent;
+    private AISensor _aiSensor;
+    private EnemyAudio _enemyAudio;
 
-    private int enemyType;
+    // Enemy attributes
+    private float _attackRange;
+    private float _runSpeed;
+
+    private bool _debugMode;
 
     #endregion
+
+
+
 
     #region Constructors
 
     // Constructor to initialize references
-    public ActionGoToTarget(bool debugMode, Transform transform, NavMeshAgent agent, int enemyType)
+    public ActionGoToTarget(bool debugMode, Transform transform, NavMeshAgent agent)
     {
-        this.transform = transform;
-        this.agent = agent;
-        animator = transform.GetComponent<Animator>();
-        enemy = transform.GetComponent<Enemy>();
-        this.debugMode = debugMode;
-        sensor = transform.GetComponent<AISensor>();
-        this.enemyType = enemyType;
+        _transform = transform;
+        _agent = agent;
+        _animator = transform.GetComponent<Animator>();
+        _attackRange = transform.GetComponent<Enemy>().AttackRange;
+        _runSpeed = transform.GetComponent<Enemy>().RunSpeed;
+        _debugMode = debugMode;
+        _aiSensor = transform.GetComponent<AISensor>();
+        _enemyAudio = transform.GetComponent<EnemyAudio>();
     }
 
     #endregion
 
+
+
+
     #region Public Methods
 
-    // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
 
-        ////////////////////////////////////////////////////////////////////////
-        // PAUSE GAME
-        ////////////////////////////////////////////////////////////////////////
-        if (GameManager.Instance.isPaused)
+        #region FAILURE CHECKS
+
+        if (GameManager.Instance.IsGamePaused)
         {
-            // Return FAILURE to indicate that the action cannot be executed
-            if (debugMode) Debug.Log("A - GoToTarget: FAILURE (game is paused)");
-            state = NodeState.FAILURE;
-            return state;
+            if (_debugMode) Debug.Log("A - GoToTarget: FAILURE (game is paused)");
+            return NodeState.FAILURE;
         }
-        ////////////////////////////////////////////////////////////////////////
 
-        ////////////////////////////////////////////////////////////////////////
-        // FAILURE CHECKS
-        ////////////////////////////////////////////////////////////////////////
+        if (_aiSensor.IsPlayerHidden)
+        {
+            if (_debugMode) Debug.Log("A - GoToTarget: FAILURE (Hidden)");
+            ClearData("target");
+            return NodeState.FAILURE;
+        }
+
         object obj = GetData("target");
-
         if (obj == null)
         {
-            // Set state to FAILURE and return
-            if (debugMode) Debug.Log("A - GoToTarget: FAILURE (target = null)");
-            state = NodeState.FAILURE;
-            return state;
+            if (_debugMode) Debug.Log("A - GoToTarget: FAILURE (target = null)");
+            return NodeState.FAILURE;
         }
-        if (sensor.hidden)
-        {
-            // Set state to FAILURE and return
-            if (debugMode) Debug.Log("A - GoToTarget: FAILURE (Hidden)");
-            ClearData("target");
-            state = NodeState.FAILURE;
-            return state;
-        }
-        ////////////////////////////////////////////////////////////////////////
+        
+        #endregion
+
+
+
+
+        #region ACTION
 
         // Get target transform
         Transform target = (Transform)obj;
 
-        float distanceToTarget = Vector3.Distance(transform.position, target.position);
-        if (distanceToTarget < EnemyBT.attackRange)
+        float distanceToTarget = Vector3.Distance(_transform.position, target.position);
+        if (distanceToTarget < _attackRange)
         {
-            if (debugMode) Debug.Log("A - GoToTarget: SUCCESS (Target in Attack Range)");
-            state = NodeState.SUCCESS;
-            return state;
+            if (_debugMode) Debug.Log("A - GoToTarget: SUCCESS (Target in Attack Range)");
+            return NodeState.SUCCESS;
         }
 
         // Set agent speed, set destination, and trigger running animation
-        agent.speed = EnemyBT.runSpeed;
-        animator.SetBool("walk", false);
-        animator.SetBool("run", true);
-        agent.SetDestination(target.position);
+        _agent.speed = _runSpeed;
+        _animator.SetBool("walk", false);
+        _animator.SetBool("run", true);
+        _agent.SetDestination(target.position);
 
-        AudioManager.Instance.VolumeFloorChanger(transform, enemyType);
+        _enemyAudio.VolumeFloorChanger();
 
         // Return RUNNING to indicate that the action is ongoing
-        if (debugMode) Debug.Log("A - GoToTarget: RUNNING (Going to target)");
-        state = NodeState.RUNNING;
-        return state;
+        if (_debugMode) Debug.Log("A - GoToTarget: RUNNING (Going to target)");
+        return NodeState.RUNNING;
+
+        #endregion
     }
 
     #endregion

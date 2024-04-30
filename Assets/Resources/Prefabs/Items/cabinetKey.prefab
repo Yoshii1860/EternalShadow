@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 1433952183}
   m_Layer: 6
   m_Name: cabinetKey
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 1807402537570743421}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -10.2277, y: -4.8681, z: -19.0994}
-  m_LocalScale: {x: 0.70832, y: 0.70831996, z: 0.70831996}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3485502093444418858}
@@ -75,20 +75,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16ed7316a1f278345a2b3ae88d24c02b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isPickup: 1
-  active: 0
-  inventoryItem: 1
-  objectPosition: {fileID: 0}
-  rotateX: 0
-  rotateY: 1
-  rotateZ: 0
-  objectName: {fileID: 0}
-  objectDescription: {fileID: 0}
-  objectNameString: Cabinet Key
-  objectDescriptionString: There is a tag that says "Cabinet".
-  clipName: 
-  item: {fileID: 11400000, guid: eeca86dc98950164b9e46a35c8f79000, type: 2}
-  originalPosition: {x: 0, y: 0, z: 0}
+  IsPickup: 1
+  IsActive: 1
+  InventoryItem: 1
+  UseEmission: 1
+  Item: {fileID: 11400000, guid: eeca86dc98950164b9e46a35c8f79000, type: 2}
+  _audioAfterPickup: 0
+  _audioClipName: 
+  _delay: 0
+  ClipNameOnPickup: key pickup
 --- !u!33 &1433952184
 MeshFilter:
   m_ObjectHideFlags: 0

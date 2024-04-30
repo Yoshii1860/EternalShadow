@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class Duplicate : MonoBehaviour
 {
-    public string duplicateID;
-    public GameObject duplicateObject;
+    [HideInInspector]
+    public string DuplicateID;
+    public GameObject DuplicateObject;
 
-    void Start()
+    private void Start()
     {
-        duplicateID = duplicateObject.GetComponent<UniqueIDComponent>().UniqueID;
+        DuplicateObject.GetComponent<UniqueIDComponent>().UniqueID = DuplicateID;
     }
 }

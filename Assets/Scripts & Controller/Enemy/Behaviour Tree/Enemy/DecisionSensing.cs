@@ -7,133 +7,113 @@ public class DecisionSensing : Node
 {
     #region Fields
 
-    // Maximum range for chasing the player, consistent with AISensor.cs
-    float maxChaseRange = 15f;
-
     // References to components
-    Transform transform;
-    Animator animator;
-    AISensor aiSensor;
+    Transform _transform;
+    AISensor _aiSensor;
 
-    private bool debugMode;
+    // Enemy attributes
+    float _maxChaseRange;
+
+    private bool _debugMode;
 
     #endregion
+
+
+
 
     #region Constructors
 
     // Constructor to initialize references to components
     public DecisionSensing(bool debugMode, Transform transform)
     {
-        this.transform = transform;
-        animator = transform.GetComponent<Animator>();
-        aiSensor = transform.GetComponent<AISensor>();
-        this.debugMode = debugMode;
+        _transform = transform;
+        _aiSensor = transform.GetComponent<AISensor>();
+        _maxChaseRange = transform.GetComponent<Enemy>().MaxChaseRange;
+        _debugMode = debugMode;
     }
 
     #endregion
 
+
+
+
     #region Public Methods
 
-    // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
 
-        ////////////////////////////////////////////////////////////////////////
-        // PAUSE GAME
-        ////////////////////////////////////////////////////////////////////////
-        if (GameManager.Instance.isPaused)
-        {
-            // Return FAILURE to indicate that the decision cannot be made
-            if (debugMode) Debug.Log("D - Sensing: FAILURE (Game is paused)");
-            state = NodeState.FAILURE;
-            return state;
-        }
-        ////////////////////////////////////////////////////////////////////////
+        #region FAILURE CHECKS
 
-        ////////////////////////////////////////////////////////////////////////
-        // No Attack Mode
-        ////////////////////////////////////////////////////////////////////////
-        if (GameManager.Instance.noAttackMode)
+        if (GameManager.Instance.IsGamePaused)
         {
-            // Return FAILURE as the decision is disabled in debug mode
-            if (debugMode) Debug.Log("D - Sensing: FAILURE (No Attack Mode)");
-            state = NodeState.FAILURE;
-            return state;
+            if (_debugMode) Debug.Log("D - Sensing: FAILURE (Game is paused)");
+            return NodeState.FAILURE;
         }
-        ////////////////////////////////////////////////////////////////////////
 
-        ////////////////////////////////////////////////////////////////////////
-        // FAILURE CHECKS
-        ////////////////////////////////////////////////////////////////////////
-        if (aiSensor.hidden)
+        if (GameManager.Instance.NoAttackMode)
         {
-            // Clear the target and last known position, and return FAILURE
+            if (_debugMode) Debug.Log("D - Sensing: FAILURE (No Attack Mode)");
+            return NodeState.FAILURE;
+        }
+
+        if (_aiSensor.IsPlayerHidden)
+        {
             ClearData("target");
             ClearData("lastKnownPosition");
-            if (debugMode) Debug.Log("D - Sensing: FAILURE (AISensor Hidden)");
-            state = NodeState.FAILURE;
-            return state;
+            if (_debugMode) Debug.Log("D - Sensing: FAILURE (AISensor Hidden)");
+            return NodeState.FAILURE;
         }
-        ////////////////////////////////////////////////////////////////////////
+        
+        #endregion
 
 
-        // Retrieve the target and last known position from the blackboard
+
+
+        #region DECISION
+
         object obj = GetData("target");
-        object obj2 = GetData("lastKnownPosition");
-
-        // If no target is set
         if (obj == null)
         {
-            // Check if the player is in sight
-            if (aiSensor.playerInSight)
+            if (_aiSensor.IsPlayerInSight)
             {
-                // Clear last known position, set the player as the target, and return SUCCESS
                 ClearData("lastKnownPosition");
-                parent.parent.SetData("target", GameManager.Instance.player.transform);
+                parent.parent.SetData("target", GameManager.Instance.Player.transform);
 
-                if (debugMode) Debug.Log("D - Sensing: SUCCESS (Player in Sight)");
-                state = NodeState.SUCCESS;
-                return state;
+                if (_debugMode) Debug.Log("D - Sensing: SUCCESS (Player in Sight)");
+                return NodeState.SUCCESS;
             }
-            // If there's no target and no last known position, return FAILURE
-            else if (obj2 == null)
+            else if (GetData("lastKnownPosition") == null)
             {
-                if (debugMode) Debug.Log("D - Sensing: FAILURE (No Target or Last Known Position)");
-                state = NodeState.FAILURE;
-                return state;
+                if (_debugMode) Debug.Log("D - Sensing: FAILURE (No Target or Last Known Position)");
+                return NodeState.FAILURE;
             }
         }
-        // If a target is set
         else if (obj != null)
         {
             Transform target = (Transform)obj;
-            float distanceToTarget = Vector3.Distance(transform.position, target.position);
+            float distanceToTarget = Vector3.Distance(_transform.position, target.position);
 
-            // If the target is out of the maximum chase range
-            if (distanceToTarget > maxChaseRange)
+            if (distanceToTarget > _maxChaseRange)
             {
-                // Save the last known position, clear the target, and return FAILURE
-                Vector3 lastKnownPosition = GameManager.Instance.player.transform.position;
+                Vector3 lastKnownPosition = GameManager.Instance.Player.transform.position;
                 parent.parent.SetData("lastKnownPosition", lastKnownPosition);
                 ClearData("target");
 
-                if (debugMode) Debug.Log("D - Sensing: FAILURE (Target Out of Range)");
-                state = NodeState.FAILURE;
-                return state;
+                if (_debugMode) Debug.Log("D - Sensing: FAILURE (Target Out of Range)");
+                return NodeState.FAILURE;
             }
             // If the target is within range, return SUCCESS
             else 
             {
-                if (debugMode) Debug.Log("D - Sensing: SUCCESS (Target in Range)");
-                state = NodeState.SUCCESS;
-                return state;
+                if (_debugMode) Debug.Log("D - Sensing: SUCCESS (Target in Range)");
+                return NodeState.SUCCESS;
             }
         }
 
-        // Default case, return FAILURE
-        if (debugMode) Debug.Log("D - Sensing: FAILURE (Default)");
-        state = NodeState.FAILURE;
-        return state;
+        if (_debugMode) Debug.Log("D - Sensing: FAILURE (Default)");
+        return NodeState.FAILURE;
+
+        #endregion
     }
 
     #endregion

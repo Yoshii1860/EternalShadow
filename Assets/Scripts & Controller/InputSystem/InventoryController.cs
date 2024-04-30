@@ -10,24 +10,32 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     #region Fields
 
     [Header("Input Settings")]
-    public float moveDebounceTime = 0.3f;
-    public LayerMask pushLayers;
-    public bool canPush;
-    [Range(0.5f, 5f)] public float strength = 1.1f;
+    [Tooltip("The time between each move input")]
+    [SerializeField] float _moveDebounceTime = 0.3f;
 
-    private ItemActions itemActions;
+    [HideInInspector]
+    public bool IsInventoryClosing = false;
+    
+    [Space(10)]
+    [SerializeField] private bool _debugMode = false;
 
-    private bool interact, exit, back, inspectInteract;
-    private Vector2 move, look;
-    private float scroll;
 
-    public bool inventoryClosing = false;
-    private float inventoryCounter = 0f;
-    private float inventoryTimer = 0.5f;
+    private ItemActions _itemActions;
 
-    private float inspectorTimer;
+    // Input actions variables
+    private bool _isInteracting, _isExiting, _isGoingBack, _isInteractingInspector;
+    private Vector2 _movePos, _lookPos;
+    private float _scrollValue;
+
+    // Inventory counter variables
+    private const float INVENTORY_CLOSE_TIME = 0.5f;
+    private float _inventoryClosingCounter = 0f;
+    private float _inspectorClosingCounter;
 
     #endregion
+
+
+
 
     #region Unity Callbacks
 
@@ -35,61 +43,94 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     void Start() 
     {
         // Get the ItemActions component from the InventoryManager
-        itemActions = InventoryManager.Instance.GetComponent<ItemActions>();
+        _itemActions = InventoryManager.Instance.GetComponent<ItemActions>();
     }
+
+    #endregion
+
+
+
+
+    #region Custom Update
 
     // Called every frame if the script is enabled
     public void CustomUpdate(float deltaTime)
     {       
-        if (InventoryManager.Instance.isInspecting)
-        {
-            if (interact || back || exit)
-            {
-                Debug.Log("InventoryController.CustomUpdate: ResumeFromInspector");
-                InventoryManager.Instance.ResumeFromInspector();
-                inspectorTimer = 0.5f;
-            } else Inspect();
 
-            if (inspectInteract) InspectInteract();
-            
+        if (InventoryManager.Instance.IsInspecting)
+        {
+            HandleInspectorInput();
             return;
         }
 
         // Check if the game is in the Inventory state
-        if (GameManager.Instance.CurrentGameState == GameManager.GameState.Inventory)
+        if (GameManager.Instance.CurrentGameState == GameManager.GameState.INVENTORY)
         {
-            if (inspectorTimer > 0)
-            {
-                inspectorTimer -= deltaTime;
-                interact = false;
-                exit = false;
-                back = false;
-                return;
-            }
-            
-            // Process input actions related to the inventory
-            if (interact)   Interact();
-            if (exit)       Exit();
-            if (back)       Back();
+            HandleInventoryInput(deltaTime);
         }
 
         // Check if the inventory is in the closing state
-        if (inventoryClosing)
+        if (IsInventoryClosing)
         {
             // Update the inventory closing timer
-            inventoryCounter += deltaTime;
+            _inventoryClosingCounter += deltaTime;
 
             // Check if the timer exceeds the specified time
-            if (inventoryCounter >= inventoryTimer)
+            if (_inventoryClosingCounter >= INVENTORY_CLOSE_TIME)
             {
                 // Reset the timer and exit the closing state
-                inventoryCounter = 0f;
-                inventoryClosing = false;
+                _inventoryClosingCounter = 0f;
+                IsInventoryClosing = false;
             }
         }
     }
 
     #endregion
+
+
+
+
+    #region Input Handling Methods
+
+    // Handle the input actions related to the inventory
+    private void HandleInventoryInput(float deltaTime)
+    {
+        if (_inspectorClosingCounter > 0)
+        {
+            _inspectorClosingCounter -= deltaTime;
+            _isInteracting = false;
+            _isExiting = false;
+            _isGoingBack = false;
+            return;
+        }
+        
+        // Process input actions related to the inventory
+        if (_isInteracting)     Interact();
+        if (_isExiting)         Exit();
+        if (_isGoingBack)       Back();
+    }
+
+    // Handle the input actions related to the inspector
+    private void HandleInspectorInput()
+    {
+        if (_isInteracting || _isGoingBack || _isExiting)
+        {
+            if (_debugMode) Debug.Log("InventoryController.CustomUpdate: ResumeFromInspector");
+            InventoryManager.Instance.ResumeFromInspector();
+            _inspectorClosingCounter = 0.5f;
+        } 
+        else 
+        {
+            LookAtInspectorItem();
+        }
+
+        if (_isInteractingInspector) InteractWithInspectorItem();
+    }
+
+    #endregion
+
+
+
 
     #region Input Callbacks
 
@@ -97,30 +138,30 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     public void OnInteract(InputAction.CallbackContext context)
     {
         // Read the value of the interact button
-        interact = context.ReadValueAsButton();
+        _isInteracting = context.ReadValueAsButton();
     }
 
     // Called when the exit input action is triggered
     public void OnExit(InputAction.CallbackContext context)
     {
         // Read the value of the exit button
-        exit = context.ReadValueAsButton();
+        _isExiting = context.ReadValueAsButton();
     }
 
     // Called when the move input action is triggered
     public void OnMove(InputAction.CallbackContext context)
     {
         // Read the value of the move vector
-        move = context.ReadValue<Vector2>();
+        _movePos = context.ReadValue<Vector2>();
 
-        if (InventoryManager.Instance.isInspecting) return;
+        if (InventoryManager.Instance.IsInspecting) return;
         if (InventoryManager.Instance.Items.Count == 0) return;
 
         // Debounce the move input
         float deltaTime = Time.deltaTime;
-        if (Time.time - moveDebounceTime > deltaTime)
+        if (Time.time - _moveDebounceTime > deltaTime)
         {
-            moveDebounceTime = Time.time;
+            _moveDebounceTime = Time.time;
             Move();
         }
     }
@@ -129,45 +170,49 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     public void OnBack(InputAction.CallbackContext context)
     {
         // Read the value of the back button
-        back = context.ReadValueAsButton();
+        _isGoingBack = context.ReadValueAsButton();
     }
 
     public void OnLook(InputAction.CallbackContext context)
     {
-        look = context.ReadValue<Vector2>();
+        _lookPos = context.ReadValue<Vector2>();
     }
 
     public void OnScroll(InputAction.CallbackContext context)
     {
-        scroll = context.ReadValue<float>();
-        Debug.Log("InventoryController.OnScroll = " + scroll);
+        _scrollValue = context.ReadValue<float>();
+        if (_debugMode) Debug.Log("InventoryController.OnScroll = " + _scrollValue);
     }
 
     public void OnInspectInteract(InputAction.CallbackContext context)
     {
-        inspectInteract = context.ReadValueAsButton();
+        _isInteractingInspector = context.ReadValueAsButton();
     }
 
     #endregion
 
+
+
+
     #region Input Processing Methods
 
     // Process the inspect action
-    private void Inspect()
+    private void LookAtInspectorItem()
     {
-        InventoryManager.Instance.RotateInspectorItem(look.x, look.y, scroll);
-        look = Vector2.zero;
-        scroll = 0f;
+        InventoryManager.Instance.RotateInspectorItem(_lookPos.x, _lookPos.y, _scrollValue);
+        _lookPos = Vector2.zero;
+        _scrollValue = 0f;
     }
 
-    private void InspectInteract()
+    // Process the interact action with the inspector item
+    private void InteractWithInspectorItem()
     {
-        Debug.Log("InventoryController.InspectInteract");
-        inspectInteract = false;
+        if (_debugMode) Debug.Log("InventoryController.InteractWithInspectorItem");
+        _isInteractingInspector = false;
         Interaction objInteraction = InventoryManager.Instance.ReturnInspectorItem().GetComponent<Interaction>();
         if (objInteraction != null)
         {
-            Debug.Log("InventoryController.InspectInteract: Interact");
+            if (_debugMode) Debug.Log("InventoryController.InteractWithInspectorItem: Interact");
             objInteraction.Interact();
         }
     }
@@ -175,35 +220,30 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     // Process the interact action
     private void Interact()
     {
-        interact = false;
-        Debug.Log("InventoryController.Interact");
+        _isInteracting = false;
+        if (_debugMode) Debug.Log("InventoryController.Interact");
 
         // Check if item actions are not open
-        if (!InventoryManager.Instance.itemActionsOpen)
+        if (!InventoryManager.Instance.IsItemActionsOpen)
         {
-            Debug.Log("InventoryController.Interact: ItemActionsNotOpen");
+            if (_debugMode) Debug.Log("InventoryController.Interact: ItemActionsNotOpen");
             InventoryManager.Instance.ShowItemDisplay();
         }
         else
         {
-            Debug.Log("InventoryController.Interact: ItemActionsOpen");
+            if (_debugMode) Debug.Log("InventoryController.Interact: ItemActionsOpen");
             // Perform the selected item action
-            switch (InventoryManager.Instance.itemActionNumber)
+            switch (InventoryManager.Instance.ItemActionNumber)
             {
                 case 0:
-                    itemActions.Use(InventoryManager.Instance.selectedItem);
+                    _itemActions.Use(InventoryManager.Instance.SelectedItem);
                     break;
                 case 1:
-                    itemActions.Inspect(InventoryManager.Instance.selectedItem);
+                    _itemActions.Inspect(InventoryManager.Instance.SelectedItem);
                     return;
                 case 2:
-                    itemActions.ThrowAway(InventoryManager.Instance.selectedItem);
+                    _itemActions.ThrowAway(InventoryManager.Instance.SelectedItem);
                     break;
-                /*
-                case 2:
-                    itemActions.Combine(InventoryManager.Instance.selectedItem);
-                    break;
-                */
             }
 
             InventoryManager.Instance.BackToSelection();
@@ -213,30 +253,30 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     // Process the exit action
     private void Exit()
     {
-        Debug.Log("InventoryController.Exit");
-        if (InventoryManager.Instance.isInspecting)
+        if (_debugMode) Debug.Log("InventoryController.Exit");
+        if (InventoryManager.Instance.IsInspecting)
         {
-            Debug.Log("InventoryController.Exit: ResumeFromInspector");
+            if (_debugMode) Debug.Log("InventoryController.Exit: ResumeFromInspector");
             InventoryManager.Instance.ResumeFromInspector();
-            inspectorTimer = 0.5f;
+            _inspectorClosingCounter = 0.5f;
             return;
         }
-        if (InventoryManager.Instance.itemActionsOpen)
+        if (InventoryManager.Instance.IsItemActionsOpen)
         {
             InventoryManager.Instance.BackToSelection();
         }
-        exit = false;
-        inventoryClosing = true;
+        _isExiting = false;
+        IsInventoryClosing = true;
 
         // Resume the game
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "close inventory", 1f, 1f);
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "close inventory", 1f, 1f);
         GameManager.Instance.ResumeGame();
     }
 
     // Process the move action
     private void Move()
     {
-        if (!InventoryManager.Instance.itemActionsOpen)
+        if (!InventoryManager.Instance.IsItemActionsOpen)
         {
             MoveSelection();
         }
@@ -249,55 +289,46 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     // Process the back action
     private void Back()
     {
-        back = false;
+        _isGoingBack = false;
         InventoryManager.Instance.BackToSelection();
     }
 
     #endregion
+
+
+
 
     #region Movement Methods
 
     // Move the selection within the inventory
     private void MoveSelection()
     {
-        if (move.y > 0.5f)
+        if (_movePos.y > 0.5f)
         {
-            MoveSelectionUpDown(-4);
+            MoveSelection(-4);
         }
-        else if (move.y < -0.5f)
+        else if (_movePos.y < -0.5f)
         {
-            MoveSelectionUpDown(4);
+            MoveSelection(4);
         }
-        else if (move.x > 0.5f)
+        else if (_movePos.x > 0.5f)
         {
-            MoveSelectionRightLeft(1);
+            MoveSelection(1);
         }
-        else if (move.x < -0.5f)
+        else if (_movePos.x < -0.5f)
         {
-            MoveSelectionRightLeft(-1);
+            MoveSelection(-1);
         }
     }
 
     // Move the selection up or down
-    private void MoveSelectionUpDown(int step)
+    private void MoveSelection(int step)
     {
-        if (InventoryManager.Instance.highlightNumber + step >= 0 &&
-            InventoryManager.Instance.highlightNumber + step < InventoryManager.Instance.Items.Count)
+        if (InventoryManager.Instance.HighlightNumber + step >= 0 &&
+            InventoryManager.Instance.HighlightNumber + step < InventoryManager.Instance.Items.Count)
         {
             InventoryManager.Instance.ChangeSelectedItemColor(true, false);
-            InventoryManager.Instance.highlightNumber += step;
-            InventoryManager.Instance.ChangeSelectedItemColor(true, true);
-        }
-    }
-
-    // Move the selection right or left
-    private void MoveSelectionRightLeft(int step)
-    {
-        if (InventoryManager.Instance.highlightNumber + step >= 0 &&
-            InventoryManager.Instance.highlightNumber + step < InventoryManager.Instance.Items.Count)
-        {
-            InventoryManager.Instance.ChangeSelectedItemColor(true, false);
-            InventoryManager.Instance.highlightNumber += step;
+            InventoryManager.Instance.HighlightNumber += step;
             InventoryManager.Instance.ChangeSelectedItemColor(true, true);
         }
     }
@@ -305,24 +336,24 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
     // Move the actions within the item actions menu
     private void MoveActions()
     {
-        if (move.y > 0.5f)
+        if (_movePos.y > 0.5f)
         {
-            MoveActionsUpDown(-1);
+            MoveActions(-1);
         }
-        else if (move.y < -0.5f)
+        else if (_movePos.y < -0.5f)
         {
-            MoveActionsUpDown(1);
+            MoveActions(1);
         }
     }
 
     // Move the actions up or down
-    private void MoveActionsUpDown(int step)
+    private void MoveActions(int step)
     {
-        if (InventoryManager.Instance.itemActionNumber + step >= 0 &&
-            InventoryManager.Instance.itemActionNumber + step < InventoryManager.Instance.actionsChildCount)
+        if (InventoryManager.Instance.ItemActionNumber + step >= 0 &&
+            InventoryManager.Instance.ItemActionNumber + step < InventoryManager.Instance.ActionsChildCount)
         {
             InventoryManager.Instance.ChangeSelectedActionColor(false);
-            InventoryManager.Instance.itemActionNumber += step;
+            InventoryManager.Instance.ItemActionNumber += step;
             InventoryManager.Instance.ChangeSelectedActionColor(true);
         }
     }

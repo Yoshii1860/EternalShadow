@@ -4,19 +4,20 @@ public class UniqueIDComponent : MonoBehaviour
 {
     #region Fields
 
-    [SerializeField]
-    private string uniqueID = "";
+    [Tooltip("The unique ID of the object.")]
+    [SerializeField] private string _uniqueID = "";
 
     #endregion
 
+
+
+
     #region Properties
 
-    /// <summary>
     /// Gets or sets the unique ID of the object.
-    /// </summary>
     public string UniqueID
     {
-        get { return uniqueID; }
+        get { return _uniqueID; }
         set
         {
             // Check if the new unique ID is already used
@@ -27,11 +28,11 @@ public class UniqueIDComponent : MonoBehaviour
             }
 
             // Unregister the previous unique ID (if any)
-            UniqueIDManager.UnregisterUniqueID(uniqueID);
+            UniqueIDManager.UnregisterUniqueID(_uniqueID);
 
             // Update the unique ID and register the new one
-            uniqueID = value;
-            UniqueIDManager.RegisterUniqueID(uniqueID, gameObject);
+            _uniqueID = value;
+            UniqueIDManager.RegisterUniqueID(_uniqueID, gameObject);
         }
     }
 

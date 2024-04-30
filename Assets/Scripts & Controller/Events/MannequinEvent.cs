@@ -4,54 +4,84 @@ using UnityEngine;
 
 public class MannequinEvent : MonoBehaviour
 {
-    [SerializeField] Mannequin firstMannequin;
-    [SerializeField] Mannequin secondMannequin;
-    [SerializeField] Weapon weapon;
-    bool firstEnter = false;
-    bool playOnce = false;
+    #region Fields
 
-    void OnTriggerExit(Collider other) 
+    [Tooltip("The first mannequin in the event.")]
+    [SerializeField] private Mannequin _firstMannequin;
+    [Tooltip("The second mannequin in the event.")]
+    [SerializeField] private Mannequin _secondMannequin;
+    [Tooltip("The _weapon required to pick up first to trigger the event.")]
+    [SerializeField] private Weapon _weapon;
+
+    private bool _hasEntered = false;
+    private bool _playOnce = false;
+
+    #endregion
+
+
+
+
+    #region Collider Trigger
+
+    private void OnTriggerExit(Collider other) 
     {
         if (other.tag == "Player")
         {
-            if (!firstEnter)
+            if (!_hasEntered)
             {
-                firstEnter = true;
-                firstMannequin.started = true;
-                secondMannequin.started = true;
+                // Start mannequins head movement
+                _hasEntered = true;
+                _firstMannequin.HasEventStarted = true;
+                _secondMannequin.HasEventStarted = true;
             }
             else
             {
-                if (weapon.isAvailable)
+                if (_weapon.IsAvailable)
                 {
-                    GameManager.Instance.eventData.SetEvent("Mannequin");
-                    firstMannequin.move = true;
-                    secondMannequin.move = true;
-                    if (!playOnce) 
+                    // Set the event to active
+                    GameManager.Instance.EventData.SetEvent("Mannequin");
+
+                    // Start the mannequins movement
+                    _firstMannequin.IsMoving = true;
+                    _secondMannequin.IsMoving = true;
+
+                    if (!_playOnce) 
                     {
-                        AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, "speaker mannequins", 1.5f);
-                        playOnce = true;
+                        AudioManager.Instance.PlayClipOneShotWithDelay(AudioManager.Instance.PlayerSpeaker2, "speaker mannequins", 1.5f);
+                        _playOnce = true;
                     }
+
                     Destroy(gameObject);
                 }
+                else Debug.Log("You need to pick up the weapon first.");
             }
         }
     }
 
+    #endregion
+
+
+
+
+    #region Public Methods
+
+    // Load the event from the save file
     public void EventLoad()
     {
-        if (firstMannequin.gameObject.activeSelf)
+        if (_firstMannequin.gameObject.activeSelf)
         {
-            firstMannequin.started = true;
-            firstMannequin.move = true;
+            _firstMannequin.HasEventStarted = true;
+            _firstMannequin.IsMoving = true;
         }
 
-        if (secondMannequin.gameObject.activeSelf)
+        if (_secondMannequin.gameObject.activeSelf)
         {
-            secondMannequin.started = true;
-            secondMannequin.move = true;
+            _secondMannequin.HasEventStarted = true;
+            _secondMannequin.IsMoving = true;
         }
 
-        playOnce = true;
+        _playOnce = true;
     }
+
+    #endregion
 }

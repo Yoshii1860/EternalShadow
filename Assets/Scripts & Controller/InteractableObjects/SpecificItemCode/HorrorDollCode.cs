@@ -9,7 +9,7 @@ public class HorrorDollCode : InteractableObject
     protected override void RunItemCode()
     {
         // Convert the text to an integer, add 1, then convert back to string
-        InventoryManager.Instance.horrorDollCount.text = (int.Parse(InventoryManager.Instance.horrorDollCount.text) + 1).ToString();
+        InventoryManager.Instance.HorrorDollCount.text = (int.Parse(InventoryManager.Instance.HorrorDollCount.text) + 1).ToString();
         Debug.Log("Horror Doll picked up");
     }
 }

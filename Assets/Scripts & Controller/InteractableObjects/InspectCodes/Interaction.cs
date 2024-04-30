@@ -4,19 +4,37 @@ using UnityEngine;
 
 public class Interaction : MonoBehaviour
 {
-    bool isInteractable = true;
+    #region Variables
+
+    private bool _isInteractable = true;
+
+    #endregion
+
+
+
+
+    #region Public Methods
 
     public void Interact()
     {
-        if (isInteractable)
+        if (_isInteractable)
         {
-            isInteractable = false;
+            _isInteractable = false;
             OnInteract();
         }
     }
+
+    #endregion
+
+
+
+
+    #region Base Methods
 
     public virtual void OnInteract()
     {
         Debug.Log("Interaction.OnInteract()");
     }
+
+    #endregion
 }

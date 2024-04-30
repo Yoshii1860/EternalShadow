@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: CabinetKey
   m_EditorClassIdentifier: 
-  displayName: Cabinet Key
-  description: There is a tag that says "Cabinet".
-  icon: {fileID: 21300000, guid: 4c12479499f37b54a807d1c01cd74658, type: 3}
-  iconPath: VFX/ItemIcons/cabinetkey
-  unique: 1
-  quantity: 1
-  prefab: {fileID: 1807402537570743421, guid: 61e0685f30dfc3b4986b294685b09019, type: 3}
-  prefabPath: Prefabs/Items/cabinetKey
-  type: 3
+  DisplayName: Cabinet Key
+  Description: Etched with "Cabinet," this key unlocks hidden compartments, potentially
+    revealing essential resources vital for your survival.
+  Icon: {fileID: 21300000, guid: 4c12479499f37b54a807d1c01cd74658, type: 3}
+  IconPath: VFX/ItemIcons/cabinetkey
+  IsUnique: 1
+  Quantity: 1
+  Prefab: {fileID: 1807402537570743421, guid: 61e0685f30dfc3b4986b294685b09019, type: 3}
+  PrefabPath: Prefabs/Items/cabinetKey
+  Type: 3
   ammoType: 0
   potionType: 0

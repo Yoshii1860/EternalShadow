@@ -5,64 +5,100 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class Drawer : InteractableObject
 {
+    #region Variables
+
     [Space(10)]
     [Header("OPEN DOOR/DRAWER")]
     [Tooltip("Is it a drawer (true) or a door (false)?")]
-    public bool isDrawer;
-    [Tooltip("The position (drawer) or rotation (door) to move to")]
-    [SerializeField] Vector3 openPosOrRot;
-    Vector3 closedPosOrRot;
-    public bool open = false;
-    bool isMoving = false;
+    public bool IsDrawer;
+    [Tooltip("Is the drawer/door open?")]
+    public bool IsOpen = false;
 
+    [Tooltip("The position the drawer moves to when opened")]
+    [SerializeField] private Vector3 _openPosition;
+    [Tooltip("The closed position of the drawer")]
+    [SerializeField] private Vector3 _closedPosition;
+    [Tooltip("The rotation the door rotates to when opened (for doors only)")]
+    [SerializeField] private Vector3 _openRotation;
+    [Tooltip("The closed rotation of the door (for doors only)")]
+    [SerializeField] private Vector3 _closedRotation;
+
+    private bool _isMoving = false;
+
+    #endregion
+
+
+
+
+    #region Unity Methods
+
+    // Start is called before the first frame update
     void Start()
     {
-        closedPosOrRot = isDrawer ? transform.localPosition : transform.localEulerAngles;
-        transform.GetComponent<AudioSource>().spatialBlend = 1;
-        transform.GetComponent<AudioSource>().rolloffMode = AudioRolloffMode.Custom;
+        if (IsDrawer)   _closedPosition             = transform.localPosition;
+        else            _closedRotation             = transform.localEulerAngles;
     }
+
+    #endregion
+
+
+
+
+    #region Base Class Methods
 
     protected override void RunItemCode()
     {
-        if (isMoving) return;
-        StartCoroutine(LerpToPosition());
+        if (_isMoving) return;
+        StartCoroutine(LerpToOpenOrClose());
     }
 
-    IEnumerator LerpToPosition()
-    {
-        isMoving = true;
-        Vector3 currentVector = open ? openPosOrRot : closedPosOrRot;
-        Vector3 newPosOrRot = open ? closedPosOrRot : openPosOrRot;
+    #endregion
 
-        float t = 0f;
+
+
+
+    #region Coroutines
+
+    // Lerp the drawer/door to the open position
+    IEnumerator LerpToOpenOrClose()
+    {
+        _isMoving = true;
+
+        // Play the sound of the drawer/door opening
+        if (IsDrawer) AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), "drawer", 1f, 1f);
+        else AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), "closet door", 1f, 1f);
+
+        Vector3 targetPosition, targetRotation;
         float timeToMove = 1f;
 
-        if (isDrawer) AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "drawer", 1f, 1f);
-        else AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "closet door", 1f, 1f);
+        targetPosition = IsOpen ? _closedPosition : _openPosition;
+        targetRotation = IsOpen ? _closedRotation : _openRotation;
 
         yield return new WaitForSeconds(0.3f);
 
-        open = !open;
+        IsOpen = !IsOpen;
 
-        if (isDrawer)
+        float t = 0f;
+        while (t < 1f)
         {
-            while (t < 1)
+            t += Time.deltaTime / timeToMove;
+
+            if (IsDrawer)
             {
-                t += Time.deltaTime / timeToMove;
-                transform.localPosition = Vector3.Lerp(currentVector, newPosOrRot, t);
+                transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, t);
                 yield return null;
             }
-        }
-        else
-        {
-            while (t < 1)
+            else
             {
-                t += Time.deltaTime / timeToMove;
-                transform.localEulerAngles = Vector3.Lerp(currentVector, newPosOrRot, t);
+                transform.localRotation = Quaternion.Lerp(transform.localRotation, Quaternion.Euler(targetRotation), t);
                 yield return null;
             }
+
+            yield return null;
         }
         
-        isMoving = false;
+        _isMoving = false;
     }
+
+    #endregion
 }

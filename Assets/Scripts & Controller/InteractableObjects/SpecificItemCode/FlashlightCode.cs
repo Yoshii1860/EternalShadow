@@ -7,7 +7,7 @@ public class FlashlightCode : InteractableObject
     // Override the base class method for specific implementation
     protected override void RunItemCode()
     {
-        GameManager.Instance.player.lightAvail = true;
-        GameManager.Instance.player.LightSwitch();
+        GameManager.Instance.Player.IsLightAvailable = true;
+        GameManager.Instance.Player.LightSwitch();
     }
 }

@@ -5,11 +5,18 @@ using UnityEngine;
 [RequireComponent(typeof(UniqueIDComponent))]
 public class AutoSave : MonoBehaviour
 {
-    #region Unity Events
+    #region Variables
 
-    public bool active = true;
-    public bool hasCondition = false;
-    public bool conditionMet = false;
+    public bool IsActive = true;
+    public bool HasCondition = false;
+    public bool ConditionMet = false;
+
+    #endregion
+
+
+
+
+    #region Unity Methods
 
     // This method is called when another Collider enters the trigger zone
     void OnTriggerEnter(Collider other) 
@@ -17,12 +24,12 @@ public class AutoSave : MonoBehaviour
         // Check if the entering collider has the "Player" tag
         if (other.gameObject.CompareTag("Player"))
         {
-            if (!hasCondition)
+            if (!HasCondition)
             {
                 // Log a message for debugging
                 Debug.Log("AutoSave");
 
-                active = false;
+                IsActive = false;
 
                 // Trigger the SaveData method in the GameManager
                 GameManager.Instance.SaveData();
@@ -31,14 +38,14 @@ public class AutoSave : MonoBehaviour
 
                 Debug.Log("AutoSave: SaveData - no condition");
             }
-            else if (hasCondition)
+            else if (HasCondition)
             {
-                if (conditionMet)
+                if (ConditionMet)
                 {
                     // Log a message for debugging
                     Debug.Log("AutoSave");
 
-                    active = false;
+                    IsActive = false;
 
                     // Trigger the SaveData method in the GameManager
                     GameManager.Instance.SaveData();

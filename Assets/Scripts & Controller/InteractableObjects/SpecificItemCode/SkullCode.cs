@@ -4,80 +4,126 @@ using UnityEngine;
 
 public class SkullCode : InteractableObject
 {
+    #region Variables
+
     [Space(10)]
-    [Header("RUN ITEM CODE")]
-    [SerializeField] GameObject bonesaw;
-    [SerializeField] GameObject skullcap;
-    [SerializeField] Vector3 skullcapPosition; // 0, 0.022, -0.007
-    [SerializeField] Vector3 skullcapRotation; // -15.45, 16.68, 102.13
-    [SerializeField] float cutTimer = 4.5f;
-    [SerializeField] string displayMessage;
-    [SerializeField] Transform vCamFollowTarget;
+    [Header("Components")]
+    [SerializeField] private GameObject _bonesaw;
+    [SerializeField] private GameObject _skullcap;
+
+    [Space(10)]
+    [Header("Cut Sequence")]
+    [SerializeField] private Vector3 _skullcapPosition = new Vector3(0f, 0.022f, -0.007f);
+    [SerializeField] private Vector3 _skullcapRotation = new Vector3(-15.45f, 16.68f, 102.13f);
+    [SerializeField] private float _cutTimer = 4.5f;
+    [SerializeField] private string _displayMessage;
+    [SerializeField] private Transform _vCamFollowTarget;
+
+    #endregion
+
+
+
+
+    #region Unity Methods  
 
     void Start()
     {
-        bonesaw.SetActive(false);
+        _bonesaw.SetActive(false);
     }
+
+    #endregion
+
+
+
+
+    #region Base Methods
 
     // Override the base class method for specific implementation
     protected override void RunItemCode()
     {
-        if (GameManager.Instance.eventData.CheckEvent("Skull")) return;
+        if (GameManager.Instance.EventData.CheckEvent("Skull")) return;
 
+        // Find the bonesaw in the inventory
         Item item = InventoryManager.Instance.FindItem("Bonesaw");
 
         if (item != null)
         {
-            GameManager.Instance.eventData.SetEvent("Skull");
+            // Set the event to true
+            GameManager.Instance.EventData.SetEvent("Skull");
+            // Remove the item from the inventory
             InventoryManager.Instance.RemoveItem(item);
-            bonesaw.SetActive(true);
+            // Display the bonesaw
+            _bonesaw.SetActive(true);
+            // Trigger the gameplay event
             GameManager.Instance.GameplayEvent();
-            GameManager.Instance.playerController.ToggleArms(false);
-            GameManager.Instance.playerController.SetFollowTarget(vCamFollowTarget);
-            bonesaw.GetComponent<Animator>().SetTrigger("Cut");
+            GameManager.Instance.PlayerController.ToggleArms(false);
+            GameManager.Instance.PlayerController.SetFollowTarget(_vCamFollowTarget);
+            _bonesaw.GetComponent<Animator>().SetTrigger("Cut");
             StartCoroutine(CutSkull());
         }
+        // If the player doesn't have the bonesaw, display a message
         else
         {
-            GameManager.Instance.DisplayMessage(displayMessage, 2f);
+            GameManager.Instance.DisplayMessage(_displayMessage, 2f);
         }
     }
 
-    public void EventLoad()
-    {
-        bonesaw.SetActive(false);
-        skullcap.transform.localPosition = new Vector3(0, 0.022f, -0.007f);
-        skullcap.transform.localRotation = Quaternion.Euler(-15.45f, 16.68f, 102.13f);
-        skullcap.transform.parent.GetComponent<Collider>().enabled = false;
-    }
+    #endregion
 
+
+
+
+    #region Coroutines
+
+    // Cut the skull
     IEnumerator CutSkull()
     {
-        AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, "speaker cut head", 1f);
-        // properly aligning the audio with the animation
+        // Play the audio and align it with the animation
+        AudioManager.Instance.PlayClipOneShotWithDelay(AudioManager.Instance.PlayerSpeaker2, "speaker cut head", 1f);
         yield return new WaitForSeconds(0.4f);
-        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "bonesaw cut", 0.6f, 1f);
-        yield return new WaitForSeconds(cutTimer);
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), "bonesaw cut", 0.6f, 1f);
+        yield return new WaitForSeconds(_cutTimer);
 
         // translate skullcap to desired position and rotation over time
         float t = 0;
-        Vector3 initialPosition = skullcap.transform.localPosition;
-        Quaternion initialRotation = skullcap.transform.localRotation;
+        Vector3 startPosition = _skullcap.transform.localPosition;
+        Quaternion startRotation = _skullcap.transform.localRotation;
 
         while (t < 1)
         {
             t += Time.deltaTime;
-            skullcap.transform.localPosition = Vector3.Lerp(initialPosition, skullcapPosition, t);
-            skullcap.transform.localRotation = Quaternion.Lerp(initialRotation, Quaternion.Euler(skullcapRotation), t);
+            _skullcap.transform.localPosition = Vector3.Lerp(startPosition, _skullcapPosition, t);
+            _skullcap.transform.localRotation = Quaternion.Lerp(startRotation, Quaternion.Euler(_skullcapRotation), t);
             yield return null;
         }
 
         yield return new WaitForSeconds(1f);
 
-        bonesaw.SetActive(false);
-        skullcap.transform.parent.GetComponent<Collider>().enabled = false;
-        GameManager.Instance.playerController.ToggleArms(true);
-        GameManager.Instance.playerController.SetFollowTarget();
+        // Set the bonesaw inactive and disable the collider of the skullcap
+        _bonesaw.SetActive(false);
+        _skullcap.transform.parent.GetComponent<Collider>().enabled = false;
+
+        // Resume the game
+        GameManager.Instance.PlayerController.ToggleArms(true);
+        GameManager.Instance.PlayerController.SetFollowTarget();
         GameManager.Instance.ResumeGame();
     }
+
+    #endregion
+
+
+
+
+    #region Public Methods
+
+    // Event load method to reset the skull state
+    public void EventLoad()
+    {
+        _bonesaw.SetActive(false);
+        _skullcap.transform.localPosition = _skullcapPosition;
+        _skullcap.transform.localEulerAngles = _skullcapRotation;
+        _skullcap.transform.parent.GetComponent<Collider>().enabled = false;
+    }
+
+    #endregion
 }

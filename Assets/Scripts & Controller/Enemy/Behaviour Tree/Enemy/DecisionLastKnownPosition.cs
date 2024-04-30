@@ -7,88 +7,76 @@ public class DecisionLastKnownPosition : Node
 {
     #region Fields
 
-    // Reference to the transform component
-    private Transform transform;
-    private AISensor aiSensor;
+    // References
+    private AISensor _aiSensor;
 
-    private bool debugMode;
+    private bool _debugMode;
 
     #endregion
 
+
+
+
     #region Constructors
 
-    // Constructor to initialize the transform reference
     public DecisionLastKnownPosition(bool debugMode, Transform transform)
     {
-        this.transform = transform;
-        aiSensor = transform.GetComponent<AISensor>();
-        this.debugMode = debugMode;
+        _aiSensor = transform.GetComponent<AISensor>();
+        _debugMode = debugMode;
     }
 
     #endregion
 
+
+
+
     #region Public Methods
 
-    // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
 
-        ////////////////////////////////////////////////////////////////////////
-        // PAUSE GAME
-        ////////////////////////////////////////////////////////////////////////
-        if (GameManager.Instance.isPaused)
+        #region FAILURE CHECKS
+
+        if (GameManager.Instance.IsGamePaused)
         {
-            // Return RUNNING to indicate that the decision is inconclusive
-            if (debugMode) Debug.Log("D - LastKnownPosition: RUNNING (Game is paused)");
-            state = NodeState.RUNNING;
-            return state;
+            if (_debugMode) Debug.Log("D - LastKnownPosition: RUNNING (Game is paused)");
+            return NodeState.RUNNING;
         }
-        ////////////////////////////////////////////////////////////////////////
 
-        ////////////////////////////////////////////////////////////////////////
-        // FAILURE CHECKS
-        ////////////////////////////////////////////////////////////////////////
-        object obj = GetData("target");
-
-        if (obj != null)
+        if (GetData("target") != null || _aiSensor.IsPlayerHidden)
         {
             ClearData("lastKnownPosition");
-            if (debugMode) Debug.Log("D - LastKnownPosition: FAILURE (Target exists)");
-            state = NodeState.FAILURE;
-            return state;
+            if (_debugMode) Debug.Log("D - LastKnownPosition: FAILURE (Target exists or player is hidden)");
+            return NodeState.FAILURE;
         }
-        else if (aiSensor.hidden)
-        {
-            ClearData("lastKnownPosition");
-            if (debugMode) Debug.Log("D - LastKnownPosition: FAILURE (Hidden)");
-            state = NodeState.FAILURE;
-            return state;
-        }
-        else if (aiSensor.playerInSight)
-        {
-            ClearData("lastKnownPosition");
-            parent.parent.SetData("target", GameManager.Instance.player.transform);
-            if (debugMode) Debug.Log("D - LastKnownPosition: FAILURE (Player in sight)");
-            state = NodeState.FAILURE;
-            return state;
-        }
-        ////////////////////////////////////////////////////////////////////////
 
-        // Retrieve the last known position from the blackboard
+        if (_aiSensor.IsPlayerInSight)
+        {
+            ClearData("lastKnownPosition");
+            parent.parent.SetData("target", GameManager.Instance.Player.transform);
+            if (_debugMode) Debug.Log("D - LastKnownPosition: FAILURE (Player in sight)");
+            return NodeState.FAILURE;
+        }
+        
+        #endregion
+
+
+
+
+        #region DECISION
+
         object objPos = GetData("lastKnownPosition");
 
-        // If the last known position exists, set state to SUCCESS
         if (objPos != null)
         {
-            if (debugMode) Debug.Log("D - LastKnownPosition: SUCCESS (Last Known Position)");
-            state = NodeState.SUCCESS;
-            return state;
+            if (_debugMode) Debug.Log("D - LastKnownPosition: SUCCESS (Last Known Position)");
+            return NodeState.SUCCESS;
         }
 
-        // If there is no last known position, set state to FAILURE
-        if (debugMode) Debug.Log("D - LastKnownPosition: FAILURE (No Last Known Position)");
-        state = NodeState.FAILURE;
-        return state;
+        if (_debugMode) Debug.Log("D - LastKnownPosition: FAILURE (No Last Known Position)");
+        return NodeState.FAILURE;
+
+        #endregion
     }
 
     #endregion

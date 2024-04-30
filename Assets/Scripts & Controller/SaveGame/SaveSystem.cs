@@ -2,22 +2,21 @@ using UnityEngine;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
-/// <summary>
-/// Handles saving and loading game data.
-/// </summary>
 public static class SaveSystem 
 {
     #region Save Data
-    /// <summary>
-    /// Saves the game data to a file.
-    /// </summary>
-    /// <param name="filename">Name of the file to save.</param>
-    /// <param name="player">Reference to the player.</param>
-    /// <param name="weaponPool">Reference to the weapon pool.</param>
-    /// <param name="interactableObjectPool">Reference to the object pool.</param>
-    /// <param name="enemyPool">Reference to the enemy pool.</param>
-    /// <param name="interactableObjectPool">Reference to the interactable objects pool.</param>
-    public static void SaveGameFile(string filename, Player player, Transform weaponPool, Transform enemyPool, Transform interactableObjectPool, Transform interactStaticObjectPool, Transform doorObjectPool, Transform autoSavePool)
+
+    public static void SaveGameFile(
+        string filename, 
+        Player player, 
+        Transform weaponPool, 
+        Transform enemyPool, 
+        Transform interactableObjectPool, 
+        Transform interactStaticObjectPool, 
+        Transform doorObjectPool, 
+        Transform textObjectPool, 
+        Transform summonObjectPool,
+        Transform autoSavePool)
     {
         Debug.Log("SaveSystem.cs - SAVE - filename: " + filename);
 
@@ -31,7 +30,7 @@ public static class SaveSystem
         using (FileStream stream = new FileStream(path, FileMode.Create))
         {
             // Create save data
-            SaveData data = new SaveData(player, weaponPool, enemyPool, interactableObjectPool, interactStaticObjectPool, doorObjectPool, autoSavePool);
+            SaveData data = new SaveData(player, weaponPool, enemyPool, interactableObjectPool, interactStaticObjectPool, doorObjectPool, textObjectPool, summonObjectPool, autoSavePool);
 
             // Serialize and write the data to the file
             formatter.Serialize(stream, data);
@@ -43,13 +42,11 @@ public static class SaveSystem
 
     #endregion
 
+
+
+
     #region Load Data
 
-    /// <summary>
-    /// Loads the game data from a file.
-    /// </summary>
-    /// <param name="filename">Name of the file to load.</param>
-    /// <returns>The loaded game data or null if the file is not found.</returns>
     public static SaveData LoadGameFile(string filename)
     {
         Debug.Log("SaveSystem.cs - LOAD - filename: " + filename);

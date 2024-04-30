@@ -8,9 +8,12 @@ public static class UniqueIDManager
     #region Fields
 
     // This dictionary will store the unique IDs as keys, and the corresponding GameObjects as values
-    private static Dictionary<string, GameObject> uniqueIDs = new Dictionary<string, GameObject>();
+    private static Dictionary<string, GameObject> _uniqueIDs = new Dictionary<string, GameObject>();
 
     #endregion
+
+
+
 
     #region Constructor
 
@@ -30,16 +33,17 @@ public static class UniqueIDManager
 
     #endregion
 
+
+
+
     #region Methods
 
-    /// <summary>
     /// Register a new unique ID along with the corresponding GameObject.
-    /// </summary>
     public static void RegisterUniqueID(string uniqueID, GameObject gameObject)
     {
-        if (!uniqueIDs.ContainsKey(uniqueID))
+        if (!_uniqueIDs.ContainsKey(uniqueID))
         {
-            uniqueIDs.Add(uniqueID, gameObject);
+            _uniqueIDs.Add(uniqueID, gameObject);
         }
         else
         {
@@ -48,23 +52,19 @@ public static class UniqueIDManager
         }
     }
 
-    /// <summary>
     /// Remove a unique ID entry when an object is destroyed.
-    /// </summary>
     public static void UnregisterUniqueID(string uniqueID)
     {
-        if (uniqueIDs.ContainsKey(uniqueID))
+        if (_uniqueIDs.ContainsKey(uniqueID))
         {
-            uniqueIDs.Remove(uniqueID);
+            _uniqueIDs.Remove(uniqueID);
         }
     }
 
-    /// <summary>
     /// Check if a unique ID is already used.
-    /// </summary>
     public static bool IsUniqueIDUsed(string uniqueID)
     {
-        return uniqueIDs.ContainsKey(uniqueID);
+        return _uniqueIDs.ContainsKey(uniqueID);
     }
 
     #endregion

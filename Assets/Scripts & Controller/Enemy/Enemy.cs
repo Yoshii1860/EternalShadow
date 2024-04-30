@@ -1,49 +1,64 @@
 using System.Collections;
 using UnityEngine;
 
+#region Enemy Type Enum
+
+public enum EnemyType { SLENDER, GIRL }
+
+#endregion
+
 [RequireComponent(typeof(UniqueIDComponent))]
 [RequireComponent(typeof(AISensor))]
 public class Enemy : MonoBehaviour
 {
     #region Fields
 
-    public int health = 100;
-    public bool isDead = false;
-    public bool isShot = false;
-    public float damage = 10f;
+    public EnemyType EnemyType;
+
+    [Header("Enemy Properties")]
+    public int HealthPoints = 100;
+    public float EnemyDamage = 10f;
+    public bool IsDead = false;
+    public bool IsShot = false;
+    [Space(10)]
+
+    [Header("Enemy Attributes for BT")]
+    public float WalkSpeed = 0.4f;
+    public float RunSpeed = 2.1f;
+    public float AttackRange = 3f;
+    public float AttackInterval = 1f;
+    public float MaxChaseRange = 15f;
+    [Space(10)]
+
+    [Header("Enemy Stun Properties")]
     [Tooltip("The time the enemy stays down after being shot.")]
-    [SerializeField] float downTimer = 30f;
+    [SerializeField] private float _stunDuration = 30f;
     [Tooltip("The time the enemy starts with get up animation after being shot.")]
-    [SerializeField] float reducedTimer = 25f;
-    [SerializeField] string deathClip = "";
-    [SerializeField] string fallClip = "";
-    [SerializeField] float deathToFallTime = 1f;
-    [SerializeField] float fallVolume = 1f;
-    
-    // Audio Variables
-    bool slenderStep = false;
-    bool girlStep = false;
-    public bool slender = false;
-    int slenderStepID;
-    int girlStepID;
-    bool girlShout = false;
-    bool girlSpeak = false;
-    bool slenderShout = false; 
-    bool slenderSpeak = false;
+    [SerializeField] private float _getUpDelay = 25f;
+    [Space(10)]
+
+    [Header("Audio")]
+    [SerializeField] private string _deathSound = "";
+    [SerializeField] private string _fallImpactSound = "";
+    [SerializeField] private float _fallSoundDelay = 1f;
+    [SerializeField] private float _fallImpactVolume = 1f;
 
     #endregion
+
+
+
 
     #region Public Methods
 
     /// Inflict damage to the enemy.
-    public void TakeDamage(int damage)
+    public void TakeDamage(int EnemyDamage)
     {
-        health -= damage;
+        HealthPoints -= EnemyDamage;
         
         // Check if the enemy has no health left
-        if (health <= 0)
+        if (HealthPoints <= 0)
         {
-            isDead = true;
+            IsDead = true;
             Die();
         }
 
@@ -53,13 +68,10 @@ public class Enemy : MonoBehaviour
 
     #endregion
 
-    #region Private Methods
 
-    private void Start()
-    {
-        if (slender) slenderStepID = transform.GetChild(0).gameObject.GetInstanceID();
-        else girlStepID = transform.GetChild(0).gameObject.GetInstanceID();
-    }
+
+
+    #region Private Methods
 
     /// Handles the death of the enemy.
     private void Die()
@@ -68,11 +80,18 @@ public class Enemy : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    #endregion
+
+
+
+
+    #region Coroutines
+
     /// Coroutine to handle the enemy being shot and the chase timer.
     private IEnumerator EnemyShot()
     {
         // Set the enemy as shot
-        isShot = true;
+        IsShot = true;
 
         transform.GetComponent<Animator>().SetTrigger("die");
 
@@ -80,163 +99,25 @@ public class Enemy : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f);
 
-        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), deathClip);
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), _deathSound);
 
-        yield return new WaitForSeconds(deathToFallTime);
+        yield return new WaitForSeconds(_fallSoundDelay);
 
-        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), fallClip, fallVolume);
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), _fallImpactSound, _fallImpactVolume);
 
         StartCoroutine(EnemyGetUp());
 
         // Wait for the specified chase timer duration
-        yield return new WaitForSeconds(downTimer);
+        yield return new WaitForSeconds(_stunDuration);
 
         // Reset the shot state
-        isShot = false;
+        IsShot = false;
     }
 
-    IEnumerator EnemyGetUp()
+    private IEnumerator EnemyGetUp()
     {
-        yield return new WaitForSeconds(reducedTimer);
+        yield return new WaitForSeconds(_getUpDelay);
         transform.GetComponent<Animator>().SetTrigger("getup");
-    }
-
-    private void Hit() 
-    {
-        AudioManager.Instance.PlaySoundOneShot(transform.gameObject.GetInstanceID(), "slender punch", 0.6f);
-        GameManager.Instance.player.TakeDamage(damage);
-    }
-
-    #endregion
-
-    #region Anim Events
-
-    public void SlenderWalk()
-    {
-        float volume = AudioManager.Instance.slenderVolume;
-
-        if (!slenderStep)
-        {
-            AudioManager.Instance.PlaySoundOneShot(slenderStepID, "slender walk 1", volume);
-            slenderStep = true;
-        }
-        else
-        {
-            AudioManager.Instance.PlaySoundOneShot(slenderStepID, "slender walk 2", volume);
-            slenderStep = false;
-        }
-    }
-
-    public void SlenderRun()
-    {
-        float volume = AudioManager.Instance.slenderVolume;
-
-        AudioManager.Instance.PlaySoundOneShot(slenderStepID, "slender run", volume);
-    }
-
-    public void SlenderShout()
-    {
-        if (slenderShout) return;
-        if (slenderSpeak) 
-        {
-            AudioManager.Instance.StopAudioWithDelay(gameObject.GetInstanceID(), 0.5f);
-        }
-
-        float volume = AudioManager.Instance.slenderVolume;
-
-        AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "slender scream", volume, 1f, true);
-        AudioManager.Instance.PlayAudioWithDelay(gameObject.GetInstanceID(), 0.6f);
-
-        slenderShout = true;
-        slenderSpeak = false;
-    }
-
-    public void SlenderSpeak()
-    {
-        if (slenderSpeak) return;
-        if (slenderShout) 
-        {
-            AudioManager.Instance.StopAudioWithDelay(gameObject.GetInstanceID(), 0.5f);
-        }
-
-        float volume = AudioManager.Instance.slenderVolume;
-
-        AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "slender hello", volume, 1f, true);
-        AudioManager.Instance.PlayAudioWithDelay(gameObject.GetInstanceID(), 0.6f);
-
-        slenderSpeak = true;
-        slenderShout = false;
-    }
-
-    public void SlenderDie()
-    {
-        slenderShout = false;
-        slenderSpeak = false;
-        AudioManager.Instance.StopAudio(gameObject.GetInstanceID());
-    }
-
-    public void GirlWalk()
-    {
-        float volume = AudioManager.Instance.girlVolume;
-
-        if (!girlStep)
-        {
-            AudioManager.Instance.PlaySoundOneShot(girlStepID, "woman step 1", volume);
-            girlStep = true;
-        }
-        else
-        {
-            AudioManager.Instance.PlaySoundOneShot(girlStepID, "woman step 2", volume);
-            girlStep = false;
-        }
-    }
-
-    public void GirlRun()
-    {
-        float volume = AudioManager.Instance.girlVolume;
-
-        AudioManager.Instance.PlaySoundOneShot(girlStepID, "woman run", volume);
-    }
-
-    public void GirlShout()
-    {
-        if (girlShout) return;
-        if (girlSpeak) 
-        {
-            AudioManager.Instance.StopAudioWithDelay(gameObject.GetInstanceID(), 0.5f);
-        }
-
-        float volume = AudioManager.Instance.girlVolume;
-
-        AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "woman scream", volume, 1f, true);
-        AudioManager.Instance.PlayAudioWithDelay(gameObject.GetInstanceID(), 0.6f);
-
-        girlShout = true;
-        girlSpeak = false;
-    }
-
-    public void GirlSpeak()
-    {
-        if (girlSpeak) return;
-        if (girlShout) 
-        {
-            AudioManager.Instance.StopAudioWithDelay(gameObject.GetInstanceID(), 0.5f);
-        }
-
-        float volume = AudioManager.Instance.girlVolume;
-
-        AudioManager.Instance.SetAudioClip(gameObject.GetInstanceID(), "weeping ghost woman", volume, 1f, true);
-        AudioManager.Instance.PlayAudioWithDelay(gameObject.GetInstanceID(), 0.6f);
-
-        girlSpeak = true;
-        girlShout = false;
-    }
-
-    public void GirlDie()
-    {
-        girlShout = false;
-        girlSpeak = false;
-        AudioManager.Instance.StopAudio(gameObject.GetInstanceID());
     }
 
     #endregion

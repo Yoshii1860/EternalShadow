@@ -15,7 +15,11 @@ public enum ItemType
 
 // CreateAssetMenu attribute to create new items from Unity Editor
 [CreateAssetMenu(fileName = "New Item", menuName = "Item/Create New Item")]
+
 #endregion
+
+
+
 
 public class Item : ScriptableObject
 {
@@ -23,72 +27,68 @@ public class Item : ScriptableObject
 
     [Header("General Properties")]
     [Tooltip("The display name of the item")]
-    public string displayName;
-
+    public string DisplayName;
     [Tooltip("The description of the item")]
-    public string description;
-
+    public string Description;
     [Tooltip("The icon representing the item")]
-    public Sprite icon;
-
+    public Sprite Icon;
     [Tooltip("Path to the icon resource")]
-    public string iconPath;
-
+    public string IconPath;
     [Tooltip("Determines if the item is unique")]
-    public bool unique;
-
+    public bool IsUnique;
     [Tooltip("The quantity of the item")]
-    public int quantity;
-
+    public int Quantity;
     [Tooltip("The prefab associated with the item")]
-    public GameObject prefab;
-
+    public GameObject Prefab;
     [Tooltip("Path to the prefab resource")]
-    public string prefabPath;
-
+    public string PrefabPath;
     [Tooltip("The type of the item")]
-    public ItemType type;
+    public ItemType Type;
 
     #endregion
 
+
+
+
     #region Additional Fields
 
+    [Space(10)]
     [Header("Additional Fields")]
     [Tooltip("Ammo type of the item (visible when ItemType is Ammo)")]
     [SerializeField] private Ammo.AmmoType ammoType;
-
     [Tooltip("Potion type of the item (visible when ItemType is Potion)")]
     [SerializeField] private Potion.PotionType potionType;
 
     #endregion
 
+
+
+
     #region Properties
 
-    public Ammo.AmmoType AmmoType
+    public Ammo.AmmoType AmmoType 
     {
-        get
+        get => Type == ItemType.Ammo ? ammoType : Ammo.AmmoType.None;
+        set 
         {
-            return type == ItemType.Ammo ? ammoType : Ammo.AmmoType.None;
-        }
-        set
-        {
-            ammoType = value;
+            if (Type == ItemType.Ammo) ammoType = value;
+
         }
     }
 
     public Potion.PotionType PotionType
     {
-        get
-        {
-            return type == ItemType.Potion ? potionType : Potion.PotionType.None;
-        }
+        get => Type == ItemType.Potion ? potionType : Potion.PotionType.None;
         set
         {
-            potionType = value;
+            if (Type == ItemType.Potion) potionType = value;
         }
     }
 
     #endregion
+
+
+
 
     #region Unity Editor Callbacks
 
@@ -96,12 +96,15 @@ public class Item : ScriptableObject
     private void OnValidate()
     {
         // Update the iconPath and prefabPath whenever the icon or prefab is set in the Inspector.
-        if (icon != null) iconPath = GetResourcePath(icon);
+        if (Icon != null) IconPath = GetResourcePath(Icon);
 
-        if (prefab != null) prefabPath = GetResourcePath(prefab);
+        if (Prefab != null) PrefabPath = GetResourcePath(Prefab);
     }
 
     #endregion
+
+
+
 
     #region Helper Methods
 
@@ -109,17 +112,11 @@ public class Item : ScriptableObject
     private string GetResourcePath(Object obj)
     {
         string assetPath = UnityEditor.AssetDatabase.GetAssetPath(obj);
-        string resourcePath = "Assets/Resources/";
 
         // Check if the asset path is in the Resources folder.
-        if (assetPath.StartsWith(resourcePath))
+        if (assetPath.StartsWith("Assets/Resources/"))
         {
-            int startIndex = resourcePath.Length;
-            int endIndex = assetPath.LastIndexOf(".");
-            if (endIndex == -1)
-                endIndex = assetPath.Length;
-            int length = endIndex - startIndex;
-            return assetPath.Substring(startIndex, length);
+            return assetPath.Substring("Assets/Resources/".Length, assetPath.LastIndexOf(".") - "Assets/Resources/".Length);
         }
         else
         {

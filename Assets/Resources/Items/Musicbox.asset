@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: Musicbox
   m_EditorClassIdentifier: 
-  displayName: Old Musicbox
-  description: "Maybe you can just open it to see what\xB4s inside?"
-  icon: {fileID: 21300000, guid: 87e5164fc87c8bb4da6b5fbb6970c442, type: 3}
-  iconPath: VFX/ItemIcons/musicboxicon
-  unique: 1
-  quantity: 1
-  prefab: {fileID: 979859657941160054, guid: 18e1f6ae9d26e9740b1dd2cb927b7d7d, type: 3}
-  prefabPath: Prefabs/Musicbox
-  type: 3
+  DisplayName: Music Box
+  Description: Open to reveal its hidden contents, but beware what melody it might
+    play in the depths of the asylum.
+  Icon: {fileID: 21300000, guid: 87e5164fc87c8bb4da6b5fbb6970c442, type: 3}
+  IconPath: VFX/ItemIcons/musicboxicon
+  IsUnique: 1
+  Quantity: 1
+  Prefab: {fileID: 979859657941160054, guid: 18e1f6ae9d26e9740b1dd2cb927b7d7d, type: 3}
+  PrefabPath: Prefabs/Musicbox
+  Type: 3
   ammoType: 0
   potionType: 0

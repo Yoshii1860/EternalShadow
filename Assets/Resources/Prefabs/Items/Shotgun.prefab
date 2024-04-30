@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4093783359226416240}
   - component: {fileID: 4093783359226416254}
-  - component: {fileID: 2732074482676743499}
   - component: {fileID: 6007551048924741211}
   - component: {fileID: 342428563801623543}
   - component: {fileID: 3390812779475882202}
@@ -51,20 +50,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2732074482676743499
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4093783359226416243}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3933c0825e904a3478f5d3c4b326382f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 11400000, guid: eb7463f2d84d4cd49b5184399b521452, type: 2}
-  originalPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &6007551048924741211
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -85,6 +70,7 @@ MonoBehaviour:
   magazine: 2
   magazineCount: 2
   isEquipped: 0
+  bloodEffect: {fileID: 0}
   ammoType: 2
   ammoSlot: {fileID: 0}
 --- !u!114 &342428563801623543
@@ -113,6 +99,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   noiseType: 8
+  debugMode: 0
 --- !u!1 &8807544695788405614
 GameObject:
   m_ObjectHideFlags: 0

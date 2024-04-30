@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class CrossAudios : MonoBehaviour
 {
+    // To be called on animation event of the cross
     private void CrossShake()
     {
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker, "cross shake", 0.6f, 1f);
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker, "cross shake", 0.6f, 1f);
     }
 
+    // To be called on animation event of the cross
     private void CrossFall()
     {
-        AudioManager.Instance.FadeOut(gameObject.GetInstanceID(), 0.5f);
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "cross fall", 0.6f, 1f);
+        AudioManager.Instance.FadeOutAudio(gameObject.GetInstanceID(), 0.5f);
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "cross fall", 0.6f, 1f);
     }
 }

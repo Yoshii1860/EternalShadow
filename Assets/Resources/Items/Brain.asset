@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: Brain
   m_EditorClassIdentifier: 
-  displayName: "A Virgin\xB4s Brain"
-  description: So glibbery and disgusting.. but two brains are better than one.
-  icon: {fileID: 21300000, guid: b5f38e04520e1554092117d4f17174fc, type: 3}
-  iconPath: VFX/ItemIcons/brain
-  unique: 1
-  quantity: 1
-  prefab: {fileID: 100000, guid: a749d3c40d8b544e09d6124decd9892b, type: 3}
-  prefabPath: Assets/Gibs N Gore - Complete/Extra Gore (FBX)/Gibs N Organs/Gibs N
-    Organs - FBX Prefabs/gib_brain
-  type: 3
+  DisplayName: "A Virgin\xB4s Brain"
+  Description: The untouched brain of a virgin holds secrets untold, awaiting discovery
+    within the asylum's twisted corridors
+  Icon: {fileID: 21300000, guid: b5f38e04520e1554092117d4f17174fc, type: 3}
+  IconPath: VFX/ItemIcons/brain
+  IsUnique: 1
+  Quantity: 1
+  Prefab: {fileID: 100000, guid: 0a4501812c4156b4f923dbc32798cee6, type: 3}
+  PrefabPath: Prefabs/Items/brain
+  Type: 3
   ammoType: 0
   potionType: 0

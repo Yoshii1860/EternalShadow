@@ -16,6 +16,9 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
     #endregion
 
+
+
+
     #region Custom File Comparer
 
     // Custom comparer for sorting save files by date
@@ -45,66 +48,96 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
     #endregion
 
+
+
+
     #region Menu Canvas Variables
 
-    [Header("Menu Canvas Settings")]
-    [SerializeField] GameObject loadFilePrefab;
-    [SerializeField] GameObject saveFilePrefab;
-    public GameObject menuCanvas;
-    [SerializeField] Transform mainMenu;
-    [SerializeField] Transform newGameButton;
-    [SerializeField] Transform loadGameButton;
-    [SerializeField] Transform exitButton;
-    [SerializeField] Transform loadMenu;
-    [SerializeField] Transform saveMenu;
-    [SerializeField] Transform deathScreen;
-    [SerializeField] Transform messageDisplay;
-    [SerializeField] Transform saveFileContainer;
-    [SerializeField] Transform loadFileContainer;
-    [SerializeField] Button returnFromLoadButton;
-    [SerializeField] Button returnFromSaveButton;
-    [SerializeField] int maxFiles = 8;
+    [Header("Menu Canvas Reference")]
+    public GameObject MenuCanvas;
+    [Space(10)]
 
-    Dictionary<Transform, Vector3> initialButtonPositions = new Dictionary<Transform, Vector3>();
-    Transform[] menus;
-    Button[] buttons;
-    Button[] decisionButtons;
-    Button selectedButton;
-    int buttonNumber;
-    bool isDead = false;
-    public bool canCloseMenu = true;
-    public float customTimer = 0f;
+    [Header("Save/Load References and Settings")]
+    [SerializeField] private GameObject _loadFilePrefab;
+    [SerializeField] private GameObject _saveFilePrefab;
+    [SerializeField] private Transform _saveFileContainer;
+    [SerializeField] private Transform _loadFileContainer;
+    [SerializeField] private int maxFiles = 8;
+    [Space(10)]
+
+    [Header("Menu References")]
+    [SerializeField] private Transform _mainMenu;
+    [SerializeField] private Transform _loadMenu;
+    [SerializeField] private Transform _saveMenu;
+    [SerializeField] private Transform _deathMenu;
+    [Space(10)]
+
+    [Header("Menu Buttons")]
+    [SerializeField] private Transform _newGameButton;
+    [SerializeField] private Transform _loadGameButton;
+    [SerializeField] private Transform _exitButton;
+    [SerializeField] private Button _returnFromLoadButton;
+    [SerializeField] private Button _returnFromSaveButton;
+    [Space(10)]
+
+    [Header("Message Display Reference")]
+    [SerializeField] private Transform _messageDisplay;
+    [Space(10)]
+
+    [Header("Menu Settings")]
+    public bool CanCloseMenu = true;
+    public float CloseMenuTimer = 0f;
+    [Space(10)]
 
     [Header("Colors")]
-    [SerializeField] Color selectedColor;
-    [SerializeField] Color unselectedColor;
+    [SerializeField] private Color _selectedColor;
+    [SerializeField] private Color _unselectedColor;
+    [Space(10)]
+
+    // Button and Menu Variables
+    private Dictionary<Transform, Vector3> _initialButtonPositions = new Dictionary<Transform, Vector3>();
+    private Transform[] _menus;
+    private Button[] _buttons;
+    private Button[] _decisionButtons;
+    private Button _selectedButton;
+    private int _currentButtonNumber;
+    private bool _isDead = false;
 
     // Audio Source and Clips
-    AudioSource audioSource;
-    AudioClip wooshClip;
-    AudioClip clickClip;
-    AudioClip menuDieClip;
-    AudioClip menuMusic;
-    AudioClip bootPC;
-    AudioClip shutdownPC;
+    private AudioSource _audioSource;
+    private AudioClip _wooshClip;
+    private AudioClip _clickClip;
+    private AudioClip _menuDieClip;
+    private AudioClip _menuMusic;
+    private AudioClip _bootPC;
+    private AudioClip _shutdownPC;
 
     #endregion
+
+
+
 
     #region Menu Controller Variables
 
     [Header("Menu Controller Settings")]
-    public float moveDebounceTime = 0.3f;
-    bool cantMove = false;
-    bool decision = false;
-    bool yes = false;
+    public float MoveDebounceTime = 0.3f;
 
-    bool interact, back;
-    Vector2 move;
+    private bool _canMove = false;
+    private bool _isDeciding = false;
+    private bool _isAccepting = false;
+
+    // Input Handling Variables
+    private bool _isInteracting, _isGoingBack;
+    private Vector2 _movePos;
 
     #endregion
 
+
+
+
     #region Unity Callbacks
 
+    // Awake is called when the script instance is being loaded
     void Awake()
     {
         #region Singleton
@@ -125,47 +158,33 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
         #endregion
 
-        menus = new Transform[] { mainMenu, loadMenu, saveMenu, deathScreen };
-        initialButtonPositions[newGameButton.transform] = newGameButton.transform.position;
-        initialButtonPositions[loadGameButton.transform] = loadGameButton.transform.position;
-        initialButtonPositions[exitButton.transform] = exitButton.transform.position;
-        audioSource = GetComponent<AudioSource>();
-        wooshClip = Resources.Load<AudioClip>("SFX/woosh");
-        clickClip = Resources.Load<AudioClip>("SFX/click");
-        menuDieClip = Resources.Load<AudioClip>("SFX/menu die");
-        menuMusic = Resources.Load<AudioClip>("SFX/menu music");
-        bootPC = Resources.Load<AudioClip>("SFX/boot pc");
-        shutdownPC = Resources.Load<AudioClip>("SFX/shutdown pc");
+
+
+        // Initialize the menu variables
+        _menus = new Transform[] { _mainMenu, _loadMenu, _saveMenu, _deathMenu };
+        _initialButtonPositions[_newGameButton.transform] = _newGameButton.transform.position;
+        _initialButtonPositions[_loadGameButton.transform] = _loadGameButton.transform.position;
+        _initialButtonPositions[_exitButton.transform] = _exitButton.transform.position;
+        _audioSource = GetComponent<AudioSource>();
+        _wooshClip = Resources.Load<AudioClip>("SFX/woosh");
+        _clickClip = Resources.Load<AudioClip>("SFX/click");
+        _menuDieClip = Resources.Load<AudioClip>("SFX/menu die");
+        _menuMusic = Resources.Load<AudioClip>("SFX/menu music");
+        _bootPC = Resources.Load<AudioClip>("SFX/boot pc");
+        _shutdownPC = Resources.Load<AudioClip>("SFX/shutdown pc");
     }
 
+    // Start is called before the first frame update
     void Start()
     {
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
-            ActivateMenu(mainMenu, true);
+            ActivateMenu(_mainMenu, true);
         }
         else
         {
-            ActivateMenu(mainMenu, false);
-            menuCanvas.SetActive(false);
-        }
-    }
-
-    public void CustomUpdate(float deltaTime)
-    {
-        if (customTimer < .5f)
-        {
-            customTimer += deltaTime;
-        }
-        else
-        {
-            canCloseMenu = true;
-        }
-
-        if (GameManager.Instance.CurrentGameState == GameManager.GameState.MainMenu)
-        {
-            if (interact) Interact();
-            if (back) Back();
+            ActivateMenu(_mainMenu, false);
+            MenuCanvas.SetActive(false);
         }
     }
 
@@ -173,227 +192,316 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
 
 
-    #region Public Methods
 
-    public void DeathScreen()
+    #region Custom Update
+
+    // Custom Update method to handle menu interactions
+    public void CustomUpdate(float deltaTime)
     {
-        Debug.Log("Death Screen!!!!!");
-        isDead = true;
-        ActivateMenu(deathScreen, false);
+        if (CloseMenuTimer < .5f)   CloseMenuTimer += deltaTime;
+        else                        CanCloseMenu = true;
+
+        if (GameManager.Instance.CurrentGameState == GameManager.GameState.MENU)
+        {
+            if (_isInteracting) Interact();
+            if (_isGoingBack) Back();
+        }
     }
 
+    #endregion
+
+
+
+
+    #region Public Methods
+
+    // Method to display the death screen - called from GameManager
+    public void DeathScreen()
+    {
+        _isDead = true;
+        ActivateMenu(_deathMenu, false);
+    }
+
+    // Method to display the main menu - called from GameManager
     public void MainMenu()
     {
-        ActivateMenu(mainMenu, true);
+        ActivateMenu(_mainMenu, true);
     }
 
     #endregion
 
     
 
+
     #region Input Handling
 
     public void OnInteract(InputAction.CallbackContext context)
     {
-        interact = context.ReadValueAsButton();
+        _isInteracting = context.ReadValueAsButton();
     }
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        move = context.ReadValue<Vector2>();
+        _movePos = context.ReadValue<Vector2>();
 
         // Debounce the move input
         float deltaTime = Time.deltaTime;
-        if (Time.time - moveDebounceTime > deltaTime)
+        if (Time.time - MoveDebounceTime > deltaTime)
         {
-            moveDebounceTime = Time.time;
-            if (!cantMove) Move();
+            MoveDebounceTime = Time.time;
+            if (!_canMove) Move();
         }
     }
 
     public void OnBack(InputAction.CallbackContext context)
     {
-        back = context.ReadValueAsButton();
+        _isGoingBack = context.ReadValueAsButton();
     }
 
     #endregion
 
+
+
+
     #region Menu Interaction Methods
 
-    void Interact()
+    // Method to handle menu interactions
+    private void Interact()
     {
-        interact = false;
+        _isInteracting = false;
         
-        if (selectedButton == null) return;
-        if (decision) 
+        if (_selectedButton == null) return;
+
+        if (_isDeciding) 
         {
-            if (selectedButton.gameObject.CompareTag("Yes"))
-            {
-                yes = true;
-                decision = false;
-                audioSource.PlayOneShot(wooshClip);
-                return;
-            }
-            else if (selectedButton.gameObject.CompareTag("No"))
-            {
-                yes = false;
-                decision = false;
-                audioSource.PlayOneShot(clickClip);
-                return;
-            }
+            DecisionInput();
         }
-        audioSource.PlayOneShot(wooshClip);
-        if (string.Compare(selectedButton.gameObject.name, "NewGame") == 0)                     StartCoroutine(StartNewGame());
-        else if (string.Compare(selectedButton.gameObject.name, "LoadGame") == 0)               ActivateMenu(loadMenu);
-        else if (string.Compare(selectedButton.gameObject.name, "Return") == 0 
-                && loadMenu.gameObject.activeSelf)                                              Return(returnFromLoadButton);
-        else if (string.Compare(selectedButton.gameObject.name, "Return") == 0 
-                && saveMenu.gameObject.activeSelf)                                              Return(returnFromSaveButton);
-        else if (selectedButton.gameObject.CompareTag("LoadFileButton"))                        StartCoroutine(LoadFile());
-        else if (selectedButton.gameObject.CompareTag("SaveFileButton"))                        StartCoroutine(SaveFile());
-        else if (string.Compare(selectedButton.gameObject.name, "ExitGame") == 0)               StartCoroutine(ExitGame());
-        else if (string.Compare(selectedButton.gameObject.name, "Retry") == 0)                  LoadAuotsave();
+
+        // Play the woosh sound effect
+        _audioSource.PlayOneShot(_wooshClip);
+
+        // Check the selected button and perform the appropriate action
+        if (string.Compare(_selectedButton.gameObject.name, "NewGame") == 0)                     StartCoroutine(StartNewGame());
+        else if (string.Compare(_selectedButton.gameObject.name, "LoadGame") == 0)               ActivateMenu(_loadMenu);
+        else if (string.Compare(_selectedButton.gameObject.name, "Return") == 0 
+                && _loadMenu.gameObject.activeSelf)                                              Return(_returnFromLoadButton);
+        else if (string.Compare(_selectedButton.gameObject.name, "Return") == 0 
+                && _saveMenu.gameObject.activeSelf)                                              Return(_returnFromSaveButton);
+        else if (_selectedButton.gameObject.CompareTag("LoadFileButton"))                        StartCoroutine(LoadFile());
+        else if (_selectedButton.gameObject.CompareTag("SaveFileButton"))                        StartCoroutine(SaveFile());
+        else if (string.Compare(_selectedButton.gameObject.name, "ExitGame") == 0)               StartCoroutine(ExitGame());
+        else if (string.Compare(_selectedButton.gameObject.name, "Retry") == 0)                  LoadAuotsave();
     }
 
-    void Move()
+    // Method to handle decision input
+    private void DecisionInput()
     {
-        if (decision)
+        if (_selectedButton.gameObject.CompareTag("Yes"))
         {
-            if (move.x > 0.5f)
-            {
-                selectedButton = decisionButtons[1];
-                ChangeSelectedButtonColor(selectedButton);
-            }
-            else if (move.x < -0.5f)
-            {
-                selectedButton = decisionButtons[0];
-                ChangeSelectedButtonColor(selectedButton);
-            }
+            _isAccepting = true;
+            _isDeciding = false;
+            _audioSource.PlayOneShot(_wooshClip);
+            return;
+        }
+        else if (_selectedButton.gameObject.CompareTag("No"))
+        {
+            _isAccepting = false;
+            _isDeciding = false;
+            _audioSource.PlayOneShot(_clickClip);
+            return;
+        }
+    }
+
+    #endregion
+
+
+
+
+    #region Menu Navigation Methods
+
+    // Method to handle menu navigation
+    private void Move()
+    {
+        // If the player is deciding, move on the decision
+        if (_isDeciding)
+        {
+            MoveOnDecision();
             return;
         }
 
-        if (selectedButton == null) 
+        // If no button is selected, select the first button
+        if (_selectedButton == null) 
         {
-            if (buttons.Length == 0)
+            if (_buttons.Length == 0)
             {
-                if (selectedButton != returnFromLoadButton || selectedButton != returnFromSaveButton)
+                if (_selectedButton != _returnFromLoadButton || _selectedButton != _returnFromSaveButton)
                 {
-                    if (saveMenu.gameObject.activeSelf) selectedButton = returnFromSaveButton;
-                    else if (loadMenu.gameObject.activeSelf) selectedButton = returnFromLoadButton;
-                    buttonNumber = 0;
-                    ChangeSelectedButtonColor(selectedButton);
+                    _selectedButton = (_saveMenu.gameObject.activeSelf) ? _returnFromSaveButton : _returnFromLoadButton;
+                    _currentButtonNumber = 0;
+                    ChangeSelectedButtonColor(_selectedButton);
                     return;
                 }
             }
-            selectedButton = buttons[0];
-            buttonNumber = 0;
-            ChangeSelectedButtonColor(selectedButton);
+            _selectedButton = _buttons[0];
+            _currentButtonNumber = 0;
+            ChangeSelectedButtonColor(_selectedButton);
             return;
         }
 
-        if (move.y > 0.5f && buttons.Length > 0)
+        // Move the selected button based on the input
+        if (_movePos.y > 0.5f && _buttons.Length > 0)
         {
-            if (buttonNumber - 1 >= 0)
-            {
-                buttonNumber--;
-                selectedButton = buttons[buttonNumber];
-                ChangeSelectedButtonColor(selectedButton);
-            }
-            else
-            {
-                buttonNumber = buttons.Length - 1;
-                selectedButton = buttons[buttonNumber];
-                ChangeSelectedButtonColor(selectedButton);
-            }
+            MoveUp(true);
         }
-        else if (move.y < -0.5f && buttons.Length > 0)
+        else if (_movePos.y < -0.5f && _buttons.Length > 0)
         {
-            if (buttonNumber + 1 < buttons.Length)
-            {
-                buttonNumber++;
-                selectedButton = buttons[buttonNumber];
-                ChangeSelectedButtonColor(selectedButton);
-            }
-            else
-            {
-                buttonNumber = 0;
-                selectedButton = buttons[buttonNumber];
-                ChangeSelectedButtonColor(selectedButton);
-            }
+            MoveUp(false);
         }
-        else if (move.x > 0.5f && buttons.Length > 0)
+        else if (_movePos.x > 0.5f && _buttons.Length > 0)
         {
-            if (selectedButton != returnFromLoadButton || selectedButton != returnFromSaveButton)
-            {
-                if (saveMenu.gameObject.activeSelf) selectedButton = returnFromSaveButton;
-                else if (loadMenu.gameObject.activeSelf) selectedButton = returnFromLoadButton;
-                buttonNumber = 0;
-                ChangeSelectedButtonColor(selectedButton);
-            }
+            MoveRight(true);
         }
-        else if (move.x < -0.5f && buttons.Length > 0)
+        else if (_movePos.x < -0.5f && _buttons.Length > 0)
         {
-            if (selectedButton == returnFromLoadButton || selectedButton == returnFromSaveButton)
-            {
-                selectedButton = buttons[0];
-                buttonNumber = 0;
-                ChangeSelectedButtonColor(selectedButton);
-            }
+            MoveRight(false);
         }
         else return;
     }
 
-    void Back()
+    // Method to move on decision buttons
+    private void MoveOnDecision()
     {
-        back = false;
-        if (!canCloseMenu) return;
+        if (_movePos.x > 0.5f)
+        {
+            if (_selectedButton == _decisionButtons[1]) return;
+            _selectedButton = _decisionButtons[1];
+            ChangeSelectedButtonColor(_selectedButton);
+        }
+        else if (_movePos.x < -0.5f)
+        {
+            if (_selectedButton == _decisionButtons[0]) return;
+            _selectedButton = _decisionButtons[0];
+            ChangeSelectedButtonColor(_selectedButton);
+        }
+    }
 
+    // Method to move the selected button up or down
+    private void MoveUp(bool moveUp)
+    {
+        if (!moveUp && _currentButtonNumber + 1 >= _buttons.Length || moveUp && _currentButtonNumber - 1 < 0) return;
+
+        _currentButtonNumber = moveUp ? _currentButtonNumber - 1 : _currentButtonNumber + 1;
+        _selectedButton = _buttons[_currentButtonNumber];
+        ChangeSelectedButtonColor(_selectedButton);
+    }
+
+    // Method to move the selected button right or left
+    private void MoveRight(bool moveRight)
+    {
+        if (!_saveMenu.gameObject.activeSelf && !_loadMenu.gameObject.activeSelf) return;
+
+        if (moveRight)
+        {
+            if (_selectedButton == _returnFromLoadButton || _selectedButton == _returnFromSaveButton) return;
+            
+            _selectedButton = _saveMenu.gameObject.activeSelf ? _returnFromSaveButton : _returnFromLoadButton;
+            _currentButtonNumber = 0;
+            ChangeSelectedButtonColor(_selectedButton);
+        }
+        else
+        {
+            if (_selectedButton == _returnFromLoadButton || _selectedButton == _returnFromSaveButton)
+            {
+                _selectedButton = _buttons[0];
+                _currentButtonNumber = 0;
+                ChangeSelectedButtonColor(_selectedButton);
+            }
+        }
+    }
+
+    // Method to handle going back in the menu
+    private void Back()
+    {
+        _isGoingBack = false;
+
+        if (!CanCloseMenu) return;
+
+        // Check if the main menu is active
         bool mainMenuActive = SceneManager.GetActiveScene().name == "MainMenu";
 
-        if (mainMenuActive && mainMenu.gameObject.activeSelf) return;
+        if (mainMenuActive && _mainMenu.gameObject.activeSelf) return;
 
-        if (mainMenu.gameObject.activeSelf && canCloseMenu && !isDead)         
+        // if the main menu scene is not active
+        // and the main menu is open, resume the game
+        if (_mainMenu.gameObject.activeSelf && CanCloseMenu && !_isDead)         
         {
-            ActivateMenu(mainMenu, false);
+            ActivateMenu(_mainMenu, false);
             GameManager.Instance.ResumeGame();
-            menuCanvas.SetActive(false);
-            audioSource.PlayOneShot(clickClip, 0.8f);
+            MenuCanvas.SetActive(false);
+            _audioSource.PlayOneShot(_clickClip, 0.8f);
+            return;
         }
-        else if (loadMenu.gameObject.activeSelf && !isDead)     ActivateMenu(mainMenu, mainMenuActive);
-        else if (loadMenu.gameObject.activeSelf && isDead)      ActivateMenu(deathScreen, mainMenuActive);
-        else if (saveMenu.gameObject.activeSelf && !isDead)     ActivateMenu(mainMenu, mainMenuActive);
-        else if (saveMenu.gameObject.activeSelf && isDead)      ActivateMenu(deathScreen, mainMenuActive);
+
+        // if the main menu scene is not active
+        // and the load/save menu is open, return to the main menu
+        if (_loadMenu.gameObject.activeSelf || _saveMenu.gameObject.activeSelf)
+        {
+            ActivateMenu(_isDead ? _deathMenu : _mainMenu, mainMenuActive);
+        }
     }
 
     #endregion
 
+
+
+
     #region Menu Activation and Configuration
 
-    void ActivateMenu(Transform menu, bool mainMenuState = false)
+    // Method to activate the menu and configure the buttons
+    public void OnMainMenu(bool mainMenuState)
     {
+        // Set the new game button active based on the main menu state
+        _newGameButton.gameObject.SetActive(mainMenuState);
+        // Set the button positions based on the main menu state
+        _loadGameButton.transform.position = _initialButtonPositions[mainMenuState ? _loadGameButton.transform : _newGameButton.transform];
+        _exitButton.transform.position = _initialButtonPositions[mainMenuState ? _exitButton.transform : _loadGameButton.transform];
+
+        // Reset the buttons array and color
+        ResetButtonColor();
+        List <Button> buttonList = new List<Button>(_buttons);
+        buttonList.Remove(_returnFromLoadButton);
+        buttonList.Remove(_returnFromSaveButton);
+
+        // Remove the new game button from the button list if the main menu is not active
+        if (!mainMenuState)   buttonList.Remove(_newGameButton.GetComponent<Button>());
+
+        // Set the buttons array and selected button
+        _buttons = buttonList.ToArray();
+        _selectedButton = null;
+        _currentButtonNumber = 0;
+    }
+
+    // Method to activate the menu and configure the buttons
+    private void ActivateMenu(Transform menu, bool mainMenuState = false)
+    {
+        // If the main menu is active, play the menu music
         if (mainMenuState) 
         {
-            if (!audioSource.isPlaying)
+            if (!_audioSource.isPlaying)
             {
-                audioSource.volume = 0f;
-                audioSource.clip = menuMusic;
-                audioSource.loop = true;
-                audioSource.Play();
-                while (audioSource.volume < 1f)
-                {
-                    audioSource.volume += Time.deltaTime;
-                }
-                audioSource.volume = 1f;
+                StartCoroutine(ActivateMenuAudio());
             }
         }
 
-        newGameButton.gameObject.SetActive(true);
-        foreach (Transform m in menus)
+        _newGameButton.gameObject.SetActive(true);
+
+        // Activate the selected menu and deactivate the others
+        foreach (Transform m in _menus)
         {
             if (m == menu)  
             {
                 m.gameObject.SetActive(true);
-                buttons = m.GetComponentsInChildren<Button>();
+                _buttons = m.GetComponentsInChildren<Button>();
             }
             else     
             {       
@@ -401,111 +509,119 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             }
         }
 
-        if (menu == loadMenu)       PopulateMenu(loadFileContainer, loadFilePrefab);
-        else if (menu == saveMenu)  PopulateMenu(saveFileContainer, saveFilePrefab);
-        else
+        // If the menu is not the load or save menu, return to the main menu
+        if (menu != _loadMenu && menu != _saveMenu) 
         {
             OnMainMenu(mainMenuState);
         }
+        // If the menu is the load or save menu, populate the menu with saved files
+        else
+        {
+            PopulateMenu(   menu == _loadMenu ? _loadFileContainer : _saveFileContainer, 
+                            menu == _loadMenu ? _loadFilePrefab : _saveFilePrefab);
+        }
     }
 
-    public void OnMainMenu(bool mainMenuState)
+    // Method to reset the button colors
+    private void ResetButtonColor()
     {
-        newGameButton.gameObject.SetActive(mainMenuState);
-
-        if (mainMenuState) 
+        foreach (Button b in _buttons)
         {
-            loadGameButton.transform.position = initialButtonPositions[loadGameButton.transform];
-            exitButton.transform.position = initialButtonPositions[exitButton.transform];
+            b.GetComponentInChildren<Image>().color = _unselectedColor;
         }
-        else               
-        {
-            loadGameButton.transform.position = initialButtonPositions[newGameButton.transform];
-            exitButton.transform.position = initialButtonPositions[loadGameButton.transform];
-        }
-
-        // Reset the buttons array and color
-        ResetButtonColor();
-        List <Button> buttonList = new List<Button>(buttons);
-        buttonList.Remove(returnFromLoadButton);
-        buttonList.Remove(returnFromSaveButton);
-        if (!mainMenuState)   buttonList.Remove(newGameButton.GetComponent<Button>());
-        buttons = buttonList.ToArray();
-        selectedButton = null;
-        buttonNumber = 0;
+        _returnFromLoadButton.GetComponentInChildren<Image>().color = _unselectedColor;
+        _returnFromSaveButton.GetComponentInChildren<Image>().color = _unselectedColor;
     }
 
-    void ResetButtonColor()
+    // Method to change the selected button color
+    private void ChangeSelectedButtonColor(Button button)
     {
-        foreach (Button b in buttons)
+        // If the player is deciding, change the decision button color
+        if (_isDeciding)
         {
-            b.GetComponentInChildren<Image>().color = unselectedColor;
-        }
-        returnFromLoadButton.GetComponentInChildren<Image>().color = unselectedColor;
-        returnFromSaveButton.GetComponentInChildren<Image>().color = unselectedColor;
-    }
-
-    void ChangeSelectedButtonColor(Button button)
-    {
-        if (decision)
-        {
-            foreach (Button b in decisionButtons)
+            foreach (Button b in _decisionButtons)
             {
-                b.GetComponentInChildren<Image>().color = unselectedColor;
+                b.GetComponentInChildren<Image>().color = _unselectedColor;
             }
-            button.GetComponentInChildren<Image>().color = selectedColor;
-            audioSource.PlayOneShot(clickClip, 0.8f);
+            button.GetComponentInChildren<Image>().color = _selectedColor;
+            _audioSource.PlayOneShot(_clickClip, 0.8f);
             return;
         }
 
-        foreach (Button b in buttons)
+        // Unslect all buttons and select the new button
+        foreach (Button b in _buttons)
         {
-            b.GetComponentInChildren<Image>().color = unselectedColor;
+            b.GetComponentInChildren<Image>().color = _unselectedColor;
         }
-        returnFromLoadButton.GetComponentInChildren<Image>().color = unselectedColor;
-        returnFromSaveButton.GetComponentInChildren<Image>().color = unselectedColor;
-        button.GetComponentInChildren<Image>().color = selectedColor;
-        audioSource.PlayOneShot(clickClip, 0.8f);
-    }
 
-    IEnumerator StartNewGame()
-    {
-        interact = false;
-        selectedButton = null;
-        cantMove = true;
-        yield return new WaitForSeconds(2f);
-        audioSource.PlayOneShot(menuDieClip, 0.8f);
-        cantMove = false;
-        GameManager.Instance.LoadNewGame();
-        ActivateMenu(mainMenu, false);
-        menuCanvas.SetActive(false);
-        yield return new WaitForSeconds(1f);
-        while (audioSource.volume > 0)
-        {
-            audioSource.volume -= Time.deltaTime;
-            yield return null;
-        }
-        audioSource.Stop();
-        audioSource.volume = 1f;
+        _returnFromLoadButton.GetComponentInChildren<Image>().color = _unselectedColor;
+        _returnFromSaveButton.GetComponentInChildren<Image>().color = _unselectedColor;
+        button.GetComponentInChildren<Image>().color = _selectedColor;
+
+        // Play the click sound effect
+        _audioSource.PlayOneShot(_clickClip, 0.8f);
     }
 
     #endregion
 
-    #region Save and Load Methods
 
-    public void SaveGame()
+
+
+    #region Audio Methods
+
+    // Method to activate the menu audio over time
+    private IEnumerator ActivateMenuAudio()
     {
-        audioSource.PlayOneShot(bootPC, 0.6f);
-        ActivateMenu(saveMenu);
+        _audioSource.volume = 0f;
+        _audioSource.clip = _menuMusic;
+        _audioSource.loop = true;
+        _audioSource.Play();
+        while (_audioSource.volume < 1f)
+        {
+            _audioSource.volume += Time.deltaTime;
+            yield return null;
+        }
+        _audioSource.volume = 1f;
     }
 
-    void PopulateMenu(Transform container, GameObject prefab)
+    // Method to deactivate the menu audio over time
+    private IEnumerator DeactiveMenuAudio()
     {
+        while (_audioSource.volume > 0)
+        {
+            _audioSource.volume -= Time.deltaTime;
+            yield return null;
+        }
+        _audioSource.Stop();
+        _audioSource.volume = 1f;
+    }
+
+    #endregion
+
+
+
+
+    #region Save and Load Methods
+
+    // Method to display the load menu - Called from a PC in the game
+    public void SaveGame()
+    {
+        // Play the boot PC sound effect
+        _audioSource.PlayOneShot(_bootPC, 0.6f);
+
+        ActivateMenu(_saveMenu);
+    }
+
+    // Method to populate the menu with saved files
+    private void PopulateMenu(Transform container, GameObject prefab)
+    {
+        // Get the list of saved files
         string[] savedFiles = GetSavedFiles();
 
         // Sort the savedFiles array based on the date and time in filenames
         System.Array.Sort(savedFiles, new SaveFileComparer());
 
+        // Create a button for each saved file
         int filecount = 0;
         foreach (string file in savedFiles)
         {
@@ -514,6 +630,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             filecount++;
         }
 
+        // Create empty buttons for the remaining slots
         if (prefab.CompareTag("SaveFileButton"))
         {
             for (int i = filecount; i < maxFiles; i++)
@@ -523,18 +640,23 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             }
         }
 
+        // Reset the button colors and set the buttons List
         ResetButtonColor();
-        buttons = container.GetComponentsInChildren<Button>();
-        List <Button> buttonList = new List<Button>(buttons);
-        buttonList.Remove(returnFromLoadButton);
-        buttonList.Remove(returnFromSaveButton);
-        buttons = buttonList.ToArray();
-        selectedButton = null;
-        buttonNumber = 0;
+        _buttons = container.GetComponentsInChildren<Button>();
+        List <Button> buttonList = new List<Button>(_buttons);
+
+        // Remove the return buttons from the button list
+        buttonList.Remove(_returnFromLoadButton);
+        buttonList.Remove(_returnFromSaveButton);
+
+        // Set the buttons array and selected button
+        _buttons = buttonList.ToArray();
+        _selectedButton = null;
+        _currentButtonNumber = 0;
     }
 
     // Function to get the list of saved file names (excluding file extensions)
-    string[] GetSavedFiles()
+    private string[] GetSavedFiles()
     {
         // Get all files in the persistent data path with the ".shadow" extension
         string[] savedFiles = Directory.GetFiles(Application.persistentDataPath, "*.shadow");
@@ -546,75 +668,75 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         return savedFiles;
     }
 
+    // Coroutine to load a saved file
     IEnumerator LoadFile()
     {
+        // Check if the player is in the main menu and let decide if they want to load a new game
         if (SceneManager.GetActiveScene().name != "MainMenu")
         {
-            Button saveButton = selectedButton;
+            Button saveButton = _selectedButton;
 
             ////////////////////////////
             // Decision
             ////////////////////////////
-            decision = true;
+            _isDeciding = true;
             MessageDisplay("Unsaved progress will be lost. Continue?");
-            yield return new WaitUntil(() => !decision);
-            messageDisplay.gameObject.SetActive(false);
-            selectedButton = saveButton;
-            if (!yes)
+            yield return new WaitUntil(() => !_isDeciding);
+            _messageDisplay.gameObject.SetActive(false);
+            _selectedButton = saveButton;
+            if (!_isAccepting)
             {
                 yield break;
             }
             else
             {
-                yes = false;
+                _isAccepting = false;
             }
             ////////////////////////////
             // Decision End
             ////////////////////////////
         }
-        string filename = selectedButton.GetComponentInChildren<TextMeshProUGUI>().text;
-        foreach (Transform file in loadFileContainer)
+
+        // Get the file name from the button text
+        string filename = _selectedButton.GetComponentInChildren<TextMeshProUGUI>().text;
+
+        // Delete all children of the parent canvas to prevent duplicates
+        foreach (Transform file in _loadFileContainer)
         {
             Destroy(file.gameObject);
         }
-        StartCoroutine(FadeOut());
-        ActivateMenu(mainMenu, false);
-        menuCanvas.SetActive(false);
+
+        // Deactivate the menu audio
+        if (_audioSource.isPlaying) StartCoroutine(DeactiveMenuAudio());
+
+        // Deactivate the menu and load the new scene
+        ActivateMenu(_mainMenu, false);
+        MenuCanvas.SetActive(false);
         GameManager.Instance.LoadNewScene(filename);
+
         yield return null;
     }
 
-    IEnumerator FadeOut()
-    {
-        if (audioSource.isPlaying)
-        {
-            while (audioSource.volume > 0)
-            {
-                audioSource.volume -= Time.deltaTime;
-                yield return null;
-            }
-            audioSource.Stop();
-            audioSource.volume = 1f;
-        }
-    }
-
+    // Coroutine to save the game data
     IEnumerator SaveFile()
     {
         // Get the file name from the button text
-        string filename = selectedButton.GetComponentInChildren<TextMeshProUGUI>().text;
+        string filename = _selectedButton.GetComponentInChildren<TextMeshProUGUI>().text;
+
+        // Check if the player is overwriting a file and let them decide to do so
         if (filename != "" && filename != "Asylum-autosave")
         {
             ////////////////////////////
             // Decision
             ////////////////////////////
-            decision = true;
+            _isDeciding = true;
             MessageDisplay("Overwrite file?");
-            yield return new WaitUntil(() => !decision);
-            messageDisplay.gameObject.SetActive(false);
-            if (yes)
+            yield return new WaitUntil(() => !_isDeciding);
+            _messageDisplay.gameObject.SetActive(false);
+            if (_isAccepting)
             {
                 File.Delete(Path.Combine(Application.persistentDataPath, filename + ".shadow"));
-                yes = false;
+                _isAccepting = false;
             }
             else
             {
@@ -624,37 +746,50 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             // Decision End
             ////////////////////////////
         }
+        // Check if the player is trying to overwrite the autosave file
         else if (filename == "Asylum-autosave")
         {
             GameManager.Instance.DisplayMessage("Can`t overwrite autosave", 2f);
             yield break;
         }
+
         // Get Scene Name and Date/Time
         Scene scene = SceneManager.GetActiveScene();
         filename = scene.name + " - " + System.DateTime.Now.ToString("dd-MM-yyy HH-mm-ss");
-        Debug.Log("SaveObject.OnButtonClick: " + filename);
+
         // Delete all children of the parent canvas to prevent duplicates
-        foreach (Transform file in saveFileContainer)
+        foreach (Transform file in _saveFileContainer)
         {
             Destroy(file.gameObject);
         }
+
         // Save the game data
         GameManager.Instance.SaveData(filename);
-        interact = false;
-        cantMove = true;
-        selectedButton = null;
+        _isInteracting = false;
+        _canMove = true;
+        _selectedButton = null;
+
         yield return new WaitForSeconds(1f);
-        audioSource.PlayOneShot(shutdownPC, 0.6f);
+
+        // Play the shutdown PC sound effect
+        _audioSource.PlayOneShot(_shutdownPC, 0.6f);
+
         yield return new WaitForSeconds(1f);
-        cantMove = false;
-        ActivateMenu(mainMenu, false);
-        menuCanvas.SetActive(false);
+
+        // Deactivate the menu 
+        _canMove = false;
+        ActivateMenu(_mainMenu, false);
+        MenuCanvas.SetActive(false);
     }
 
+    // Method to load the autosave file
     public void LoadAuotsave()
     {
+        // Get the list of saved files
         string[] savedFiles = GetSavedFiles();
         string autosave = "Asylum-autosave";
+
+        // Load the autosave file from the saved files array
         foreach (string file in savedFiles)
         {
             if (file.Contains(autosave))
@@ -662,70 +797,90 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
                 GameManager.Instance.LoadNewScene(file, false);
             }
         }
-        deathScreen.gameObject.SetActive(false);
-        ActivateMenu(mainMenu, false);
-        menuCanvas.SetActive(false);
+
+        // Deactivate the menu
+        _deathMenu.gameObject.SetActive(false);
+        ActivateMenu(_mainMenu, false);
+        MenuCanvas.SetActive(false);
     }
 
+    // Method to display a message on the screen for the player to decide
     private void MessageDisplay(string message)
     {
-        messageDisplay.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = message;
-        decisionButtons = messageDisplay.GetComponentsInChildren<Button>(true);
-        messageDisplay.gameObject.SetActive(true);
+        _messageDisplay.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = message;
+        _decisionButtons = _messageDisplay.GetComponentsInChildren<Button>(true);
+        _messageDisplay.gameObject.SetActive(true);
     }
 
     #endregion
 
-    #region Return and Exit Methods
 
+
+
+    #region Start, Return and Exit Method
+
+    // Method to return to the main menu
     void Return(Button returnButton)
     {
+        // Check if the player is in the main menu
         bool isMainMenu = SceneManager.GetActiveScene().name == "MainMenu";
         
+        // If the return button is a load, return to the main menu
         if (returnButton.gameObject.CompareTag("LoadReturnButton"))
         {
-            foreach (Transform file in loadFileContainer)
+            foreach (Transform file in _loadFileContainer)
             {
                 Destroy(file.gameObject);
             }
-            ActivateMenu(mainMenu, isMainMenu);
+            ActivateMenu(_mainMenu, isMainMenu);
         }
+        // If the return button is a save, resume the game
         else if (returnButton.gameObject.CompareTag("SaveReturnButton"))
         {
-            foreach (Transform file in saveFileContainer)
+            foreach (Transform file in _saveFileContainer)
             {
                 Destroy(file.gameObject);
             }
-            ActivateMenu(mainMenu, false);
-            audioSource.PlayOneShot(clickClip, 0.8f);
+
+            // Deactivate the menu audio
+            ActivateMenu(_mainMenu, false);
+            MenuCanvas.SetActive(false);
+
+            // Play the click sound effect
+            _audioSource.PlayOneShot(_clickClip, 0.8f);
+
+            // Resume the game
             GameManager.Instance.ResumeGame();
-            menuCanvas.SetActive(false);
         }
     }
 
-    IEnumerator ExitGame()
+    // Method to exit the game
+    private IEnumerator ExitGame()
     {
+        // Check if the player is in the main menu scene
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
             Application.Quit();
         }
+        // If the player is not in the main menu scene, let them decide to exit to the main menu
         else
         {
             ////////////////////////////
             // Decision
             ////////////////////////////
-            decision = true;
+            _isDeciding = true;
             MessageDisplay("Exit to Main Menu?");
-            yield return new WaitUntil(() => !decision);
-            messageDisplay.gameObject.SetActive(false);
+            yield return new WaitUntil(() => !_isDeciding);
+            _messageDisplay.gameObject.SetActive(false);
 
-            if (yes)
+            // If the player accepts, exit to the main menu
+            if (_isAccepting)
             {
-                yes = false;
+                _isAccepting = false;
                 GameManager.Instance.RemoveEnemyCustomUpdatables();
                 SceneManager.LoadScene("MainMenu");
-                ActivateMenu(mainMenu, true);
-                audioSource.Play();
+                ActivateMenu(_mainMenu, true);
+                _audioSource.Play();
             }
             else
             {
@@ -735,6 +890,31 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             // Decision End
             ////////////////////////////
         }
+    }
+
+    // Coroutine to start a new game
+    private IEnumerator StartNewGame()
+    {
+        _isInteracting = false;
+        _selectedButton = null;
+        _canMove = true;
+
+        yield return new WaitForSeconds(2f);
+
+        // Play the menu sound effect
+        _audioSource.PlayOneShot(_menuDieClip, 0.8f);
+
+        _canMove = false;
+
+        // Load the new game and deactivate the menu
+        GameManager.Instance.LoadNewGame();
+        ActivateMenu(_mainMenu, false);
+        MenuCanvas.SetActive(false);
+
+        yield return new WaitForSeconds(1f);
+
+        // Deactivate the menu audio
+        StartCoroutine(DeactiveMenuAudio());
     }
 
     #endregion

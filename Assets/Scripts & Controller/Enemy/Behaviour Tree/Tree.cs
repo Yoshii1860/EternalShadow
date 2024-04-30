@@ -4,9 +4,7 @@ using UnityEngine;
 
 namespace BehaviorTree
 {
-    /// <summary>
     /// The base class for behavior trees.
-    /// </summary>
     public abstract class Tree : MonoBehaviour
     {
         #region Fields
@@ -16,19 +14,18 @@ namespace BehaviorTree
 
         #endregion
 
+
+
+
         #region Unity Lifecycle Methods
 
-        /// <summary>
         /// Initializes the behavior tree by setting up the root node.
-        /// </summary>
         protected void Start()
         {
             _root = SetupTree();
         }
 
-        /// <summary>
         /// Continuously evaluates the behavior tree if it exists.
-        /// </summary>
         void Update()
         {
             if (_root != null)
@@ -39,11 +36,12 @@ namespace BehaviorTree
 
         #endregion
 
+
+
+
         #region Public Methods
 
-        /// <summary>
         /// Resets data of all nodes in the tree.
-        /// </summary>
         protected void ClearNodeDataRecursive(Node node)
         {
             node.ClearData();
@@ -55,12 +53,12 @@ namespace BehaviorTree
 
         #endregion
 
+
+
+
         #region Protected Methods
 
-        /// <summary>
         /// Sets up and returns the root node of the behavior tree.
-        /// </summary>
-        /// <returns>The root node of the behavior tree.</returns>
         protected abstract Node SetupTree();
 
         #endregion

@@ -4,43 +4,75 @@ using UnityEngine;
 
 public class CrowbarCode : MonoBehaviour
 {
-    [SerializeField] Animator firstRailing;
-    [SerializeField] Animator secondRailing;
-    [SerializeField] MirrorCode mirrorCode;
+    #region Fields
 
+    [SerializeField] private Animator _firstRailing;
+    [SerializeField] private Animator _secondRailing;
+    [SerializeField] private MirrorCode _mirrorCode;
+
+    #endregion
+
+
+
+
+    #region Animator Triggers
+
+    // Break the first railing
     public void BreakFirst()
     {
-        firstRailing.SetTrigger("Fall");
-        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "rails removal 2", 0.6f, 1f);
+        _firstRailing.SetTrigger("Fall");
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), "rails removal 2", 0.6f, 1f);
     }
 
+    // Break the second railing
     public void BreakSecond()
     {
-        secondRailing.SetTrigger("Fall");
-        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "rails removal 2", 0.6f, 1f);
+        _secondRailing.SetTrigger("Fall");
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), "rails removal 2", 0.6f, 1f);
     }
 
+    // Play audio when removing the railings
     public void RemovalAudio()
     {
-        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "rails removal 1", 0.6f, 1f);
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), "rails removal 1", 0.6f, 1f);
     }
 
+    // Deactivate the crowbar
     public void DeactivateCrowbar()
     {
-        GameManager.Instance.eventData.SetEvent("Rails");
-        GameManager.Instance.playerController.ToggleArms(true);
-        firstRailing.transform.GetComponentInChildren<Collider>().enabled = false;
-        secondRailing.transform.GetComponentInChildren<Collider>().enabled = false;
-        GameManager.Instance.playerController.SetFollowTarget();
+        // Set the event to active
+        GameManager.Instance.EventData.SetEvent("Rails");
+
+        // Disable the colliders of the railings
+        _firstRailing.transform.GetComponentInChildren<Collider>().enabled = false;
+        _secondRailing.transform.GetComponentInChildren<Collider>().enabled = false;
+
+        // Resume the game
+        GameManager.Instance.PlayerController.ToggleArms(true);
+        GameManager.Instance.PlayerController.SetFollowTarget();
         GameManager.Instance.ResumeGame();
-        mirrorCode.enabled = true;
-        GameManager.Instance.customUpdateManager.AddCustomUpdatable(mirrorCode);
+
+        // Enable the mirror event and add the mirror event to the custom update manager
+        _mirrorCode.enabled = true;
+        GameManager.Instance.CustomUpdateManager.AddCustomUpdatable(_mirrorCode);
+
+        // Deactivate the crowbar
         gameObject.SetActive(false);
     }
 
+    #endregion
+
+
+
+
+    #region Public Methods
+
+    // Function to be called to load the event from the save file
     public void EventLoad()
     {
-        firstRailing.gameObject.SetActive(false);
-        secondRailing.gameObject.SetActive(false);
+        _firstRailing.gameObject.SetActive(false);
+        _secondRailing.gameObject.SetActive(false);
     }
+
+    #endregion
 }

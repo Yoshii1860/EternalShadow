@@ -196,7 +196,6 @@ Transform:
   m_Children:
   - {fileID: 609835131871287544}
   - {fileID: 7629658437717986856}
-  - {fileID: 7625113189086961934}
   - {fileID: 5345952364760143433}
   - {fileID: 5927640988658350604}
   m_Father: {fileID: 0}
@@ -620,6 +619,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -663,7 +665,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 1b6d40b8e8330cf449472376bd201c44, type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1b6d40b8e8330cf449472376bd201c44, type: 3}
       propertyPath: m_LocalScale.x
@@ -874,6 +876,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6181629672722873152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6415631373573742774}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueID: 
 --- !u!114 &6181629672722873154
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -890,6 +905,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -906,19 +924,6 @@ MonoBehaviour:
   cutTimer: 4.3
   displayMessage: You need something to cut the skull open with.
   vCamFollowTarget: {fileID: 6181629673068704960}
---- !u!114 &6181629672722873152
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6415631373573742774}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uniqueID: 
 --- !u!1 &8154230031268743784 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2657170429619427215, guid: 1b6d40b8e8330cf449472376bd201c44, type: 3}
@@ -1034,6 +1039,9 @@ MonoBehaviour:
   active: 1
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 1
@@ -1096,7 +1104,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2303921294396319333, guid: b47bdf1669865c841ace96330ee3d7ec, type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2303921294396319333, guid: b47bdf1669865c841ace96330ee3d7ec, type: 3}
       propertyPath: m_LocalScale.x
@@ -1252,6 +1260,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -1300,6 +1311,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -1348,6 +1362,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -1396,6 +1413,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -1444,6 +1464,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -1492,6 +1515,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -1540,6 +1566,19 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 448681982134069905, guid: b47bdf1669865c841ace96330ee3d7ec, type: 3}
   m_PrefabInstance: {fileID: 6181629674226151468}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6181629673851068636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6049326666037811901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueID: BTT5
 --- !u!114 &6181629673851068639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1556,6 +1595,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -1570,19 +1612,6 @@ MonoBehaviour:
   moveDist: 0.0025
   buttonPressedTime: 0.1
   keypad: {fileID: 5345952364760143434}
---- !u!114 &6181629673851068636
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6049326666037811901}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uniqueID: BTT5
 --- !u!1 &7758254256717149683 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4495529537794917855, guid: b47bdf1669865c841ace96330ee3d7ec, type: 3}
@@ -1604,6 +1633,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -1652,6 +1684,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -1700,6 +1735,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -1732,6 +1770,19 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2906794897754377706, guid: b47bdf1669865c841ace96330ee3d7ec, type: 3}
   m_PrefabInstance: {fileID: 6181629674226151468}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6181629673108317716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9051828298078895558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueID: BTT2
 --- !u!114 &6181629673108317719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1748,6 +1799,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -1762,19 +1816,6 @@ MonoBehaviour:
   moveDist: 0.0025
   buttonPressedTime: 0.1
   keypad: {fileID: 5345952364760143434}
---- !u!114 &6181629673108317716
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9051828298078895558}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uniqueID: BTT2
 --- !u!1001 &6181629674661137681
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1958,6 +1999,9 @@ MonoBehaviour:
   active: 0
   inventoryItem: 1
   useEmission: 1
+  audioAfterPickup: 0
+  audioClipName: 
+  delay: 0
   objectPosition: {fileID: 0}
   rotateX: 0
   rotateY: 0
@@ -2154,135 +2198,3 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!1001 &7626499490510984179
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 6181629673348389255}
-    m_Modifications:
-    - target: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_RootOrder
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 1.9964905
-      objectReference: {fileID: 0}
-    - target: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -5.574805
-      objectReference: {fileID: 0}
-    - target: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 30.891844
-      objectReference: {fileID: 0}
-    - target: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 349453072092502739, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 349453072092502739, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 814250234044885063, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_Name
-      value: Devil's_Book_01
-      objectReference: {fileID: 0}
-    - target: {fileID: 814250234044885063, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 814250234044885063, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1373365652819422486, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 1373365652819422486, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6618901278700676818, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 6618901278700676818, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
---- !u!1 &3606762370381116705 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6618901278700676818, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-  m_PrefabInstance: {fileID: 7626499490510984179}
-  m_PrefabAsset: {fileID: 0}
---- !u!65 &6181629673923779356
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3606762370381116705}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.32264876, y: 0.038834773, z: 0.5424795}
-  m_Center: {x: 0, y: 0.017709814, z: -0.00003938377}
---- !u!114 &6181629673923779357
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3606762370381116705}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19618df7d89283748adf0c108c9ac2cd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mainHeader: Sanguis Libertatem
-  mainBody: "To escape the clutches of the horrific creatures keeping hell on earth,
-    one must heed the words inscribed within this ancient tome. It speaks of the
-    five sacred offerings:   A virgin\xB4s heart, stomach, eye, tongue, and brain.  
-    Each holds the key to unlocking the gateway to hell, summoning a power to bring
-    freedom to the ones looking for it."
-  subHeader: 
-  subBody: 
---- !u!4 &7625113189086961934 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2002118537278205, guid: 937ab570c2218b64d8d5c63f2622963f, type: 3}
-  m_PrefabInstance: {fileID: 7626499490510984179}
-  m_PrefabAsset: {fileID: 0}

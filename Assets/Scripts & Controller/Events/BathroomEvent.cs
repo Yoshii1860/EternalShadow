@@ -4,9 +4,19 @@ using UnityEngine;
 
 public class BathroomEvent : MonoBehaviour
 {
-    [SerializeField] Animator girl;
-    bool playOnce = false;
+    #region Fields
 
+    [SerializeField] private Animator _girl;
+    private bool _playOnce = false;
+
+    #endregion
+
+
+
+
+    #region Collider Trigger
+
+    // When the player enters the trigger, start the event
     void OnTriggerEnter(Collider other) 
     {
         if (other.CompareTag("Player"))
@@ -16,38 +26,76 @@ public class BathroomEvent : MonoBehaviour
         }
     }
 
+    #endregion
+
+
+
+
+    #region Coroutines
+
     IEnumerator StartEvent()
     {
-        if (!girl.gameObject.activeSelf) girl.gameObject.SetActive(true);
-        AudioManager.Instance.FadeOut(AudioManager.Instance.environment, 2f);
-        GameManager.Instance.customUpdateManager.RemoveCustomUpdatable(girl.GetComponent<AISensor>());
-        girl.SetTrigger("GetOut");
-        GameManager.Instance.eventData.CheckEvent("Bathroom");
-        if (!playOnce)
+        if (!_girl.gameObject.activeSelf) _girl.gameObject.SetActive(true);
+
+        // Fade out the environment audio and remove the AISensor from the custom update manager
+        AudioManager.Instance.FadeOutAudio(AudioManager.Instance.Environment, 2f);
+        GameManager.Instance.CustomUpdateManager.RemoveCustomUpdatable(_girl.GetComponent<AISensor>());
+
+        // Trigger animation and play audio
+        _girl.SetTrigger("GetOut");
+
+        if (!_playOnce)
         {
-            AudioManager.Instance.PlayOneShotWithDelay(AudioManager.Instance.playerSpeaker2, "speaker girl", 1.5f);
-            playOnce = true;
+            AudioManager.Instance.PlayClipOneShotWithDelay(AudioManager.Instance.PlayerSpeaker2, "speaker girl", 1.5f);
+            _playOnce = true;
         }
+
+        // Check event
+        GameManager.Instance.EventData.CheckEvent("Bathroom");
+
         yield return new WaitForSeconds(3f);
-        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "horror chase music 2");
-        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.30f, 1f, true);
+
+        // Play chase music
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.Environment, "horror chase music 2");
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.Environment, 0.30f, 1f, true);
+
         yield return new WaitForSeconds(4f);
+
+        // Activate the girl
         StartGirl();
     }
 
-    void StartGirl()
+    #endregion
+
+
+
+
+    #region Private Methods
+
+    // Start the girl, add the AISensor to the custom update manager and enable the EnemyBT script
+    private void StartGirl()
     {
-        GameManager.Instance.customUpdateManager.AddCustomUpdatable(girl.GetComponent<AISensor>());
-        girl.GetComponent<EnemyBT>().enabled = true;
-        girl.GetComponentInChildren<Collider>().enabled = true;
+        GameManager.Instance.CustomUpdateManager.AddCustomUpdatable(_girl.GetComponent<AISensor>());
+        _girl.GetComponent<EnemyBT>().enabled = true;
+        _girl.GetComponentInChildren<Collider>().enabled = true;
     }
 
+    #endregion
+
+
+
+
+    #region Public Methods
+
+    // Function to be called to load the event from the save file
     public void EventLoad()
     {
-        girl.GetComponent<EnemyBT>().enabled = true;
-        girl.GetComponentInChildren<Collider>().enabled = true;
+        _girl.GetComponent<EnemyBT>().enabled = true;
+        _girl.GetComponentInChildren<Collider>().enabled = true;
         GetComponent<Collider>().enabled = false;
-        playOnce = true;
+        _playOnce = true;
     }
+
+    #endregion
 }
 

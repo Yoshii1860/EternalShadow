@@ -9,27 +9,31 @@ public class ActionShot : Node
     #region Fields
 
     // References to components
-    private Transform transform;
-    private Animator animator;
-    private NavMeshAgent agent;
+    private Animator _animator;
+    private NavMeshAgent _agent;
 
     // Debug mode flag
-    private bool debugMode;
+    private bool _debugMode;
 
     #endregion
+
+
+
 
     #region Constructors
 
     // Constructor to initialize references
     public ActionShot(bool debugMode, Transform transform, NavMeshAgent agent)
     {
-        this.transform = transform;
-        animator = transform.GetComponent<Animator>();
-        this.agent = agent;
-        this.debugMode = debugMode;
+        _animator = transform.GetComponent<Animator>();
+        _agent = agent;
+        _debugMode = debugMode;
     }
 
     #endregion
+
+
+
 
     #region Public Methods
 
@@ -37,26 +41,30 @@ public class ActionShot : Node
     public override NodeState Evaluate()
     {
 
-        ////////////////////////////////////////////////////////////////////////
-        // PAUSE GAME
-        ////////////////////////////////////////////////////////////////////////
-        if (GameManager.Instance.isPaused)
+        #region FAILURE CHECKS
+
+        if (GameManager.Instance.IsGamePaused)
         {
             // Return RUNNING to indicate that the action is ongoing
-            if (debugMode) Debug.Log("A - ChaseTarget: RUNNING (game is paused)");
-            state = NodeState.RUNNING;
-            return state;
+            if (_debugMode) Debug.Log("A - isShot: RUNNING (game is paused)");
+            return NodeState.RUNNING;
         }
-        ////////////////////////////////////////////////////////////////////////
+        
+        #endregion
 
-        agent.isStopped = true;
-        animator.SetBool("walk", false);
-        animator.SetBool("run", false);
 
-        // If the chase is still ongoing, return RUNNING
-        if (debugMode) Debug.Log("A - ChaseTarget: RUNNING (dead)");
-        state = NodeState.RUNNING;
-        return state;
+
+
+        #region ACTION
+
+        _agent.isStopped = true;
+        _animator.SetBool("walk", false);
+        _animator.SetBool("run", false);
+
+        if (_debugMode) Debug.Log("A - isShot: RUNNING (dead)");
+        return NodeState.RUNNING;
+
+        #endregion
     }
 
     #endregion

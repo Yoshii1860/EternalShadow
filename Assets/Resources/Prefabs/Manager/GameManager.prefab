@@ -506,6 +506,9 @@ MonoBehaviour:
   inventoryCanvas: {fileID: 0}
   inventory: {fileID: 0}
   pickupCanvas: {fileID: 0}
+  pickupName: {fileID: 0}
+  pickupDescription: {fileID: 0}
+  pickupPositions: {fileID: 0}
   textCanvas: {fileID: 0}
   player: {fileID: 0}
   playerController: {fileID: 0}
@@ -514,6 +517,7 @@ MonoBehaviour:
   interactableObjectPool: {fileID: 0}
   interactStaticObjectPool: {fileID: 0}
   doorObjectPool: {fileID: 0}
+  textObjectPool: {fileID: 0}
   eventData: {fileID: 0}
   autoSavePool: {fileID: 0}
   blackScreen: {fileID: 1129416956}
@@ -529,8 +533,6 @@ MonoBehaviour:
   noAttackMode: 0
   noNoiseMode: 0
   _deleteSaveFiles: 0
-  saveGame: 0
-  loadGame: 0
 --- !u!114 &929486092
 MonoBehaviour:
   m_ObjectHideFlags: 0

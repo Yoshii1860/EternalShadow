@@ -6,18 +6,17 @@ using TMPro;
 [RequireComponent(typeof(UniqueIDComponent))]
 public class ItemController : InteractableObject
 {
-    public Item item;
-    public Vector3 originalPosition;
-    bool pickedUpState;
+    private Vector3 _originalPosition;
+    private bool _pickedUpState;
 
-    public bool isPickedUp
+    public bool IsPickedUp
     {
-        get => pickedUpState;
+        get => _pickedUpState;
         set
         {
-            pickedUpState = value;
+            _pickedUpState = value;
             // Whenever isPickedUp is changed, update the transform.position
-            if (pickedUpState)
+            if (_pickedUpState)
             {
                 // Move the object to a position far away
                 transform.position = new Vector3(0, -1000f, 0);
@@ -25,22 +24,22 @@ public class ItemController : InteractableObject
             else
             {
                 // If it's not picked up, reset its position to its initial position.
-                transform.position = originalPosition;
+                transform.position = _originalPosition;
             }
         }
     }
 
     void Start() 
     {
-        pickedUpState = false;
-        originalPosition = transform.position;
+        _pickedUpState = false;
+        _originalPosition = transform.position;
     }
 
     protected override void RunItemCode()
     {
-        if (isPickup) return;
-        if (clipName == "") clipName = "pickup item";
-        if (!isPickup) GameManager.Instance.DisplayMessage("Picked up " + item.displayName, 2f);
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, clipName, 0.6f, 1f);
+        if (IsPickup) return;
+        if (ClipNameOnPickup == "") ClipNameOnPickup = "pickup item";
+        if (!IsPickup) GameManager.Instance.DisplayMessage("Picked up " + Item.DisplayName, 2f);
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, ClipNameOnPickup, 0.6f, 1f);
     }
 }

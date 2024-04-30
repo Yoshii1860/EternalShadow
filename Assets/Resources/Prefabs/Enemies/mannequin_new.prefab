@@ -1432,6 +1432,7 @@ GameObject:
   - component: {fileID: 908311746174637155}
   - component: {fileID: 447070736}
   - component: {fileID: 447070737}
+  - component: {fileID: 64566433675894948}
   m_Layer: 8
   m_Name: mannequin_new
   m_TagString: Untagged
@@ -1468,20 +1469,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f77dc922eb381e4b9ef43255cd99627, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  head: {fileID: 6942510049101238857}
-  headRotationSpeed: 1
-  bodyParts:
-  - {fileID: 6942510049101238857}
-  - {fileID: 1828724357264226110}
-  - {fileID: 6830715324763575170}
-  - {fileID: 8988659888298681790}
-  - {fileID: 7602334753554709520}
+  _headTransform: {fileID: 6942510049101238857}
+  _headRotationSpeed: 1
+  _bodyParts:
   - {fileID: 1465562055039765736}
+  - {fileID: 6942510049101238857}
+  - {fileID: 8988659888298681790}
+  - {fileID: 1828724357264226110}
+  - {fileID: 7602334753554709520}
+  - {fileID: 6830715324763575170}
   - {fileID: 5429580365014112198}
-  - {fileID: 6188537273434377817}
   - {fileID: 6630963742068117149}
+  - {fileID: 6188537273434377817}
   - {fileID: 4912000182515247819}
-  deathParts:
+  _deathParts:
   - {fileID: 101854322}
   - {fileID: 836954864}
   - {fileID: 1871115779}
@@ -1492,9 +1493,10 @@ MonoBehaviour:
   - {fileID: 1088688394}
   - {fileID: 617877951}
   - {fileID: 1670301159}
-  maxDistance: 50
-  move: 0
-  started: 0
+  _maxFollowDistance: 18
+  IsDead: 0
+  IsMoving: 0
+  HasEventStarted: 0
 --- !u!95 &908311746174637155
 Animator:
   serializedVersion: 4
@@ -1633,6 +1635,19 @@ NavMeshAgent:
   m_BaseOffset: 0.83
   m_WalkableMask: 7
   m_ObstacleAvoidanceType: 4
+--- !u!114 &64566433675894948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2696314083659088085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _uniqueID: 
 --- !u!1 &3116765544428749407
 GameObject:
   m_ObjectHideFlags: 0

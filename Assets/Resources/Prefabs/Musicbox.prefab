@@ -270,7 +270,7 @@ GameObject:
   - component: {fileID: 2877771441118474140}
   m_Layer: 6
   m_Name: Musicbox
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -341,21 +341,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16ed7316a1f278345a2b3ae88d24c02b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isPickup: 1
-  active: 0
-  inventoryItem: 1
-  useEmission: 1
-  objectPosition: {fileID: 0}
-  rotateX: 0
-  rotateY: 1
-  rotateZ: 0
-  objectName: {fileID: 0}
-  objectDescription: {fileID: 0}
-  objectNameString: Old Musicbox
-  objectDescriptionString: "Maybe you can just open it to see what\xB4s inside?"
-  clipName: 
-  item: {fileID: 11400000, guid: 3cf687a7e2f699d42907d6eb6eb4fa1e, type: 2}
-  originalPosition: {x: 0, y: 0, z: 0}
+  IsPickup: 1
+  IsActive: 1
+  InventoryItem: 1
+  UseEmission: 1
+  Item: {fileID: 11400000, guid: 3cf687a7e2f699d42907d6eb6eb4fa1e, type: 2}
+  _audioAfterPickup: 1
+  _audioClipName: speaker item musicbox
+  _delay: 1
+  ClipNameOnPickup: 
 --- !u!114 &2877771441118474140
 MonoBehaviour:
   m_ObjectHideFlags: 0

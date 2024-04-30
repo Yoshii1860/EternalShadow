@@ -6,46 +6,78 @@ using TMPro;
 
 public class GameEnd : MonoBehaviour, ICustomUpdatable
 {
-    Door door;
-    bool once = false;
-    [SerializeField] GameObject finishCanvas;
-    [SerializeField] TextMeshProUGUI creditsText;
-    [SerializeField] float creditsSpeed  = 10f;
-    public bool debug = false;
+    #region Fields
 
+    [SerializeField] private GameObject _finishGameCanvas;
+    [SerializeField] private TextMeshProUGUI _creditsText;
+    [SerializeField] private float _creditsScrollSpeed  = 30f;
+
+    private Door _door;
+    private bool _playOnce = false;
+
+    [SerializeField] private bool _debugMode = false;
+
+    #endregion
+
+
+
+
+    #region Custom Update
 
     public void CustomUpdate(float deltaTime)
     {
-        if (!door.locked && door.open && !once)
+        if (!_door.IsLocked && _door.IsOpen && !_playOnce)
         {
-            once = true;
+            _playOnce = true;
             StartCoroutine(EndGame());
         }
     }
 
+    #endregion
+
+
+
+
+    #region Unity Methods
+
     void Update()
     {
-        if (debug)
+        if (_debugMode)
         {
-            debug = false;
+            _debugMode = false;
             StartCoroutine(EndGame());
         }
     }
 
     void Start()
     {
-        door = GetComponent<Door>();
+        _door = GetComponent<Door>();
     }
+
+    #endregion
+
+
+
+
+    #region Coroutines
 
     IEnumerator EndGame()
     {
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "speaker end", 1f, 1f);
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "speaker end", 1f, 1f);
+
         yield return new WaitForSeconds(2f);
+
+        // Start the gameplay event
         GameManager.Instance.GameplayEvent();
-        Image blackScreenImage = GameManager.Instance.blackScreen.GetComponent<Image>();
-        blackScreenImage.color = new Color(0, 0, 0, 0);
-        GameManager.Instance.blackScreen.gameObject.SetActive(true);
+
+        // Fade out all audio
         AudioManager.Instance.FadeOutAll(3f);
+
+        // Fade in the black screen
+        Image blackScreenImage = GameManager.Instance.Blackscreen.GetComponent<Image>();
+        blackScreenImage.color = new Color(0, 0, 0, 0);
+        GameManager.Instance.Blackscreen.gameObject.SetActive(true);
+
         float t = 0;
         while (t < 1)
         {
@@ -53,25 +85,36 @@ public class GameEnd : MonoBehaviour, ICustomUpdatable
             blackScreenImage.color = new Color(0, 0, 0, t);
             yield return null;
         }
+
         yield return new WaitForSeconds(3f);
-        finishCanvas.SetActive(true);
-        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "piano music");
+
+        // Show the finish game canvas and set the piano music
+        _finishGameCanvas.SetActive(true);
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.Environment, "piano music");
+
         yield return new WaitForSeconds(0.1f);
-        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.6f, 1f, true);
+
+        // Play the piano music
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.Environment, 0.6f, 1f, true);
 
         // scroll through credits, it starts at -400f and stops at 3400f 
-        RectTransform creditsRect = creditsText.GetComponent<RectTransform>();
+        RectTransform creditsRect = _creditsText.GetComponent<RectTransform>();
         float creditsY = -400f;
         while (creditsY < 3400f)
         {
-            creditsY += creditsSpeed * Time.deltaTime;
+            creditsY += _creditsScrollSpeed * Time.deltaTime;
             creditsRect.anchoredPosition = new Vector2(0, creditsY);
             yield return null;
         }
 
-        AudioManager.Instance.StopAudioWithDelay(AudioManager.Instance.environment, 5f);
+        // Stop the piano music
+        AudioManager.Instance.StopAudioWithDelay(AudioManager.Instance.Environment, 5f);
 
         yield return new WaitForSeconds(5f);
+
+        // Go back to the main menu
         GameManager.Instance.BackToMainMenu();
     }
+
+    #endregion
 }

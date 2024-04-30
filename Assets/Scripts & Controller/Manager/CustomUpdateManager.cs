@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#region Custom Update Manager Interface
+
 // Interface for custom updatable objects
 public interface ICustomUpdatable
 {
@@ -9,12 +11,26 @@ public interface ICustomUpdatable
     void CustomUpdate(float deltaTime);
 }
 
+#endregion
+
+
+
+
 // Manager class responsible for updating custom updatable objects
 public class CustomUpdateManager : MonoBehaviour
 {
+    #region Fields
+
     // List to store custom updatable objects
     private List<ICustomUpdatable> customUpdatables = new List<ICustomUpdatable>();
-    public bool debugBool;
+    public bool PrintUpdatables;
+
+    #endregion
+
+
+
+
+    #region Add and Remove Custom Updatables
 
     // Add a custom updatable object to the list
     public void AddCustomUpdatable(ICustomUpdatable updatable)
@@ -31,17 +47,29 @@ public class CustomUpdateManager : MonoBehaviour
         customUpdatables.Remove(updatable);
     }
 
+    public void ClearCustomUpdatables()
+    {
+        customUpdatables.Clear();
+    }
+
+    #endregion
+
+
+
+
+    #region Unity Update Method
+
     // Unity's Update method, called every frame
     private void Update()
     {   
-        if (debugBool)
+        if (PrintUpdatables)
         {
-            debugBool = false;
+            PrintUpdatables = false;
             string[] allCustomUpdateables = AllCustomUpdateables();
             Debug.Log("All Custom Updateables: " + string.Join(", ", allCustomUpdateables));
         }
 
-        if (GameManager.Instance.Loading) return;
+        if (GameManager.Instance.IsLoading) return;
         
         // Calculate deltaTime once for all custom updates
         float deltaTime = Time.deltaTime;
@@ -52,6 +80,13 @@ public class CustomUpdateManager : MonoBehaviour
             updatable.CustomUpdate(deltaTime);
         }
     }
+
+    #endregion
+
+
+
+
+    #region Get Custom Updatables
 
     public string[] AllCustomUpdateables()
     {
@@ -85,8 +120,5 @@ public class CustomUpdateManager : MonoBehaviour
         return customUpdatablesString;
     }
 
-    public void ClearCustomUpdatables()
-    {
-        customUpdatables.Clear();
-    }
+    #endregion
 }

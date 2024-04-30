@@ -12,16 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: Heart
   m_EditorClassIdentifier: 
-  displayName: "A Virgin\xB4s Heart"
-  description: "As disgusting as it sounds, this might be a virgin\xB4s heart. I
-    wouldn\xB4t be surprised if it is actually useful in here."
-  icon: {fileID: 21300000, guid: 7348ab6b39b92c5458dd66aced0edbb4, type: 3}
-  iconPath: VFX/ItemIcons/heart
-  unique: 1
-  quantity: 1
-  prefab: {fileID: 100000, guid: 0cd1ba2bc965c4afd8c76e08a4fc3519, type: 3}
-  prefabPath: Assets/Gibs N Gore - Complete/Extra Gore (FBX)/Gibs N Organs/Gibs N
-    Organs - FBX Prefabs/gib_heart
-  type: 3
+  DisplayName: "A Virgin\xB4s Heart"
+  Description: The untouched heart of a virgin holds a dark significance, potentially
+    crucial to uncovering the asylum's secrets.
+  Icon: {fileID: 21300000, guid: 7348ab6b39b92c5458dd66aced0edbb4, type: 3}
+  IconPath: VFX/ItemIcons/heart
+  IsUnique: 1
+  Quantity: 1
+  Prefab: {fileID: 100000, guid: 4f9f99f3d4609734298ee75b6decddb6, type: 3}
+  PrefabPath: Prefabs/Items/heart
+  Type: 3
   ammoType: 0
   potionType: 0

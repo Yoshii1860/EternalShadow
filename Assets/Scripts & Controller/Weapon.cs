@@ -8,216 +8,262 @@ public class Weapon : MonoBehaviour
 
     [Header("Weapon Settings")]
     [Tooltip("If the weapon can be used.")]
-    public bool isAvailable = false;
+    public bool IsAvailable = false;
     [Tooltip("The time between shots in seconds.")]
-    [SerializeField] float timeBetweenShots = 0.5f;
+    [SerializeField] private float _timeBetweenShots = 0.5f;
     [Tooltip("The time it takes to reload the weapon in seconds.")]
-    [SerializeField] float timeOfReload = 1f;
-    [Tooltip("The range of the weapon in meters.")]
-    [SerializeField] float range = 100f;
+    [SerializeField] private float _timeOfReload = 1f;
+    [Tooltip("The fire range of the weapon in meters.")]
+    [SerializeField] private float _fireRange = 100f;
     [Tooltip("The damage of the weapon.")]
-    [SerializeField] int damage = 10;
+    [SerializeField] private int _damage = 10;
     [Tooltip("The amount of ammo in the magazine.")]
-    [SerializeField] int magazine = 10;
+    [SerializeField] private int _magazineCapacity = 10;
     [Tooltip("The amount of ammo a magazine currently has.")]
-    public int magazineCount = 5;
+    public int CurrentAmmoInClip = 5;
     [Tooltip("If the weapon is currently equipped.")]
-    public bool isEquipped = false;
-    [Tooltip("The blood particle effect.")]
-    [SerializeField] GameObject bloodEffect;
+    public bool IsEquipped = false;
+    [Tooltip("The blood particle effect for hit impact.")]
+    [SerializeField] private GameObject _bloodEffect;
 
     [Space(10)]
     [Header("Ammo Settings")]
     [Tooltip("The type of ammo this weapon uses.")]
-    public Ammo.AmmoType ammoType;
+    public Ammo.AmmoType AmmoType;
     [Tooltip("The ammo slot this weapon uses. Should be on the player.")]
-    [SerializeField] Ammo ammoSlot;
+    [SerializeField] private Ammo _ammoSlot;
 
-    bool canShoot = true;
-    bool canReload = true;
-    LayerMask allLayersExceptCharacter = ~(1 << 7);
+    // Cooldowns
+    private bool _canShoot = true;
+    private bool _canReload = true;
+
+    // Layer mask for raycasting
+    private LayerMask _allLayersExceptCharacter = ~(1 << 7);
+    private LayerMask _enemyLayer = 1 << 8;
 
     #endregion
+
+
+
 
     #region Unity Callbacks
 
+    // Set the weapon as equipped when enabled for save data
     void OnEnable()
     {
-        canShoot = true;
-        canReload = true;
-        isEquipped = true;
+        _canShoot = true;
+        _canReload = true;
+        IsEquipped = true;
     }
 
+    // Set the weapon as unequipped when disabled for save data
     void OnDisable()
     {
-        isEquipped = false;
+        IsEquipped = false;
     }
 
     #endregion
+
+
+
 
     #region Public Methods
 
+    // Execute the weapon's fire action from the PlayerController
     public void Execute(Weapon weapon)
     {
-        if (weapon == null) return;
-        else if (canShoot) StartCoroutine(Shoot(weapon));
+        if (weapon == null || weapon.AmmoType == Ammo.AmmoType.None) return;
+        else if (_canShoot) Fire(weapon);
     }
 
+    // Execute the weapon's reload action from the PlayerController
     public void ExecuteReload()
     {
-        if (canReload) StartCoroutine(Reload());
+        if (_canReload) Reload();
     }
 
+    // Get the weapon's stats for the InventoryManager
     public string GetWeaponStats()
     {
-        // Order - Firepower: Reload Speed: Shoot Delay: Range: Capacity: (separated with \n)
-        // Used for InventoryManager
-        return $"{damage}\n{timeOfReload}\n{timeBetweenShots}\n{range}\n{magazine}";
+        // Order - Firepower: Reload Speed: Fire Delay: Range: Capacity: (separated with \n)
+        return $"{_damage}\n{_timeOfReload}\n{_timeBetweenShots}\n{_fireRange}\n{_magazineCapacity}";
     }
 
     #endregion
 
-    #region Coroutines
 
-    IEnumerator Shoot(Weapon weapon)
+
+
+    #region Private Methods
+
+    // Fire the weapon
+    private void Fire(Weapon weapon)
     {
-        if (string.Compare(weapon.transform.name, "Pistol") != 0) yield break;
-        canShoot = false;
+        // Check if the weapon can shoot
+        if (!_canShoot) return;
+        else _canShoot = false;
 
-        if (ammoSlot.GetCurrentAmmo(ammoType) >= 1 && magazineCount >= 1)
+        // Check if the weapon has enough ammo
+        if (!HasEnoughAmmo())
         {
-            Debug.Log("Shooting");
-            GameManager.Instance.playerAnimController.ShootAnimation();
+            Debug.Log("Fire: Out of ammo");
+            AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "empty shot", 1f, 1f);
+            return;
+        }
 
-            // if weapon has a NoiseController, make noise
-            NoiseController noiseController = GameManager.Instance.player.GetComponent<NoiseController>();
-            if (noiseController != null)
+        // Play the shoot animation and noise and reduce ammo
+        ReduceAmmo();
+        GameManager.Instance.PlayerAnimManager.ShootAnimation();
+        GameManager.Instance.Player.GetComponent<NoiseController>().TriggerShootNoise();
+
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, _fireRange, _allLayersExceptCharacter))
+        {
+            // Check if the raycast hit an object
+            if (hit.transform != null) HandleHit(hit);
+            else StartCoroutine(ResetShootCooldown());
+        }
+    }
+
+    private void HandleHit(RaycastHit hit)
+    {
+        Debug.Log("Hit: " + hit.transform.name);
+
+        // Blood effect for hit impact of enemies
+        if (hit.transform.gameObject.layer == _enemyLayer)
+        {
+            Debug.Log("Hit: Blood effect");
+            Instantiate(_bloodEffect, hit.point, Quaternion.LookRotation(hit.normal), hit.transform);
+            Destroy(_bloodEffect, 0.6f); // Destroy blood effect after a short duration
+        }
+
+        // Damage enemies
+        if (hit.transform.parent.GetComponent<Enemy>() != null)
+        {
+            Debug.Log("Hit: Enemy hit");
+            Enemy enemy = hit.transform.parent.GetComponent<Enemy>();
+            enemy.TakeDamage(_damage);
+            PlayHitSound(enemy.gameObject);
+        }
+        // Damage bosses
+        else if (hit.transform.GetComponent<Boss>() != null)
+        {
+            Debug.Log("Hit: Boss hit");
+            Boss boss = hit.transform.GetComponent<Boss>();
+            boss.GetHit();
+            PlayHitSound(boss.gameObject);
+        }
+        // Damage mannequins or non-enemy objects
+        else
+        {
+            // Recursive hit for Mannequin as it has several children objects for hit detection
+            Transform currentParent = hit.transform;
+            while (currentParent != null && currentParent.GetComponent<Mannequin>() == null)
             {
-                noiseController.ShootNoise();
+                currentParent = currentParent.parent;
             }
 
-            RaycastHit hit;
-            Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, range, allLayersExceptCharacter);
-
-            if (hit.transform != null)
+            if (currentParent != null)
             {
-                Debug.Log("Target Hit: " + hit.transform.gameObject.name);
-                if (ammoType != Ammo.AmmoType.Infinite)
-                {
-                    magazineCount--;
-
-                    // SET UI FOR BULLETS
-                    int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
-                    GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
-
-                    ammoSlot.ReduceCurrentAmmo(ammoType);
-                    // Hit animation
-                }
-
-                // Check if target is an enemy by Layer "Enemies"
-                if (hit.transform.gameObject.layer == 8)
-                {
-                    GameObject obj = Instantiate(bloodEffect, hit.point, Quaternion.LookRotation(hit.normal), hit.transform);
-                    Destroy(obj, 0.6f);
-
-                    Boss boss = hit.transform.GetComponent<Boss>();
-                    // Slender & Girl have script on parent
-                    Enemy parentEnemy = hit.transform.parent.GetComponent<Enemy>();
-                    if (boss != null)
-                    {
-                        AudioManager.Instance.PlaySoundOneShot(boss.gameObject.GetInstanceID(), "bullet hit", 0.6f, 1f);
-                        boss.GetHit();
-                    }
-                    else if (parentEnemy != null)
-                    {
-                        AudioManager.Instance.PlaySoundOneShot(parentEnemy.gameObject.GetInstanceID(), "bullet hit", 0.6f, 1f);
-                        parentEnemy.TakeDamage(damage);
-                        // Hit animation
-                    }
-                    else
-                    {
-                        // Recursive hit for Mannequin as it has several children objects for hit detection
-                        Transform currentParent = hit.transform;
-                        while (currentParent != null && currentParent.GetComponent<Mannequin>() == null)
-                        {
-                            currentParent = currentParent.parent;
-                        }
-
-                        if (currentParent != null)
-                        {
-                            currentParent.GetComponent<Mannequin>().Hit(hit.transform.gameObject);
-                        }
-                    }
-                }
+                Debug.Log("Hit: Mannequin hit");
+                currentParent.GetComponent<Mannequin>().GetHit(hit.transform.gameObject);
+                PlayHitSound(currentParent.gameObject);
             }
             else
             {
                 Debug.Log("No target hit");
-                if (ammoType != Ammo.AmmoType.Infinite)
-                {
-                    magazineCount--;
-
-                    // SET UI FOR BULLETS
-                    int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
-                    GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
-
-                    ammoSlot.ReduceCurrentAmmo(ammoType);
-                }
             }
         }
-        else
-        {
-            Debug.Log("Shoot: Out of ammo");
-            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "empty shot", 1f, 1f);
-        }
 
-        yield return new WaitForSeconds(timeBetweenShots);
-        canShoot = true;
+        // Reset the shoot cooldown
+        StartCoroutine(ResetShootCooldown());
     }
 
-    IEnumerator Reload()
+    private void Reload()
     {
-        canShoot = false;
-        canReload = false;
-
-        int currentInventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
-
-        if (currentInventoryAmmo >= 1 && magazineCount < magazine)
+        // Check if the weapon can reload
+        if (_canReload)
         {
-            Debug.Log("Reloading");
-
-            if (currentInventoryAmmo <= magazine - magazineCount)
-            {
-                magazineCount += currentInventoryAmmo;
-                InventoryManager.Instance.RemoveAmmo(ammoType, currentInventoryAmmo);
-
-                Debug.Log("Reloading Amount: " + currentInventoryAmmo);
-            }
-            else
-            {
-                int ammoNeeded = magazine - magazineCount;
-                magazineCount += ammoNeeded;
-                InventoryManager.Instance.RemoveAmmo(ammoType, ammoNeeded);
-
-                Debug.Log("Reloading Amount: " + ammoNeeded);
-            }
-
-            // SET UI FOR BULLETS
-            int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(ammoType);
-            Debug.Log("Inventory Ammo: " + inventoryAmmo);
-            GameManager.Instance.player.SetBulletsUI(magazineCount, inventoryAmmo);
-
-            GameManager.Instance.playerAnimController.ReloadAnimation();
+            _canReload = false;
+            _canShoot = false;
         }
+        else return;
+
+        // Check if the weapon has enough ammo to reload
+        int ammoToReload = Mathf.Clamp(_magazineCapacity - CurrentAmmoInClip, 0, InventoryManager.Instance.GetInventoryAmmo(AmmoType));
+        
+        // Reload the weapon
+        if (ammoToReload > 0)
+        {
+            InventoryManager.Instance.RemoveAmmo(AmmoType, ammoToReload);
+            CurrentAmmoInClip += ammoToReload;
+            UpdateAmmoUI();
+            GameManager.Instance.PlayerAnimManager.ReloadAnimation();
+        }
+        // Display error message if no ammo to reload
         else
         {
-            Debug.Log("Reload failed.");
-            AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "error", 0.6f, 1f);
+            Debug.Log("Reload failed: No ammo to reload");
+            AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "error", 0.6f, 1f);
         }
 
-        yield return new WaitForSeconds(timeOfReload);
-        canShoot = true;
-        canReload = true;
+        StartCoroutine(ResetReloadCooldown());
+    }
+
+    // Check if the weapon has enough ammo to shoot
+    private bool HasEnoughAmmo()
+    {
+        return CurrentAmmoInClip > 0 || AmmoType == Ammo.AmmoType.Infinite;
+    }
+
+    // Reduce the ammo in the weapon
+    private void ReduceAmmo()
+    {
+        if (AmmoType != Ammo.AmmoType.Infinite)
+        {
+            CurrentAmmoInClip--;
+            _ammoSlot.ReduceCurrentAmmo(AmmoType);
+
+            // SET UI FOR BULLETS
+            UpdateAmmoUI();
+        }
+    }
+
+    // Play the hit sound for the object hit
+    private void PlayHitSound(GameObject obj)
+    {
+        AudioManager.Instance.PlayClipOneShot(obj.GetInstanceID(), "bullet hit", 0.6f, 1f);
+    }
+
+    // Update the ammo UI
+    private void UpdateAmmoUI()
+    {
+        int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(AmmoType);
+        GameManager.Instance.Player.SetBulletsUI(CurrentAmmoInClip, inventoryAmmo);
+    }
+
+    #endregion
+
+
+
+
+    #region Coroutines
+
+    // Reset the shoot cooldown
+    private IEnumerator ResetShootCooldown()
+    {
+        Debug.Log("Fire: Waiting for next shot");
+        yield return new WaitForSeconds(_timeBetweenShots);
+        _canShoot = true;
+    }
+
+    // Reset the reload cooldown
+    private IEnumerator ResetReloadCooldown()
+    {
+        Debug.Log("Reload: Waiting for reload");
+        yield return new WaitForSeconds(_timeOfReload);
+        _canReload = true;
+        _canShoot = true;
     }
 
     #endregion

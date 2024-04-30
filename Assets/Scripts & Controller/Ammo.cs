@@ -6,9 +6,12 @@ public class Ammo : MonoBehaviour
 {
     #region Serialized Fields
 
-    [SerializeField] AmmoSlot[] ammoSlots;
+    [SerializeField] AmmoSlot[] _ammoSlots;
 
     #endregion
+
+
+
 
     #region Enums
 
@@ -22,77 +25,93 @@ public class Ammo : MonoBehaviour
 
     #endregion
 
+
+
+
+
     #region AmmoSlot Class
 
     [System.Serializable]
     private class AmmoSlot
     {
-        public AmmoType ammoType;
-        public int ammoAmount;
+        public AmmoType AmmoType;
+        public int AmmoAmount;
     }
 
     #endregion
 
+
+
+
+
     #region Ammo Management
 
-    /// <summary>
     /// Gets the current ammo amount for the specified ammo type.
-    /// </summary>
     public int GetCurrentAmmo(AmmoType ammoType)
     {
-        return GetAmmoSlot(ammoType).ammoAmount;
+        var slot = GetAmmoSlot(ammoType);
+        return slot?.AmmoAmount ?? 0;
     }
 
-    /// <summary>
+
     /// Reduces the current ammo amount for the specified ammo type.
-    /// </summary>
     public void ReduceCurrentAmmo(AmmoType ammoType)
     {
         if (ammoType != AmmoType.Infinite)
         {
-            GetAmmoSlot(ammoType).ammoAmount--;
+            var slot = GetAmmoSlot(ammoType);
+            if (slot != null)
+            {
+                slot.AmmoAmount--;
+            }
         }
     }
 
-    /// <summary>
     /// Increases the current ammo amount for the specified ammo type.
-    /// </summary>
     public void IncreaseCurrentAmmo(AmmoType ammoType, int ammoAmount)
     {
-        GetAmmoSlot(ammoType).ammoAmount += ammoAmount;
+        var slot = GetAmmoSlot(ammoType);
+        if (slot != null)
+        {
+            slot.AmmoAmount += ammoAmount;
+        }
     }
 
-    /// <summary>
+
     /// Sets the ammo amount for the specified ammo type.
-    /// </summary>
     public void SetAmmoOnLoad(AmmoType ammoType, int newAmmoAmount)
     {
-        GetAmmoSlot(ammoType).ammoAmount = newAmmoAmount;
+        var slot = GetAmmoSlot(ammoType);
+        if (slot != null)
+        {
+            slot.AmmoAmount = newAmmoAmount;
+        }
     }
 
-    /// <summary>
+
     /// Resets all ammo amounts to zero.
-    /// </summary>
     public void ResetAmmo()
     {
-        foreach (AmmoSlot slot in ammoSlots)
+        foreach (var slot in _ammoSlots)
         {
-            slot.ammoAmount = 0;
+            slot.AmmoAmount = 0;
         }
     }
 
     #endregion
 
+
+
+
+
     #region Private Methods
 
-    /// <summary>
     /// Gets the AmmoSlot for the specified ammo type.
-    /// </summary>
     private AmmoSlot GetAmmoSlot(AmmoType ammoType)
     {
-        foreach (AmmoSlot slot in ammoSlots)
+          foreach (AmmoSlot slot in _ammoSlots)
         {
-            if (slot.ammoType == ammoType)
+            if (slot.AmmoType == ammoType)
             {
                 return slot;
             }

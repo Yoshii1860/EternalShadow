@@ -4,136 +4,187 @@ using UnityEngine;
 
 public class LockerCode : InteractableObject
 {
+    #region Variables
+
     [Space(10)]
-    [Header("RUN ITEM CODE")]
-    [SerializeField] Transform door;
-    MeshRenderer doorMesh;
-    bool insideCollider = false;
-    bool open = false;
-    bool locked = false;
+    [Header("Components")]
+    [SerializeField] private Transform _doorTransform;
+
+    private MeshRenderer _doorMesh;
+    private bool _isInsideCollider = false;
+    private bool _isOpen = false;
+    private bool _isLocked = false;
+
+    #endregion
+
+
+
+
+    #region Unity Methods
 
     void Start()
     {
-        doorMesh = door.GetComponent<MeshRenderer>();
+        _doorMesh = _doorTransform.GetComponent<MeshRenderer>();
     }
+
+    #endregion
+
+
+
+
+    #region Base Methods
 
     // Override the base class method for specific implementation
     protected override void RunItemCode()
     {
-        if (!locked) 
+        if (!_isLocked) 
         {
-            if (!open) StartCoroutine(Open());
-            else if (open) StartCoroutine(Close());
+            Debug.Log("Locker INTERACTED");
+            if (_isOpen)    StartCoroutine(Close());
+            else            StartCoroutine(Open());
         }
     }
 
+    #endregion
+
+
+
+
+    #region Colliders
+
+    // When the player enters the collider and closes the door, the player is hidden
     void OnTriggerStay(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            insideCollider = true;
-            ToggleMeshEmission(true);
+            _isInsideCollider = true;
+            HighlightLocker(true);
         }
     }
 
+    // When the player exits the collider, the player is visible again
     void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            insideCollider = false;
-            ToggleHidden(false);
-            ToggleMeshEmission(false);
+            _isInsideCollider = false;
+            ToggleEnemyVisibility(false);
+            HighlightLocker(false);
         }
     }
 
-    void ToggleHidden(bool hidden)
+    #endregion
+
+
+
+
+    #region Private Methods
+
+    // Close the lockers and lock them
+    public void CloseLocker()
     {
-        foreach (AISensor sensor in GameManager.Instance.enemyPool.GetComponentsInChildren<AISensor>())
-        {
-            sensor.hidden = hidden;
-        }
+        if (_isOpen)    StartCoroutine(ShutDown());
+        else            _isLocked = true;
     }
 
-    void ToggleMeshEmission(bool emission)
+    #endregion
+
+
+
+
+    #region Helper Methods
+
+    // Highlight the locker door
+    private void HighlightLocker(bool highlight)
     {
-        if (emission)
+        if (highlight)
         {
-            doorMesh.material.EnableKeyword("_EMISSION");
-            doorMesh.material.SetColor("_EmissionColor", new Color(0.1f, 0.1f, 0.1f));
+            _doorMesh.material.EnableKeyword("_EMISSION");
+            _doorMesh.material.SetColor("_EmissionColor", new Color(0.1f, 0.1f, 0.1f));
         }
         else
         {
-            doorMesh.material.DisableKeyword("_EMISSION");
+            _doorMesh.material.DisableKeyword("_EMISSION");
         }
     }
 
-    public void CloseLocker()
+    // Toggle the visibility of the enemies
+    void ToggleEnemyVisibility(bool hidden)
     {
-        if (open)
+        foreach (AISensor sensor in GameManager.Instance.EnemyPool.GetComponentsInChildren<AISensor>())
         {
-            StartCoroutine(ShutDown());
+            sensor.IsPlayerHidden = hidden;
         }
-        else locked = true;
     }
 
+    #endregion
 
+
+
+
+    #region Coroutines
+
+    // Coroutine to open the locker
     IEnumerator Open()
     {
-        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "open locker", 0.8f);
-        locked = true;
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), "open locker", 0.8f);
+        _isLocked = true;
 
-        // slowly open door of the locker
+        // slowly _isOpen door of the locker
         float t = 0;
         while (t < 1f)
         {
             t += Time.deltaTime;
-            door.localEulerAngles = Vector3.Lerp(Vector3.zero, new Vector3(0, -100, 0), t);
+            _doorTransform.localEulerAngles = Vector3.Lerp(Vector3.zero, new Vector3(0, -100, 0), t);
             yield return null;
         }
 
-        if (insideCollider)
+        if (_isInsideCollider)
         {
-            ToggleHidden(false);
+            ToggleEnemyVisibility(false);
         }
-
-        locked = false;
-        open = true;
+        Debug.Log("Locker OPENED");
+        _isLocked = false;
+        _isOpen = true;
     }
 
+    // Coroutine to close the locker
     IEnumerator Close()
     {
-        AudioManager.Instance.PlaySoundOneShot(gameObject.GetInstanceID(), "close locker", 0.8f);
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), "close locker", 0.8f);
 
-        if (insideCollider)
+        if (_isInsideCollider)
         {
-            ToggleHidden(true);
+            ToggleEnemyVisibility(true);
         }
-        locked = true;
+        _isLocked = true;
         
         // close the door of the locker
         float t = 0;
         while (t < 1f)
         {
             t += Time.deltaTime;
-            door.localRotation = Quaternion.Lerp(door.localRotation, Quaternion.Euler(0, 0, 0), t);
+            _doorTransform.localRotation = Quaternion.Lerp(_doorTransform.localRotation, Quaternion.Euler(0, 0, 0), t);
             yield return null;
         }
-
-        locked = false;
-        open = false;
+        Debug.Log("Locker CLOSED");
+        _isLocked = false;
+        _isOpen = false;
     }
 
+    // Coroutine to close the locker and lock it
     IEnumerator ShutDown()
     {
-        locked = true;
+        _isLocked = true;
         
-        // close the door of the locker
         float t = 0;
         while (t < 1f)
         {
             t += Time.deltaTime;
-            door.localRotation = Quaternion.Lerp(door.localRotation, Quaternion.Euler(0, 0, 0), t);
+            _doorTransform.localRotation = Quaternion.Lerp(_doorTransform.localRotation, Quaternion.Euler(0, 0, 0), t);
             yield return null;
         }
     }
+
+    #endregion
 }

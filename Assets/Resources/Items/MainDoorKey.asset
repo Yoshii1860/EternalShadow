@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: MainDoorKey
   m_EditorClassIdentifier: 
-  displayName: Main Door Key
-  description: This key might open the main entrance door
-  icon: {fileID: 21300000, guid: 0506ca7bf949b5e429e1ac87774d535f, type: 3}
-  iconPath: VFX/ItemIcons/MainDoorKey
-  unique: 1
-  quantity: 1
-  prefab: {fileID: 6202248377633566000, guid: 609cad5eb478dd849beaf2705286bdf7, type: 3}
-  prefabPath: Assets/Keys/Prefabs/Key2
-  type: 3
+  DisplayName: Main Door Key
+  Description: The ultimate key to freedom, obtain this to unlock the asylum's main
+    door and escape its horrors.
+  Icon: {fileID: 21300000, guid: 0506ca7bf949b5e429e1ac87774d535f, type: 3}
+  IconPath: VFX/ItemIcons/MainDoorKey
+  IsUnique: 1
+  Quantity: 1
+  Prefab: {fileID: 6202248377633566000, guid: 922b657c582d9fc40a31918f50421b84, type: 3}
+  PrefabPath: Prefabs/Items/mainDoorKey
+  Type: 3
   ammoType: 0
   potionType: 0

@@ -3686,27 +3686,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44a6850c5f339824b8b7438320716600, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loadFilePrefab: {fileID: 1090790080320487823, guid: ee3a20b2d58a55e4f96cec34e355ff90, type: 3}
-  saveFilePrefab: {fileID: 1090790080320487823, guid: 1e92b8191476b454d8f8d8b1d452b2f5, type: 3}
-  menuCanvas: {fileID: 4819816095528754905}
-  mainMenu: {fileID: 4819816095015689662}
-  newGameButton: {fileID: 4819816095836373941}
-  loadGameButton: {fileID: 4819816094934733479}
-  exitButton: {fileID: 537581037}
-  loadMenu: {fileID: 4819816094780423677}
-  saveMenu: {fileID: 4819816096251123927}
-  deathScreen: {fileID: 1114315030}
-  messageDisplay: {fileID: 971495139}
-  saveFileContainer: {fileID: 4819816094596759084}
-  loadFileContainer: {fileID: 4819816094693804758}
-  returnFromLoadButton: {fileID: 4819816095870001115}
-  returnFromSaveButton: {fileID: 4819816096054171371}
+  MenuCanvas: {fileID: 4819816095528754905}
+  _loadFilePrefab: {fileID: 1090790080320487823, guid: ee3a20b2d58a55e4f96cec34e355ff90, type: 3}
+  _saveFilePrefab: {fileID: 1090790080320487823, guid: 1e92b8191476b454d8f8d8b1d452b2f5, type: 3}
+  _saveFileContainer: {fileID: 4819816094596759084}
+  _loadFileContainer: {fileID: 4819816094693804758}
   maxFiles: 8
-  canCloseMenu: 1
-  customTimer: 0
-  selectedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-  unselectedColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 0.5882353}
-  moveDebounceTime: 0.3
+  _mainMenu: {fileID: 4819816095015689662}
+  _loadMenu: {fileID: 4819816094780423677}
+  _saveMenu: {fileID: 4819816096251123927}
+  _deathMenu: {fileID: 1114315030}
+  _newGameButton: {fileID: 4819816095836373941}
+  _loadGameButton: {fileID: 4819816094934733479}
+  _exitButton: {fileID: 537581037}
+  _returnFromLoadButton: {fileID: 4819816095870001115}
+  _returnFromSaveButton: {fileID: 4819816096054171371}
+  _messageDisplay: {fileID: 971495139}
+  CanCloseMenu: 1
+  CloseMenuTimer: 0
+  _selectedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+  _unselectedColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 0.5882353}
+  MoveDebounceTime: 0.3
 --- !u!82 &1130309367
 AudioSource:
   m_ObjectHideFlags: 0

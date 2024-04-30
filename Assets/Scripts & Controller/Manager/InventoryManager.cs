@@ -36,6 +36,9 @@ public class InventoryManager : MonoBehaviour
 
     #endregion
 
+
+
+
     #region Fields
 
         public List<Item> Items = new List<Item>();
@@ -43,91 +46,105 @@ public class InventoryManager : MonoBehaviour
         [Space(10)]
         [Header("Inventory Settings")]
         [Tooltip("The prefab that will be used to display the inventory items")]
-        public GameObject inventoryItem;
+        [SerializeField] private GameObject _inventoryItemPrefab;
         [Tooltip("The prefab that will be used to display the inventory item display")]
-        public GameObject itemDisplay;
-        [Tooltip("The prefab that will be used to display the doll")]
-        public GameObject dollDisplay;
-        [Tooltip("The camera that will be used to inspect items")]
-        public GameObject inspectorCamera;
-        [Tooltip("The prefab that will be used to display the item inspector")]
-        public GameObject inspector;
-        [Tooltip("The transform that will be used to parent the item to inspect")]
-        public Transform inspectItemTransform;
-        [Tooltip("The canvas that will be used to display the status of the player")]
-        public GameObject statsDisplay;
-        [Tooltip("The fill amount of the health bar")]
-        public Image healthBar;
-        [Tooltip("The fill amount of the stamina bar")]
-        public Image staminaBar;
-        [Tooltip("The icons that will be used to display status effects")]
-        public GameObject bleedingIcon;
-        [Tooltip("The icons that will be used to display status effects")]
-        public GameObject poisonedIcon;
-        [Tooltip("The icons that will be used to display status effects")]
-        public GameObject dizzyIcon;
-        [Tooltip("The canvas that will be used to display messages")]
-        public GameObject messageCanvas;
-        [Tooltip("The text that will be used to display messages")]
-        public TextMeshProUGUI messageText;
-        [Tooltip("The text that will be used to display the amount of horror dolls")]
-        public TextMeshProUGUI horrorDollCount;
+        [SerializeField] private GameObject _itemDisplayPrefab;
+        [Tooltip("The canvas (child of viewport) that will be used to display the items in the inventory")]
+        [SerializeField] private Transform _itemContentCanvas;
+        [Tooltip("The canvas (child of viewport) that will be used to display the item display")]
+        [SerializeField] private Transform _itemPreviewCanvas;
+        [Tooltip("The child of inventory that will be used to display the doll")]
+        [SerializeField] private GameObject _dollDisplayUI;
+        [Tooltip("The text (child of doll dipsplay) that will be used to display the amount of horror dolls")]
+        public TextMeshProUGUI HorrorDollCount;
+        [Tooltip("The camera (child of inventory) that will be used to inspect items")]
+        [SerializeField] private GameObject _inspectorCamera;
+        [Tooltip("The object (child of inventory viewport) that will be used to display the item inspector")]
+        [SerializeField] private GameObject _inspector;
+        [Tooltip("The transform (child of camera) that will be used to parent the item to inspect")]
+        [SerializeField] private Transform _inspectItemTransform;
+        [Tooltip("The object (child of viewport) that will be used to display the status of the player")]
+        [SerializeField] private GameObject _statsDisplay;
+        [Tooltip("The image (child of stats) that will be used to display the health bar")]
+        [SerializeField] private Image _healthBar;
+        [Tooltip("The image (child of stats) that will be used to display the stamina bar")]
+        [SerializeField] private Image _staminaBar;
+        [Tooltip("The icon (child of stats) that will be used to display status effects")]
+        [SerializeField] private GameObject _bleedingIcon;
+        [Tooltip("The icon (child of stats) that will be used to display status effects")]
+        [SerializeField] private GameObject _poisonedIcon;
+        [Tooltip("The icon (child of stats) that will be used to display status effects")]
+        [SerializeField] private GameObject _dizzyIcon;
+        [Tooltip("The canvas (child of inventory) that will be used to display messages")]
+        [SerializeField] private GameObject _messageCanvas;
+        [Tooltip("The text (child of message canvas) that will be used to display messages")]
+        [SerializeField] private TextMeshProUGUI _messageText;
         [Tooltip("The force that will be applied to the dropped item")]
-        public float dropForce;
+        [SerializeField] private float _dropForce;
         [Tooltip("The maximum amount of items that can be stored in the inventory")]
-        public int maxItems = 9;
+        [SerializeField] private int _maxItems = 9;
+        [Space(10)]
+
+        [Tooltip("The GameObject (child of player) that contains the weapons")]
+        public GameObject Weapons;
+        [Space(10)]
+
+        [Header("Inspector Settings")]
         [Tooltip("The sensitivity of the zoom when inspecting items")]
-        public float zoomSensitive = 0.01f;
+        [SerializeField] private float _zoomSensitivity = 0.01f;
         [Tooltip("The sensitivity of the look when inspecting items")]
-        public float lookSensitivity = 0.5f;
+        [SerializeField] private float _lookSensitivity = 0.5f;
         [Tooltip("The maximum zoom scale when inspecting items")]
-        public float maxZoomScale = 4f;
+        [SerializeField] private float _maxZoomScale = 4f;
         [Tooltip("The minimum zoom scale when inspecting items")]
-        public float minZoomScale = 0.5f;
+        [SerializeField] private float _minZoomScale = 0.5f;
+        [Space(10)]
 
 
         // Additional fields
-        Transform[] gridLayouts;
-        public Transform itemContent;
-        public Transform itemPreview;
-        public GameObject weapons;
-        GameObject player;
-        Ammo ammo;
-        GameObject inspectorItem;
-        TextMeshProUGUI healthText;
-        TextMeshProUGUI maxHealthText;
-        TextMeshProUGUI staminaText;
-        TextMeshProUGUI maxStaminaText;
+        private Transform[] _gridLayouts;
+        private Player _player;
+        private Ammo _ammo;
+        private GameObject _inspectorItem;
+        private TextMeshProUGUI _healthText;
+        private TextMeshProUGUI _maxHealthText;
+        private TextMeshProUGUI _staminaText;
+        private TextMeshProUGUI _maxStaminaText;
+        // The Image components of the item actions
+        Image[] _itemCanvasActions;
 
-        [Space(10)]
         [Header("Colors")]
         [Tooltip("The color of the selected item")]
-        public Color selectedColor;
+        [SerializeField] private Color selectedColor;
         [Tooltip("The color of the unselected item")]
-        public Color unselectedColor;
+        [SerializeField] private Color unselectedColor;
         [Tooltip("The color of the highlighted item")]
-        public Color highlightedColor;
-
+        [SerializeField] private Color highlightedColor;
         [Space(10)]
+
         [Header("Only for Debugging)")]
-        public Item selectedItem;
-        public int highlightNumber;
-        public int selectedActionNumber;
-        public int itemActionNumber;
-        public bool itemActionsOpen;
-        public int actionsChildCount;
-        public bool isInspecting = false;
+        public Item SelectedItem;
+        public int HighlightNumber;
+        public int ItemActionNumber;
+        public bool IsItemActionsOpen;
+        public int ActionsChildCount;
+        public bool IsInspecting = false;
+        [Space(10)]
 
-        // names of items need to meet the conditions to autosave the game before boss fight
-        [SerializeField] AutoSave autoSave;
-        public int uniqueAutoSaveID;
-        public string[] autoSaveCondition;
-        public int conditionCounter = 0;
+        [Header("AutoSave Condition")]
+        [Tooltip("The AutoSave object that will be used to save the game before the boss fight")]
+        [SerializeField] private AutoSave _autoSaveWithCondition;
+        [SerializeField] private int _uniqueAutoSaveID;
+        [SerializeField] private string[] _autoSaveConditionNames;
+        [SerializeField] private int _conditionCounter = 0;
+        [Space(10)]
 
-        // The Image components of the item actions
-        Image[] itemCanvasActions;
+        [SerializeField] private bool _debugMode;
 
-        #endregion
+    #endregion
+
+
+
 
     #region Initialization
 
@@ -138,13 +155,13 @@ public class InventoryManager : MonoBehaviour
 
     void InitializeReferences()
     {
-        gridLayouts = FindGridLayoutGroups();
-        itemContent = gridLayouts[1];
-        itemPreview = gridLayouts[2];
-        healthText = healthBar.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-        maxHealthText = healthBar.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
-        staminaText = staminaBar.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-        maxStaminaText = staminaBar.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+        _gridLayouts = FindGridLayoutGroups();
+        _itemContentCanvas = _gridLayouts[1];
+        _itemPreviewCanvas = _gridLayouts[2];
+        _healthText = _healthBar.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        _maxHealthText = _healthBar.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+        _staminaText = _staminaBar.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        _maxStaminaText = _staminaBar.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
     }
 
     private Transform[] FindGridLayoutGroups(Transform parent = null)
@@ -179,23 +196,19 @@ public class InventoryManager : MonoBehaviour
         return null;
     }
 
-    #endregion
-
-    #region Update References
-
     public void UpdateReferences()
     {
-        player = GameManager.Instance.player.gameObject;
-        weapons = FindObjectOfType<WeaponSwitcher>().gameObject;
-        ammo = player.GetComponent<Ammo>();
-        if (autoSave == null)
+        _player = GameManager.Instance.Player.gameObject.GetComponent<Player>();
+        Weapons = FindObjectOfType<WeaponSwitcher>().gameObject;
+        _ammo = _player.GetComponent<Ammo>();
+        if (_autoSaveWithCondition == null)
         {
             GameObject autoSavePool = GameObject.FindWithTag("SaveGamePool");
             foreach (AutoSave autoSaveObj in autoSavePool.GetComponentsInChildren<AutoSave>())
             {
-                if (autoSaveObj.GetComponent<UniqueIDComponent>().UniqueID == uniqueAutoSaveID.ToString())
+                if (autoSaveObj.GetComponent<UniqueIDComponent>().UniqueID == _uniqueAutoSaveID.ToString())
                 {
-                    autoSave = autoSaveObj;
+                    _autoSaveWithCondition = autoSaveObj;
                     break;
                 }
             }
@@ -208,119 +221,127 @@ public class InventoryManager : MonoBehaviour
 
     #endregion
 
-    #region AutoSaveCondition
 
-    void AutoSaveCondition(Item item)
+
+
+    #region CheckAutoSaveCondition
+
+    // Check if the item is one of the conditions for the AutoSave
+    private void CheckAutoSaveCondition(Item item)
     {
-        foreach (string condition in autoSaveCondition)
+        foreach (string condition in _autoSaveConditionNames)
         {
             if (item.name == condition)
             {
-                conditionCounter++;
+                _conditionCounter++;
                 break;
             }
         }
 
-        if (conditionCounter == autoSaveCondition.Length)
+        // if all items are in the inventory, set the condition to true
+        if (_conditionCounter == _autoSaveConditionNames.Length)
         {
-            autoSave.conditionMet = true;
+            _autoSaveWithCondition.ConditionMet = true;
         }
     }
 
     #endregion
 
+
+
+
     #region Item Management
+
 
     public void AddItem(Item item)
     {
-        AutoSaveCondition(item);
-
-        if (item.type == ItemType.Ammo || item.type == ItemType.Potion)
+        switch (item.Type)
         {
-            Item existingItem = Items.Find(existingItem => existingItem.displayName == item.displayName);
-            if (existingItem != null)
+            case ItemType.Ammo:
+                AddAmmo(item);
+                break;
+            case ItemType.Potion:
+                AddPotion(item);
+                break;
+            case ItemType.Weapon:
+                AddWeapon(item);
+                break;
+            default:
+                Items.Add(item);
+                CheckAutoSaveCondition(item);
+                if (_debugMode) if (_debugMode) Debug.Log("InventoryManager - Add New Item (" + item.DisplayName + ")");
+                break;
+        }
+    }
+
+    private void AddAmmo(Item item)
+    {
+        Item existingItem = Items.Find(existingItem => existingItem.DisplayName == item.DisplayName);
+        if (existingItem != null)
+        {
+            existingItem.Quantity += item.Quantity;
+            _ammo.IncreaseCurrentAmmo(item.AmmoType, item.Quantity);
+            SetUIForBullets(item);
+            if (_debugMode) if (_debugMode) Debug.Log("InventoryManager - Add Existing Ammo (" + item.DisplayName + ")");
+        }
+        else
+        {
+            Item newItem = Instantiate(item);
+            Items.Add(newItem);
+            _ammo.IncreaseCurrentAmmo(item.AmmoType, item.Quantity);
+            SetUIForBullets(item);
+            if (_debugMode) if (_debugMode) Debug.Log("InventoryManager - Add New Ammo (" + item.DisplayName + ")");
+        }
+    }
+
+    private void SetUIForBullets(Item item)
+    {
+        foreach(Transform weapon in Weapons.transform)
+        {
+            if (weapon.GetComponent<Weapon>().AmmoType == item.AmmoType &&
+                weapon.gameObject.activeSelf == true)
             {
-                Debug.Log("InventoryManager - Add Existing Ammo/Potion (" + item.displayName + ")");
-                // Increase quantity of existing item by quantity of added item;
-                existingItem.quantity += item.quantity;
-
-                if (item.type == ItemType.Ammo)
-                {
-                    // INCREASE AMMO SLOT
-                    ammo.IncreaseCurrentAmmo(item.AmmoType, item.quantity);
-
-                    // SET UI FOR BULLETS
-                    foreach(Transform weapon in weapons.transform)
-                    {
-                        if (weapon.GetComponent<Weapon>().ammoType == existingItem.AmmoType &&
-                            weapon.GetComponent<Weapon>().gameObject.activeSelf == true)
-                        {
-                            Weapon weaponScript = weapon.GetComponent<Weapon>();
-                            player.GetComponent<Player>().SetBulletsUI(weaponScript.magazineCount, existingItem.quantity);
-                            break;
-                        }
-                    }
-                }
-
-                return;
-            }
-            else
-            {
-                Debug.Log("InventoryManager - Add New Ammo/Potion (" + item.displayName + ")");
-
-                Item newItem = Instantiate(item);
-                Items.Add(newItem);
-
-                // If the item is not unique, create a copy to not change the original
-                if (item.type == ItemType.Ammo)
-                {
-                    // Increase the current ammo amount of the player
-                    ammo.IncreaseCurrentAmmo(item.AmmoType, item.quantity);
-
-                    // SET UI FOR BULLETS
-                    foreach(Transform weapon in weapons.transform)
-                    {
-                        if (weapon.GetComponent<Weapon>().ammoType == item.AmmoType)
-                        {
-                            Weapon weaponScript = weapon.GetComponent<Weapon>();
-                            int inventoryAmmoAmount = GetInventoryAmmo(weaponScript.ammoType);
-                            player.GetComponent<Player>().SetBulletsUI(weaponScript.magazineCount, inventoryAmmoAmount);
-                            break;
-                        }
-                    }
-
-                }
-                return;
+                Weapon weaponScript = weapon.GetComponent<Weapon>();
+                int inventoryAmmoAmount = GetInventoryAmmo(weaponScript.AmmoType);
+                _player.SetBulletsUI(weaponScript.CurrentAmmoInClip, inventoryAmmoAmount);
+                break;
             }
         }
-        else if (item.type == ItemType.Weapon)
+    }
+
+    private void AddPotion(Item item)
+    {
+        Item existingItem = Items.Find(existingItem => existingItem.DisplayName == item.DisplayName);
+        if (existingItem != null)
         {
-            Debug.Log("InventoryManager - Add New Weapon (" + item.displayName + ")");
-
-            Items.Add(item);
-            foreach (Transform weapon in weapons.transform)
-            {                    
-                if (weapon.GetComponent<ItemController>() != null && weapon.GetComponent<ItemController>().item.displayName == item.displayName)
-                {
-                    Weapon weaponScript = weapon.GetComponent<Weapon>();
-                    weaponScript.isAvailable = true;
-
-                    // SET UI FOR BULLETS
-                    int inventoryAmmo = GetInventoryAmmo(weaponScript.ammoType);
-                    player.GetComponent<Player>().SetBulletsUI(weaponScript.magazineCount, inventoryAmmo);
-
-                    ammo.IncreaseCurrentAmmo(weaponScript.ammoType, weaponScript.magazineCount);
-                    while (weapon.gameObject.activeSelf == false)
-                    {
-                        weapons.GetComponent<WeaponSwitcher>().SwitchWeapon(true);
-                    }
-                    break;
-                }
-            }
+            existingItem.Quantity++;
+            if (_debugMode) if (_debugMode) Debug.Log("InventoryManager - Add Existing Potion (" + item.DisplayName + ")");
         }
         else
         {
             Items.Add(item);
+            if (_debugMode) if (_debugMode) Debug.Log("InventoryManager - Add New Potion (" + item.DisplayName + ")");
+        }
+    }
+
+    private void AddWeapon(Item item)
+    {
+        Items.Add(item);
+        foreach (Transform weapon in Weapons.transform)
+        {                    
+            if (weapon.GetComponent<ItemController>() != null && weapon.GetComponent<ItemController>().Item.DisplayName == item.DisplayName)
+            {
+                Weapon weaponScript = weapon.GetComponent<Weapon>();
+                weaponScript.IsAvailable = true;
+                int inventoryAmmoAmount = GetInventoryAmmo(weaponScript.AmmoType);
+                _player.SetBulletsUI(weaponScript.CurrentAmmoInClip, inventoryAmmoAmount);
+                _ammo.IncreaseCurrentAmmo(weaponScript.AmmoType, weaponScript.CurrentAmmoInClip);
+                while (weapon.gameObject.activeSelf == false)
+                {
+                    Weapons.GetComponent<WeaponSwitcher>().SwitchWeapon(true);
+                }
+                if (_debugMode) if (_debugMode) Debug.Log("InventoryManager - Add New Weapon (" + item.DisplayName + ")");
+            }
         }
     }
 
@@ -328,10 +349,10 @@ public class InventoryManager : MonoBehaviour
     {
         if (Items.Contains(item))
         {
-            if (Items[Items.IndexOf(item)].quantity > 1)
+            if (Items[Items.IndexOf(item)].Quantity > 1)
             {
-                Items[Items.IndexOf(item)].quantity -= 1;
-                if (GameManager.Instance.inventoryCanvas.activeSelf)
+                Items[Items.IndexOf(item)].Quantity -= 1;
+                if (GameManager.Instance.InventoryCanvas.activeSelf)
                 {
                     BackToSelection();
                     ListItems();
@@ -340,7 +361,7 @@ public class InventoryManager : MonoBehaviour
             else
             {
                 Items.Remove(item);
-                if (GameManager.Instance.inventoryCanvas.activeSelf)
+                if (GameManager.Instance.InventoryCanvas.activeSelf)
                 {
                     BackToSelection();
                     ListItems();
@@ -351,24 +372,24 @@ public class InventoryManager : MonoBehaviour
 
     public void RemoveAmmo(Ammo.AmmoType ammotype, int amount)
     {
-        Debug.Log("InventoryManager.RemoveAmmo(" + ammotype + ", " + amount + ")");
+        if (_debugMode) if (_debugMode) Debug.Log("InventoryManager.RemoveAmmo(" + ammotype + ", " + amount + ")");
         foreach (Item item in Items)
         {
             if (item.AmmoType == ammotype)
             {
-                if (item.quantity > amount)
+                if (item.Quantity > amount)
                 {
-                    item.quantity -= amount;
+                    item.Quantity -= amount;
                     break;
                 }
-                else if (item.quantity == amount)
+                else if (item.Quantity == amount)
                 {
                     Items.Remove(item);
                     break;
                 }
                 else
                 {
-                    Debug.Log("InventoryManager.RemoveAmmo() - FAILED");
+                    if (_debugMode) Debug.Log("InventoryManager.RemoveAmmo() - FAILED");
                 }
             }
         }
@@ -376,11 +397,11 @@ public class InventoryManager : MonoBehaviour
 
     public Item FindItem(string itemDisplayName)
     {
-        foreach (Item inventoryItem in Items)
+        foreach (Item _inventoryItemPrefab in Items)
         {
-            if (inventoryItem.displayName == itemDisplayName)
+            if (_inventoryItemPrefab.DisplayName == itemDisplayName)
             {
-                return inventoryItem;
+                return _inventoryItemPrefab;
             }
         }
         return null;
@@ -392,59 +413,71 @@ public class InventoryManager : MonoBehaviour
         {
             if (item.AmmoType == ammotype)
             {
-                return item.quantity;
+                return item.Quantity;
             }
         }
         return 0;
     }
 
+    public bool InventorySpaceCheck()
+    {
+        if (Items.Count >= _maxItems)
+        {
+            return true;
+        }
+        return false;
+    }
+
     #endregion
+
+
+
 
     #region UI Handling
 
     public void ListItems()
     {
         // Clear list before showing items
-        Debug.Log("InventoryManager.ListItems() - Clearing itemContent and itemPreview");
-        foreach (Transform child in itemContent)
+        if (_debugMode) Debug.Log("InventoryManager.ListItems() - Clearing itemContent and itemPreview");
+        foreach (Transform child in _itemContentCanvas)
         {
             Destroy(child.gameObject);
         }
-        foreach (Transform child in itemPreview)
+        foreach (Transform child in _itemPreviewCanvas)
         {
             Destroy(child.gameObject);
         }
 
         // Show items from inventory list in UI
-        Debug.Log("InventoryManager.ListItems() - Showing " + Items.Count + " items in itemContent");
+        if (_debugMode) Debug.Log("InventoryManager.ListItems() - Showing " + Items.Count + " items in itemContent");
         foreach (Item item in Items)
         {
-            GameObject obj = Instantiate(inventoryItem, itemContent);
+            GameObject obj = Instantiate(_inventoryItemPrefab, _itemContentCanvas);
             Image[] itemCanvasIcons = obj.GetComponentsInChildren<Image>();
             TextMeshProUGUI itemCanvasText = obj.GetComponentInChildren<TextMeshProUGUI>();
 
-            if (item.unique && item.type != ItemType.Weapon)
+            if (item.IsUnique && item.Type != ItemType.Weapon)
             {
                 // If the item is unique, hide the quantity
                 itemCanvasText.enabled = false;
             }
-            else if (item.type == ItemType.Weapon)
+            else if (item.Type == ItemType.Weapon)
             {
                 // If item is weapon, show current ammo in magazine
                 // loop through weapons to find the weapon with the same name as the item
-                foreach (Transform weapon in weapons.transform)
+                foreach (Transform weapon in Weapons.transform)
                 {
-                    if (weapon.GetComponent<ItemController>().item.displayName == item.displayName)
+                    if (weapon.GetComponent<ItemController>().Item.DisplayName == item.DisplayName)
                     {   
                         Weapon weaponScript = weapon.GetComponent<Weapon>();
-                        if (weaponScript.ammoType == Ammo.AmmoType.Infinite)
+                        if (weaponScript.AmmoType == Ammo.AmmoType.Infinite)
                         {
                             itemCanvasText.enabled = false;
                             break;
                         }
                         
                         // If it is, get the weapon stats and display them
-                        string weaponAmmo = weaponScript.magazineCount.ToString();
+                        string weaponAmmo = weaponScript.CurrentAmmoInClip.ToString();
                         itemCanvasText.text = weaponAmmo;
                         break;
                     }
@@ -453,7 +486,7 @@ public class InventoryManager : MonoBehaviour
             else
             {
                 // If the item is not unique, show the quantity
-                itemCanvasText.text = item.quantity.ToString();
+                itemCanvasText.text = item.Quantity.ToString();
             }
 
             // Iterate through the Image components and find the desired one
@@ -461,19 +494,19 @@ public class InventoryManager : MonoBehaviour
             {
                 if (itemCanvasIcon.gameObject != obj)
                 {
-                    itemCanvasIcon.sprite = item.icon;
+                    itemCanvasIcon.sprite = item.Icon;
                     break;
                 }
             }
             
-            obj.GetComponentInChildren<ItemController>().item = item;
+            obj.GetComponentInChildren<ItemController>().Item = item;
         }
 
         // check if Items list is empty
         if (Items.Count > 0)
         {
-            highlightNumber = 0;
-            selectedItem = Items[highlightNumber];
+            HighlightNumber = 0;
+            SelectedItem = Items[HighlightNumber];
             ChangeSelectedItemColor(true, true);
         }
     }
@@ -481,80 +514,80 @@ public class InventoryManager : MonoBehaviour
     public void ShowItemDisplay()
     {
         if (Items.Count == 0) return;
-        selectedItem = Items[highlightNumber];
-        Debug.Log("InventoryManager.ShowItemDisplay() for" + selectedItem.displayName);
+        SelectedItem = Items[HighlightNumber];
+        if (_debugMode) Debug.Log("InventoryManager.ShowItemDisplay() for" + SelectedItem.DisplayName);
         ChangeSelectedItemColor(false, false);
 
-        itemActionNumber = 0;
-        itemActionsOpen = true;
+        ItemActionNumber = 0;
+        IsItemActionsOpen = true;
 
         GameObject obj;
         // Instantiate ItemDisplay UI if it doesn't exist
-        if (itemPreview.childCount == 0)
+        if (_itemPreviewCanvas.childCount == 0)
         {
-            obj = Instantiate(itemDisplay, itemPreview);
-            Debug.Log("InventoryManager.ShowItemDisplay() - Instantiated ItemDisplay: " + obj.name);
+            obj = Instantiate(_itemDisplayPrefab, _itemPreviewCanvas);
+            if (_debugMode) Debug.Log("InventoryManager.ShowItemDisplay() - Instantiated ItemDisplay: " + obj.name);
         }
         else
         {
             // Clear the ItemDisplay UI
-            foreach (Transform child in itemPreview)
+            foreach (Transform child in _itemPreviewCanvas)
             {
                 Destroy(child.gameObject);
             }
             // Instantiate ItemDisplay UI
-            obj = Instantiate(itemDisplay, itemPreview);
-            Debug.Log("InventoryManager.ShowItemDisplay() - Instantiated ItemDisplay: " + obj.name);
+            obj = Instantiate(_itemDisplayPrefab, _itemPreviewCanvas);
+            if (_debugMode) Debug.Log("InventoryManager.ShowItemDisplay() - Instantiated ItemDisplay: " + obj.name);
         }
 
         // Change icon of obj to item.icon
         Image[] itemCanvasIcons = obj.GetComponentsInChildren<Image>();
-        Debug.Log("InventoryManager.ShowItemDisplay() - Changing icon to " + selectedItem.icon.name);
+        if (_debugMode) Debug.Log("InventoryManager.ShowItemDisplay() - Changing icon to " + SelectedItem.Icon.name);
         // Iterate through the Image components and find the desired one
         foreach (Image itemCanvasIcon in itemCanvasIcons)
         {
             if (itemCanvasIcon.gameObject != obj)
             {
-                itemCanvasIcon.sprite = selectedItem.icon;
+                itemCanvasIcon.sprite = SelectedItem.Icon;
                 break;
             }
         }
 
         // Get all TextMeshProUGUI components
         TextMeshProUGUI[] itemCanvasTexts = obj.GetComponentsInChildren<TextMeshProUGUI>();
-        Debug.Log("InventoryManager.ShowItemDisplay() - Changing text to " + selectedItem.displayName);
+        if (_debugMode) Debug.Log("InventoryManager.ShowItemDisplay() - Changing text to " + SelectedItem.DisplayName);
         foreach (TextMeshProUGUI itemCanvasText in itemCanvasTexts)
         {
             // Change name and description of ItemDisplay
             if (itemCanvasText.gameObject.name == "ItemName")
             {
-                itemCanvasText.text = selectedItem.displayName;
+                itemCanvasText.text = SelectedItem.DisplayName;
             }
             else if (itemCanvasText.gameObject.name == "ItemDescription")
             {
-                itemCanvasText.text = selectedItem.description;
+                itemCanvasText.text = SelectedItem.Description;
             }
             // If item is unique we hide the quantity display
-            else if (itemCanvasText.gameObject.name == "ItemCountText" && selectedItem.unique)
+            else if (itemCanvasText.gameObject.name == "ItemCountText" && SelectedItem.IsUnique)
             {
                 itemCanvasText.gameObject.SetActive(false);
             }
             // If item is not unique, get its child object and change the quantity
-            else if (itemCanvasText.gameObject.name == "ItemCountText" && !selectedItem.unique)
+            else if (itemCanvasText.gameObject.name == "ItemCountText" && !SelectedItem.IsUnique)
             {
-                itemCanvasText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = selectedItem.quantity.ToString();
+                itemCanvasText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = SelectedItem.Quantity.ToString();
             }
             // If item is not a weapon, hide the stats display
-            if (itemCanvasText.gameObject.name == "ItemStatsText" && selectedItem.type != ItemType.Weapon)
+            if (itemCanvasText.gameObject.name == "ItemStatsText" && SelectedItem.Type != ItemType.Weapon)
             {
                 itemCanvasText.gameObject.SetActive(false);
             }
-            else if (itemCanvasText.gameObject.name == "ItemStatsText" && selectedItem.type == ItemType.Weapon)
+            else if (itemCanvasText.gameObject.name == "ItemStatsText" && SelectedItem.Type == ItemType.Weapon)
             {
                 // loop through all the childs of weapons, check if item is the same item as the one displayed
-                foreach (Transform weapon in weapons.transform)
+                foreach (Transform weapon in Weapons.transform)
                 {
-                    if (weapon.GetComponent<ItemController>().item.displayName == selectedItem.displayName)
+                    if (weapon.GetComponent<ItemController>().Item.DisplayName == SelectedItem.DisplayName)
                     {
                         // If it is, get the weapon stats and display them
                         string weaponStats = weapon.GetComponent<Weapon>().GetWeaponStats();
@@ -571,8 +604,8 @@ public class InventoryManager : MonoBehaviour
             if (child.gameObject.name == "ItemActions")
             {
                 // Get all image children of child and add them to itemCanvasActions
-                itemCanvasActions = child.GetComponentsInChildren<Image>();
-                actionsChildCount = child.childCount;
+                _itemCanvasActions = child.GetComponentsInChildren<Image>();
+                ActionsChildCount = child.childCount;
                 ChangeSelectedActionColor(true);
             }
         }
@@ -580,15 +613,15 @@ public class InventoryManager : MonoBehaviour
 
     public void ChangeSelectedItemColor(bool highlight, bool newSelected)
     {
-        Debug.Log("InventoryManager.ChangeSelectedItemColor(" + highlight + ", " + newSelected + ")");
-        selectedItem = Items[highlightNumber];
+        if (_debugMode) Debug.Log("InventoryManager.ChangeSelectedItemColor(" + highlight + ", " + newSelected + ")");
+        SelectedItem = Items[HighlightNumber];
 
         ItemController itemController;
         Image itemImage;
-        foreach (Transform item in itemContent)
+        foreach (Transform item in _itemContentCanvas)
         {
             itemController = item.GetComponentInChildren<ItemController>();
-            if (itemController != null && itemController.item.displayName == selectedItem.displayName)
+            if (itemController != null && itemController.Item.DisplayName == SelectedItem.DisplayName)
             {
                 itemImage = item.GetComponentInChildren<Image>();
                 if (itemImage != null)
@@ -602,74 +635,97 @@ public class InventoryManager : MonoBehaviour
 
     public void ChangeSelectedActionColor(bool newHighlight)
     {
-        Debug.Log("InventoryManager.ChangeSelectedActionColor(" + newHighlight + ")");
-        itemCanvasActions[itemActionNumber].color = newHighlight ? highlightedColor : unselectedColor;
+        if (_debugMode) Debug.Log("InventoryManager.ChangeSelectedActionColor(" + newHighlight + ")");
+        _itemCanvasActions[ItemActionNumber].color = newHighlight ? highlightedColor : unselectedColor;
     }
 
     public void BackToSelection()
     {
-        Debug.Log("Back To Selection - Destroying ItemDisplay UI");
-        itemActionsOpen = false;
+        if (_debugMode) Debug.Log("Back To Selection - Destroying ItemDisplay UI");
+        IsItemActionsOpen = false;
         if (Items.Count > 0) ChangeSelectedItemColor(true, true);
-        foreach (Transform child in itemPreview)
+        foreach (Transform child in _itemPreviewCanvas)
         {
             Destroy(child.gameObject);
         }
     }
 
-    public void Inspect(Item item)
+    public void StatsUpdate()
     {
-        Debug.Log("InventoryManager.Inspect(" + item.displayName + ") - Set content and display to false and inspector items to true");
-        InstantiateItemToInspect();
-        isInspecting = true;
-        foreach (Transform child in itemContent)
-        {
-            child.gameObject.SetActive(false);
-        }
-        foreach (Transform child in itemPreview)
-        {
-            child.gameObject.SetActive(false);
-        }
-        dollDisplay.SetActive(false);
-        statsDisplay.SetActive(false);
-        inspectorCamera.SetActive(true);
-        inspector.SetActive(true);
+        _healthBar.fillAmount = _player.Health / 100f;
+        _healthText.text = _player.Health.ToString();
+        _maxHealthText.text = _player.MaxHealth.ToString();
+        _staminaBar.fillAmount = _player.Stamina / 100f;
+        _staminaText.text = _player.Stamina.ToString();
+        _maxStaminaText.text = _player.MaxStamina.ToString();
+        if (_player.IsBleeding) _bleedingIcon.SetActive(true);
+        else _bleedingIcon.SetActive(false);
+        if (_player.IsPoisoned) _poisonedIcon.SetActive(true);
+        else _poisonedIcon.SetActive(false);
+        if (_player.IsDizzy) _dizzyIcon.SetActive(true);
+        else _dizzyIcon.SetActive(false);
     }
 
-    void InstantiateItemToInspect()
+    #endregion
+
+
+
+
+    #region Inspect Item
+
+    public void Inspect(Item item)
     {
-        Debug.Log("InventoryManager.InstantiateItemToInspect() - Instantiating " + selectedItem.displayName + " to inspect");
-        inspectorItem = Instantiate(selectedItem.prefab, inspectItemTransform);
-        inspectorItem.transform.localPosition = new Vector3(0, 0, 0.8f);
-        inspectorItem.transform.localRotation = Quaternion.identity;
-        inspectorItem.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+        if (_debugMode) Debug.Log("InventoryManager.Inspect(" + item.DisplayName + ") - Set content and display to false and inspector items to true");
+        InstantiateItemToInspect();
+        IsInspecting = true;
+        foreach (Transform child in _itemContentCanvas)
+        {
+            child.gameObject.SetActive(false);
+        }
+        foreach (Transform child in _itemPreviewCanvas)
+        {
+            child.gameObject.SetActive(false);
+        }
+        _dollDisplayUI.SetActive(false);
+        _statsDisplay.SetActive(false);
+        _inspectorCamera.SetActive(true);
+        _inspector.SetActive(true);
+    }
+
+    private void InstantiateItemToInspect()
+    {
+        if (_debugMode) Debug.Log("InventoryManager.InstantiateItemToInspect() - Instantiating " + SelectedItem.DisplayName + " to inspect");
+        _inspectorItem = Instantiate(SelectedItem.Prefab, _inspectItemTransform);
+        _inspectorItem.transform.localPosition = new Vector3(0, 0, 0.8f);
+        _inspectorItem.transform.localRotation = Quaternion.identity;
+        _inspectorItem.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
     }
 
     public GameObject ReturnInspectorItem()
     {
-        return inspectorItem;
+        return _inspectorItem;
     }
 
     public void RotateInspectorItem(float x, float y, float scale)
     {
-        float zoom = scale * zoomSensitive;
-        float xRot = -x * lookSensitivity;
-        float yRot = -y * lookSensitivity;
-        if (inspectorItem != null)
+        float zoom = scale * _zoomSensitivity;
+        float xRot = -x * _lookSensitivity;
+        float yRot = -y * _lookSensitivity;
+        if (_inspectorItem != null)
         {
-            inspectorItem.transform.Rotate(Vector3.up, xRot);
-            inspectorItem.transform.Rotate(Vector3.right, yRot);
-            if (inspectorItem.transform.localScale.x + zoom < minZoomScale)
+            _inspectorItem.transform.Rotate(Vector3.up, xRot);
+            _inspectorItem.transform.Rotate(Vector3.right, yRot);
+            if (_inspectorItem.transform.localScale.x + zoom < _minZoomScale)
             {
-                inspectorItem.transform.localScale = new Vector3(minZoomScale, minZoomScale, minZoomScale);
+                _inspectorItem.transform.localScale = new Vector3(_minZoomScale, _minZoomScale, _minZoomScale);
             }
-            else if (inspectorItem.transform.localScale.x + zoom > maxZoomScale)
+            else if (_inspectorItem.transform.localScale.x + zoom > _maxZoomScale)
             {
-                inspectorItem.transform.localScale = new Vector3(maxZoomScale, maxZoomScale, maxZoomScale);
+                _inspectorItem.transform.localScale = new Vector3(_maxZoomScale, _maxZoomScale, _maxZoomScale);
             }
             else
             {
-                inspectorItem.transform.localScale += new Vector3(zoom, zoom, zoom);
+                _inspectorItem.transform.localScale += new Vector3(zoom, zoom, zoom);
             }
         }
         else Debug.LogError("InventoryManager.RotateInspectorItem() - inspectorItem is null");
@@ -677,85 +733,75 @@ public class InventoryManager : MonoBehaviour
 
     public void ResumeFromInspector()
     {
-        Debug.Log("InventoryManager.ResumeFromInspector() - Set content and display to true and inspector items to false");
-        inspectorCamera.SetActive(false);
-        inspector.SetActive(false);
-        dollDisplay.SetActive(true);
-        statsDisplay.SetActive(true);
-        Destroy(inspectorItem);
-        inspectorItem = null;
-        foreach (Transform child in itemContent)
+        if (_debugMode) Debug.Log("InventoryManager.ResumeFromInspector() - Set content and display to true and inspector items to false");
+        _inspectorCamera.SetActive(false);
+        _inspector.SetActive(false);
+        _dollDisplayUI.SetActive(true);
+        _statsDisplay.SetActive(true);
+        Destroy(_inspectorItem);
+        _inspectorItem = null;
+        foreach (Transform child in _itemContentCanvas)
         {
             child.gameObject.SetActive(true);
         }
-        foreach (Transform child in itemPreview)
+        foreach (Transform child in _itemPreviewCanvas)
         {
             child.gameObject.SetActive(true);
         }
-        isInspecting = false;
-    }
-
-    public void StatsUpdate()
-    {
-        healthBar.fillAmount = GameManager.Instance.player.health / 100f;
-        healthText.text = GameManager.Instance.player.health.ToString();
-        maxHealthText.text = GameManager.Instance.player.maxHealth.ToString();
-        staminaBar.fillAmount = GameManager.Instance.player.stamina / 100f;
-        staminaText.text = GameManager.Instance.player.stamina.ToString();
-        maxStaminaText.text = GameManager.Instance.player.maxStamina.ToString();
-        if (GameManager.Instance.player.isBleeding) bleedingIcon.SetActive(true);
-        else bleedingIcon.SetActive(false);
-        if (GameManager.Instance.player.isPoisoned) poisonedIcon.SetActive(true);
-        else poisonedIcon.SetActive(false);
-        if (GameManager.Instance.player.isDizzy) dizzyIcon.SetActive(true);
-        else dizzyIcon.SetActive(false);
+        IsInspecting = false;
     }
 
     #endregion
+
+
+
 
     #region Message Management
 
     public void DisplayMessage(string message, float duration = 2f)
     {
-        messageText.text = message;
-        if (!messageCanvas.activeSelf) messageCanvas.SetActive(true);
+        _messageText.text = message;
+        if (!_messageCanvas.activeSelf) _messageCanvas.SetActive(true);
         StartCoroutine(HideMessage(duration, message));
     }
 
-    IEnumerator HideMessage(float duration, string message)
+    private IEnumerator HideMessage(float duration, string message)
     {
         yield return new WaitForSeconds(duration);
-        // string compare: if message is same as messageText
-        if (string.Compare(message, messageText.text) == 0)
+        // string compare: if message is same as _messageText
+        if (string.Compare(message, _messageText.text) == 0)
         {
-            messageCanvas.SetActive(false);
+            _messageCanvas.SetActive(false);
         }
     }
 
     #endregion
 
+
+
+
     #region Item Actions
 
     public void DropItem(Item item)
     {
-        Debug.Log("InventoryManager.DropItem(" + item.displayName + ")");
-        GameObject obj = Instantiate(item.prefab, player.transform.position + player.transform.forward, Quaternion.identity, GameManager.Instance.interactableObjectPool);
+        if (_debugMode) Debug.Log("InventoryManager.DropItem(" + item.DisplayName + ")");
+        GameObject obj = Instantiate(item.Prefab, _player.transform.position + _player.transform.forward, Quaternion.identity, GameManager.Instance.InteractableObjectPool);
         Rigidbody itemRigidbody = obj.AddComponent<Rigidbody>();
-        itemRigidbody.AddForce(player.transform.forward * dropForce, ForceMode.Impulse);
+        itemRigidbody.AddForce(_player.transform.forward * _dropForce, ForceMode.Impulse);
         StartCoroutine(RemoveRigidbody(obj));
 
-        if(item.type == ItemType.Weapon)
+        if(item.Type == ItemType.Weapon)
         {
-            Weapon childWeapon = weapons.GetComponentInChildren<Weapon>();
-            childWeapon.isAvailable = false;
+            Weapon childWeapon = Weapons.GetComponentInChildren<Weapon>();
+            childWeapon.IsAvailable = false;
 
-            weapons.GetComponent<WeaponSwitcher>().SwitchWeapon(true);
+            Weapons.GetComponent<WeaponSwitcher>().SwitchWeapon(true);
         }
-        else if(item.type == ItemType.Ammo)
+        else if(item.Type == ItemType.Ammo)
         {
-            for (int i = 0; i < item.quantity; i++)
+            for (int i = 0; i < item.Quantity; i++)
             {
-                ammo.ReduceCurrentAmmo(item.AmmoType);
+                _ammo.ReduceCurrentAmmo(item.AmmoType);
             }
         }
         Items.Remove(item);
@@ -763,22 +809,11 @@ public class InventoryManager : MonoBehaviour
         BackToSelection();
     }
 
-    IEnumerator RemoveRigidbody(GameObject obj)
+    private IEnumerator RemoveRigidbody(GameObject obj)
     {
         yield return new WaitForSeconds(1f);
         Destroy(obj.GetComponent<Rigidbody>());
     }   
-
-    public int ItemCount()
-    {
-        if (Items.Count >= maxItems)
-        {
-            GameManager.Instance.DisplayMessage("Inventory is full", 2f);
-            // play an audio
-            return Items.Count;
-        }
-        return Items.Count;
-    }
 
     #endregion
 }

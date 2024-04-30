@@ -6,70 +6,76 @@ public class FlickeringLight : MonoBehaviour, ICustomUpdatable
 {
     #region Public Fields
 
+    [Header("Flickering Settings")]
     [Tooltip("Minimum random light intensity")]
-    public float minIntensity = 0f;
-
+    public float MinIntensity = 0f;
     [Tooltip("Maximum random light intensity")]
-    public float maxIntensity = 1f;
-
+    public float MaxIntensity = 1f;
     [Tooltip("Smooth out the randomness")]
+
     [Range(1, 50)]
-    public int smoothing = 5;
+    public int SmoothingFactor = 5;
 
     #endregion
+
+
+
 
     #region Private Fields    
 
-    private Light mainLight;
+    // Reference to the light component
+    private Light _light;
 
     // Continuous average calculation via FIFO queue
-    // Saves us iterating every time we update; we just change by the delta
-    private Queue<float> smoothQueue;
-    private float lastSum = 0;
+    private Queue<float> _intensityQueue;
+    private float _lastSum = 0;
 
     #endregion
+
+
+
+
 
     #region Unity Lifecycle Methods
 
     void Start()
     {
-        smoothQueue = new Queue<float>(smoothing);
-        mainLight = GetComponent<Light>();
+        _intensityQueue = new Queue<float>(SmoothingFactor);
+        _light = GetComponent<Light>();
     }
 
     #endregion
 
+
+
+
+
     #region Flickering Implementation
 
-    /// <summary>
-    /// Reset the randomness and start again. You usually don't need to call
-    /// this; deactivating/reactivating is usually fine, but if you want a strict
-    /// restart, you can do.
-    /// </summary>
-    public void Reset()
+    /// Reset the randomness and start again
+    public void ResetFlicker()
     {
-        smoothQueue.Clear();
-        lastSum = 0;
+        _intensityQueue.Clear();
+        _lastSum = 0f;
     }
 
     public void CustomUpdate(float deltaTime)
     {
-        if (mainLight == null)
-            return;
+        if (_light == null) return;
 
         // pop off an item if too big
-        while (smoothQueue.Count >= smoothing)
+        while (_intensityQueue.Count >= SmoothingFactor)
         {
-            lastSum -= smoothQueue.Dequeue();
+            _lastSum -= _intensityQueue.Dequeue();
         }
 
         // Generate random new item, calculate new average
-        float newVal = Random.Range(minIntensity, maxIntensity);
-        smoothQueue.Enqueue(newVal);
-        lastSum += newVal;
+        float newIntensity = Random.Range(MinIntensity, MaxIntensity);
+        _intensityQueue.Enqueue(newIntensity);
+        _lastSum += newIntensity;
 
         // Calculate new smoothed average
-        mainLight.intensity = lastSum / (float)smoothQueue.Count;
+        _light.intensity = _lastSum / (float)_intensityQueue.Count;
     }
 
     #endregion

@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: Antibiotics
   m_EditorClassIdentifier: 
-  displayName: Antibiotics
-  description: Alorpromazine are antibiotics, a medicine that fights infections caused
-    by bacteria in humans. Manufactured by Umbrella Corp..
-  icon: {fileID: 21300000, guid: 1f6b8265bbf84c94dba756f83f6678ee, type: 3}
-  iconPath: VFX/ItemIcons/Antibiotics
-  unique: 0
-  quantity: 1
-  prefab: {fileID: 6200164740777521001, guid: b312818d8d0739a4eba009106e9f2a1d, type: 3}
-  prefabPath: Prefabs/Items/Antibiotics
-  type: 2
+  DisplayName: Antibiotics
+  Description: Essential for fighting infections, this medication could save your
+    life in the perilous depths of the asylum.
+  Icon: {fileID: 21300000, guid: 1f6b8265bbf84c94dba756f83f6678ee, type: 3}
+  IconPath: VFX/ItemIcons/Antibiotics
+  IsUnique: 0
+  Quantity: 1
+  Prefab: {fileID: 6200164740777521001, guid: b312818d8d0739a4eba009106e9f2a1d, type: 3}
+  PrefabPath: Prefabs/Items/Antibiotics
+  Type: 2
   ammoType: 0
   potionType: 1

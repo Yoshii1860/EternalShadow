@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.IO;
 using UnityEngine.UI;
+using UnityEngine.AI;
 using UnityEngine.SceneManagement;
 using System.Timers;
 using TMPro;
@@ -16,7 +17,6 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton pattern to ensure only one instance exists
         if (Instance == null)
         {
             Instance = this;
@@ -27,99 +27,112 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Keep the GameManager between scene changes
         DontDestroyOnLoad(gameObject);
 
-        // Get the black screen reference
-        blackScreen = transform.GetChild(0).gameObject;
-
-        // Get the CustomUpdateManager instance
-        customUpdateManager = GetComponent<CustomUpdateManager>();
+        Blackscreen = transform.GetChild(0).gameObject;
+        CustomUpdateManager = GetComponent<CustomUpdateManager>();
     }
 
     #endregion
+
+
+
 
     #region Enums
 
     public enum GameState
     {
-        MainMenu,
-        Gameplay,
-        Inventory,
-        Paused,
-        GameOver
+        MENU,
+        GAMEPLAY,
+        INVENTORY,
+        PAUSE,
+        GAMEOVER
     }
 
     public enum SubGameState
     {
-        Default,
-        EventScene,
-        PickUp,
-        Painting
+        DEFAULT,
+        EVENT,
+        PICKUP,
+        PAINT
     }
 
     #endregion
 
+
+
+
     #region Fields
 
-    // Game state variables
+
     public GameState CurrentGameState { get; private set; }
     public SubGameState CurrentSubGameState { get; private set; }
+    [Header("Game State")]
     public GameState LastGameState;
     public SubGameState LastSubGameState;
+    [Space(10)]
 
-    // Game objects and components
-    [Header("Game Objects")]
-    public GameObject inventoryCanvas;
-    public GameObject inventory;
-    public GameObject pickupCanvas;
-    public GameObject textCanvas;
-    public Player player;
-    public PlayerController playerController;
-    public PlayerAnimController playerAnimController;
-    public Transform enemyPool;
-    public Transform interactableObjectPool;    
-    public Transform interactStaticObjectPool;
-    public Transform doorObjectPool;
-    public EventData eventData;
-    public Transform autoSavePool;
-    public GameObject blackScreen;
-    public GameObject fpsArms;
+    // Player and related components
+    [HideInInspector] public Player Player;
+    [HideInInspector] public PlayerController PlayerController;
+    [HideInInspector] public PlayerAnimManager PlayerAnimManager;
 
-    public GameObject messageCanvas;
-    public TextMeshProUGUI messageText;
+    // Canvas and UI components
+    [HideInInspector] public GameObject Inventory;
+    [HideInInspector] public GameObject InventoryCanvas;
+    [HideInInspector] public GameObject PickupCanvas;
+    [HideInInspector] public TextMeshProUGUI PickupName;
+    [HideInInspector] public TextMeshProUGUI PickupDescription;
+    [HideInInspector] public GameObject PickupPositions;
+    [HideInInspector] public GameObject TextCanvas;
+    [HideInInspector] public GameObject Blackscreen;
 
-    [Header("UI Components")]
-    [SerializeField] Image progressBar;
+    // Object Pools
+    [HideInInspector] public Transform EnemyPool;
+    [HideInInspector] public Transform InteractableObjectPool;    
+    private Transform _interactStaticObjectPool;
+    private Transform _doorObjectPool;
+    private Transform _textObjectPool;
+    private Transform _summonObjectPool;
+    private Transform _autoSavePool;
 
-    // Custom Update Manager and Input System
-    [Header("Custom Update System")]
-    public CustomUpdateManager customUpdateManager;
-    PlayerInput playerInput;
-    public bool debugUpdateManager = false;
-    public bool Loading = false;
+    // Other components
+    [HideInInspector] public CustomUpdateManager CustomUpdateManager;
+    [HideInInspector] public EventData EventData;
+    private PlayerInput _playerInput;
 
-    // Pause and debug flags
-    [Header("Pause Flag")]
-    public bool isPaused = false;
+    [Header("Flags")]
+    public bool IsGamePaused = false;
     [Tooltip("When Pickup is active, but another canvas is used. Set during gameplay.")]
-    public bool canvasActive = false;
+    public bool IsCanvasActive = false;
+    [Tooltip("When the game is loading.")]
+    public bool IsLoading = false;
+    private bool _areReferencesUpdated = false;
 
-    bool referencesUpdated = false;
+    // Message Canvas
+    private GameObject _messageCanvas;
+    private TextMeshProUGUI _messageText;
+
+    // Progress Bar for Loading
+    private Image _progressBar;
 
     #endregion
+
+
+
 
     #region Debug
 
     [Header("Debug")]
     [Tooltip("Debug mode for the enemy. If true, the enemy will not attack the player. Set during gameplay.")]
-    public bool noAttackMode = false;
+    public bool NoAttackMode = false;
     [Tooltip("Debug mode for the enemy. If true, the enemy will not hear. Set during gameplay.")]
-    public bool noNoiseMode = false;
+    public bool NoNoiseMode = false;
+    [Tooltip("Print the CustomUpdatables list.")]
+    [SerializeField] bool _printCustomUpdateables = false;
     [Tooltip("When set to true, all saved files will be deleted and the bool sets back to false. Set during gameplay.")]
     [SerializeField] bool _deleteSaveFiles = false;
 
-    // Public property for deleteSaveFiles
     public bool DeleteSaveFiles
     {
         get => _deleteSaveFiles;
@@ -134,6 +147,9 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
+
+
+
     #region Reference Management
 
     void UpdateReferences()
@@ -141,32 +157,35 @@ public class GameManager : MonoBehaviour
         Debug.Log("Updating references...");
 
         // Find and assign player and related components
-        player = FindObjectOfType<Player>();
-        if (playerAnimController == null) playerAnimController = FindObjectOfType<PlayerAnimController>();
-        if (playerController == null)  playerController = FindObjectOfType<PlayerController>();
-        if (pickupCanvas == null) pickupCanvas = GameObject.FindWithTag("PickupCanvas");
-            pickupCanvas.SetActive(false);
-        if (textCanvas == null) 
-        {
-            TextCanvasCode textCanvasCode = Resources.FindObjectsOfTypeAll<TextCanvasCode>()[0];
-            textCanvas = textCanvasCode.gameObject;
-        }
-        pickupCanvas.SetActive(false);
+        Player = GameObject.FindWithTag("Player").GetComponent<Player>();
+        if (PlayerAnimManager == null) PlayerAnimManager = GameObject.FindWithTag("Player").GetComponent<PlayerAnimManager>();
+        if (PlayerController == null)  PlayerController = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
+        if (PickupCanvas == null) PickupCanvas = GameObject.FindWithTag("PickupCanvas");
+        if (PickupName == null) PickupName = PickupCanvas.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        if (PickupDescription == null) PickupDescription = PickupCanvas.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        if (PickupPositions == null) PickupPositions = PickupCanvas.transform.GetChild(2).gameObject;
+        PickupCanvas.SetActive(false);
+        if (TextCanvas == null) TextCanvas = GameObject.FindWithTag("TextCanvas");
+        TextCanvas.SetActive(false);
 
         // Find and assign inventory components
-        inventory = GameObject.FindWithTag("Inventory");
-        inventoryCanvas = inventory.transform.GetChild(0).gameObject;
+        Inventory = GameObject.FindWithTag("Inventory");
+        InventoryCanvas = Inventory.transform.GetChild(0).gameObject;
+
+        _messageCanvas = transform.GetChild(1).gameObject;
+        _messageText = _messageCanvas.GetComponentInChildren<TextMeshProUGUI>();
 
         // Find and assign object pools
-        enemyPool = GameObject.FindWithTag("EnemyPool").transform;
-        interactableObjectPool = GameObject.FindWithTag("InteractableObjectPool").transform;
-        interactStaticObjectPool = GameObject.FindWithTag("InteractStaticObjectPool").transform;
-        doorObjectPool = GameObject.FindWithTag("DoorObjectPool").transform;
-        eventData = GameObject.FindWithTag("EventData").GetComponent<EventData>();
-        autoSavePool = GameObject.FindWithTag("SaveGamePool").transform;
-        fpsArms = player.transform.GetChild(0).GetChild(0).gameObject;
+        EnemyPool = GameObject.FindWithTag("EnemyPool").transform;
+        InteractableObjectPool = GameObject.FindWithTag("InteractableObjectPool").transform;
+        _interactStaticObjectPool = GameObject.FindWithTag("InteractStaticObjectPool").transform;
+        _doorObjectPool = GameObject.FindWithTag("DoorObjectPool").transform;
+        _textObjectPool = GameObject.FindWithTag("TextObjectPool").transform;
+        _summonObjectPool = GameObject.FindWithTag("SummonObjectPool").transform;
+        EventData = GameObject.FindWithTag("EventData").GetComponent<EventData>();
+        _autoSavePool = GameObject.FindWithTag("SaveGamePool").transform;
 
-        // Update references in InventoryManager
+        // Update References for Managers
         if(InventoryManager.Instance != null)
         {
             InventoryManager.Instance.UpdateReferences();
@@ -187,123 +206,83 @@ public class GameManager : MonoBehaviour
 
         AudioManager.Instance.LoadAudioSources();
 
-        // Update CustomUpdatable references
         UpdateCustomUpdatables();
     }
 
     void UpdateCustomUpdatables()
     {
-        customUpdateManager.ClearCustomUpdatables();
-
-        // Add relevant components to CustomUpdateManager
-        customUpdateManager.AddCustomUpdatable(MenuController.Instance);
-        PaintingController paintingController = FindObjectOfType<PaintingController>();
-        if (paintingController != null)
-        {
-            customUpdateManager.AddCustomUpdatable(paintingController);
-        }
+        CustomUpdateManager.ClearCustomUpdatables();
+        CustomUpdateManager.AddCustomUpdatable(MenuController.Instance);
         
-        if (player != null) 
+        if (Player != null) 
         {
-            customUpdateManager.AddCustomUpdatable(player.GetComponent<InventoryController>());
-            customUpdateManager.AddCustomUpdatable(player.GetComponent<PlayerController>());
-            customUpdateManager.AddCustomUpdatable(player.GetComponent<Player>());
+            CustomUpdateManager.AddCustomUpdatable(Player.GetComponent<InventoryController>());
+            CustomUpdateManager.AddCustomUpdatable(PlayerController);
+            CustomUpdateManager.AddCustomUpdatable(Player);
         }
         else Debug.LogWarning("GameManager.cs: Player is null!");
         
-        if (enemyPool != null)
+        if (EnemyPool != null)
         {
             AddEnemyCustomUpdatables();
         }
         else Debug.LogWarning("GameManager.cs: EnemyPool is null!");
         
-        string debugLog = customUpdateManager.GetCustomUpdatables();
-        Debug.Log("GameManager.cs: CustomUpdatables: " + debugLog);
+        string allCustomUpdateables = CustomUpdateManager.GetCustomUpdatables();
+        Debug.Log("GameManager.cs: CustomUpdatables: " + allCustomUpdateables);
 
-        referencesUpdated = true;
-    }
-
-    public void RemoveEnemyCustomUpdatables(bool exit = true)
-    {
-        foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>(exit))
-        {
-            if (exit) customUpdateManager.RemoveCustomUpdatable(enemy);
-            enemy.PausePlayerInSight();
-        }
-
-        foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>(exit))
-        {
-            customUpdateManager.RemoveCustomUpdatable(mannequin);
-        }
-    }
-
-    public void AddEnemyCustomUpdatables(bool start = true)
-    {
-        foreach (AISensor enemy in enemyPool.GetComponentsInChildren<AISensor>(start))
-        {
-            if (start) customUpdateManager.AddCustomUpdatable(enemy);
-            enemy.ResumePlayerInSight();
-        }
-
-        foreach (Mannequin mannequin in enemyPool.GetComponentsInChildren<Mannequin>(start))
-        {
-            customUpdateManager.AddCustomUpdatable(mannequin);
-        }
+        _areReferencesUpdated = true;
     }
 
     #endregion
+
+
+
 
     #region Start and Initialization
 
     private void Start()
     {
-        // Check if the current scene is the main menu
-        if (SceneManager.GetActiveScene().name == "MainMenu")
-        {
-            UpdateCustomUpdatables();
-            InputManager.Instance.UpdateReferences();
-            Debug.Log("GameManager - Start - MainMenu: " + SceneManager.GetActiveScene().name);
-            SetGameState(GameState.MainMenu);
-            // AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "menu music");
-            // AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 1f, 1f, true);
-        }
+        UpdateCustomUpdatables();
+        InputManager.Instance.UpdateReferences();
+        Debug.Log("GameManager - Start - MainMenu: " + SceneManager.GetActiveScene().name);
+        SetGameState(GameState.MENU);
     }
 
     IEnumerator StartWithUpdatedReferences()
     {
-        // Wait until references are updated before starting the game
-        yield return new WaitUntil(() => referencesUpdated);
+        yield return new WaitUntil(() => _areReferencesUpdated);
 
-        // Set initial audio and add starting items
-        AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, "night sound");
-        AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.5f, 1f, true);
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.Environment, "night sound");
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.Environment, 0.5f, 1f, true);
 
-        referencesUpdated = false;
+        _areReferencesUpdated = false;
     }
 
     #endregion
+
+
+
 
     #region DEBUG STATEMENT - Delete Files
 
     private void Update()
     {
-        // Check if deleteSaveFiles flag is true and delete save files
         if (DeleteSaveFiles)
         {
             DeleteAllSaveFiles();
             DeleteSaveFiles = false;
         }
 
-        if (debugUpdateManager)
+        if (_printCustomUpdateables)
         {
-            debugUpdateManager = false;
-            customUpdateManager.debugBool = true;
+            _printCustomUpdateables = false;
+            CustomUpdateManager.PrintUpdatables = true;
         }
     }
 
     public void DeleteAllSaveFiles()
     {
-        // Delete all save files with .shadow extension
         string[] saveFiles = Directory.GetFiles(Application.persistentDataPath, "*.shadow");
 
         foreach (string saveFile in saveFiles)
@@ -318,41 +297,37 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
+
+
+
     #region Start Management
 
     public void StartGame()
     {
-        // Add code to initialize the gameplay
         StartCoroutine(StartGameWithBlackScreen());
     }
 
     public IEnumerator StartGameWithBlackScreen()
     {
-        Debug.Log("BlackScreen Start");
-        // Set the black screen to active
+        Debug.Log("Blackscreen Start");
 
-        // Wait for 2 seconds before starting the fade-out
         yield return new WaitForSecondsRealtime(2f);
 
-        // Start the fade-out process
         StartCoroutine(LoadGameWithBlackScreen(true));
 
-        // AudioManager.Instance.LoadAudioSources();
-
-        // Set the game state to Gameplay after the fade-out
         yield return new WaitForSeconds(5f);
         
-        Debug.Log("BlackScreen Stop");
+        Debug.Log("Blackscreen Stop");
     }
 
     public IEnumerator LoadGameWithBlackScreen(bool newGame = false)
     {
-        SetGameState(GameState.Gameplay, SubGameState.EventScene);
+        SetGameState(GameState.GAMEPLAY, SubGameState.EVENT);
 
         float duration = 3f; 
         float elapsedTime = 0f;
-        Color startColor = blackScreen.GetComponent<Image>().color;
-        Color targetColor = new Color(0f, 0f, 0f, 0f); // Fully transparent
+        Color startColor = Blackscreen.GetComponent<Image>().color;
+        Color targetColor = new Color(0f, 0f, 0f, 0f);
         bool unique = false;
 
         while (elapsedTime < duration)
@@ -360,129 +335,124 @@ public class GameManager : MonoBehaviour
             elapsedTime += Time.deltaTime;
             float t = Mathf.Clamp01(elapsedTime / duration);
             Color newColor = Color.Lerp(startColor, targetColor, t);
-            blackScreen.GetComponent<Image>().color = newColor;
+            Blackscreen.GetComponent<Image>().color = newColor;
 
             if (elapsedTime >= 1f && !unique) 
             {
-                if (newGame) playerAnimController.StartAnimation();
+                if (newGame) PlayerAnimManager.StartAnimation();
                 unique = true;
             }
 
             yield return null;
         }
 
-        // Deactivate the black screen once the fade-out is complete
-        blackScreen.SetActive(false);
-        blackScreen.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
+        Blackscreen.SetActive(false);
+        Blackscreen.GetComponent<Image>().color = new Color(0f, 0f, 0f, 1f);
 
         float wait = newGame ? 5f : 0f;
         yield return new WaitForSeconds(wait);
 
-        // Set the game state to Gameplay after the fade-out
-        SetGameState(GameState.Gameplay, SubGameState.Default);
+        SetGameState(GameState.GAMEPLAY, SubGameState.DEFAULT);
     }
 
     #endregion
 
+
+
+
     #region Game State Management
 
-    public void Inventory()
+    public void OpenInventory()
     {
         InventoryManager.Instance.StatsUpdate();
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "open inventory", 1f, 1f);
-        SetGameState(GameState.Inventory);
-        // Add code to display the inventory
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "open inventory", 1f, 1f);
+        SetGameState(GameState.INVENTORY);
     }
 
     public void OpenSaveScreen()
     {
-        MenuController.Instance.menuCanvas.SetActive(true);
+        MenuController.Instance.MenuCanvas.SetActive(true);
         MenuController.Instance.SaveGame();
-        SetGameState(GameState.MainMenu);
+        SetGameState(GameState.MENU);
     }
 
     public void OpenMenu()
     {
-        AudioManager.Instance.PlaySoundOneShot(AudioManager.Instance.playerSpeaker2, "click", 1f, 1f);
-        MenuController.Instance.customTimer = 0f;
-        MenuController.Instance.canCloseMenu = false;
-        MenuController.Instance.menuCanvas.SetActive(true);
-        SetGameState(GameState.MainMenu);
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "click", 1f, 1f);
+        MenuController.Instance.CloseMenuTimer = 0f;
+        MenuController.Instance.CanCloseMenu = false;
+        MenuController.Instance.MenuCanvas.SetActive(true);
+        SetGameState(GameState.MENU);
     }
 
     public void BackToMainMenu()
     {
         MenuController.Instance.MainMenu();
         SceneManager.LoadScene("MainMenu");
-        MenuController.Instance.menuCanvas.SetActive(true);
-        SetGameState(GameState.MainMenu);
+        MenuController.Instance.MenuCanvas.SetActive(true);
+        SetGameState(GameState.MENU);
     }
 
     public void OpenDeathScreen()
     {
-        MenuController.Instance.customTimer = 0f;
-        MenuController.Instance.canCloseMenu = false;
-        MenuController.Instance.menuCanvas.SetActive(true);
+        MenuController.Instance.CloseMenuTimer = 0f;
+        MenuController.Instance.CanCloseMenu = false;
+        MenuController.Instance.MenuCanvas.SetActive(true);
         MenuController.Instance.DeathScreen();
-        SetGameState(GameState.MainMenu);
+        SetGameState(GameState.MENU);
     }
 
     public void PauseGame()
     {
-        if (CurrentGameState == GameState.MainMenu) return;
-        SetGameState(GameState.Paused);
-        // Add code to pause the game
+        if (CurrentGameState == GameState.MENU) return;
+        SetGameState(GameState.PAUSE);
         RemoveEnemyCustomUpdatables(false);
     }
 
     public void GameplayEvent()
     {
-        SetGameState(GameState.Gameplay, SubGameState.EventScene);
-        playerController.GamePlayEvent();
-        // Add code for gameplay event
+        SetGameState(GameState.GAMEPLAY, SubGameState.EVENT);
+        PlayerController.GamePlayEvent();
     }
 
     public void PickUp()
     {
-        SetGameState(GameState.Gameplay, SubGameState.PickUp);
-        // Add code for picking up an item
+        SetGameState(GameState.GAMEPLAY, SubGameState.PICKUP);
         RemoveEnemyCustomUpdatables(false);
     }
 
     public void PaintingEvent()
     {
         PaintingEvent paintingEvent = FindObjectOfType<PaintingEvent>();
-        if (!paintingEvent.active)
+        if (!paintingEvent.IsActive)
         {
             DisplayMessage("It seems like you can control something with it, but it has no power.", 3f);
             return;
         }
 
-        SetGameState(GameState.Gameplay, SubGameState.Painting);
+        SetGameState(GameState.GAMEPLAY, SubGameState.PAINT);
         RemoveEnemyCustomUpdatables(false);
         paintingEvent.StartPaintingEvent();
     }
 
     public void ResumeGame()
     {
-        SetGameState(GameState.Gameplay, SubGameState.Default);
-        // Add code to resume the game
-        if (inventoryCanvas.activeSelf) inventoryCanvas.SetActive(false);
+        SetGameState(GameState.GAMEPLAY);
+        if (InventoryCanvas.activeSelf) InventoryCanvas.SetActive(false);
         AddEnemyCustomUpdatables(false);
     }
 
     public void ResumeFromEventScene()
     {
-        SetGameState(GameState.Gameplay, SubGameState.Default);
+        SetGameState(GameState.GAMEPLAY);
     }
 
     public void GameOver()
     {
-        SetGameState(GameState.GameOver);
-        // Add code for game over logic and display game over screen
+        SetGameState(GameState.GAMEOVER);
     }
 
-    private void SetGameState(GameState newState, SubGameState newSubGameState = SubGameState.Default)
+    private void SetGameState(GameState newState, SubGameState newSubGameState = SubGameState.DEFAULT)
     {
         LastGameState = CurrentGameState;
         LastSubGameState = CurrentSubGameState;
@@ -491,135 +461,77 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("GameManager.cs: SetGameState: " + CurrentGameState + "." + CurrentSubGameState);
 
-        // Handle state-specific actions
         switch (CurrentGameState)
         {
-            case GameState.MainMenu:
-                // Add code for main menu behavior
-                if (playerInput == null)
+            case GameState.MENU:
+                if (_playerInput == null)
                 {
-                    playerInput = FindObjectOfType<PlayerInput>();
+                    _playerInput = FindObjectOfType<PlayerInput>();
                 }
-                if (enemyPool != null)
+                if (EnemyPool != null)
                 {
-                    foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
-                    {
-                        if (agent.gameObject.activeSelf)
-                        {
-                            agent.isStopped = true;
-                        }
-                    }
+                    StopNavMeshAgents(true);
                 }
-                isPaused = true;
+                IsGamePaused = true;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                playerInput.SwitchCurrentActionMap("Menu");
+                _playerInput.SwitchCurrentActionMap("Menu");
                 break;
 
-            case GameState.Gameplay:
-                // Add code for common gameplay behavior (for SubGameState.Default)
-                // This will be executed for all variations unless overridden in substates.
-
-                if (playerInput == null)
-                {
-                    playerInput = FindObjectOfType<PlayerInput>();
-                }
-
+            case GameState.GAMEPLAY:
+                if (_playerInput == null) _playerInput = FindObjectOfType<PlayerInput>();
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 switch (CurrentSubGameState)
                 {
-                    case SubGameState.Default:
-                        foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
-                        {
-                            if (agent.gameObject.activeSelf)
-                            {
-                                agent.isStopped = false;
-                                Debug.Log("GameManager.cs: Move " + agent.name);
-                            }
-                        }
-                        isPaused = false;
-                        playerInput.SwitchCurrentActionMap("Player");
-                        Debug.Log("GameManager.cs: Switch to GamePlay.Default");
+                    case SubGameState.DEFAULT:
+                        StopNavMeshAgents(false);
+                        IsGamePaused = false;
+                        _playerInput.SwitchCurrentActionMap("Player");
+                        Debug.Log("GameManager.cs: Switch to GamePlay.DEFAULT");
                         break;
 
-                    case SubGameState.EventScene:
-                        foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
-                        {
-                            if (agent.gameObject.activeSelf)
-                            {
-                                agent.isStopped = true;
-                                Debug.Log("GameManager.cs: Move " + agent.name);
-                            }
-                        }
-                        isPaused = true;
-                        playerInput.SwitchCurrentActionMap("Event");
-                        Debug.Log("GameManager.cs: Switch to GamePlay.EventScene");
+                    case SubGameState.EVENT:
+                        StopNavMeshAgents(true);
+                        IsGamePaused = true;
+                        _playerInput.SwitchCurrentActionMap("Event");
+                        Debug.Log("GameManager.cs: Switch to GamePlay.EVENT");
                         break;
 
-                    case SubGameState.PickUp:
-                        foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
-                        {
-                            if (agent.gameObject.activeSelf)
-                            {
-                                agent.isStopped = true;
-                                Debug.Log("GameManager.cs: Move " + agent.name);
-                            }
-                        }
-                        isPaused = true;
-                        playerInput.SwitchCurrentActionMap("PickUp");
-                        Debug.Log("GameManager.cs: Switch to GamePlay.PickUp");
+                    case SubGameState.PICKUP:
+                        StopNavMeshAgents(true);
+                        IsGamePaused = true;
+                        _playerInput.SwitchCurrentActionMap("PickUp");
+                        Debug.Log("GameManager.cs: Switch to GamePlay.PICKUP");
                         break;
-                    case SubGameState.Painting:
-                        foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
-                        {
-                            if (agent.gameObject.activeSelf)
-                            {
-                                agent.isStopped = true;
-                                Debug.Log("GameManager.cs: Move " + agent.name);
-                            }
-                        }
-                        isPaused = true;
-                        playerInput.SwitchCurrentActionMap("Painting");
-                        Debug.Log("GameManager.cs: Switch to GamePlay.Painting");
+                    case SubGameState.PAINT:
+                        StopNavMeshAgents(true);
+                        IsGamePaused = true;
+                        _playerInput.SwitchCurrentActionMap("Painting");
+                        Debug.Log("GameManager.cs: Switch to GamePlay.PAINT");
                         break;
                 }
                 break;
 
-            case GameState.Inventory:
-                // Add code for inventory behavior
-                foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
-                {
-                    if (agent.gameObject.activeSelf)
-                    {
-                        agent.isStopped = true;
-                    }
-                }
-                isPaused = true;
-                playerInput.SwitchCurrentActionMap("Inventory");
-                inventoryCanvas.SetActive(true);
+            case GameState.INVENTORY:
+                StopNavMeshAgents(true);
+                IsGamePaused = true;
+                _playerInput.SwitchCurrentActionMap("Inventory");
+                InventoryCanvas.SetActive(true);
                 InventoryManager.Instance.ListItems();
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 break;
 
-            case GameState.Paused:
-                // Add code for paused behavior
-                foreach (UnityEngine.AI.NavMeshAgent agent in enemyPool.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>())
-                {
-                    if (agent.gameObject.activeSelf)
-                    {
-                        agent.isStopped = true;
-                    }
-                }
-                isPaused = true;
+            case GameState.PAUSE:
+                StopNavMeshAgents(true);
+                IsGamePaused = true;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 break;
 
-            case GameState.GameOver:
-                // Add code for game over behavior
-                isPaused = true;
+            case GameState.GAMEOVER:
+                IsGamePaused = true;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 break;
@@ -627,40 +539,44 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
+
+
+
     #region Message Management
 
     public void DisplayMessage(string message, float duration = 3f)
     {
-        messageText.text = message;
-        if (!messageCanvas.activeSelf) messageCanvas.SetActive(true);
+        _messageText.text = message;
+        if (!_messageCanvas.activeSelf) _messageCanvas.SetActive(true);
         StartCoroutine(HideMessage(duration, message));
     }
 
     IEnumerator HideMessage(float duration, string message)
     {
         yield return new WaitForSeconds(duration);
-        // string compare: if message is same as messageText
-        if (string.Compare(message, messageText.text) == 0)
+        if (string.Compare(message, _messageText.text) == 0)
         {
-            messageCanvas.SetActive(false);
+            _messageCanvas.SetActive(false);
         }
     }
 
     #endregion
 
+
+
+
     #region Save and Load
 
     public void LoadNewGame()
     {
-        // Add code to initialize a new game
-        Loading = true;
-        LoadNewScene("Asylum", true); // Load the Sandbox scene and set "new Game" flag to new    
+        IsLoading = true;
+        LoadNewScene("Asylum", true);
         Debug.Log("GameManager.cs: New Game Loaded!");
     }
 
     public void SaveData(string filename = "Asylum-autosave")
     {
-        SaveSystem.SaveGameFile(filename, player, InventoryManager.Instance.weapons.transform, enemyPool, interactableObjectPool, interactStaticObjectPool, doorObjectPool, autoSavePool);
+        SaveSystem.SaveGameFile(filename, Player, InventoryManager.Instance.Weapons.transform, EnemyPool, InteractableObjectPool, _interactStaticObjectPool, _doorObjectPool, _textObjectPool, _summonObjectPool, _autoSavePool);
         Debug.Log("GameManager.cs: Player data saved!");
     }
 
@@ -669,278 +585,28 @@ public class GameManager : MonoBehaviour
         SaveData data = SaveSystem.LoadGameFile(filename);
         if (data != null)
         {
-            ////////////////////////////
-            // Load Player Stats
-            ////////////////////////////
-            player.health = data.health;
-            Vector3 position = new Vector3(data.position[0], data.position[1], data.position[2]);
-            player.transform.position = position;
-
-            ////////////////////////////
-            // Load Inventory
-            ////////////////////////////
-            InventoryManager.Instance.Items.Clear();
-
-            foreach (ItemData itemData in data.items)
-            {
-                // Convert ItemData back to Item and add it to the inventory
-                Item item = CreateItemFromData(itemData);
-                InventoryManager.Instance.AddItem(item);
-            }
-
-            ////////////////////////////
-            // Load Weapons
-            ////////////////////////////
-            foreach (WeaponData weaponData in data.weapons)
-            {
-                // Convert WeaponData back to Weapon and add it to the inventory
-                Weapon weapon = InventoryManager.Instance.weapons.transform.GetChild(weaponData.index).GetComponent<Weapon>();
-                weapon.magazineCount = weaponData.magazineCount;
-                weapon.isAvailable = weaponData.isAvailable;
-                if (weaponData.isEquipped) weapon.gameObject.SetActive(true);
-                else weapon.gameObject.SetActive(false);
-            }
-
-            ////////////////////////////
-            // Set Ammo
-            ////////////////////////////
-            Ammo ammoSlot = player.GetComponent<Ammo>();
-            ammoSlot.ResetAmmo();
-
-            foreach (Item item in InventoryManager.Instance.Items)
-            {
-                if (item.type == ItemType.Ammo)
-                {
-                    ammoSlot.IncreaseCurrentAmmo(item.AmmoType, item.quantity);
-                }
-            }
-
-            foreach (Weapon weapon in InventoryManager.Instance.weapons.transform.GetComponentsInChildren<Weapon>(true))
-            {
-                if (weapon.isAvailable)
-                {
-                    ammoSlot.IncreaseCurrentAmmo(weapon.ammoType, weapon.magazineCount);
-                }
-
-                if (weapon.isEquipped)
-                {
-                    // Set the UI for the current weapon
-                    int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(weapon.ammoType);
-                    player.SetBulletsUI(weapon.magazineCount, inventoryAmmo);
-                }
-            }
-
-            ////////////////////////////
-            // Load Enemies
-            ////////////////////////////
-            Enemy[] enemiesPool = enemyPool.GetComponentsInChildren<Enemy>(true);
-            Mannequin[] mannequinsPool = enemyPool.GetComponentsInChildren<Mannequin>(true);
-
-            foreach (EnemyData enemyData in data.enemies)
-            {
-                foreach (Enemy enemy in enemiesPool)
-                {
-                    if (enemy.GetComponent<UniqueIDComponent>().UniqueID == enemyData.uniqueID)
-                    {
-                        enemy.health = enemyData.health;
-                        enemy.isDead = enemyData.isDead;
-                        enemy.transform.position = new Vector3(enemyData.position[0], enemyData.position[1], enemyData.position[2]);
-                        enemy.transform.rotation = Quaternion.Euler(enemyData.rotation[0], enemyData.rotation[1], enemyData.rotation[2]);
-                        if (enemy.isDead)
-                        {
-                            enemy.gameObject.SetActive(false);
-                        }
-                        else
-                        {
-                            enemy.gameObject.SetActive(true);
-                        }
-                        // if (enemyData.isActive) enemy.GetComponent<EnemyBT>().ResetTree();
-                        if (!enemyData.isActive) enemy.gameObject.SetActive(false);
-                    }
-                }
-
-                foreach (Mannequin mannequin in mannequinsPool)
-                {
-                    if (mannequin.GetComponent<UniqueIDComponent>().UniqueID == enemyData.uniqueID)
-                    {
-                        mannequin.isDead = enemyData.isDead;
-                        mannequin.transform.position = new Vector3(enemyData.position[0], enemyData.position[1], enemyData.position[2]);
-                        mannequin.transform.rotation = Quaternion.Euler(enemyData.rotation[0], enemyData.rotation[1], enemyData.rotation[2]);
-                        if (mannequin.isDead)
-                        {
-                            mannequin.gameObject.SetActive(false);
-                        }
-                        else if (enemyData.isActive)
-                        {
-                            mannequin.gameObject.SetActive(true);
-                        }
-                        else mannequin.gameObject.SetActive(false);
-                    }
-                }
-            }
-
-            ////////////////////////////
-            // Load Interactable Objects
-            ////////////////////////////
-            InteractableObject[] intObjectsPool = interactableObjectPool.GetComponentsInChildren<InteractableObject>();
-            Duplicate[] duplicatesPool = interactableObjectPool.GetComponentsInChildren<Duplicate>();
-
-            foreach (InteractableObjectData intObjectsData in data.interactableObjects)
-            {
-                foreach (InteractableObject pickupObject in intObjectsPool)
-                {
-                    if (pickupObject.GetComponent<UniqueIDComponent>().UniqueID == intObjectsData.uniqueID)
-                    {
-                        pickupObject.active = intObjectsData.active;
-                        if (!pickupObject.active)
-                        {
-                            // Move the object to a position far away
-                            pickupObject.transform.position = new Vector3(0, -1000f, 0);
-                        }
-                    }
-                }
-
-                int count = 0;
-
-                foreach (InteractableObject obj in intObjectsPool)
-                {                    
-                    if (obj is HorrorDollCode horrorDoll)
-                    {
-                        if (!horrorDoll.active)
-                        {
-                            count++;
-                        }
-                    }
-                }
-
-                InventoryManager.Instance.horrorDollCount.text = count.ToString();
-
-                foreach (Duplicate duplicate in duplicatesPool)
-                {
-                    if (duplicate.duplicateID == intObjectsData.uniqueID)
-                    {
-                        duplicate.duplicateObject.GetComponent<InteractableObject>().active = intObjectsData.active;
-                        if (!duplicate.duplicateObject.GetComponent<InteractableObject>().active)
-                        {
-                            // Move the object to a position far away
-                            duplicate.duplicateObject.transform.position = new Vector3(0, -1000f, 0);
-                        }
-                    }
-                }
-            }
-
-            ////////////////////////////
-            // Load Interactable Static Objects
-            ////////////////////////////
-            Drawer[] intObjPool;
-
-            foreach (Transform staticObject in interactStaticObjectPool.GetComponentsInChildren<Transform>())
-            {
-                intObjPool = staticObject.GetComponentsInChildren<Drawer>();
-
-                foreach (InteractStaticObjectData intObjData in data.interactStaticObjects)
-                {
-                    foreach (Drawer drawer in intObjPool)
-                    {
-                        if (drawer.GetComponent<UniqueIDComponent>().UniqueID == intObjData.uniqueID)
-                        {
-                            drawer.open = intObjData.open;
-                            if (drawer.isDrawer && intObjData.open) drawer.transform.position = new Vector3(intObjData.position[0], intObjData.position[1], intObjData.position[2]);
-                            else if (intObjData.open) drawer.transform.rotation = Quaternion.Euler(intObjData.rotation[0], intObjData.rotation[1], intObjData.rotation[2]);
-                        }
-                    }
-                }
-            }
-
-            ////////////////////////////
-            // Load Door Objects
-            ////////////////////////////
-
-            foreach (DoorObjectData doorData in data.doors)
-            {
-                foreach (Duplicate door in doorObjectPool.GetComponentsInChildren<Duplicate>())
-                {
-                    if (door.duplicateID == doorData.uniqueID)
-                    {
-                        Door doorScript = door.duplicateObject.GetComponent<Door>();
-                        doorScript.locked = doorData.locked;
-                        if (doorData.open) doorScript.OpenDoor(false);
-                    }
-                }
-            }
-
-            ////////////////////////////
-            // Load Event Data
-            ////////////////////////////
-
-            foreach (SavedEventData savedEventData in data.events)
-            {
-                foreach (EventDataEntry eventDataEntry in eventData.eventDataEntries)
-                {
-                    if (eventDataEntry.EventName == savedEventData.EventName)
-                    {
-                        if (savedEventData.Active)
-                        {
-                            eventDataEntry.Active = true;
-                            eventData.TriggerEvent(eventDataEntry.EventName);
-                        }
-                    }
-                }
-            }
-
-            ////////////////////////////
-            // Load Various Data
-            ////////////////////////////
-
-            AudioManager.Instance.SetAudioClip(AudioManager.Instance.environment, data.variousData.environmentMusicClip);
-            AudioManager.Instance.PlayAudio(AudioManager.Instance.environment, 0.1f, 1f, true);
-            player.lightAvail = data.variousData.flashlightEnabled;
-            if (player.lightAvail) player.LightSwitch();
-
-            ////////////////////////////
-            // AutoSave Data
-            ////////////////////////////
-
-            foreach (AutoSaveData autoSaveData in data.autoSaveData)
-            {
-                foreach (AutoSave autoSave in autoSavePool.GetComponentsInChildren<AutoSave>())
-                {
-                    if (autoSave.GetComponent<UniqueIDComponent>().UniqueID == autoSaveData.uniqueID)
-                    {
-                        if (!autoSaveData.active)
-                        {
-                            autoSave.active = false;
-                            autoSave.GetComponent<Collider>().enabled = false;
-                        }
-                    }
-                }
-            }
+            LoadPlayerStats(data);
+            LoadInventory(data);
+            LoadWeapons(data);
+            LoadAmmo(data);
+            LoadEnemies(data);
+            LoadInteractableObjects(data);
+            LoadInteractableStaticObjects(data);
+            LoadDoorObjects(data);
+            LoadTextObjects(data);
+            LoadSummonObjects(data);
+            LoadEventData(data);
+            LoadVariousData(data);
+            LoadAutoSaveData(data);
 
             Debug.Log("GameManager.cs: Player data loaded!");
         }
+        else Debug.LogError("GameManager.cs: No save data found!");
     }
 
-    private Item CreateItemFromData(ItemData itemData)
+    public void LoadNewScene(string filename, bool newGame = false)
     {
-        Item newItem = ScriptableObject.CreateInstance<Item>();
-        newItem.displayName = itemData.displayName;
-        newItem.description = itemData.description;
-        newItem.unique = itemData.unique;
-        newItem.quantity = itemData.quantity;
-        newItem.type = (ItemType)System.Enum.Parse(typeof(ItemType), itemData.type);
-        newItem.AmmoType = (Ammo.AmmoType)System.Enum.Parse(typeof(Ammo.AmmoType), itemData.ammoType);
-        newItem.PotionType = (Potion.PotionType)System.Enum.Parse(typeof(Potion.PotionType), itemData.potionType);
-        newItem.iconPath = itemData.iconPath;
-        newItem.icon = Resources.Load<Sprite>(itemData.iconPath);
-        newItem.prefabPath = itemData.prefabPath;
-        newItem.prefab = Resources.Load<GameObject>(itemData.prefabPath);
-
-        return newItem;
-    }
-
-    public void LoadNewScene(string filename, bool newGame = false) // Hardcoded for now
-    {
-        Loading = true;
+        IsLoading = true;
 
         string sceneNameToLoad = filename.Split('-')[0].Trim();
 
@@ -949,28 +615,26 @@ public class GameManager : MonoBehaviour
 
     IEnumerator LoadSceneAsync(string sceneName, string filename, bool newGame = false)
     {
-        blackScreen.SetActive(true);
+        Blackscreen.SetActive(true);
 
-        // Start loading the LoadingScreen scene asynchronously
         AsyncOperation asyncLoadLoadingScreen = SceneManager.LoadSceneAsync("LoadingScreen");
 
-        // Wait until the LoadingScreen scene is fully loaded
         while (!asyncLoadLoadingScreen.isDone)
         {
             yield return null;
         }
 
-        progressBar = GameObject.Find("ProgressBar").GetComponent<Image>();
+        _progressBar = GameObject.Find("ProgressBar").GetComponent<Image>();
 
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
 
         while (!asyncLoad.isDone)
         {
-            progressBar.fillAmount = asyncLoad.progress;
+            _progressBar.fillAmount = asyncLoad.progress;
 
             if (asyncLoad.progress >= 0.95f)
             {
-                progressBar.fillAmount = 1f;
+                _progressBar.fillAmount = 1f;
                 asyncLoad.allowSceneActivation = true;
             }
             yield return null;
@@ -1000,10 +664,363 @@ public class GameManager : MonoBehaviour
             Debug.Log("GameManager - Start - LoadGame: " + SceneManager.GetActiveScene().name);
             StartCoroutine(LoadGameWithBlackScreen());
         }
+        else if (newGame)
+        {
+            foreach (Enemy enemy in EnemyPool.GetComponentsInChildren<Enemy>())
+            {
+                enemy.gameObject.SetActive(false);
+            }
+        }
 
-        // Scene is fully loaded
         Debug.Log("Scene " + sceneName + " is fully loaded!");
-        Loading = false;
+        IsLoading = false;
     }
+
+    private void LoadPlayerStats(SaveData data)
+    {
+        Player.Health = data.Health;
+        Vector3 position = new Vector3(data.Position[0], data.Position[1], data.Position[2]);
+        Player.transform.position = position;
+    }
+
+    private void LoadInventory(SaveData data)
+    {
+        InventoryManager.Instance.Items.Clear();
+
+        foreach (ItemData itemData in data.Items)
+        {
+            Item item = CreateItemFromData(itemData);
+            InventoryManager.Instance.AddItem(item);
+        }
+    }
+
+    private void LoadWeapons(SaveData data)
+    {
+        foreach (WeaponData weaponData in data.Weapons)
+        {
+            Weapon weapon = InventoryManager.Instance.Weapons.transform.GetChild(weaponData.Index).GetComponent<Weapon>();
+            weapon.CurrentAmmoInClip = weaponData.MagazineCount;
+            weapon.IsAvailable = weaponData.IsAvailable;
+            if (weaponData.IsEquipped) weapon.gameObject.SetActive(true);
+            else weapon.gameObject.SetActive(false);
+        }
+    }
+
+    private void LoadAmmo(SaveData data)
+    {
+        Ammo ammoSlot = Player.GetComponent<Ammo>();
+        ammoSlot.ResetAmmo();
+
+        foreach (Item item in InventoryManager.Instance.Items)
+        {
+            if (item.Type == ItemType.Ammo)
+            {
+                ammoSlot.IncreaseCurrentAmmo(item.AmmoType, item.Quantity);
+            }
+        }
+
+        foreach (Weapon weapon in InventoryManager.Instance.Weapons.transform.GetComponentsInChildren<Weapon>(true))
+        {
+            if (weapon.IsAvailable)
+            {
+                ammoSlot.IncreaseCurrentAmmo(weapon.AmmoType, weapon.CurrentAmmoInClip);
+            }
+
+            if (weapon.IsEquipped)
+            {
+                int inventoryAmmo = InventoryManager.Instance.GetInventoryAmmo(weapon.AmmoType);
+                Player.SetBulletsUI(weapon.CurrentAmmoInClip, inventoryAmmo);
+            }
+        }
+    }
+
+    private void LoadEnemies(SaveData data)
+    {
+        Enemy[] enemiesPool = EnemyPool.GetComponentsInChildren<Enemy>(true);
+        Mannequin[] mannequinsPool = EnemyPool.GetComponentsInChildren<Mannequin>(true);
+
+        foreach (EnemyData enemyData in data.Enemies)
+        {
+            foreach (Enemy enemy in enemiesPool)
+            {
+                if (enemy.GetComponent<UniqueIDComponent>().UniqueID == enemyData.UniqueID)
+                {
+                    enemy.HealthPoints = enemyData.Health;
+                    enemy.IsDead = enemyData.IsDead;
+                    enemy.transform.position = new Vector3(enemyData.Position[0], enemyData.Position[1], enemyData.Position[2]);
+                    enemy.transform.rotation = Quaternion.Euler(enemyData.Rotation[0], enemyData.Rotation[1], enemyData.Rotation[2]);
+                    if (enemy.IsDead)
+                    {
+                        enemy.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        enemy.gameObject.SetActive(true);
+                    }
+                    if (!enemyData.IsActive) enemy.gameObject.SetActive(false);
+                }
+            }
+
+            foreach (Mannequin mannequin in mannequinsPool)
+            {
+                if (mannequin.GetComponent<UniqueIDComponent>().UniqueID == enemyData.UniqueID)
+                {
+                    mannequin.IsDead = enemyData.IsDead;
+                    mannequin.transform.position = new Vector3(enemyData.Position[0], enemyData.Position[1], enemyData.Position[2]);
+                    mannequin.transform.rotation = Quaternion.Euler(enemyData.Rotation[0], enemyData.Rotation[1], enemyData.Rotation[2]);
+                    if (mannequin.IsDead)
+                    {
+                        mannequin.gameObject.SetActive(false);
+                    }
+                    else if (enemyData.IsActive)
+                    {
+                        mannequin.gameObject.SetActive(true);
+                    }
+                    else mannequin.gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    
+    private void LoadInteractableObjects(SaveData data)
+    {
+        InteractableObject[] intObjectsPool = InteractableObjectPool.GetComponentsInChildren<InteractableObject>();
+        Duplicate[] duplicatesPool = InteractableObjectPool.GetComponentsInChildren<Duplicate>();
+
+        foreach (InteractableObjectData intObjectsData in data.InteractableObjects)
+        {
+            foreach (InteractableObject pickupObject in intObjectsPool)
+            {
+                if (pickupObject.GetComponent<UniqueIDComponent>().UniqueID == intObjectsData.UniqueID)
+                {
+                    pickupObject.IsActive = intObjectsData.IsActive;
+                    if (!pickupObject.IsActive)
+                    {
+                        // Move the object to a position far away
+                        pickupObject.transform.position = new Vector3(0, -1000f, 0);
+                    }
+                }
+            }
+
+            int count = 0;
+
+            foreach (InteractableObject obj in intObjectsPool)
+            {                    
+                if (obj is HorrorDollCode horrorDoll)
+                {
+                    if (!horrorDoll.IsActive)
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            InventoryManager.Instance.HorrorDollCount.text = count.ToString();
+
+            foreach (Duplicate duplicate in duplicatesPool)
+            {
+                if (duplicate.DuplicateID == intObjectsData.UniqueID)
+                {
+                    duplicate.DuplicateObject.GetComponent<InteractableObject>().IsActive = intObjectsData.IsActive;
+                    if (!duplicate.DuplicateObject.GetComponent<InteractableObject>().IsActive)
+                    {
+                        // Move the object to a position far away
+                        duplicate.DuplicateObject.transform.position = new Vector3(0, -1000f, 0);
+                    }
+                }
+            }
+        }
+    }
+
+    private void LoadInteractableStaticObjects(SaveData data)
+    {
+        Drawer[] intObjPool;
+
+        foreach (Transform staticObject in _interactStaticObjectPool.GetComponentsInChildren<Transform>())
+        {
+            intObjPool = staticObject.GetComponentsInChildren<Drawer>();
+
+            foreach (InteractStaticObjectData intObjData in data.InteractStaticObjects)
+            {
+                foreach (Drawer drawer in intObjPool)
+                {
+                    if (drawer.GetComponent<UniqueIDComponent>().UniqueID == intObjData.UniqueID)
+                    {
+                        drawer.IsOpen = intObjData.IsOpen;
+                        if (drawer.IsDrawer && intObjData.IsOpen) drawer.transform.position = new Vector3(intObjData.Position[0], intObjData.Position[1], intObjData.Position[2]);
+                        else if (intObjData.IsOpen) drawer.transform.rotation = Quaternion.Euler(intObjData.Rotation[0], intObjData.Rotation[1], intObjData.Rotation[2]);
+                    }
+                }
+            }
+        }
+    }
+
+    private void LoadDoorObjects(SaveData data)
+    {
+        foreach (DoorObjectData doorData in data.Doors)
+        {
+            foreach (Duplicate door in _doorObjectPool.GetComponentsInChildren<Duplicate>())
+            {
+                if (door.DuplicateID == doorData.UniqueID)
+                {
+                    Door doorScript = door.DuplicateObject.GetComponent<Door>();
+                    doorScript.IsLocked = doorData.IsLocked;
+                    if (doorData.IsOpen) doorScript.OpenDoor(false);
+                }
+            }
+        }
+    }
+
+    private void LoadTextObjects(SaveData data)
+    {
+        foreach (TextObjectData textData in data.TextObjects)
+        {
+            foreach (TextCode textCode in _textObjectPool.GetComponentsInChildren<TextCode>())
+            {
+                if (textCode.GetComponent<UniqueIDComponent>().UniqueID == textData.UniqueID)
+                {
+                    textCode.IsAudioActive = textData.IsActive;
+                }
+            }
+        }
+
+        foreach (Duplicate duplicate in _textObjectPool.GetComponentsInChildren<Duplicate>())
+        {
+            foreach (TextObjectData textData in data.TextObjects)
+            {
+                if (duplicate.DuplicateID == textData.UniqueID)
+                {
+                    TextCode textCode = duplicate.DuplicateObject.GetComponent<TextCode>();
+                    textCode.IsAudioActive = textData.IsActive;
+                }
+            }
+        }
+    }
+
+    private void LoadSummonObjects(SaveData data)
+    {
+        foreach (SummonObjectData summonData in data.SummonObjects)
+        {
+            foreach (SummonObject summonObject in _summonObjectPool.GetComponentsInChildren<SummonObject>())
+            {
+                if (summonObject.GetComponent<UniqueIDComponent>().UniqueID == summonData.UniqueID)
+                {
+                    summonObject.IsObjectPlaced = summonData.IsObjectPlaced;
+                    if (summonData.IsObjectPlaced) summonObject.LoadPlacedObject();
+                }
+            }
+        }
+    }
+
+    private void LoadEventData(SaveData data)
+    {
+        foreach (SavedEventData savedEventData in data.Events)
+        {
+            foreach (EventDataEntry eventDataEntry in EventData.eventDataEntries)
+            {
+                if (eventDataEntry.EventName == savedEventData.EventName)
+                {
+                    if (savedEventData.Active)
+                    {
+                        eventDataEntry.Active = true;
+                        EventData.TriggerEvent(eventDataEntry.EventName);
+                    }
+                }
+            }
+        }
+    }
+
+    private void LoadVariousData(SaveData data)
+    {
+        AudioManager.Instance.SetAudioClip(AudioManager.Instance.Environment, data.VariousData.EnvironmentMusicClip);
+        AudioManager.Instance.PlayAudio(AudioManager.Instance.Environment, 0.1f, 1f, true);
+        Player.IsLightAvailable = data.VariousData.IsFlashlightEnabled;
+        if (Player.IsLightAvailable) Player.LightSwitch();
+    }
+
+    private void LoadAutoSaveData(SaveData data)
+    {
+        foreach (AutoSaveData autoSaveData in data.AutoSaveData)
+        {
+            foreach (AutoSave autoSave in _autoSavePool.GetComponentsInChildren<AutoSave>())
+            {
+                if (autoSave.GetComponent<UniqueIDComponent>().UniqueID == autoSaveData.UniqueID)
+                {
+                    if (!autoSaveData.IsActive)
+                    {
+                        autoSave.IsActive = false;
+                        autoSave.GetComponent<Collider>().enabled = false;
+                    }
+                }
+            }
+        }
+    }
+
+    #endregion
+
+
+
+
+    #region Helper Methods
+
+    public void RemoveEnemyCustomUpdatables(bool exit = true)
+    {
+        foreach (AISensor enemy in EnemyPool.GetComponentsInChildren<AISensor>(exit))
+        {
+            if (exit) CustomUpdateManager.RemoveCustomUpdatable(enemy);
+            enemy.PausePlayerInSight();
+        }
+
+        foreach (Mannequin mannequin in EnemyPool.GetComponentsInChildren<Mannequin>(exit))
+        {
+            CustomUpdateManager.RemoveCustomUpdatable(mannequin);
+        }
+    }
+
+    private void AddEnemyCustomUpdatables(bool start = true)
+    {
+        foreach (AISensor enemy in EnemyPool.GetComponentsInChildren<AISensor>(start))
+        {
+            if (start) CustomUpdateManager.AddCustomUpdatable(enemy);
+            enemy.ResumePlayerInSight();
+        }
+
+        foreach (Mannequin mannequin in EnemyPool.GetComponentsInChildren<Mannequin>(start))
+        {
+            CustomUpdateManager.AddCustomUpdatable(mannequin);
+        }
+    }
+
+    private void StopNavMeshAgents(bool toggle)
+    {
+        foreach (NavMeshAgent agent in EnemyPool.GetComponentsInChildren<NavMeshAgent>())
+        {
+            if (agent.gameObject.activeSelf)
+            {
+                agent.isStopped = toggle;
+                Debug.Log("GameManager.cs: " + agent.name + " is " + (toggle ? "stopped" : "moving"));
+            }
+        }
+    }
+
+    private Item CreateItemFromData(ItemData itemData)
+    {
+        Item newItem = ScriptableObject.CreateInstance<Item>();
+        newItem.DisplayName = itemData.DisplayName;
+        newItem.Description = itemData.Description;
+        newItem.IsUnique = itemData.IsUnique;
+        newItem.Quantity = itemData.Quantity;
+        newItem.Type = (ItemType)System.Enum.Parse(typeof(ItemType), itemData.Type);
+        newItem.AmmoType = (Ammo.AmmoType)System.Enum.Parse(typeof(Ammo.AmmoType), itemData.AmmoType);
+        newItem.PotionType = (Potion.PotionType)System.Enum.Parse(typeof(Potion.PotionType), itemData.PotionType);
+        newItem.IconPath = itemData.IconPath;
+        newItem.Icon = Resources.Load<Sprite>(itemData.IconPath);
+        newItem.PrefabPath = itemData.PrefabPath;
+        newItem.Prefab = Resources.Load<GameObject>(itemData.PrefabPath);
+
+        return newItem;
+    }
+
     #endregion
 }

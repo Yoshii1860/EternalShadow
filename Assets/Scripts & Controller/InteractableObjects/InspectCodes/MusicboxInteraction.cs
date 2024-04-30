@@ -4,8 +4,19 @@ using UnityEngine;
 
 public class MusicboxInteraction : Interaction
 {
-    private Transform musicBoxLid;
+    #region Variables
 
+    // Reference to the music box lid
+    private Transform _musicBoxLid;
+
+    #endregion
+
+
+
+
+    #region Unity Methods
+
+    // Start is called before the first frame update
     void Start()
     {
         // for each child look for tag "lid"
@@ -13,23 +24,41 @@ public class MusicboxInteraction : Interaction
         {
             if (child.CompareTag("lid"))
             {
-                musicBoxLid = child;
+                _musicBoxLid = child;
             }
         }
     }
 
+    #endregion
+
+
+
+
+    #region Base Methods
+
+    // Override the base class method for specific implementation
     public override void OnInteract()
     {
         Debug.Log("MusicboxInteraction.OnInteract()");
         StartCoroutine(OpenLid());
     }
 
+    #endregion
+
+
+
+
+    #region Coroutines
+
+    // Coroutine to open the music box lid
     IEnumerator OpenLid()
     {
-        for (float i = musicBoxLid.localEulerAngles.x; i > 0; i -= 0.5f)
+        for (float i = _musicBoxLid.localEulerAngles.x; i > 0; i -= 0.5f)
         {
-            musicBoxLid.localEulerAngles = new Vector3(i, 0, 0);
+            _musicBoxLid.localEulerAngles = new Vector3(i, 0, 0);
             yield return new WaitForSeconds(0.01f);
         }
     }
+
+    #endregion
 }

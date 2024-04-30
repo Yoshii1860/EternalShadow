@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2073693823424396098}
   m_Layer: 6
   m_Name: musicKey
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -60,7 +60,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 927c9f8bcf23dc647a910cf5a5b0259b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uniqueID: 
+  uniqueID: MK1
 --- !u!114 &2073693823424396098
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,20 +73,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16ed7316a1f278345a2b3ae88d24c02b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isPickup: 1
-  active: 0
-  objectPosition: {fileID: 0}
-  rotateX: 0
-  rotateY: 1
-  rotateZ: 0
-  objectName: {fileID: 0}
-  objectDescription: {fileID: 0}
-  objectNameString: Music Key
-  objectDescriptionString: There is a tag that says "Music".. What door could it
-    be for?
-  clipName: 
-  item: {fileID: 11400000, guid: 8b295343db816ab41aebc51a63c03209, type: 2}
-  originalPosition: {x: 0, y: 0, z: 0}
+  IsPickup: 1
+  IsActive: 1
+  InventoryItem: 1
+  UseEmission: 1
+  Item: {fileID: 11400000, guid: 8b295343db816ab41aebc51a63c03209, type: 2}
+  _audioAfterPickup: 0
+  _audioClipName: 
+  _delay: 0
+  ClipNameOnPickup: key pickup
 --- !u!1 &6364469392284021877
 GameObject:
   m_ObjectHideFlags: 0

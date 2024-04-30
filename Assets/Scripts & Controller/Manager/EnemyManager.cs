@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class EnemyManager : MonoBehaviour
 {
+    #region Singleton
+
     static EnemyManager instance;
 
     // Singleton pattern to ensure only one instance exists
@@ -26,17 +28,29 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    #endregion
+
+
+
+
+    #region Fields
+
     // Store enemy-related data here
     public Dictionary<Transform, Enemy> enemyDataDictionary = new Dictionary<Transform, Enemy>();
 
-    #region Enemy Manager
+    #endregion
+
+
+
+
+    #region Enemy Manager Methods
 
     // Initialize enemy pool either from GameManager or find by tag
     public void InitializeEnemyPool()
     {
-        if (GameManager.Instance.enemyPool != null)
+        if (GameManager.Instance.EnemyPool != null)
         {
-            FillEnemyArray(GameManager.Instance.enemyPool);
+            FillEnemyArray(GameManager.Instance.EnemyPool);
         }
         else
         {

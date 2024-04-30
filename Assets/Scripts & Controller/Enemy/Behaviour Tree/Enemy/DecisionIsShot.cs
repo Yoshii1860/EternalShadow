@@ -1,60 +1,66 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using BehaviorTree;
 
 public class DecisionIsShot : Node
 {
     #region Fields
 
-    // References to components
-    private Transform transform;
-    private Animator animator;
-    private UnityEngine.AI.NavMeshAgent agent;
+    // References
+    private Transform _transform;
+    private NavMeshAgent _agent;
 
-    // Debug mode flag
-    private bool debugMode;
+    private bool _debugMode;
 
     #endregion
 
+
+
+
     #region Constructors
 
-    // Constructor to initialize references
-    public DecisionIsShot(bool debugMode, Transform transform, UnityEngine.AI.NavMeshAgent agent)
+    public DecisionIsShot(bool debugMode, Transform transform, NavMeshAgent agent)
     {
-        this.transform = transform;
-        this.animator = transform.GetComponent<Animator>();
-        this.debugMode = debugMode;
-        this.agent = agent;
+        _transform = transform;
+        _debugMode = debugMode;
+        _agent = agent;
     }
 
     #endregion
 
+
+
+
+
     #region Public Methods
 
-    // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        ////////////////////////////////////////////////////////////////////////
-        // PAUSE GAME
-        ////////////////////////////////////////////////////////////////////////
-        if (GameManager.Instance.isPaused)
+        
+        #region FAILURE CHECKS
+
+        if (GameManager.Instance.IsGamePaused)
         {
-            // Return FAILURE to indicate that the decision is not satisfied
-            if (debugMode) Debug.Log("D - IsShot: FAILURE (Game is paused)");
-            state = NodeState.FAILURE;
-            return state;
+            if (_debugMode) Debug.Log("D - IsShot: FAILURE (Game is paused)");
+            return NodeState.FAILURE;
         }
-        ////////////////////////////////////////////////////////////////////////
 
-        // Initialize variable to track if the enemy is shot
+        #endregion
+
+
+
+
+        #region DECISION
+
         bool isShot = false;
-
-        // Check if the enemy is shot by accessing the EnemyManager
         Enemy enemyData;
-        if (EnemyManager.Instance.TryGetEnemy(transform, out enemyData))
+
+        // Get the information from the EnemyManager
+        if (EnemyManager.Instance.TryGetEnemy(_transform, out enemyData))
         {
-            isShot = enemyData.isShot;
+            isShot = enemyData.IsShot;
         }
 
         // If the enemy is shot, set the player as the target
@@ -64,20 +70,18 @@ public class DecisionIsShot : Node
             ClearData("lastKnownPosition");
             ClearData("noisePosition");
 
-            // Set state to SUCCESS
-            if (debugMode) Debug.Log("D - IsShot: SUCCESS (Enemy is shot)");
-            state = NodeState.SUCCESS;
-            return state;
+            if (_debugMode) Debug.Log("D - IsShot: SUCCESS (Enemy is shot)");
+            return NodeState.SUCCESS;
         }
         else
         {
-            agent.isStopped = false;
+            _agent.isStopped = false;
         }
 
-        // If the enemy is not shot, set state to FAILURE
-        if (debugMode) Debug.Log("D - IsShot: FAILURE (Enemy is not shot)");
-        state = NodeState.FAILURE;
-        return state;
+        if (_debugMode) Debug.Log("D - IsShot: FAILURE (Enemy is not shot)");
+        return NodeState.FAILURE;
+
+        #endregion
     }
 
     #endregion

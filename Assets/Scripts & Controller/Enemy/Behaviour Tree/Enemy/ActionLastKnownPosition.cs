@@ -9,110 +9,105 @@ public class ActionLastKnownPosition : Node
     #region Fields
 
     // References to components
-    private Transform transform;
-    private NavMeshAgent agent;
-    private Animator animator;
-    private Enemy enemy;
-    private AISensor aiSensor;
+    private Transform _transform;
+    private NavMeshAgent _agent;
+    private Animator _animator;
+    private AISensor _aiSensor;
+    private EnemyAudio _enemyAudio;
+
+    // Enemy attributes
+    private float _walkSpeed;
 
     // Debug mode flag
-    private bool debugMode;
-
-    private int enemyType;
+    private bool _debugMode;
 
     #endregion
+
+
+
 
     #region Constructors
 
     // Constructor to initialize references
-    public ActionLastKnownPosition(bool debugMode, Transform transform, NavMeshAgent agent, int enemyType)
+    public ActionLastKnownPosition(bool debugMode, Transform transform, NavMeshAgent agent)
     {
-        this.transform = transform;
-        this.agent = agent;
-        animator = transform.GetComponent<Animator>();
-        enemy = transform.GetComponent<Enemy>();
-        this.debugMode = debugMode;
-        aiSensor = transform.GetComponent<AISensor>();
-        this.enemyType = enemyType;
+        _transform = transform;
+        _agent = agent;
+        _animator = transform.GetComponent<Animator>();
+        _walkSpeed = transform.GetComponent<Enemy>().WalkSpeed;
+        _debugMode = debugMode;
+        _aiSensor = transform.GetComponent<AISensor>();
+        _enemyAudio = transform.GetComponent<EnemyAudio>();
     }
 
     #endregion
+
+
+
 
     #region Public Methods
 
     // Evaluate method to determine the state of the node
     public override NodeState Evaluate()
     {
-        ////////////////////////////////////////////////////////////////////////
-        // PAUSE GAME
-        ////////////////////////////////////////////////////////////////////////
-        if (GameManager.Instance.isPaused)
-        {
-            // Return RUNNING to indicate that the action is ongoing
-            if (debugMode) Debug.Log("A - LastKnownPosition: RUNNING (game is paused)");
-            state = NodeState.RUNNING;
-            return state;
-        }
-        ////////////////////////////////////////////////////////////////////////
+        #region FAILURE CHECKS
 
-        ////////////////////////////////////////////////////////////////////////
-        // FAILURE CHECKS
-        ////////////////////////////////////////////////////////////////////////
-        object obj = GetData("target");
-        object objPos = GetData("lastKnownPosition");
+        if (GameManager.Instance.IsGamePaused)
+        {
+            if (_debugMode) Debug.Log("A - LastKnownPosition: RUNNING (game is paused)");
+            return NodeState.RUNNING;
+        }
 
-        if (obj != null)
+        if (GetData("target") != null)
         {
-            if (debugMode) Debug.Log("A - LastKnownPosition: FAILURE (target = null)");
+            if (_debugMode) Debug.Log("A - LastKnownPosition: FAILURE (target = null)");
             ClearData("lastKnownPosition");
-            state = NodeState.FAILURE;
-            return state;
+            return NodeState.FAILURE;
         }
-        else if (aiSensor.playerInSight)
-        {
-            // Set state to FAILURE and return
-            if (debugMode) Debug.Log("A - LastKnownPosition: FAILURE (Player in Sight)");
-            ClearData("lastKnownPosition");
-            parent.parent.SetData("target", GameManager.Instance.player.transform);
-            state = NodeState.FAILURE;
-            return state;
-        }
-        if (objPos == null)
-        {
-            // Set state to FAILURE and return
-            if (debugMode) Debug.Log("A - LastKnownPosition: FAILURE (lastKnownPosition = null) or (Player in Sight)");
-            ClearData("lastKnownPosition");
-            state = NodeState.FAILURE;
-            return state;
-        }
-        ////////////////////////////////////////////////////////////////////////
 
-        // Get last known position
-        Vector3 lastKnownPosition = (Vector3)objPos;
+        if (_aiSensor.IsPlayerInSight)
+        {
+            if (_debugMode) Debug.Log("A - LastKnownPosition: FAILURE (Player in Sight)");
+            ClearData("lastKnownPosition");
+            parent.parent.SetData("target", GameManager.Instance.Player.transform);
+            return NodeState.FAILURE;
+        }
+
+        object obj = GetData("lastKnownPosition");
+        if (obj == null)
+        {
+            if (_debugMode) Debug.Log("A - LastKnownPosition: FAILURE (lastKnownPosition = null) or (Player in Sight)");
+            ClearData("lastKnownPosition");
+            return NodeState.FAILURE;
+        }
+        
+        #endregion
+
+
+
+
+        #region ACTION
+
+        Vector3 lastKnownPosition = (Vector3)obj;
 
         // Check if AI has reached the last known position
-        if (Vector3.Distance(transform.position, lastKnownPosition) < 0.1f)
+        if (Vector3.Distance(_transform.position, lastKnownPosition) < 0.1f)
         {
-            // Debug message and animation state update
-            animator.SetBool("walk", false);
-
-            // Clear the last known position data and set state to SUCCESS
+            _animator.SetBool("walk", false);
             ClearData("lastKnownPosition");
-            if (debugMode) Debug.Log("A - LastKnownPosition: SUCCESS (Reached Last Known Position)");
-            state = NodeState.SUCCESS;
-            return state;
+            if (_debugMode) Debug.Log("A - LastKnownPosition: SUCCESS (Reached Last Known Position)");
+            return NodeState.SUCCESS;
         }
 
-        agent.speed = EnemyBT.walkSpeed;
-        agent.SetDestination(lastKnownPosition);
-        animator.SetBool("walk", true);
+        _agent.speed = _walkSpeed;
+        _agent.SetDestination(lastKnownPosition);
+        _animator.SetBool("walk", true);
+        _enemyAudio.VolumeFloorChanger();
 
-        AudioManager.Instance.VolumeFloorChanger(transform, enemyType);
+        if (_debugMode) Debug.Log("A - LastKnownPosition: RUNNING (Moving to Last Known Position)");
+        return NodeState.RUNNING;
 
-        // Return RUNNING to indicate that the action is ongoing
-        if (debugMode) Debug.Log("A - LastKnownPosition: RUNNING (Moving to Last Known Position)");
-        state = NodeState.RUNNING;
-        return state;
+        #endregion
     }
 
     #endregion

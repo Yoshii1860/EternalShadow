@@ -8,30 +8,35 @@ public class DecisionNoiseSensing : Node
     #region Fields
 
     // References to components
-    private Transform transform;
-    private Animator animator;
-    private AISensor aiSensor;
+    private Transform _transform;
+    private Animator _animator;
+    private AISensor _aiSensor;
 
     // Reduction factor for noise level through walls
-    private float noiseReduction = 0.6f;
+    private float _noiseReduction = 0.6f;
 
-    // Debug mode flag
-    private bool debugMode;
+    private bool _debugMode;
 
     #endregion
+
+
+
 
     #region Constructors
 
     // Constructor to initialize references to components
     public DecisionNoiseSensing(bool debugMode, Transform transform)
     {
-        this.transform = transform;
-        animator = transform.GetComponent<Animator>();
-        aiSensor = transform.GetComponent<AISensor>();
-        this.debugMode = debugMode;
+        _transform = transform;
+        _animator = transform.GetComponent<Animator>();
+        _aiSensor = transform.GetComponent<AISensor>();
+        _debugMode = debugMode;
     }
 
     #endregion
+
+
+
 
     #region Public Methods
 
@@ -39,124 +44,96 @@ public class DecisionNoiseSensing : Node
     public override NodeState Evaluate()
     {
 
-        ////////////////////////////////////////////////////////////////////////
-        // PAUSE GAME
-        ////////////////////////////////////////////////////////////////////////
-        if (GameManager.Instance.isPaused)
+        #region FAILURE CHECKS
+
+        if (GameManager.Instance.IsGamePaused || GameManager.Instance.NoNoiseMode)
         {
             // Return FAILURE to indicate that the decision cannot be made
-            if (debugMode) Debug.Log("D - NoiseSensing: FAILURE (Game is paused)");
-            state = NodeState.FAILURE;
-            return state;
+            if (_debugMode) Debug.Log("D - NoiseSensing: FAILURE (Game is paused or no noise mode active)");
+            return NodeState.FAILURE;
         }
-        ////////////////////////////////////////////////////////////////////////
-        
-        ////////////////////////////////////////////////////////////////////////
-        // No Noise Mode
-        ////////////////////////////////////////////////////////////////////////
-        if (GameManager.Instance.noNoiseMode)
-        {
-            // If in debug mode, return FAILURE
-            if (debugMode) Debug.Log("D - NoiseSensing: FAILURE (No Noise Mode)");
-            state = NodeState.FAILURE;
-            return state;
-        }
-        ////////////////////////////////////////////////////////////////////////
 
-        ////////////////////////////////////////////////////////////////////////
-        // FAILURE CHECKS
-        ////////////////////////////////////////////////////////////////////////
-        object obj = GetData("target");
-
-        if (obj != null)
+        if (GetData("target") != null || _aiSensor.IsPlayerHidden)
         {
             // Clear noise data and return FAILURE
-            ClearData("noiseLevel");
-            ClearData("noiseLevel");
-            if (debugMode) Debug.Log("D - NoiseSensing: FAILURE (Target exists)");
-            state = NodeState.FAILURE;
-            return state;
-        }
-        else if (aiSensor.hidden)
-        {
             ClearData("noisePosition");
             ClearData("noiseLevel");
-            if (debugMode) Debug.Log("D - NoiseSensing: FAILURE (AISensor Hidden)");
-            state = NodeState.FAILURE;
-            return state;
+            if (_debugMode) Debug.Log("D - NoiseSensing: FAILURE (target exists or player hidden)");
+            return NodeState.FAILURE;
         }
-        else if (aiSensor.playerInSight)
+
+        if (_aiSensor.IsPlayerInSight)
         {
             // Clear noise data and set the player as the target
             ClearData("noisePosition");
             ClearData("noiseLevel");
-            parent.parent.SetData("target", GameManager.Instance.player.transform);
-            if (debugMode) Debug.Log("D - NoiseSensing: FAILURE (Player in sight)");
-            state = NodeState.FAILURE;
-            return state;
+            parent.parent.SetData("target", GameManager.Instance.Player.transform);
+            if (_debugMode) Debug.Log("D - NoiseSensing: FAILURE (Player in sight)");
+            return NodeState.FAILURE;
         }
-        ////////////////////////////////////////////////////////////////////////
+        
+        #endregion
 
-        animator.SetBool("run", false);
-        animator.SetBool("walk", true);
 
-        // Retrieve the saved noise level from the blackboard
-        object obj2 = GetData("noiseLevel");
-        float? noiseLevel = (float?)obj2;
+
+
+        #region DECISION
+
+        _animator.SetBool("run", false);
+        _animator.SetBool("walk", true);
+
+        object noiseObj = GetData("noiseLevel");
+        float? noiseLevel = (float?)noiseObj;
 
         // If noise level is not available, save the current noise level
         if (noiseLevel == null)
         {
-            parent.parent.SetData("noiseLevel", NoiseManager.Instance.noiseLevel);
-            noiseLevel = NoiseManager.Instance.noiseLevel;
+            parent.parent.SetData("noiseLevel", NoiseManager.Instance.NoiseLevel);
+            noiseLevel = NoiseManager.Instance.NoiseLevel;
         }
         else
         {
-            if (debugMode) Debug.Log("D - NoiseSensing: Noise Level Available");
-            state = NodeState.SUCCESS;
-            return state;
+            if (_debugMode) Debug.Log("D - NoiseSensing: Noise Level Available");
+            return NodeState.SUCCESS;
         }
 
         // Check if the distance to the player is within the hearing range
-        if (Vector3.Distance(transform.position, GameManager.Instance.player.transform.position) <= noiseLevel)
+        if (Vector3.Distance(_transform.position, GameManager.Instance.Player.transform.position) <= noiseLevel)
         {
             // Check if there is a collider between the enemy and the player
             RaycastHit hit;
-            Vector3 playerPosition = GameManager.Instance.player.transform.position;
-            Vector3 directionToPlayer = playerPosition - transform.position;
+            Vector3 playerPosition = GameManager.Instance.Player.transform.position;
+            Vector3 directionToPlayer = playerPosition - _transform.position;
 
             // No wall in between, set noise position
-            if (!Physics.Linecast(transform.position, playerPosition, out hit, LayerMask.GetMask("Wall")))
+            if (!Physics.Linecast(_transform.position, playerPosition, out hit, LayerMask.GetMask("Wall")))
             {
-                parent.parent.SetData("noisePosition", GameManager.Instance.player.transform.position);
-
-                if (debugMode) Debug.Log("D - NoiseSensing: SUCCESS (Noise heard! No wall in between!)");
-                state = NodeState.SUCCESS;
-                return state;
+                parent.parent.SetData("noisePosition", GameManager.Instance.Player.transform.position);
+                
+                if (_debugMode) Debug.Log("D - NoiseSensing: SUCCESS (Noise heard! No wall in between!)");
+                return NodeState.SUCCESS;
             }
             // Wall in between, check if it's within reduced hearing range
-            else if (Vector3.Distance(transform.position, playerPosition) <= noiseLevel * noiseReduction)
+            else if (Vector3.Distance(_transform.position, playerPosition) <= noiseLevel * _noiseReduction)
             {
-                parent.parent.SetData("noisePosition", GameManager.Instance.player.transform.position);
+                parent.parent.SetData("noisePosition", GameManager.Instance.Player.transform.position);
 
-                if (debugMode) Debug.Log("D - NoiseSensing: SUCCESS (Noise heard through wall!)");
-                state = NodeState.SUCCESS;
-                return state;
+                if (_debugMode) Debug.Log("D - NoiseSensing: SUCCESS (Noise heard through wall!)");
+                return NodeState.SUCCESS;
             }
             else
             {
                 parent.parent.ClearData("noiseLevel");
-                if (debugMode) Debug.Log("D - NoiseSensing: FAILURE (Noise heard but too far!)");
-                state = NodeState.FAILURE;
-                return state;
+                if (_debugMode) Debug.Log("D - NoiseSensing: FAILURE (Noise heard but too far!)");
+                return NodeState.FAILURE;
             }
         }
 
-        // No noise heard, clear noise data and return FAILURE
         ClearData("noiseLevel");
-        if (debugMode) Debug.Log("D - NoiseSensing: FAILURE (No noise heard!)");
-        state = NodeState.FAILURE;
-        return state;
+        if (_debugMode) Debug.Log("D - NoiseSensing: FAILURE (No noise heard!)");
+        return NodeState.FAILURE;
+
+        #endregion
     }
 
     #endregion

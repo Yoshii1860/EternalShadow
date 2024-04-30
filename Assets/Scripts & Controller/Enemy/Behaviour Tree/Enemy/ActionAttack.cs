@@ -7,115 +7,107 @@ public class ActionAttack : Node
 {
     #region Fields
 
-    // Reference to the animator component.
-    private Animator animator;
-    private Transform transform;
-    private AISensor aiSensor;
+    // References
+    private Animator _animator;
+    private AISensor _aiSensor;
 
-    // Counter for tracking attack intervals.
-    private float attackCounter = 0f;
+    // variables for attack behavior
+    private float _attackCounter = 0f;
+    private float _attackInterval;
 
-    // Damage value for the attack.
-    private float damage;
-
-    private bool debugMode;
-
-    private int enemyType;
+    private bool _debugMode;
 
     #endregion
 
+
+
+
     #region Constructors
 
-    /// Initializes a new instance of the <see cref="ActionAttack"/> class.
-    public ActionAttack(bool debugMode, Transform transform, int enemyType)
+    public ActionAttack(bool debugMode, Transform transform)
     {
-        this.debugMode = debugMode;
-        animator = transform.GetComponent<Animator>();
-        damage = transform.GetComponent<Enemy>().damage;
-        this.transform = transform;
-        aiSensor = transform.GetComponent<AISensor>();
-        this.enemyType = enemyType;
+        _debugMode = debugMode;
+        _animator = transform.GetComponent<Animator>();
+        _attackInterval = transform.GetComponent<Enemy>().AttackInterval;
+        _aiSensor = transform.GetComponent<AISensor>();
     }
 
     #endregion
 
+
+
+
     #region Public Methods
 
-    /// Evaluates the attack action node.
     public override NodeState Evaluate()
     {
 
-        ////////////////////////////////////////////////////////////////////////
-        // PAUSE GAME
-        ////////////////////////////////////////////////////////////////////////
-        if (GameManager.Instance.isPaused)
+        #region FAILURE CHECKS
+
+        if (GameManager.Instance.IsGamePaused)
         {
-            // Return RUNNING to indicate that the decision is ongoing
-            if (debugMode) Debug.Log("A - ActionAttack: FAILURE (Paused)");
-            state = NodeState.FAILURE;
-            return state;
+            if (_debugMode) Debug.Log("A - ActionAttack: FAILURE (Paused)");
+            return NodeState.FAILURE;
         }
-        ////////////////////////////////////////////////////////////////////////
+
+        if (_aiSensor.IsPlayerHidden)
+        {
+            if (_debugMode) Debug.Log("A - Attack (Hidden)");
+            ClearData("target");
+            return NodeState.FAILURE;
+        }
 
         object obj = GetData("target");
-
         if (obj == null)
         {
-            if (debugMode) Debug.Log("A - Attack (No target found)");
-            state = NodeState.FAILURE;
-            return state;
+            if (_debugMode) Debug.Log("A - Attack (No target found)");
+            return NodeState.FAILURE;
         }
-        else if (aiSensor.hidden)
-        {
-            if (debugMode) Debug.Log("A - Attack (Hidden)");
-            ClearData("target");
-            state = NodeState.FAILURE;
-            return state;
-        }
-        ////////////////////////////////////////////////////////////////////////
+        
+        #endregion
+
+
+
+
+        #region ACTION
 
         Transform target = (Transform)obj;
 
-        attackCounter += Time.deltaTime;
-        if (attackCounter >= SlenderBT.attackInterval)
-        {
-            animator.SetTrigger("attack");
-
-            // Perform attack and check if the player is dead.
-            // Chances to apply status effects on the player.
-            
-            bool playerIsDead = GameManager.Instance.player.isDead;
+        _attackCounter += Time.deltaTime;
+        if (_attackCounter >= _attackInterval)
+        {       
+            bool playerIsDead = GameManager.Instance.Player.IsDead;
 
             if (playerIsDead)
             {
-                // Player is dead, reset and return success state.
                 ClearData("target");
-                animator.SetBool("attack", false);
-                attackCounter = 0f;
+                _animator.SetBool("attack", false);
+                _attackCounter = 0f;
 
-                if (debugMode) Debug.Log("A - Attack (Player is dead)");
-                state = NodeState.SUCCESS;
-                return state;
+                if (_debugMode) Debug.Log("A - Attack (Player is dead)");
+                return NodeState.SUCCESS;
             }
+
+            _animator.SetTrigger("attack");
 
             int randomizer = Random.Range(0, 100);
             if (randomizer <= 15)
             {
-                if (!GameManager.Instance.player.isDizzy) GameManager.Instance.player.Dizzy();
+                if (!GameManager.Instance.Player.IsDizzy) GameManager.Instance.Player.Dizzy();
             }
             randomizer = Random.Range(0, 100);
             if (randomizer <= 10)
             {
-                if (!GameManager.Instance.player.isBleeding) GameManager.Instance.player.Bleeding();
+                if (!GameManager.Instance.Player.IsBleeding) GameManager.Instance.Player.Bleeding();
             }
 
-            attackCounter = 0f;
+            _attackCounter = 0f;
         }
 
-        // Still in the process of attacking.
-        if (debugMode) Debug.Log("A - Attack (Attacking)");
-        state = NodeState.RUNNING;
-        return state;
+        if (_debugMode) Debug.Log("A - Attack (Attacking)");
+        return NodeState.RUNNING;
+
+        #endregion
     }
 
     #endregion

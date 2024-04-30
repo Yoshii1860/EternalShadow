@@ -4,25 +4,80 @@ using UnityEngine;
 
 public class SummonObject : InteractableObject
 {
+    #region Variables
+
     [Space(10)]
-    [Header("RUN ITEM CODE")]
-    [SerializeField] Item summoningItem;
-    [SerializeField] SummonEvent summonEvent;
-    [SerializeField] GameObject redCircle;
+    [Header("Components")]
+    [Tooltip("The item required to summon the object.")]
+    [SerializeField] private Item _summoningItem;
+    [Tooltip("The red circle that indicates the object is summonable.")]
+    [SerializeField] private GameObject _redCircle;
+    [Tooltip("The summon event that this object is a part of.")]
+    [SerializeField] private SummonEvent _summonEvent;
+
+    [Space(10)]
+    [Tooltip("Check if the object has been placed.")]
+    public bool IsObjectPlaced = false;
+
+    private GameObject _summonObject;
+
+    #endregion
+
+
+
+
+    #region Unity Methods
+
+    void Start()
+    {
+        _summonObject = transform.GetChild(0).gameObject;
+    }
+
+    #endregion
+
+
+
+
+    #region Base Methods
 
     // Override the base class method for specific implementation
     protected override void RunItemCode()
     {
-        Item item = InventoryManager.Instance.FindItem(summoningItem.displayName);
+        if (IsObjectPlaced) return;
+
+        // Check if the object is available
+        Item item = InventoryManager.Instance.FindItem(_summoningItem.DisplayName);
 
         if (item != null)
         {
-            transform.GetChild(0).gameObject.SetActive(true);
+            // Set the object as placed
+            IsObjectPlaced = true;
+            _summonObject.SetActive(true);
+            _redCircle.SetActive(false);
             InventoryManager.Instance.RemoveItem(item);
-            redCircle.SetActive(false);
         }
-        else GameManager.Instance.DisplayMessage("You need \"" + summoningItem.displayName + "\" to proceed with the summoning.", 2f);       
+        else
+        {
+            GameManager.Instance.DisplayMessage("You need \"" + _summoningItem.DisplayName + "\" to proceed with the summoning.", 2f);
+        }
 
-        summonEvent.CheckItems();
+        _summonEvent.CheckItems();
     }
+
+    #endregion
+
+
+
+
+    #region Public Methods
+
+    // Load the placed object
+    public void LoadPlacedObject()
+    {
+        IsObjectPlaced = true;
+        _summonObject.SetActive(true);
+        _redCircle.SetActive(false);
+    }
+
+    #endregion
 }
