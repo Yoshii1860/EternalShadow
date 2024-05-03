@@ -57,6 +57,7 @@ public class PaintingController : MonoBehaviour, ICustomUpdatable
     // Callback for interact input
     public void OnInteract(InputAction.CallbackContext context)
     {
+        Debug.Log("Painting: OnInteract");
         _isInteracting = context.ReadValueAsButton();
     }
 
@@ -90,6 +91,7 @@ public class PaintingController : MonoBehaviour, ICustomUpdatable
     // Interact with the selected painting
     void Interact()
     {
+        Debug.Log("Painting: Interact Method");
         _isInteracting = false;
         _paintingEvent.MarkPainting();
     }
@@ -122,6 +124,7 @@ public class PaintingController : MonoBehaviour, ICustomUpdatable
     {
         _isGoingBack = false;
 
+        _paintingEvent.OnExit();
         GameManager.Instance.ResumeGame();
     }
 

@@ -1072,7 +1072,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 2db0a33beee2c3f4bbb17dedf721ffe0, type: 3}
+  m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -1635,12 +1635,9 @@ MonoBehaviour:
   RunSpeed: 2.1
   AttackRange: 3
   AttackInterval: 1
+  MaxChaseRange: 15
   _stunDuration: 30
   _getUpDelay: 25
-  _deathSound: 
-  _fallImpactSound: 
-  _fallSoundDelay: 1
-  _fallImpactVolume: 1
 --- !u!114 &4708245444220684991
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1694,9 +1691,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61f5778c0f3a7a740a58192c8e0102b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  waypoints: []
-  agent: {fileID: 0}
-  debugMode: 0
+  Waypoints: []
+  Agent: {fileID: 0}
+  DebugMode: 0
 --- !u!195 &4708245444220684987
 NavMeshAgent:
   m_ObjectHideFlags: 0

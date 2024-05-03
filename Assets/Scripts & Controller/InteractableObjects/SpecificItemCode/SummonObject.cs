@@ -28,7 +28,7 @@ public class SummonObject : InteractableObject
 
     #region Unity Methods
 
-    void Start()
+    protected override void Start()
     {
         _summonObject = transform.GetChild(0).gameObject;
     }

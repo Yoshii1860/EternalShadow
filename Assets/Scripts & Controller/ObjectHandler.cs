@@ -70,10 +70,14 @@ public class ObjectHandler : MonoBehaviour
                     {
                         if (itemController.InventoryItem)
                         {
-                            if (InventoryManager.Instance.InventorySpaceCheck()) 
+                            Item item = InventoryManager.Instance.FindItem(itemController.Item.DisplayName);
+                            if (item == null)
                             {
-                                AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "error", 0.6f, 1f);
-                                return;
+                                if (InventoryManager.Instance.InventorySpaceCheck())
+                                {
+                                    AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "error", 0.6f, 1f);
+                                    return;
+                                } 
                             }
                         }
                         itemController.Interact();

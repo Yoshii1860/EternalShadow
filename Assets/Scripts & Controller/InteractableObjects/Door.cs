@@ -133,6 +133,7 @@ public class Door : MonoBehaviour
         else
         {
             if (withAudio) AudioManager.Instance.PlayClipOneShot(transform.gameObject.GetInstanceID(), "open door", .5f);
+            GetComponent<Collider>().enabled = false;
         }
 
         Vector3 targetRot = isOpen ? defaultRot : openRot;
@@ -145,6 +146,7 @@ public class Door : MonoBehaviour
             timeElapsed += Time.deltaTime;
             yield return null;
         }
+        GetComponent<Collider>().enabled = true;
         Debug.Log("Door is open");
 
         transform.eulerAngles = targetRot;

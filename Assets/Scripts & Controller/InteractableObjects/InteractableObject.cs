@@ -23,6 +23,13 @@ public class InteractableObject : MonoBehaviour
     public Item Item = null;
     [Space(10)]
 
+    [Header("Rotation")]
+    [Tooltip("which axis to rotate the object on (x, y or z) - empty string for no rotation")]
+    [SerializeField] private string _rotationAxis;
+    private Vector3 _rotationVector;
+    [Space(10)]
+
+    [Header("Audio")]
     [Tooltip("Does the object play audio after pickup?")]
     [SerializeField] bool _audioAfterPickup = false;
     [Tooltip("The name of the audio clip to play after pickup")]
@@ -35,6 +42,32 @@ public class InteractableObject : MonoBehaviour
     public string ClipNameOnPickup;
 
     Coroutine _rotationCoroutine;
+
+    #endregion
+
+
+
+
+    #region Unity Methods
+
+    protected virtual void Start()
+    {
+        switch (_rotationAxis.ToLower())
+        {
+            case "x":
+                _rotationVector = Vector3.right;
+                break;
+            case "y":
+                _rotationVector = Vector3.up;
+                break;
+            case "z":
+                _rotationVector = Vector3.forward;
+                break;
+            default:
+                _rotationVector = Vector3.up;
+                break;
+        }
+    }
 
     #endregion
 
@@ -181,7 +214,7 @@ public class InteractableObject : MonoBehaviour
 
     #region Coroutines
 
-    IEnumerator ItemCode(GameObject newItemToDestroy)
+    private IEnumerator ItemCode(GameObject newItemToDestroy)
     {
         // Wait for the player to return to gameplay mode
         yield return new WaitUntil(() => GameManager.Instance.CurrentSubGameState == GameManager.SubGameState.DEFAULT);
@@ -205,16 +238,15 @@ public class InteractableObject : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    IEnumerator RotateObject(GameObject itemToRotate)
+    private IEnumerator RotateObject(GameObject itemToRotate)
     {
         float elapsedTime = 0f;
         float rotateTime = 10.0f; // Adjust this value for the rotation speed
 
         while (elapsedTime < rotateTime)
         {
-            Vector3 rotation = Vector3.zero;
-
-            rotation.x = (360 / rotateTime) * Time.deltaTime;
+            float angle = (360 / rotateTime) * Time.deltaTime;
+            Vector3 rotation = _rotationVector * angle;
 
             itemToRotate.transform.rotation *= Quaternion.Euler(rotation);
 

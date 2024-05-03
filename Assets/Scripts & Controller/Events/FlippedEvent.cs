@@ -59,6 +59,7 @@ public class FlippedEvent : MonoBehaviour
                 _flippedCell.SetActive(false);
                 _horrorDoll.SetActive(false);
                 _groundFog.SetActive(false);
+                GetComponent<BoxCollider>().enabled = false;
 
                 // Set the event data
                 GameManager.Instance.EventData.SetEvent("Flipped");
@@ -105,7 +106,7 @@ public class FlippedEvent : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "speaker _mannequins 2");
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "speaker mannequins 2");
 
         FinishEvent();
     }
@@ -137,6 +138,7 @@ public class FlippedEvent : MonoBehaviour
         _flippedCell.SetActive(false);
         _groundFog.SetActive(false);
         _playOnce = true;
+        GetComponent<BoxCollider>().enabled = false;
 
         for (int i = 0; i < _mannequins.Length; i++)
         {

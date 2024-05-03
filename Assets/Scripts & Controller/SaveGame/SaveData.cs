@@ -248,7 +248,7 @@ public class SaveData
         foreach (Duplicate duplicate in interactableObjectPool.GetComponentsInChildren<Duplicate>())
         {
             InteractableObjectData objectData = new InteractableObjectData();
-            objectData.UniqueID = duplicate.DuplicateID;
+            objectData.UniqueID = duplicate.DuplicateObject.GetComponent<UniqueIDComponent>().UniqueID;
             objectData.IsActive = duplicate.DuplicateObject.GetComponent<InteractableObject>().IsActive;
 
             InteractableObjects.Add(objectData);
@@ -297,6 +297,8 @@ public class SaveData
             doorData.IsOpen = doorScript.IsOpen;
             doorData.IsLocked = doorScript.IsLocked;
 
+            Debug.Log("SaveData: Door " + doorData.UniqueID + " is " + (doorData.IsOpen ? "open" : "closed") + " and " + (doorData.IsLocked ? "locked" : "unlocked"));
+
             Doors.Add(doorData);
         }
 
@@ -318,7 +320,7 @@ public class SaveData
         {
             TextObjectData textData = new TextObjectData();
             TextCode textCode = duplicate.DuplicateObject.GetComponent<TextCode>();
-            textData.UniqueID = duplicate.DuplicateID;
+            textData.UniqueID = duplicate.DuplicateObject.GetComponent<UniqueIDComponent>().UniqueID;
             textData.IsActive = textCode.IsAudioActive;
 
             TextObjects.Add(textData);

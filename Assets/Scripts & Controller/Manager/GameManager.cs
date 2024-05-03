@@ -129,9 +129,10 @@ public class GameManager : MonoBehaviour
     [Tooltip("Debug mode for the enemy. If true, the enemy will not hear. Set during gameplay.")]
     public bool NoNoiseMode = false;
     [Tooltip("Print the CustomUpdatables list.")]
-    [SerializeField] bool _printCustomUpdateables = false;
+    [SerializeField] private bool _printCustomUpdateables = false;
     [Tooltip("When set to true, all saved files will be deleted and the bool sets back to false. Set during gameplay.")]
-    [SerializeField] bool _deleteSaveFiles = false;
+    [SerializeField] private bool _deleteSaveFiles = false;
+    [SerializeField] private bool _debugMode = false;
 
     public bool DeleteSaveFiles
     {
@@ -154,16 +155,16 @@ public class GameManager : MonoBehaviour
 
     void UpdateReferences()
     {
-        Debug.Log("Updating references...");
+        if (_debugMode) Debug.Log("Updating references...");
 
         // Find and assign player and related components
         Player = GameObject.FindWithTag("Player").GetComponent<Player>();
         if (PlayerAnimManager == null) PlayerAnimManager = GameObject.FindWithTag("Player").GetComponent<PlayerAnimManager>();
         if (PlayerController == null)  PlayerController = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
         if (PickupCanvas == null) PickupCanvas = GameObject.FindWithTag("PickupCanvas");
-        if (PickupName == null) PickupName = PickupCanvas.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-        if (PickupDescription == null) PickupDescription = PickupCanvas.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-        if (PickupPositions == null) PickupPositions = PickupCanvas.transform.GetChild(2).gameObject;
+        if (PickupName == null) PickupName = PickupCanvas.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        if (PickupDescription == null) PickupDescription = PickupCanvas.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+        if (PickupPositions == null) PickupPositions = PickupCanvas.transform.GetChild(3).gameObject;
         PickupCanvas.SetActive(false);
         if (TextCanvas == null) TextCanvas = GameObject.FindWithTag("TextCanvas");
         TextCanvas.SetActive(false);
@@ -229,7 +230,7 @@ public class GameManager : MonoBehaviour
         else Debug.LogWarning("GameManager.cs: EnemyPool is null!");
         
         string allCustomUpdateables = CustomUpdateManager.GetCustomUpdatables();
-        Debug.Log("GameManager.cs: CustomUpdatables: " + allCustomUpdateables);
+        if (_debugMode) Debug.Log("GameManager.cs: CustomUpdatables: " + allCustomUpdateables);
 
         _areReferencesUpdated = true;
     }
@@ -245,7 +246,7 @@ public class GameManager : MonoBehaviour
     {
         UpdateCustomUpdatables();
         InputManager.Instance.UpdateReferences();
-        Debug.Log("GameManager - Start - MainMenu: " + SceneManager.GetActiveScene().name);
+        if (_debugMode) Debug.Log("GameManager - Start - MainMenu: " + SceneManager.GetActiveScene().name);
         SetGameState(GameState.MENU);
     }
 
@@ -290,9 +291,9 @@ public class GameManager : MonoBehaviour
             File.Delete(saveFile);
         }
 
-        Debug.Log("##############################");
-        Debug.Log("##### All Save Files Deleted");
-        Debug.Log("##############################");
+        if (_debugMode) Debug.Log("##############################");
+        if (_debugMode) Debug.Log("##### All Save Files Deleted");
+        if (_debugMode) Debug.Log("##############################");
     }
 
     #endregion
@@ -309,7 +310,7 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator StartGameWithBlackScreen()
     {
-        Debug.Log("Blackscreen Start");
+        if (_debugMode) Debug.Log("Blackscreen Start");
 
         yield return new WaitForSecondsRealtime(2f);
 
@@ -317,7 +318,7 @@ public class GameManager : MonoBehaviour
 
         yield return new WaitForSeconds(5f);
         
-        Debug.Log("Blackscreen Stop");
+        if (_debugMode) Debug.Log("Blackscreen Stop");
     }
 
     public IEnumerator LoadGameWithBlackScreen(bool newGame = false)
@@ -365,7 +366,7 @@ public class GameManager : MonoBehaviour
     public void OpenInventory()
     {
         InventoryManager.Instance.StatsUpdate();
-        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "open inventory", 1f, 1f);
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "open inventory", 0.8f, 1f);
         SetGameState(GameState.INVENTORY);
     }
 
@@ -378,7 +379,7 @@ public class GameManager : MonoBehaviour
 
     public void OpenMenu()
     {
-        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "click", 1f, 1f);
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "clicker", 0.5f, 1f);
         MenuController.Instance.CloseMenuTimer = 0f;
         MenuController.Instance.CanCloseMenu = false;
         MenuController.Instance.MenuCanvas.SetActive(true);
@@ -459,7 +460,7 @@ public class GameManager : MonoBehaviour
         CurrentGameState = newState;
         CurrentSubGameState = newSubGameState;
 
-        Debug.Log("GameManager.cs: SetGameState: " + CurrentGameState + "." + CurrentSubGameState);
+        if (_debugMode) Debug.Log("GameManager.cs: SetGameState: " + CurrentGameState + "." + CurrentSubGameState);
 
         switch (CurrentGameState)
         {
@@ -488,27 +489,27 @@ public class GameManager : MonoBehaviour
                         StopNavMeshAgents(false);
                         IsGamePaused = false;
                         _playerInput.SwitchCurrentActionMap("Player");
-                        Debug.Log("GameManager.cs: Switch to GamePlay.DEFAULT");
+                        if (_debugMode) Debug.Log("GameManager.cs: Switch to GamePlay.DEFAULT");
                         break;
 
                     case SubGameState.EVENT:
                         StopNavMeshAgents(true);
                         IsGamePaused = true;
                         _playerInput.SwitchCurrentActionMap("Event");
-                        Debug.Log("GameManager.cs: Switch to GamePlay.EVENT");
+                        if (_debugMode) Debug.Log("GameManager.cs: Switch to GamePlay.EVENT");
                         break;
 
                     case SubGameState.PICKUP:
                         StopNavMeshAgents(true);
                         IsGamePaused = true;
                         _playerInput.SwitchCurrentActionMap("PickUp");
-                        Debug.Log("GameManager.cs: Switch to GamePlay.PICKUP");
+                        if (_debugMode) Debug.Log("GameManager.cs: Switch to GamePlay.PICKUP");
                         break;
                     case SubGameState.PAINT:
                         StopNavMeshAgents(true);
                         IsGamePaused = true;
                         _playerInput.SwitchCurrentActionMap("Painting");
-                        Debug.Log("GameManager.cs: Switch to GamePlay.PAINT");
+                        if (_debugMode) Debug.Log("GameManager.cs: Switch to GamePlay.PAINT");
                         break;
                 }
                 break;
@@ -571,13 +572,13 @@ public class GameManager : MonoBehaviour
     {
         IsLoading = true;
         LoadNewScene("Asylum", true);
-        Debug.Log("GameManager.cs: New Game Loaded!");
+        if (_debugMode) Debug.Log("GameManager.cs: New Game Loaded!");
     }
 
     public void SaveData(string filename = "Asylum-autosave")
     {
         SaveSystem.SaveGameFile(filename, Player, InventoryManager.Instance.Weapons.transform, EnemyPool, InteractableObjectPool, _interactStaticObjectPool, _doorObjectPool, _textObjectPool, _summonObjectPool, _autoSavePool);
-        Debug.Log("GameManager.cs: Player data saved!");
+        if (_debugMode) Debug.Log("GameManager.cs: Player data saved!");
     }
 
     public void LoadData(string filename = "Asylum-autosave")
@@ -599,7 +600,7 @@ public class GameManager : MonoBehaviour
             LoadVariousData(data);
             LoadAutoSaveData(data);
 
-            Debug.Log("GameManager.cs: Player data loaded!");
+            if (_debugMode) Debug.Log("GameManager.cs: Player data loaded!");
         }
         else Debug.LogError("GameManager.cs: No save data found!");
     }
@@ -630,17 +631,16 @@ public class GameManager : MonoBehaviour
 
         while (!asyncLoad.isDone)
         {
-            _progressBar.fillAmount = asyncLoad.progress;
-
-            if (asyncLoad.progress >= 0.95f)
-            {
-                _progressBar.fillAmount = 1f;
-                asyncLoad.allowSceneActivation = true;
-            }
+            float targetFillAmount = Mathf.Lerp(_progressBar.fillAmount, asyncLoad.progress, Time.deltaTime * 5f);
+            _progressBar.fillAmount = targetFillAmount;
             yield return null;
         }
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(2f);
+
+        asyncLoad.allowSceneActivation = true;
+        
+        yield return new WaitForSeconds(1f);
 
         UpdateReferences();
 
@@ -652,7 +652,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("GameManager - Start - Gameplay: " + SceneManager.GetActiveScene().name);
+            if (_debugMode) Debug.Log("GameManager - Start - Gameplay: " + SceneManager.GetActiveScene().name);
             StartGame();
             StartCoroutine(StartWithUpdatedReferences());
         }
@@ -661,7 +661,7 @@ public class GameManager : MonoBehaviour
         
         if (!newGame)
         {
-            Debug.Log("GameManager - Start - LoadGame: " + SceneManager.GetActiveScene().name);
+            if (_debugMode) Debug.Log("GameManager - Start - LoadGame: " + SceneManager.GetActiveScene().name);
             StartCoroutine(LoadGameWithBlackScreen());
         }
         else if (newGame)
@@ -672,7 +672,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        Debug.Log("Scene " + sceneName + " is fully loaded!");
+        if (_debugMode) Debug.Log("Scene " + sceneName + " is fully loaded!");
         IsLoading = false;
     }
 
@@ -820,7 +820,7 @@ public class GameManager : MonoBehaviour
 
             foreach (Duplicate duplicate in duplicatesPool)
             {
-                if (duplicate.DuplicateID == intObjectsData.UniqueID)
+                if (duplicate.DuplicateObject.GetComponent<UniqueIDComponent>().UniqueID == intObjectsData.UniqueID)
                 {
                     duplicate.DuplicateObject.GetComponent<InteractableObject>().IsActive = intObjectsData.IsActive;
                     if (!duplicate.DuplicateObject.GetComponent<InteractableObject>().IsActive)
@@ -862,10 +862,11 @@ public class GameManager : MonoBehaviour
         {
             foreach (Duplicate door in _doorObjectPool.GetComponentsInChildren<Duplicate>())
             {
-                if (door.DuplicateID == doorData.UniqueID)
+                if (door.DuplicateObject.GetComponent<UniqueIDComponent>().UniqueID == doorData.UniqueID)
                 {
                     Door doorScript = door.DuplicateObject.GetComponent<Door>();
                     doorScript.IsLocked = doorData.IsLocked;
+                    if (_debugMode) Debug.Log("GameManager.cs: Door " + door.DuplicateObject.name + " is " + (doorData.IsLocked ? "locked" : "unlocked") + " and " + (doorData.IsOpen ? "open" : "closed"));
                     if (doorData.IsOpen) doorScript.OpenDoor(false);
                 }
             }
@@ -889,7 +890,7 @@ public class GameManager : MonoBehaviour
         {
             foreach (TextObjectData textData in data.TextObjects)
             {
-                if (duplicate.DuplicateID == textData.UniqueID)
+                if (duplicate.DuplicateObject.GetComponent<UniqueIDComponent>().UniqueID == textData.UniqueID)
                 {
                     TextCode textCode = duplicate.DuplicateObject.GetComponent<TextCode>();
                     textCode.IsAudioActive = textData.IsActive;
@@ -999,7 +1000,7 @@ public class GameManager : MonoBehaviour
             if (agent.gameObject.activeSelf)
             {
                 agent.isStopped = toggle;
-                Debug.Log("GameManager.cs: " + agent.name + " is " + (toggle ? "stopped" : "moving"));
+                if (_debugMode) Debug.Log("GameManager.cs: " + agent.name + " is " + (toggle ? "stopped" : "moving"));
             }
         }
     }

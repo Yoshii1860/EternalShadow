@@ -33,7 +33,7 @@ public class Drawer : InteractableObject
     #region Unity Methods
 
     // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
         if (IsDrawer)   _closedPosition             = transform.localPosition;
         else            _closedRotation             = transform.localEulerAngles;

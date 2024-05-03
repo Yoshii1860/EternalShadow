@@ -29,7 +29,7 @@ public class MirrorDoorEvent : InteractableObject
 
     #region Unity Methods
 
-    void Start()
+    protected override void Start()
     {
         _firstRailing = _railingContainer.GetChild(0).gameObject;
         _secondRailing = _railingContainer.GetChild(1).gameObject;

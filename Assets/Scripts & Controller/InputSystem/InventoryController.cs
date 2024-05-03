@@ -223,6 +223,8 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
         _isInteracting = false;
         if (_debugMode) Debug.Log("InventoryController.Interact");
 
+        AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "clicker", 0.3f);
+
         // Check if item actions are not open
         if (!InventoryManager.Instance.IsItemActionsOpen)
         {
@@ -327,6 +329,7 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
         if (InventoryManager.Instance.HighlightNumber + step >= 0 &&
             InventoryManager.Instance.HighlightNumber + step < InventoryManager.Instance.Items.Count)
         {
+            AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "click", 0.3f);
             InventoryManager.Instance.ChangeSelectedItemColor(true, false);
             InventoryManager.Instance.HighlightNumber += step;
             InventoryManager.Instance.ChangeSelectedItemColor(true, true);
@@ -352,6 +355,7 @@ public class InventoryController : MonoBehaviour, ICustomUpdatable
         if (InventoryManager.Instance.ItemActionNumber + step >= 0 &&
             InventoryManager.Instance.ItemActionNumber + step < InventoryManager.Instance.ActionsChildCount)
         {
+            AudioManager.Instance.PlayClipOneShot(AudioManager.Instance.PlayerSpeaker2, "click", 0.3f);
             InventoryManager.Instance.ChangeSelectedActionColor(false);
             InventoryManager.Instance.ItemActionNumber += step;
             InventoryManager.Instance.ChangeSelectedActionColor(true);

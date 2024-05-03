@@ -42,6 +42,7 @@ public class InputManager : MonoBehaviour
     private MenuController _menuController;
     private InventoryController _inventoryController;
     private PaintingController _paintingController;
+    [SerializeField] private bool _debugMode;
 
     #endregion
 
@@ -112,6 +113,8 @@ public class InputManager : MonoBehaviour
                 Debug.LogWarning("Action map available but not bound: " + actionMap.name);
             }
         }
+
+        if (_debugMode) Debug.Log("Bind all action maps");
     }
 
     #endregion
@@ -123,10 +126,8 @@ public class InputManager : MonoBehaviour
 
     void BindPlayerActions(InputActionMap actionMap)
     {
-        if (_playerController == null)
-        {
-            _playerController = FindObjectOfType<PlayerController>();
-        }
+        _playerController = FindObjectOfType<PlayerController>();
+        
         // Subscribe to actions within this action map
         foreach (var action in actionMap.actions)
         {
@@ -185,6 +186,8 @@ public class InputManager : MonoBehaviour
                 Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
             }
         }
+
+        if (_debugMode) Debug.Log("Player actions bound");
     }
 
     #endregion
@@ -221,6 +224,8 @@ public class InputManager : MonoBehaviour
                 Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
             }
         }
+
+        if (_debugMode) Debug.Log("Menu actions bound");
     }
 
     #endregion
@@ -273,6 +278,8 @@ public class InputManager : MonoBehaviour
                 Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
             }
         }
+
+        if (_debugMode) Debug.Log("Inventory actions bound");
     }
 
     #endregion
@@ -301,6 +308,8 @@ public class InputManager : MonoBehaviour
                 Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
             }
         }
+
+        if (_debugMode) Debug.Log("Pickup actions bound");
     }
 
     #endregion
@@ -337,6 +346,8 @@ public class InputManager : MonoBehaviour
                 Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
             }
         }
+
+        if (_debugMode) Debug.Log("Painting actions bound");
     }
 
     #endregion

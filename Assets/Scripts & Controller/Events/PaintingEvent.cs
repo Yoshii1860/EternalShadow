@@ -57,6 +57,7 @@ public class PaintingEvent : MonoBehaviour
     }
         
     private bool _playOnce = false;
+    private PaintingController paintingController;
 
     #endregion
 
@@ -69,6 +70,9 @@ public class PaintingEvent : MonoBehaviour
     public void StartPaintingEvent()
     {
         IsPaused = true;
+
+        paintingController = GetComponent<PaintingController>();
+        GameManager.Instance.CustomUpdateManager.AddCustomUpdatable(paintingController);
 
         StartCoroutine(StartingEvent());    
     }
@@ -113,6 +117,14 @@ public class PaintingEvent : MonoBehaviour
         }
     }
 
+    public void OnExit()
+    {
+        _doorObject.GetComponent<Renderer>().enabled = false;
+        _penObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
+        GameManager.Instance.PlayerController.SetFollowTarget();
+        GameManager.Instance.PlayerController.ToggleArms(true);
+    }
+
     #endregion
 
 
@@ -130,6 +142,8 @@ public class PaintingEvent : MonoBehaviour
         {
             if (_paintingList[i].PaintingNumber != _solvedOrder[i]) return;
         }
+
+        GameManager.Instance.CustomUpdateManager.RemoveCustomUpdatable(paintingController);
 
         if (_debugMode) Debug.Log("Painting Event Solved!");
         
@@ -253,8 +267,6 @@ public class PaintingEvent : MonoBehaviour
             _playOnce = true;
         }
 
-        // Undo flashlight and weapon if enabled
-        GameManager.Instance.PlayerAnimManager.PenholderAnimation();
         // disable the doors renderer
         _doorObject.GetComponent<Renderer>().enabled = false;
 

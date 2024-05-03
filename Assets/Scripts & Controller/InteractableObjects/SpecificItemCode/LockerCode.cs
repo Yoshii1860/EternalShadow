@@ -22,7 +22,7 @@ public class LockerCode : InteractableObject
 
     #region Unity Methods
 
-    void Start()
+    protected override void Start()
     {
         _doorMesh = _doorTransform.GetComponent<MeshRenderer>();
     }

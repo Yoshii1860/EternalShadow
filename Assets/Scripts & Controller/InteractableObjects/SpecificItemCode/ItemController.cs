@@ -29,8 +29,9 @@ public class ItemController : InteractableObject
         }
     }
 
-    void Start() 
+    protected override void Start()
     {
+        base.Start();
         _pickedUpState = false;
         _originalPosition = transform.position;
     }

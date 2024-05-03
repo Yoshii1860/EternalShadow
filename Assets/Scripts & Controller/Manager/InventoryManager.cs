@@ -82,7 +82,7 @@ public class InventoryManager : MonoBehaviour
         [Tooltip("The force that will be applied to the dropped item")]
         [SerializeField] private float _dropForce;
         [Tooltip("The maximum amount of items that can be stored in the inventory")]
-        [SerializeField] private int _maxItems = 9;
+        [SerializeField] private int _maxItems = 12;
         [Space(10)]
 
         [Tooltip("The GameObject (child of player) that contains the weapons")]
@@ -224,7 +224,7 @@ public class InventoryManager : MonoBehaviour
 
 
 
-    #region CheckAutoSaveCondition
+    #region Auto Save Condition
 
     // Check if the item is one of the conditions for the AutoSave
     private void CheckAutoSaveCondition(Item item)

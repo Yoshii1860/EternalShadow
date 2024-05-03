@@ -105,12 +105,13 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
     // Audio Source and Clips
     private AudioSource _audioSource;
-    private AudioClip _wooshClip;
+    private AudioClip _enterClip;
     private AudioClip _clickClip;
     private AudioClip _menuDieClip;
     private AudioClip _menuMusic;
     private AudioClip _bootPC;
     private AudioClip _shutdownPC;
+    private AudioClip _wooshClip;
 
     #endregion
 
@@ -166,12 +167,13 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         _initialButtonPositions[_loadGameButton.transform] = _loadGameButton.transform.position;
         _initialButtonPositions[_exitButton.transform] = _exitButton.transform.position;
         _audioSource = GetComponent<AudioSource>();
-        _wooshClip = Resources.Load<AudioClip>("SFX/woosh");
+        _enterClip = Resources.Load<AudioClip>("SFX/clicker");
         _clickClip = Resources.Load<AudioClip>("SFX/click");
         _menuDieClip = Resources.Load<AudioClip>("SFX/menu die");
         _menuMusic = Resources.Load<AudioClip>("SFX/menu music");
         _bootPC = Resources.Load<AudioClip>("SFX/boot pc");
         _shutdownPC = Resources.Load<AudioClip>("SFX/shutdown pc");
+        _wooshClip = Resources.Load<AudioClip>("SFX/woosh");
     }
 
     // Start is called before the first frame update
@@ -278,7 +280,10 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         }
 
         // Play the woosh sound effect
-        _audioSource.PlayOneShot(_wooshClip);
+        if (string.Compare(_selectedButton.gameObject.name, "NewGame") == 0)
+            _audioSource.PlayOneShot(_wooshClip, 0.5f);
+        else
+            _audioSource.PlayOneShot(_enterClip, 0.5f);
 
         // Check the selected button and perform the appropriate action
         if (string.Compare(_selectedButton.gameObject.name, "NewGame") == 0)                     StartCoroutine(StartNewGame());
@@ -300,14 +305,12 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         {
             _isAccepting = true;
             _isDeciding = false;
-            _audioSource.PlayOneShot(_wooshClip);
             return;
         }
         else if (_selectedButton.gameObject.CompareTag("No"))
         {
             _isAccepting = false;
             _isDeciding = false;
-            _audioSource.PlayOneShot(_clickClip);
             return;
         }
     }
@@ -438,7 +441,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             ActivateMenu(_mainMenu, false);
             GameManager.Instance.ResumeGame();
             MenuCanvas.SetActive(false);
-            _audioSource.PlayOneShot(_clickClip, 0.8f);
+            _audioSource.PlayOneShot(_enterClip, 0.5f);
             return;
         }
 
@@ -544,7 +547,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
                 b.GetComponentInChildren<Image>().color = _unselectedColor;
             }
             button.GetComponentInChildren<Image>().color = _selectedColor;
-            _audioSource.PlayOneShot(_clickClip, 0.8f);
+            _audioSource.PlayOneShot(_clickClip, 0.5f);
             return;
         }
 
@@ -559,7 +562,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         button.GetComponentInChildren<Image>().color = _selectedColor;
 
         // Play the click sound effect
-        _audioSource.PlayOneShot(_clickClip, 0.8f);
+        _audioSource.PlayOneShot(_clickClip, 0.5f);
     }
 
     #endregion
@@ -607,7 +610,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     public void SaveGame()
     {
         // Play the boot PC sound effect
-        _audioSource.PlayOneShot(_bootPC, 0.6f);
+        _audioSource.PlayOneShot(_bootPC, 0.5f);
 
         ActivateMenu(_saveMenu);
     }
@@ -772,7 +775,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         yield return new WaitForSeconds(1f);
 
         // Play the shutdown PC sound effect
-        _audioSource.PlayOneShot(_shutdownPC, 0.6f);
+        _audioSource.PlayOneShot(_shutdownPC, 0.5f);
 
         yield return new WaitForSeconds(1f);
 
@@ -847,7 +850,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             MenuCanvas.SetActive(false);
 
             // Play the click sound effect
-            _audioSource.PlayOneShot(_clickClip, 0.8f);
+            _audioSource.PlayOneShot(_enterClip, 0.5f);
 
             // Resume the game
             GameManager.Instance.ResumeGame();

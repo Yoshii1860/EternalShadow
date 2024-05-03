@@ -273,7 +273,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d62590c840f7e2e41b1fcecab01468e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveDebounceTime: 0.3
+  _moveDebounceTime: 0.3
+  _pen: {fileID: 2710988432015283696}
 --- !u!114 &1740172190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -286,22 +287,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e55a97d333844f4f9a95c75d82888e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  solvedOrder: 0400000002000000030000000000000001000000
-  paintingList:
+  _solvedOrder: 0400000002000000030000000000000001000000
+  _paintingList:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  markedPainting: {fileID: 0}
-  markedPaintingToSwitch: {fileID: 0}
-  pen: {fileID: 139163892186709832}
-  drawer: {fileID: 0}
-  girl: {fileID: 0}
-  door: {fileID: 0}
-  active: 0
-  vCamFollow: {fileID: 0}
-  pause: 0
+  MarkedPainting: {fileID: 0}
+  MarkedPaintingToSwitch: {fileID: 0}
+  _penObject: {fileID: 139163892186709832}
+  _drawerObject: {fileID: 0}
+  _girlObject: {fileID: 0}
+  _doorObject: {fileID: 0}
+  _vCamFollow: {fileID: 0}
+  IsActive: 0
+  IsPaused: 0
+  _debugMode: 0
 --- !u!1 &7044115346112746754
 GameObject:
   m_ObjectHideFlags: 0

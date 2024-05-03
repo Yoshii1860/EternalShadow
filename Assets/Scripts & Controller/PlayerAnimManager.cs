@@ -130,8 +130,8 @@ public class PlayerAnimManager : MonoBehaviour
         if (DebugMode) Debug.Log("PlayerAnim - PenholderAnimation");
 
         // Initiates the penholder animation
-        if (GameManager.Instance.Player.Flashlight.enabled) GameManager.Instance.Player.LightSwitch();
-        if (_isPistolEquipped) _animator.gameObject.GetComponentInChildren<WeaponSwitcher>().Execute(1);
+        //if (GameManager.Instance.Player.Flashlight.enabled) GameManager.Instance.Player.LightSwitch();
+        //if (_isPistolEquipped) _animator.gameObject.GetComponentInChildren<WeaponSwitcher>().Execute(1);
     }
 
     // Starts the reload animation of the player

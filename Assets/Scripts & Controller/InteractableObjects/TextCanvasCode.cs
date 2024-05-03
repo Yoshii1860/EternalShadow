@@ -27,6 +27,21 @@ public class TextCanvasCode : MonoBehaviour
 
     private bool IsAudioReady = false;
 
+    private GameObject _panel;
+
+    #endregion
+
+
+
+
+    #region Unity Methods
+
+    private void Start()
+    {
+        _panel = transform.GetChild(0).gameObject;
+        _panel.SetActive(false);
+    }
+
     #endregion
 
 
@@ -37,6 +52,8 @@ public class TextCanvasCode : MonoBehaviour
     // function to set text - used by Text Code Scripts
     public void SetText(string newHeader, string newBody, string newSubHeader = "", string newSubBody = "")
     {
+        if (!_panel.activeSelf) _panel.SetActive(true);
+
         _mainHeaderText = newHeader;
         _mainBodyText = newBody;
         _subHeaderText = newSubHeader;

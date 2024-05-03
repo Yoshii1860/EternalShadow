@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bb1768d0015bbd42bc8b85db28b584f, type: 3}
   m_Name: BathroomKey
   m_EditorClassIdentifier: 
-  DisplayName: BathroomKey
+  DisplayName: Bathroom Key
   Description: A key with "Bathroom" etched onto its tag, granting access to secluded
     areas within the asylum's labyrinthine corridors.
   Icon: {fileID: 21300000, guid: 28d0896f4ba39c54c87071f0b1e88af3, type: 3}

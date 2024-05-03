@@ -506,7 +506,8 @@ public class YardEvent : MonoBehaviour
         // Check if bathroom event has been triggered
         if (!GameManager.Instance.EventData.CheckEvent("Bathroom"))
         {
-            AudioManager.Instance.SetAudioClip(_girl.GetInstanceID(), "weeping ghost woman", 0.6f, 1f, true);
+            _girl.SetActive(false);
+            _girl.transform.position = new Vector3(-10.1878738f,-1.7069f,-13.7854099f);
             _girl.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
             _girl.GetComponent<EnemyBT>().enabled = false;
             _girl.GetComponentInChildren<Collider>().enabled = false;

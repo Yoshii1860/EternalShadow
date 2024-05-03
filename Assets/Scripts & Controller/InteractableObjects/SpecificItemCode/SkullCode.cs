@@ -26,7 +26,7 @@ public class SkullCode : InteractableObject
 
     #region Unity Methods  
 
-    void Start()
+    protected override void Start()
     {
         _bonesaw.SetActive(false);
     }

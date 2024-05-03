@@ -35,13 +35,6 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float _stunDuration = 30f;
     [Tooltip("The time the enemy starts with get up animation after being shot.")]
     [SerializeField] private float _getUpDelay = 25f;
-    [Space(10)]
-
-    [Header("Audio")]
-    [SerializeField] private string _deathSound = "";
-    [SerializeField] private string _fallImpactSound = "";
-    [SerializeField] private float _fallSoundDelay = 1f;
-    [SerializeField] private float _fallImpactVolume = 1f;
 
     #endregion
 
@@ -94,16 +87,6 @@ public class Enemy : MonoBehaviour
         IsShot = true;
 
         transform.GetComponent<Animator>().SetTrigger("die");
-
-        AudioManager.Instance.StopAudio(gameObject.GetInstanceID());
-
-        yield return new WaitForSeconds(0.2f);
-
-        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), _deathSound);
-
-        yield return new WaitForSeconds(_fallSoundDelay);
-
-        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), _fallImpactSound, _fallImpactVolume);
 
         StartCoroutine(EnemyGetUp());
 

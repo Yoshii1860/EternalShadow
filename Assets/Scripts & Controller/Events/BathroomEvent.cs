@@ -90,6 +90,7 @@ public class BathroomEvent : MonoBehaviour
     // Function to be called to load the event from the save file
     public void EventLoad()
     {
+        _girl.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
         _girl.GetComponent<EnemyBT>().enabled = true;
         _girl.GetComponentInChildren<Collider>().enabled = true;
         GetComponent<Collider>().enabled = false;

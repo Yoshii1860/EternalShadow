@@ -19,6 +19,8 @@ public class EnemyAudio : MonoBehaviour
     private string _walkSoundClip;
     private string _speakSoundClip;
     private string _shoutSoundClip;
+    private string _deathSoundClip;
+    private string _fallImpactSoundClip;
 
     Transform _playerTransform;
 
@@ -44,12 +46,16 @@ public class EnemyAudio : MonoBehaviour
                 _walkSoundClip = "slender walk ";
                 _speakSoundClip = "slender hello";
                 _shoutSoundClip = "slender scream";
+                _deathSoundClip = "slender death";
+                _fallImpactSoundClip = "slender fall";
                 break;
             case EnemyType.GIRL:
                 _runSoundClip = "woman run";
                 _walkSoundClip = "woman step ";
                 _speakSoundClip = "weeping ghost woman";
                 _shoutSoundClip = "woman scream";
+                _deathSoundClip = "woman death";
+                _fallImpactSoundClip = "woman fall";
                 break;
         }   
     }
@@ -99,6 +105,13 @@ public class EnemyAudio : MonoBehaviour
         _isShouting = false;
         _isSpeaking = false;
         AudioManager.Instance.StopAudio(gameObject.GetInstanceID());
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), _deathSoundClip);
+    }
+
+    // Play the sound when the enemy falls and hits the ground
+    private void FallImpactSound()
+    {
+        AudioManager.Instance.PlayClipOneShot(gameObject.GetInstanceID(), _fallImpactSoundClip, 1f);
     }
 
     // Play the sound when the enemy hits the player and inflict damage
