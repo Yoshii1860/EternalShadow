@@ -16,11 +16,11 @@ MonoBehaviour:
   Description: The untouched heart of a virgin holds a dark significance, potentially
     crucial to uncovering the asylum's secrets.
   Icon: {fileID: 21300000, guid: 7348ab6b39b92c5458dd66aced0edbb4, type: 3}
-  IconPath: VFX/ItemIcons/heart
+  IconPath: VFX/ItemIcons/Heart
   IsUnique: 1
   Quantity: 1
   Prefab: {fileID: 100000, guid: 4f9f99f3d4609734298ee75b6decddb6, type: 3}
-  PrefabPath: Prefabs/Items/heart
+  PrefabPath: Prefabs/Items/Heart
   Type: 3
   ammoType: 0
   potionType: 0

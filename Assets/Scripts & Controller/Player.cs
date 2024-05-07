@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Rendering.PostProcessing;
 
 public class Player : MonoBehaviour, ICustomUpdatable
 {
@@ -64,6 +65,10 @@ public class Player : MonoBehaviour, ICustomUpdatable
     [SerializeField] private TextMeshProUGUI _bulletsText;
     [Tooltip("The icon displaying the bullets.")]
     [SerializeField] private Image _bulletsIcon;
+    [Tooltip("The post process volume of the environment.")]
+    [SerializeField] private PostProcessVolume _postProcessVolume;
+
+    private ChromaticAberration _chromaticAberration;
 
     #endregion
 
@@ -120,6 +125,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
         _speakerID = AudioManager.Instance.PlayerSpeaker;
         _speaker2ID = AudioManager.Instance.PlayerSpeaker2;
         Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("Enemies"));
+        _postProcessVolume.profile.TryGetSettings(out _chromaticAberration);
     }
 
     // Custom update method
@@ -157,6 +163,12 @@ public class Player : MonoBehaviour, ICustomUpdatable
 
             // turn transparency of blood effect to lost health and keep the other colors
             _bloodOverlayImage.color = new Color(_bloodOverlayImage.color.r, _bloodOverlayImage.color.g, _bloodOverlayImage.color.b, 0f);
+
+            if (_chromaticAberration.enabled.value)
+            {
+                _chromaticAberration.intensity.value = 0f;
+                _chromaticAberration.enabled.value = false;
+            }
         }
         // medium health, change blood overlay transparency
         if (Health < MAX_HEALTH_THRESHOLD && Health >= MEDIUM_HEALTH_THRESHOLD)
@@ -169,6 +181,13 @@ public class Player : MonoBehaviour, ICustomUpdatable
             }
 
             _bloodOverlayImage.color = new Color(_bloodOverlayImage.color.r, _bloodOverlayImage.color.g, _bloodOverlayImage.color.b, ((MaxHealth - Health) / LOW_OPACITY_DIVIDER));
+
+            if (!_chromaticAberration.enabled.value)
+            {
+                _chromaticAberration.enabled.value = true;
+                _chromaticAberration.intensity.value = 0.2f;
+            }
+            else _chromaticAberration.intensity.value = 0.2f;
         }
         // low health, play moaning sound and change blood overlay transparency
         if (Health < MEDIUM_HEALTH_THRESHOLD && Health >= LOW_HEALTH_THRESHOLD)
@@ -181,6 +200,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
             }
 
             _bloodOverlayImage.color = new Color(_bloodOverlayImage.color.r, _bloodOverlayImage.color.g, _bloodOverlayImage.color.b, ((MaxHealth - Health) / MEDIUM_OPACITY_DIVIDER));
+            _chromaticAberration.intensity.value = 0.5f;
 
             if (!_isWaitTimerActive)
             {
@@ -195,6 +215,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
         if (Health < LOW_HEALTH_THRESHOLD)
         {
             _bloodOverlayImage.color = new Color(_bloodOverlayImage.color.r, _bloodOverlayImage.color.g, _bloodOverlayImage.color.b, ((MaxHealth - Health) / MAX_OPACITY_DIVIDER));
+            _chromaticAberration.intensity.value = 1f;
 
             if (!_isWaitTimerActive)
             {

@@ -235,6 +235,11 @@ public class GameManager : MonoBehaviour
         _areReferencesUpdated = true;
     }
 
+    public void RemoveAllCustomUpdatables()
+    {
+        CustomUpdateManager.ClearCustomUpdatables();
+    }
+
     #endregion
 
 

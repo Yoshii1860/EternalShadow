@@ -70,11 +70,15 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     [SerializeField] private Transform _loadMenu;
     [SerializeField] private Transform _saveMenu;
     [SerializeField] private Transform _deathMenu;
+    [SerializeField] private Transform _optionsMenu;
+    [SerializeField] private Transform _deviceMenu;
+    [SerializeField] private Transform _graphicsMenu;
     [Space(10)]
 
     [Header("Menu Buttons")]
     [SerializeField] private Transform _newGameButton;
-    [SerializeField] private Transform _loadGameButton;
+    [SerializeField] private Transform _returnGameButton;
+    //[SerializeField] private Transform _loadGameButton;
     [SerializeField] private Transform _exitButton;
     [SerializeField] private Button _returnFromLoadButton;
     [SerializeField] private Button _returnFromSaveButton;
@@ -95,7 +99,6 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     [Space(10)]
 
     // Button and Menu Variables
-    private Dictionary<Transform, Vector3> _initialButtonPositions = new Dictionary<Transform, Vector3>();
     private Transform[] _menus;
     private Button[] _buttons;
     private Button[] _decisionButtons;
@@ -162,10 +165,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
 
         // Initialize the menu variables
-        _menus = new Transform[] { _mainMenu, _loadMenu, _saveMenu, _deathMenu };
-        _initialButtonPositions[_newGameButton.transform] = _newGameButton.transform.position;
-        _initialButtonPositions[_loadGameButton.transform] = _loadGameButton.transform.position;
-        _initialButtonPositions[_exitButton.transform] = _exitButton.transform.position;
+        _menus = new Transform[] { _mainMenu, _loadMenu, _saveMenu, _deathMenu, _optionsMenu, _deviceMenu, _graphicsMenu};
         _audioSource = GetComponent<AudioSource>();
         _enterClip = Resources.Load<AudioClip>("SFX/clicker");
         _clickClip = Resources.Load<AudioClip>("SFX/click");
@@ -174,6 +174,20 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         _bootPC = Resources.Load<AudioClip>("SFX/boot pc");
         _shutdownPC = Resources.Load<AudioClip>("SFX/shutdown pc");
         _wooshClip = Resources.Load<AudioClip>("SFX/woosh");
+
+        // Set the input device to the default value if it is not set
+        int deviceChoice = PlayerPrefs.GetInt("InputDevice", -1);
+        if (deviceChoice == -1)
+        {
+            PlayerPrefs.SetInt("InputDevice", 0);
+        }
+
+        // Set the graphics quality to the default value if it is not set
+        int graphicsChoice = PlayerPrefs.GetInt("GraphicsQuality", -1);
+        if (graphicsChoice == -1)
+        {
+            OnHighQualitySelected();
+        }
     }
 
     // Start is called before the first frame update
@@ -281,19 +295,23 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
         // Play the woosh sound effect
         if (string.Compare(_selectedButton.gameObject.name, "NewGame") == 0)
+        {
             _audioSource.PlayOneShot(_wooshClip, 0.5f);
-        else
-            _audioSource.PlayOneShot(_enterClip, 0.5f);
+            StartCoroutine(StartNewGame());
+            return;
+        }
+        else _audioSource.PlayOneShot(_enterClip, 0.5f);
 
         // Check the selected button and perform the appropriate action
-        if (string.Compare(_selectedButton.gameObject.name, "NewGame") == 0)                     StartCoroutine(StartNewGame());
-        else if (string.Compare(_selectedButton.gameObject.name, "LoadGame") == 0)               ActivateMenu(_loadMenu);
-        else if (string.Compare(_selectedButton.gameObject.name, "Return") == 0 
-                && _loadMenu.gameObject.activeSelf)                                              Return(_returnFromLoadButton);
-        else if (string.Compare(_selectedButton.gameObject.name, "Return") == 0 
-                && _saveMenu.gameObject.activeSelf)                                              Return(_returnFromSaveButton);
+        if (string.Compare(_selectedButton.gameObject.name, "LoadGame") == 0)                    ActivateMenu(_loadMenu);
+        else if (string.Compare(_selectedButton.gameObject.name, "Return") == 0)                 Return();
+        else if (_graphicsMenu.gameObject.activeSelf)                                            Graphics();
+        else if (_deviceMenu.gameObject.activeSelf)                                              Devices();
         else if (_selectedButton.gameObject.CompareTag("LoadFileButton"))                        StartCoroutine(LoadFile());
         else if (_selectedButton.gameObject.CompareTag("SaveFileButton"))                        StartCoroutine(SaveFile());
+        else if (_selectedButton.gameObject.CompareTag("OptionsButton"))                         ActivateMenu(_optionsMenu);
+        else if (_selectedButton.gameObject.CompareTag("InputButton"))                           ActivateMenu(_deviceMenu);
+        else if (_selectedButton.gameObject.CompareTag("GraphicsButton"))                        ActivateMenu(_graphicsMenu);
         else if (string.Compare(_selectedButton.gameObject.name, "ExitGame") == 0)               StartCoroutine(ExitGame());
         else if (string.Compare(_selectedButton.gameObject.name, "Retry") == 0)                  LoadAuotsave();
     }
@@ -463,11 +481,12 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     // Method to activate the menu and configure the buttons
     public void OnMainMenu(bool mainMenuState)
     {
-        // Set the new game button active based on the main menu state
-        _newGameButton.gameObject.SetActive(mainMenuState);
-        // Set the button positions based on the main menu state
-        _loadGameButton.transform.position = _initialButtonPositions[mainMenuState ? _loadGameButton.transform : _newGameButton.transform];
-        _exitButton.transform.position = _initialButtonPositions[mainMenuState ? _exitButton.transform : _loadGameButton.transform];
+        // Set the new game button and return button active based on the main menu state
+        if (_mainMenu.gameObject.activeSelf)
+        {
+            _newGameButton.gameObject.SetActive(mainMenuState);
+            _returnGameButton.gameObject.SetActive(!mainMenuState);
+        }
 
         // Reset the buttons array and color
         ResetButtonColor();
@@ -475,8 +494,19 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         buttonList.Remove(_returnFromLoadButton);
         buttonList.Remove(_returnFromSaveButton);
 
-        // Remove the new game button from the button list if the main menu is not active
-        if (!mainMenuState)   buttonList.Remove(_newGameButton.GetComponent<Button>());
+        // Remove the new game button from the button list if the main menu is not active and add the return button
+        if (!mainMenuState)     
+        {
+            buttonList.Remove(_newGameButton.GetComponent<Button>());
+            if (_mainMenu.gameObject.activeSelf)
+            {
+                buttonList.Insert(0, _returnGameButton.GetComponent<Button>());
+            }
+        }
+        else 
+        {
+            buttonList.Remove(_returnGameButton.GetComponent<Button>());
+        }
 
         // Set the buttons array and selected button
         _buttons = buttonList.ToArray();
@@ -494,9 +524,10 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             {
                 StartCoroutine(ActivateMenuAudio());
             }
-        }
 
-        _newGameButton.gameObject.SetActive(true);
+            _newGameButton.gameObject.SetActive(true);
+            _returnGameButton.gameObject.SetActive(false);
+        }
 
         // Activate the selected menu and deactivate the others
         foreach (Transform m in _menus)
@@ -511,6 +542,9 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
                 m.gameObject.SetActive(false);
             }
         }
+
+        if (menu == _deviceMenu) ShowActiveDevice();
+        else if (menu == _graphicsMenu) ShowChosenGraphics();
 
         // If the menu is not the load or save menu, return to the main menu
         if (menu != _loadMenu && menu != _saveMenu) 
@@ -597,6 +631,108 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         }
         _audioSource.Stop();
         _audioSource.volume = 1f;
+    }
+
+    #endregion
+
+
+
+
+    #region Options
+
+    private void Graphics()
+    {
+        switch (_selectedButton.gameObject.tag)
+        {
+            case "LowQ":
+                OnLowQualitySelected();
+                break;
+
+            case "MediumQ":
+                OnMediumQualitySelected();
+                break;
+
+            case "HighQ":
+                OnHighQualitySelected();
+                break;
+
+            default:
+                break;
+        }
+
+        ShowChosenGraphics();
+    }
+
+    private void Devices()
+    {
+        switch (_selectedButton.gameObject.tag)
+        {
+            case "Controller":
+                OnControllerSelected();
+                if (GameManager.Instance.PlayerController != null) GameManager.Instance.PlayerController.SetInputDevice(1);
+                break;
+
+            case "Mouse":
+                OnMouseSelected();
+                if (GameManager.Instance.PlayerController != null) GameManager.Instance.PlayerController.SetInputDevice(0);
+                break;
+
+            default:
+                break;
+        }
+
+        ShowActiveDevice();
+    }
+
+    private void ShowActiveDevice()
+    {
+        int deviceChoice = PlayerPrefs.GetInt("InputDevice", 0);
+
+        // Find the devices and change their checkmarks
+        GameObject.FindWithTag("Mouse").transform.GetChild(1).GetChild(0).gameObject.SetActive(deviceChoice == 0 ? true : false);
+        GameObject.FindWithTag("Controller").transform.GetChild(1).GetChild(0).gameObject.SetActive(deviceChoice == 1 ? true : false);
+    }
+
+    private void ShowChosenGraphics()
+    {
+        int graphicsChoice = PlayerPrefs.GetInt("GraphicsQuality", 1);
+
+        // Find the graphics buttons and change their checkmarks
+        GameObject.FindWithTag("LowQ").transform.GetChild(1).GetChild(0).gameObject.SetActive(graphicsChoice == 0 ? true : false);
+        GameObject.FindWithTag("MediumQ").transform.GetChild(1).GetChild(0).gameObject.SetActive(graphicsChoice == 1 ? true : false);
+        GameObject.FindWithTag("HighQ").transform.GetChild(1).GetChild(0).gameObject.SetActive(graphicsChoice == 2 ? true : false);  
+    }
+
+    private void OnControllerSelected()
+    {
+        PlayerPrefs.SetInt("InputDevice", 1);
+        InputSystem.EnableDevice(Gamepad.current);
+        InputSystem.DisableDevice(Mouse.current);
+    }
+
+    private void OnMouseSelected()
+    {
+        PlayerPrefs.SetInt("InputDevice", 0);
+        InputSystem.EnableDevice(Mouse.current);
+        InputSystem.DisableDevice(Gamepad.current);
+    }
+
+    private void OnLowQualitySelected()
+    {
+        PlayerPrefs.SetInt("GraphicsQuality", 0);
+        QualitySettings.SetQualityLevel(0);
+    }
+
+    private void OnMediumQualitySelected()
+    {
+        PlayerPrefs.SetInt("GraphicsQuality", 1);
+        QualitySettings.SetQualityLevel(1);
+    }
+
+    private void OnHighQualitySelected()
+    {
+        PlayerPrefs.SetInt("GraphicsQuality", 2);
+        QualitySettings.SetQualityLevel(2);
     }
 
     #endregion
@@ -823,37 +959,62 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     #region Start, Return and Exit Method
 
     // Method to return to the main menu
-    void Return(Button returnButton)
+    void Return()
     {
         // Check if the player is in the main menu
         bool isMainMenu = SceneManager.GetActiveScene().name == "MainMenu";
-        
-        // If the return button is a load, return to the main menu
-        if (returnButton.gameObject.CompareTag("LoadReturnButton"))
+
+        switch (_selectedButton.gameObject.tag)
         {
-            foreach (Transform file in _loadFileContainer)
-            {
-                Destroy(file.gameObject);
-            }
-            ActivateMenu(_mainMenu, isMainMenu);
-        }
-        // If the return button is a save, resume the game
-        else if (returnButton.gameObject.CompareTag("SaveReturnButton"))
-        {
-            foreach (Transform file in _saveFileContainer)
-            {
-                Destroy(file.gameObject);
-            }
+            case "LoadReturnButton":
+                foreach (Transform file in _loadFileContainer)
+                {
+                    Destroy(file.gameObject);
+                }
+                ActivateMenu(_mainMenu, isMainMenu);
+                break;
 
-            // Deactivate the menu audio
-            ActivateMenu(_mainMenu, false);
-            MenuCanvas.SetActive(false);
+            case "SaveReturnButton":
+                foreach (Transform file in _saveFileContainer)
+                {
+                    Destroy(file.gameObject);
+                }
 
-            // Play the click sound effect
-            _audioSource.PlayOneShot(_enterClip, 0.5f);
+                // Deactivate the menu audio
+                ActivateMenu(_mainMenu, false);
+                MenuCanvas.SetActive(false);
 
-            // Resume the game
-            GameManager.Instance.ResumeGame();
+                // Play the click sound effect
+                _audioSource.PlayOneShot(_enterClip, 0.5f);
+
+                // Resume the game
+                GameManager.Instance.ResumeGame();
+                break;
+
+            case "ReturnGame":
+                Back();
+                break;
+
+            case "ReturnButton":
+                if (_optionsMenu.gameObject.activeSelf)
+                {
+                    _optionsMenu.gameObject.SetActive(false);
+                    ActivateMenu(_mainMenu, isMainMenu);
+                }
+                else if (_deviceMenu.gameObject.activeSelf)
+                {
+                    _deviceMenu.gameObject.SetActive(false);
+                    ActivateMenu(_optionsMenu, false);
+                }
+                else if (_graphicsMenu.gameObject.activeSelf)
+                {
+                    _graphicsMenu.gameObject.SetActive(false);
+                    ActivateMenu(_optionsMenu, false);
+                }
+                break;
+
+            default:
+                break;
         }
     }
 
@@ -880,7 +1041,8 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             if (_isAccepting)
             {
                 _isAccepting = false;
-                GameManager.Instance.RemoveEnemyCustomUpdatables();
+                GameManager.Instance.RemoveAllCustomUpdatables();
+                GameManager.Instance.CustomUpdateManager.AddCustomUpdatable(this);
                 SceneManager.LoadScene("MainMenu");
                 ActivateMenu(_mainMenu, true);
                 _audioSource.Play();

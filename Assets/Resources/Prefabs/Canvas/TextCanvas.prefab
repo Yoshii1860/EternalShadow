@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 2428572148735484824}
   m_Layer: 5
   m_Name: TextCanvas
-  m_TagString: Untagged
+  m_TagString: TextCanvas
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -114,10 +114,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e53b2e5072c00446a97a224904cc23e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainHeader: {fileID: 2428572149089266344}
-  mainBody: {fileID: 2428572149763763833}
-  subHeader: {fileID: 2428572149814982673}
-  subBody: {fileID: 2428572150387879574}
+  _mainHeader: {fileID: 2428572149089266344}
+  _mainBody: {fileID: 2428572149763763833}
+  _subHeader: {fileID: 2428572149814982673}
+  _subBody: {fileID: 2428572150387879574}
+  SpeakerClipName: 
+  Delay: 0
 --- !u!1 &2428572149089266346
 GameObject:
   m_ObjectHideFlags: 0
@@ -184,7 +186,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: MainHeader MainHeader
+  m_text: This is the Main header
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d558a584ef7498541b1fe5113f5085ca, type: 2}
   m_sharedMaterial: {fileID: 8575758687119323197, guid: d558a584ef7498541b1fe5113f5085ca, type: 2}
@@ -288,7 +290,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -25.00003}
+  m_AnchoredPosition: {x: 0, y: -24.999939}
   m_SizeDelta: {x: -220, y: -230}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2428572149763763832
@@ -319,14 +321,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Body Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody
-    Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody
-    Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody
-    Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody
-    Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody
-    Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody
-    Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody Body BodyBody
-    Body Body
+  m_text: "Here is a lot to write down. Who knows what will come next? Probably just
+    the same over and over and over and over again. I\xB4m out of words, who knows."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d558a584ef7498541b1fe5113f5085ca, type: 2}
   m_sharedMaterial: {fileID: 8575758687119323197, guid: d558a584ef7498541b1fe5113f5085ca, type: 2}
@@ -353,7 +349,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 33.95
+  m_fontSize: 40
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -430,7 +426,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -30.00003}
+  m_AnchoredPosition: {x: 0, y: -29.999939}
   m_SizeDelta: {x: -140, y: -600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2428572149814982672
@@ -461,7 +457,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: SubHeader SubHeader SubHeadER
+  m_text: This is the sub Header
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d558a584ef7498541b1fe5113f5085ca, type: 2}
   m_sharedMaterial: {fileID: 8575758687119323197, guid: d558a584ef7498541b1fe5113f5085ca, type: 2}
@@ -558,7 +554,7 @@ RectTransform:
   m_GameObject: {fileID: 2428572150381186144}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.75, y: 0.6, z: 0.8}
+  m_LocalScale: {x: 0.5, y: 0.4, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2428572149089266345}
@@ -691,7 +687,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
+  m_text: Lorem ipsum dolor sit amet, consectetur adipiscing elit. This Lorem Ipsum
+    stuff is pretty cool and fills everything with useless text.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d558a584ef7498541b1fe5113f5085ca, type: 2}
   m_sharedMaterial: {fileID: 8575758687119323197, guid: d558a584ef7498541b1fe5113f5085ca, type: 2}

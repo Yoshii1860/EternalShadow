@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 1258877030073815003}
   - component: {fileID: 1258877030073815004}
   m_Layer: 6
-  m_Name: crowbar
+  m_Name: Crowbar
   m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

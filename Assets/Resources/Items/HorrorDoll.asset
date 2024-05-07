@@ -16,11 +16,11 @@ MonoBehaviour:
   Description: A haunting memento of the asylum's dark past, collect these eerie
     dolls scattered throughout the asylum.
   Icon: {fileID: 21300000, guid: de8c57f0be3d7c54796f849fd0ae77f6, type: 3}
-  IconPath: VFX/ItemIcons/horrordoll
+  IconPath: VFX/ItemIcons/HorrorDoll
   IsUnique: 0
   Quantity: 1
   Prefab: {fileID: 129278, guid: 848098b20205e584ba1d61f0ce0ffb61, type: 3}
-  PrefabPath: Prefabs/HorrorDoll
+  PrefabPath: Prefabs/Items/HorrorDoll
   Type: 3
   ammoType: 0
   potionType: 0

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 
 public class YardEvent : MonoBehaviour
 {
@@ -29,6 +30,8 @@ public class YardEvent : MonoBehaviour
     [SerializeField] private GameObject _sun;
     [Tooltip("All red lights inside and outside the house")]
     [SerializeField] private GameObject[] _alertLights;
+    [Tooltip("The post-process volume for the environment")]
+    [SerializeField] private PostProcessVolume _postProcessVolume;
     [Space(10)]
 
     [Header("Transforms")]
@@ -45,6 +48,11 @@ public class YardEvent : MonoBehaviour
     [Header("Various Components")]
     [Tooltip("The music box object in the environment")]
     [SerializeField] private Musicbox _musicboxEvent;
+    [Tooltip("The VFX objects to be deactivated after the event")]
+    [SerializeField] private GameObject[] _vfxObjectsToDeactivate;
+    [Tooltip("The VFX objects to be activated after the event")]
+    [SerializeField] private GameObject[] _vfxObjectsToActivate;
+
 
     #endregion
 
@@ -175,6 +183,11 @@ public class YardEvent : MonoBehaviour
     /// Turn off all lights and reset the reflection probes to adjust to darkness.
     private void TurnAllLightsOff()
     {
+
+        Bloom bloom;
+        _postProcessVolume.profile.TryGetSettings(out bloom);
+        bloom.intensity.value = 5f;
+
         // Stop all audio sources associated with the lights
         for (int i = 0; i < _audioSourceIDList.Count; i++)
         {
@@ -266,6 +279,10 @@ public class YardEvent : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
+        // Access the bloom effect in the post-process volume
+        Bloom bloom;
+        _postProcessVolume.profile.TryGetSettings(out bloom);
+
         // Access the main light and its flickering component
         Light mainLightComp = _mainLight.GetComponent<Light>();
         FlickeringLight flickeringLight = mainLightComp.GetComponent<FlickeringLight>();
@@ -300,6 +317,9 @@ public class YardEvent : MonoBehaviour
             flickeringLight.MinIntensity += 0.015f;
             flickeringLight.MaxIntensity += 0.05f;
             _intensityCounter++;
+
+            // Increase the intensity of the post-process volume for the environment
+            bloom.intensity.value += 0.1f;
 
             // Trigger the start of the blindness effect when a specific intensity is reached
             if (_intensityCounter == _startBlindnessIntensity)
@@ -435,7 +455,7 @@ public class YardEvent : MonoBehaviour
         GameManager.Instance.PlayerController.transform.rotation = Quaternion.Euler(_playerRotationAfterEvent);
 
         // Wait for another short duration
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(3f);
 
         // Fade in the black screen to transition to the next phase
         GameManager.Instance.StartCoroutine(GameManager.Instance.LoadGameWithBlackScreen());
@@ -450,6 +470,9 @@ public class YardEvent : MonoBehaviour
         // Stop all sounds, play ambient audio, and set player's voice audio
         AudioManager.Instance.StopAll();
         AudioManager.Instance.PlayAudio(AudioManager.Instance.Environment, 0.1f, 1f, true);
+
+        foreach (GameObject vfxObject in _vfxObjectsToDeactivate) vfxObject.SetActive(false);
+        foreach (GameObject vfxObject in _vfxObjectsToActivate) vfxObject.SetActive(true);
 
         // Wait until the game state transitions to the default state
         Debug.Log("Waiting for game state to transition to default...");

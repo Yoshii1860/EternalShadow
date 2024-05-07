@@ -17,11 +17,11 @@ MonoBehaviour:
     a door shrouded in mystery, beckoning you deeper into the labyrinthine corridors
     of the asylum.
   Icon: {fileID: 21300000, guid: 89478a8ac5905d8408a99a83bbf4d6a9, type: 3}
-  IconPath: VFX/ItemIcons/music key
+  IconPath: VFX/ItemIcons/MusicKey
   IsUnique: 1
   Quantity: 1
   Prefab: {fileID: 1807402537570743421, guid: 82da342f21082734fa84226615e670b5, type: 3}
-  PrefabPath: Prefabs/Items/musicKey
+  PrefabPath: Prefabs/Items/MusicKey
   Type: 3
   ammoType: 0
   potionType: 0

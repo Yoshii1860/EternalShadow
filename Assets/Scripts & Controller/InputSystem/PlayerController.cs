@@ -8,18 +8,20 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     #region Movement Variables 
 
     [Header("Movement")]
-    [Tooltip("Move _currentMovementSpeed of the character in m/s")]
+    [Tooltip("Move movement speed of the character in m/s")]
     [SerializeField] private float _movementSpeed = 4.0f;
     [Tooltip("Maximum force applied when moving in m/s")]
     [SerializeField] private float _maxMovementForce = 1f;
-    [Tooltip("Sprint _currentMovementSpeed of the character in m/s")]
+    [Tooltip("Sprint movement speed of the character in m/s")]
     [SerializeField] private float _sprintMovementSpeed = 6.0f;
-    [Tooltip("Crouch _currentMovementSpeed of the character in m/s")]
+    [Tooltip("Crouch movement speed of the character in m/s")]
     [SerializeField] private float _crouchMovementSpeed = 0.6f;
-    [Tooltip("Rotation _currentMovementSpeed of the character")]
-    public float RotationSpeed = 1.0f;
-    [Tooltip("Rotation _currentMovementSpeed of the character during Gameplay")]
-    public float BaseRotationSpeed = 1.0f;
+    [Tooltip("Rotation movement speed of the character")]
+    public float RotationSpeed = 5.0f;
+    [Tooltip("Rotation movement speed of the character during Gameplay")]
+    public float BaseRotationSpeed = 5.0f;
+    [Tooltip("Rotation movement speed of the character when using the controller")]
+    public float ControllerRotationSpeed = 250.0f;
     [Tooltip("Acceleration and deceleration")]
     [SerializeField] private float _acceleration = 10.0f;
     [Tooltip("The distance the player will move up or down when crouching")]
@@ -141,6 +143,9 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
         if (_camRoot == null) _camRoot = transform.GetChild(0).gameObject;
         if (_camRoot == null) Debug.LogError("No _camRoot found!");
+
+        int deviceChoice = PlayerPrefs.GetInt("DeviceChoice", 0);
+        SetInputDevice(deviceChoice);
     }
 
     // Update is called once per frame
@@ -363,6 +368,12 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         _rb.AddForce(direction * force, ForceMode.Impulse);
     }
 
+    public void SetInputDevice(int deviceChoice)
+    {
+        if (deviceChoice == 0) RotationSpeed = BaseRotationSpeed;
+        else RotationSpeed = ControllerRotationSpeed;
+    }
+
     #endregion
 
 
@@ -515,8 +526,6 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
     // Look and Turn the player
     private void Look()
     {
-        RotationSpeed = BaseRotationSpeed;
-
         // Turn
         transform.Rotate(Vector3.up * _lookPos.x * RotationSpeed * Time.deltaTime);
 

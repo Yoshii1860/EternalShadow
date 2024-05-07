@@ -111,16 +111,43 @@ public class Item : ScriptableObject
     // Helper method to get the resource path of an object.
     private string GetResourcePath(Object obj)
     {
-        string assetPath = UnityEditor.AssetDatabase.GetAssetPath(obj);
-
-        // Check if the asset path is in the Resources folder.
-        if (assetPath.StartsWith("Assets/Resources/"))
+        // Check if the object is null
+        if (obj == null)
         {
-            return assetPath.Substring("Assets/Resources/".Length, assetPath.LastIndexOf(".") - "Assets/Resources/".Length);
+            Debug.LogError("Object reference is null!");
+            return null;
+        }
+
+        // Get the object type
+        string resourceType = obj.GetType().ToString().Replace("UnityEngine.", "");
+
+        // Check the object type and construct the path based on your folder structure
+        string resourcePath;
+        if (resourceType == "Sprite")
+        {
+            resourcePath = "VFX/ItemIcons/" + obj.name;
+        }
+        else if (resourceType == "GameObject")
+        {
+            resourcePath = "Prefabs/Items/" + obj.name;
         }
         else
         {
-            Debug.LogWarning("Object must be in the Resources folder to get the resource path.");
+            Debug.LogError("Unsupported resource type: " + resourceType);
+            return null;
+        }
+
+        // Load the resource using Resources.Load
+        Object loadedResource = Resources.Load(resourcePath);
+
+        // Check if the resource was loaded successfully
+        if (loadedResource != null)
+        {
+            return resourcePath;
+        }
+        else
+        {
+            Debug.LogError("Failed to load resource: " + obj.name);
             return null;
         }
     }

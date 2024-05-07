@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1491227723}
   - component: {fileID: 1491227724}
   m_Layer: 6
-  m_Name: brain
+  m_Name: Brain
   m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

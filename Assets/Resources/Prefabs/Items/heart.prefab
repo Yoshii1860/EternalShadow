@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 623695595}
   - component: {fileID: 623695596}
   m_Layer: 6
-  m_Name: heart
+  m_Name: Heart
   m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

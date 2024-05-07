@@ -20,7 +20,7 @@ MonoBehaviour:
   IsUnique: 0
   Quantity: 3
   Prefab: {fileID: 496015967415131217, guid: 9060b108bf149744e81dc8b9857575ec, type: 3}
-  PrefabPath: Prefabs/Items/bullets
+  PrefabPath: Prefabs/Items/Bullets
   Type: 1
   ammoType: 1
   potionType: 0

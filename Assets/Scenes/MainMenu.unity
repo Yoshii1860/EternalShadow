@@ -272,6 +272,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bd999381e3929da42834447eb9852033, type: 3}
+--- !u!224 &2034583201 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 6701541680146323717, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
+  m_PrefabInstance: {fileID: 4819816095227440773}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4819816095227440773
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -279,26 +284,22 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4819816094934733478, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 0
+    - target: {fileID: 3014471846246310204, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 4819816094934733478, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 4819816095015689657, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
-    - target: {fileID: 4819816095836373940, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 0
+    - target: {fileID: 4819816095015689663, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 4819816095836373940, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 4819816095015689657, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
     - target: {fileID: 4819816096193439282, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
       propertyPath: m_Name
       value: MenuManager
       objectReference: {fileID: 0}
+    - target: {fileID: 4819816096193439293, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
+      propertyPath: _returnGameButton
+      value: 
+      objectReference: {fileID: 2034583201}
     - target: {fileID: 4819816096193439295, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -341,6 +342,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4819816096193439295, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6274977311724226034, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -36.869377
+      objectReference: {fileID: 0}
+    - target: {fileID: 6451920699087339597, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 37.351
+      objectReference: {fileID: 0}
+    - target: {fileID: 6873502818457437345, guid: c9c289890aaeb194aa2c3859b162a273, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

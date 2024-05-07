@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1897035360}
   - component: {fileID: 1897035359}
   m_Layer: 6
-  m_Name: bathroomKey
+  m_Name: BathroomKey
   m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

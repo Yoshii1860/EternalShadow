@@ -272,8 +272,8 @@ public class Mannequin : MonoBehaviour, ICustomUpdatable
     // Switch body part with death part
     private void SwitchBodyPart(Transform bodyPart, Transform deathPart)
     {
-        bodyPart.position = deathPart.position;
-        bodyPart.rotation = deathPart.rotation;
+        deathPart.position = bodyPart.position;
+        deathPart.rotation = bodyPart.rotation;
         deathPart.gameObject.SetActive(true);
         bodyPart.gameObject.SetActive(false);
         // add force to head to make it fall

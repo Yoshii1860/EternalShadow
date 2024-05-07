@@ -20,7 +20,7 @@ MonoBehaviour:
   IsUnique: 1
   Quantity: 1
   Prefab: {fileID: 6202248377633566000, guid: 922b657c582d9fc40a31918f50421b84, type: 3}
-  PrefabPath: Prefabs/Items/mainDoorKey
+  PrefabPath: Prefabs/Items/MainDoorKey
   Type: 3
   ammoType: 0
   potionType: 0

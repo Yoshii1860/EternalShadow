@@ -25,7 +25,7 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
     [Tooltip("The music boxes light object.")]
     [SerializeField] private GameObject _itemLight;
     [Tooltip("The music box item.")]
-    [SerializeField] ItemController musicBoxObject;
+    [SerializeField] ItemController _musicboxObject;
     [Space(10)]
 
     [Header("Waypoints")]
@@ -123,6 +123,11 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
                 // Enable the item light and enable the flashlight
                 _itemLight.SetActive(true);
                 GameManager.Instance.Player.IsLightAvailable = true;
+
+                foreach (Transform waypoint in _waypoints) waypoint.gameObject.SetActive(false);
+                GetComponent<Collider>().enabled = false;
+
+                Invoke("GameManager.Instance.Player.LightSwitch", 1f);
 
                 // Set the event as ended and set the event data
                 _hasEnded = true;
@@ -286,7 +291,7 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
             _startEventText.gameObject.SetActive(false);
 
             // Disable the music box object
-            musicBoxObject.enabled = false;
+            _musicboxObject.enabled = false;
 
             // Fade out the black screen
             for (float i = _blackScreen.color.a; i > 0; i -= 0.01f)
@@ -305,7 +310,7 @@ public class Musicbox : MonoBehaviour, ICustomUpdatable
             yield return new WaitUntil(() => !AudioManager.Instance.IsPlaying(gameObject.GetInstanceID()));
 
             // enable the musicbox object
-            musicBoxObject.enabled = true;
+            _musicboxObject.enabled = true;
 
             // Resume the environment music
             AudioManager.Instance.UnpauseAudio(AudioManager.Instance.Environment);

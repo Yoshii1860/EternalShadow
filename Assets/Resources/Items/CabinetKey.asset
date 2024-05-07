@@ -16,11 +16,11 @@ MonoBehaviour:
   Description: Etched with "Cabinet," this key unlocks hidden compartments, potentially
     revealing essential resources vital for your survival.
   Icon: {fileID: 21300000, guid: 4c12479499f37b54a807d1c01cd74658, type: 3}
-  IconPath: VFX/ItemIcons/cabinetkey
+  IconPath: VFX/ItemIcons/Cabinetkey
   IsUnique: 1
   Quantity: 1
   Prefab: {fileID: 1807402537570743421, guid: 61e0685f30dfc3b4986b294685b09019, type: 3}
-  PrefabPath: Prefabs/Items/cabinetKey
+  PrefabPath: Prefabs/Items/CabinetKey
   Type: 3
   ammoType: 0
   potionType: 0

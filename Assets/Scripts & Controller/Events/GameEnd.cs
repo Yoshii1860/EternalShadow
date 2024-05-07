@@ -52,6 +52,7 @@ public class GameEnd : MonoBehaviour, ICustomUpdatable
     void Start()
     {
         _door = GetComponent<Door>();
+        _creditsText.gameObject.SetActive(false);
     }
 
     #endregion
@@ -94,13 +95,15 @@ public class GameEnd : MonoBehaviour, ICustomUpdatable
 
         yield return new WaitForSeconds(0.1f);
 
+        _creditsText.gameObject.SetActive(true);
+
         // Play the piano music
         AudioManager.Instance.PlayAudio(AudioManager.Instance.Environment, 0.6f, 1f, true);
 
-        // scroll through credits, it starts at -400f and stops at 3400f 
+        // scroll through credits, it starts at -600f and stops at 3400f 
         RectTransform creditsRect = _creditsText.GetComponent<RectTransform>();
-        float creditsY = -400f;
-        while (creditsY < 3400f)
+        float creditsY = -600f;
+        while (creditsY < 3600f)
         {
             creditsY += _creditsScrollSpeed * Time.deltaTime;
             creditsRect.anchoredPosition = new Vector2(0, creditsY);

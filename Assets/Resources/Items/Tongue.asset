@@ -16,11 +16,11 @@ MonoBehaviour:
   Description: The eerie tongue of a virgin may hold the key to unraveling the asylum's
     sinister mysteries.
   Icon: {fileID: 21300000, guid: 4acb1be10ca2a104a9e5ba3890f5dea3, type: 3}
-  IconPath: VFX/ItemIcons/tongue
+  IconPath: VFX/ItemIcons/Tongue
   IsUnique: 1
   Quantity: 1
   Prefab: {fileID: 100000, guid: ba48470c01822bc46aed8279f940178d, type: 3}
-  PrefabPath: Prefabs/Items/tongue
+  PrefabPath: Prefabs/Items/Tongue
   Type: 3
   ammoType: 0
   potionType: 0

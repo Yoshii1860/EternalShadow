@@ -53,6 +53,18 @@ TagManager:
   - Locker
   - TextObjectPool
   - SummonObjectPool
+  - OptionsButton
+  - OptionsMenu
+  - DeathMenu
+  - ReturnGame
+  - InputButton
+  - GraphicsButton
+  - Controller
+  - Mouse
+  - HighQ
+  - MediumQ
+  - LowQ
+  - Checkbox
   layers:
   - Default
   - TransparentFX
@@ -67,7 +79,7 @@ TagManager:
   - Sensing
   - Mirror
   - Ignore Render
-  - 
+  - Post Processing
   - 
   - 
   - 

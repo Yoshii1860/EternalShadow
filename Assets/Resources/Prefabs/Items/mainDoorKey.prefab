@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 156854461}
   - component: {fileID: 156854460}
   m_Layer: 6
-  m_Name: mainDoorKey
+  m_Name: MainDoorKey
   m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

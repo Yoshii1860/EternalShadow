@@ -16,11 +16,11 @@ MonoBehaviour:
   Description: A macabre relic, the eyeball of a virgin may hold the key to unlocking
     hidden truths within the asylum.
   Icon: {fileID: 21300000, guid: 2c531783abd91f44d977bcb07cc6f104, type: 3}
-  IconPath: VFX/ItemIcons/eyeball
+  IconPath: VFX/ItemIcons/Eyeball
   IsUnique: 1
   Quantity: 1
   Prefab: {fileID: 100000, guid: 321aeb75cb4739347933259625718bd5, type: 3}
-  PrefabPath: Prefabs/Items/eyeball
+  PrefabPath: Prefabs/Items/Eyeball
   Type: 3
   ammoType: 0
   potionType: 0

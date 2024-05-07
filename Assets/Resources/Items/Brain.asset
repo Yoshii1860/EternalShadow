@@ -16,11 +16,11 @@ MonoBehaviour:
   Description: The untouched brain of a virgin holds secrets untold, awaiting discovery
     within the asylum's twisted corridors
   Icon: {fileID: 21300000, guid: b5f38e04520e1554092117d4f17174fc, type: 3}
-  IconPath: VFX/ItemIcons/brain
+  IconPath: VFX/ItemIcons/Brain
   IsUnique: 1
   Quantity: 1
   Prefab: {fileID: 100000, guid: 0a4501812c4156b4f923dbc32798cee6, type: 3}
-  PrefabPath: Prefabs/Items/brain
+  PrefabPath: Prefabs/Items/Brain
   Type: 3
   ammoType: 0
   potionType: 0

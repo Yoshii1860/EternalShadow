@@ -16,11 +16,11 @@ MonoBehaviour:
   Description: Pry open locked doors and containers with this indispensable tool,
     but be wary of what you might uncover.
   Icon: {fileID: 21300000, guid: 7103a837e8d94354988b564ec18db391, type: 3}
-  IconPath: VFX/ItemIcons/crowbar
+  IconPath: VFX/ItemIcons/Crowbar
   IsUnique: 1
   Quantity: 1
   Prefab: {fileID: 1258877030806509160, guid: 0ac4e9353a0b4c84288e95efd6c2ab55, type: 3}
-  PrefabPath: Prefabs/Items/crowbar (1)
+  PrefabPath: Prefabs/Items/Crowbar
   Type: 3
   ammoType: 0
   potionType: 0
