@@ -12,7 +12,7 @@ public class ActionAttack : Node
     private AISensor _aiSensor;
 
     // variables for attack behavior
-    private float _attackCounter = 0f;
+    private float _attackCounter = 5f;
     private float _attackInterval;
 
     private bool _debugMode;

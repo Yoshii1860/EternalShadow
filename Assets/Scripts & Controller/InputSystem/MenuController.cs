@@ -8,7 +8,7 @@ using TMPro;
 using System.IO;
 using UnityEngine.SceneManagement;
 
-public class MenuController : MonoBehaviour, ICustomUpdatable
+public class MenuController : MonoBehaviour, ICustomUpdatable, IPointerEnterHandler, IPointerExitHandler
 {
     #region Singleton
 
@@ -86,11 +86,17 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
     [Header("Message Display Reference")]
     [SerializeField] private Transform _messageDisplay;
+    [SerializeField] private GameObject _sensitivityDisplay;
+    [SerializeField] private Slider _sensitivitySlider;
     [Space(10)]
 
-    [Header("Menu Settings")]
+    [Header("Other Menu Settings")]
     public bool CanCloseMenu = true;
     public float CloseMenuTimer = 0f;
+    public float SensitivityValue = 0f;
+    [SerializeField] private TextMeshProUGUI _sensitivityText;
+    [SerializeField] private GameObject _mouseCheckbox;
+    [SerializeField] private GameObject _controllerCheckbox;
     [Space(10)]
 
     [Header("Colors")]
@@ -105,6 +111,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     private Button _selectedButton;
     private int _currentButtonNumber;
     private bool _isDead = false;
+    private bool _isAdjustingSensitivity = false;
 
     // Audio Source and Clips
     private AudioSource _audioSource;
@@ -115,6 +122,8 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     private AudioClip _bootPC;
     private AudioClip _shutdownPC;
     private AudioClip _wooshClip;
+
+    private float _clickTimer = 0f;
 
     #endregion
 
@@ -129,10 +138,12 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     private bool _canMove = false;
     private bool _isDeciding = false;
     private bool _isAccepting = false;
+    private bool _isLoading = false;
 
     // Input Handling Variables
     private bool _isInteracting, _isGoingBack;
     private Vector2 _movePos;
+    private float _moveSensitivity;
 
     #endregion
 
@@ -162,9 +173,6 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
         #endregion
 
-
-
-        // Initialize the menu variables
         _menus = new Transform[] { _mainMenu, _loadMenu, _saveMenu, _deathMenu, _optionsMenu, _deviceMenu, _graphicsMenu};
         _audioSource = GetComponent<AudioSource>();
         _enterClip = Resources.Load<AudioClip>("SFX/clicker");
@@ -175,22 +183,10 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         _shutdownPC = Resources.Load<AudioClip>("SFX/shutdown pc");
         _wooshClip = Resources.Load<AudioClip>("SFX/woosh");
 
-        // Set the input device to the default value if it is not set
-        int deviceChoice = PlayerPrefs.GetInt("InputDevice", -1);
-        if (deviceChoice == -1)
-        {
-            PlayerPrefs.SetInt("InputDevice", 0);
-        }
-
-        // Set the graphics quality to the default value if it is not set
-        int graphicsChoice = PlayerPrefs.GetInt("GraphicsQuality", -1);
-        if (graphicsChoice == -1)
-        {
-            OnHighQualitySelected();
-        }
+        InitializeInputDevice();
+        InitializeGraphicsQuality();
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         if (SceneManager.GetActiveScene().name == "MainMenu")
@@ -209,6 +205,56 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
 
 
+    #region Initialization Methods
+
+    private void InitializeInputDevice()
+    {
+        int deviceChoice = PlayerPrefs.GetInt("InputDevice", 0);
+        if (Gamepad.all.Count == 0)
+        {
+            PlayerPrefs.SetInt("InputDevice", 0);
+            OnMouseSelected();
+        }
+        else if (deviceChoice == 0) 
+        {
+            OnMouseSelected();
+        }
+        else if (deviceChoice == 1) 
+        {
+            OnControllerSelected();
+        }
+
+        float sensitivityValue = PlayerPrefs.GetFloat("Sensitivity", 0);
+        if (sensitivityValue != 0)
+        {
+            SensitivityValue = sensitivityValue;
+            _sensitivitySlider.value = SensitivityValue;
+            _sensitivityText.text = SensitivityValue.ToString();
+        }
+    }
+
+    private void InitializeGraphicsQuality()
+    {
+        int graphicsChoice = PlayerPrefs.GetInt("GraphicsQuality", 1);
+        if (graphicsChoice == 0)
+        {
+            OnLowQualitySelected();
+        }
+        else if (graphicsChoice == 1)
+        {
+            OnMediumQualitySelected();
+        }
+        else if (graphicsChoice == 2)
+        {
+            OnHighQualitySelected();
+        }
+    }
+
+    #endregion
+
+
+
+
     #region Custom Update
 
     // Custom Update method to handle menu interactions
@@ -217,10 +263,18 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         if (CloseMenuTimer < .5f)   CloseMenuTimer += deltaTime;
         else                        CanCloseMenu = true;
 
+        _clickTimer += deltaTime;
+
         if (GameManager.Instance.CurrentGameState == GameManager.GameState.MENU)
         {
             if (_isInteracting) Interact();
             if (_isGoingBack) Back();
+        }
+
+        if (Gamepad.all.Count == 0)
+        {
+            PlayerPrefs.SetInt("InputDevice", 0);
+            OnMouseSelected();
         }
     }
 
@@ -265,7 +319,16 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         if (Time.time - MoveDebounceTime > deltaTime)
         {
             MoveDebounceTime = Time.time;
-            if (!_canMove) Move();
+            if (!_canMove && !_isLoading) Move();
+        }
+    }
+
+    public void OnScroll(InputAction.CallbackContext context)
+    {
+        if (_isAdjustingSensitivity)
+        {
+            _moveSensitivity = context.ReadValue<float>();
+            MoveOnSensitivity();
         }
     }
 
@@ -279,14 +342,23 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
 
 
-    #region Menu Interaction Methods
+    #region Menu Keyboard Interaction Methods
 
     // Method to handle menu interactions
     private void Interact()
     {
         _isInteracting = false;
+
+        if (_isAdjustingSensitivity)
+        {
+            StartCoroutine(StopAdjustingSensitivity());
+            return;
+        }
         
-        if (_selectedButton == null) return;
+        if (_selectedButton == null || _isLoading == false) 
+        {
+            return;
+        }
 
         if (_isDeciding) 
         {
@@ -338,6 +410,176 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
 
 
+    #region Button Navigation Methods
+
+    public void StartNewGameButton()
+    {
+        if (_isDeciding) return;
+        _audioSource.PlayOneShot(_wooshClip, 0.5f);
+        StartCoroutine(StartNewGame());
+    }
+
+    public void LoadGameButton()
+    {
+        if (_isDeciding) return;
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        ActivateMenu(_loadMenu);
+    }
+
+    public void OptionsButton()
+    {
+        if (_isDeciding) return;
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        ActivateMenu(_optionsMenu);
+    }
+
+    public void GraphicsButton()
+    {
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        ActivateMenu(_graphicsMenu);
+    }
+
+    public void LowQualityButton()
+    {
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        OnLowQualitySelected();
+        ShowChosenGraphics();
+    }
+
+    public void MediumQualityButton()
+    {
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        OnMediumQualitySelected();
+        ShowChosenGraphics();
+    }
+
+    public void HighQualityButton()
+    {
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        OnHighQualitySelected();
+        ShowChosenGraphics();
+    }
+
+    public void InputButton()
+    {
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        ActivateMenu(_deviceMenu);
+    }
+
+    public void MouseButton()
+    {
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        OnMouseSelected();
+        ShowActiveDevice();
+    }
+
+    public void ControllerButton()
+    {
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        OnControllerSelected();
+        ShowActiveDevice();
+    }
+
+    public void ExitGameButton()
+    {
+        if (_isDeciding) return;
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        StartCoroutine(ExitGame());
+    }
+
+    public void ReturnButton()
+    {
+        if (_isDeciding) return;
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        Return();
+    }
+
+    public void RetryButton()
+    {
+        if (_isDeciding) return;
+        _audioSource.PlayOneShot(_wooshClip, 0.5f);
+        LoadAuotsave();
+    }
+
+    public void YesButton()
+    {
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        _isAccepting = true;
+        _isDeciding = false;
+    }
+
+    public void NoButton()
+    {
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        _isAccepting = false;
+        _isDeciding = false;
+    }
+
+    public void SensitivityButton()
+    {
+        StartCoroutine(AdjustSensitivity());
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        Debug.Log("Pointer Enter: " + eventData.hovered[0].name + ", " + eventData.hovered[1].name);
+        if (_isLoading) return;
+
+        if (_isDeciding)
+        {
+            foreach (GameObject obj in eventData.hovered)
+            {
+                Debug.Log(obj.name);
+                if (obj.CompareTag("Yes") || obj.CompareTag("No"))
+                {
+                    _selectedButton = obj.GetComponent<Button>();
+                    ChangeHoverButtonColor(true);
+                }
+            }
+        }
+        else
+        {
+            foreach (GameObject obj in eventData.hovered)
+            {
+                if (obj.GetComponent<Button>() != null)
+                {
+                    _selectedButton = obj.GetComponent<Button>();
+                    ChangeHoverButtonColor(true);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (_isLoading) return;
+        ChangeHoverButtonColor(false);
+    }
+
+    public void OnChangingSensitivity()
+    {
+        // round the sensitivity value to the nearest 0.1
+        SensitivityValue = Mathf.Round(_sensitivitySlider.value * 10) / 10;
+        _sensitivitySlider.value = SensitivityValue;
+    }
+
+    public void LoadFileButton()
+    {
+        _audioSource.PlayOneShot(_enterClip, 0.5f);
+        StartCoroutine(LoadFile());
+    }
+
+    public void SaveFileButton()
+    {
+        StartCoroutine(SaveFile());
+    }
+
+    #endregion
+
+
+
+
     #region Menu Navigation Methods
 
     // Method to handle menu navigation
@@ -347,6 +589,11 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         if (_isDeciding)
         {
             MoveOnDecision();
+            return;
+        }
+        else if (_isAdjustingSensitivity) 
+        {
+            MoveOnSensitivity();
             return;
         }
 
@@ -403,6 +650,25 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             if (_selectedButton == _decisionButtons[0]) return;
             _selectedButton = _decisionButtons[0];
             ChangeSelectedButtonColor(_selectedButton);
+        }
+    }
+
+    // Method to move on sensitivity buttons
+    private void MoveOnSensitivity()
+    {
+        if (_moveSensitivity > 0.5f)
+        {
+            if (SensitivityValue < 1f) 
+            {
+                _sensitivitySlider.value += 0.1f;
+            }
+        }
+        else if (_moveSensitivity < -0.5f)
+        {
+            if (SensitivityValue > -1f) 
+            {
+                _sensitivitySlider.value -= 0.1f;
+            }
         }
     }
 
@@ -593,10 +859,38 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
 
         _returnFromLoadButton.GetComponentInChildren<Image>().color = _unselectedColor;
         _returnFromSaveButton.GetComponentInChildren<Image>().color = _unselectedColor;
-        button.GetComponentInChildren<Image>().color = _selectedColor;
+        if (button != null) button.GetComponentInChildren<Image>().color = _selectedColor;
 
-        // Play the click sound effect
-        _audioSource.PlayOneShot(_clickClip, 0.5f);
+        // Play the click sound effect and prevent OnPointerExit from playing the sound
+        if (_clickTimer > 0.2f && button != null) 
+        {
+            _audioSource.PlayOneShot(_clickClip, 0.5f);
+            _clickTimer = 0f;
+        }
+    }
+
+    private void ChangeHoverButtonColor(bool isPointing)
+    {
+        if (isPointing)
+        {
+            if (_clickTimer > 0.2f)
+            {
+                _audioSource.PlayOneShot(_clickClip, 0.5f);
+                _clickTimer = 0f;
+            }
+            _selectedButton.GetComponentInChildren<Image>().color = _selectedColor;
+        }
+        else
+        {
+            if (_selectedButton != null) 
+            {
+                foreach (Button b in _buttons)
+                {
+                    b.GetComponentInChildren<Image>().color = _unselectedColor;
+                }
+                _selectedButton = null;
+            }
+        }
     }
 
     #endregion
@@ -677,7 +971,13 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
                 if (GameManager.Instance.PlayerController != null) GameManager.Instance.PlayerController.SetInputDevice(0);
                 break;
 
+            case "Sensitivity":
+                Debug.Log("Sensitivity");
+                StartCoroutine(AdjustSensitivity());
+                break;
+
             default:
+                Debug.Log("Default");
                 break;
         }
 
@@ -689,8 +989,8 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         int deviceChoice = PlayerPrefs.GetInt("InputDevice", 0);
 
         // Find the devices and change their checkmarks
-        GameObject.FindWithTag("Mouse").transform.GetChild(1).GetChild(0).gameObject.SetActive(deviceChoice == 0 ? true : false);
-        GameObject.FindWithTag("Controller").transform.GetChild(1).GetChild(0).gameObject.SetActive(deviceChoice == 1 ? true : false);
+        _mouseCheckbox.SetActive(deviceChoice == 0 ? true : false);
+        _controllerCheckbox.SetActive(deviceChoice == 1 ? true : false);
     }
 
     private void ShowChosenGraphics()
@@ -733,6 +1033,26 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     {
         PlayerPrefs.SetInt("GraphicsQuality", 2);
         QualitySettings.SetQualityLevel(2);
+    }
+
+    private IEnumerator AdjustSensitivity()
+    {
+        _isAdjustingSensitivity = true;
+        int menuID = HideMenu();
+        _sensitivityDisplay.SetActive(true);
+        yield return new WaitUntil(() => !_isAdjustingSensitivity);
+        _menus[menuID].gameObject.SetActive(true);
+        _sensitivityDisplay.SetActive(false);
+    }
+
+    private IEnumerator StopAdjustingSensitivity()
+    {
+        _sensitivityText.text = SensitivityValue.ToString();
+        PlayerPrefs.SetFloat("Sensitivity", SensitivityValue);
+        if (GameManager.Instance.PlayerController != null) GameManager.Instance.PlayerController.SetInputDevice(PlayerPrefs.GetInt("InputDevice", 0));
+        yield return new WaitForSeconds(0.2f);
+        _isAdjustingSensitivity = false;
+        yield return null;
     }
 
     #endregion
@@ -819,8 +1139,10 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             // Decision
             ////////////////////////////
             _isDeciding = true;
-            MessageDisplay("Unsaved progress will be lost. Continue?");
+            int menuID = HideMenu();
+            MessageDisplay("Unsaved progress will be lost.\n\nContinue?");
             yield return new WaitUntil(() => !_isDeciding);
+            _menus[menuID].gameObject.SetActive(true);
             _messageDisplay.gameObject.SetActive(false);
             _selectedButton = saveButton;
             if (!_isAccepting)
@@ -869,8 +1191,10 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             // Decision
             ////////////////////////////
             _isDeciding = true;
+            int menuID = HideMenu();
             MessageDisplay("Overwrite file?");
             yield return new WaitUntil(() => !_isDeciding);
+            _menus[menuID].gameObject.SetActive(true);
             _messageDisplay.gameObject.SetActive(false);
             if (_isAccepting)
             {
@@ -946,7 +1270,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
     // Method to display a message on the screen for the player to decide
     private void MessageDisplay(string message)
     {
-        _messageDisplay.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = message;
+        _messageDisplay.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = message;
         _decisionButtons = _messageDisplay.GetComponentsInChildren<Button>(true);
         _messageDisplay.gameObject.SetActive(true);
     }
@@ -1033,8 +1357,10 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
             // Decision
             ////////////////////////////
             _isDeciding = true;
+            int menuID = HideMenu();
             MessageDisplay("Exit to Main Menu?");
             yield return new WaitUntil(() => !_isDeciding);
+            _menus[menuID].gameObject.SetActive(true);
             _messageDisplay.gameObject.SetActive(false);
 
             // If the player accepts, exit to the main menu
@@ -1057,9 +1383,26 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         }
     }
 
+    private int HideMenu()
+    {
+        int counter = 0;
+        foreach (Transform menu in _menus)
+        {
+            if (menu.gameObject.activeSelf)
+            {
+                menu.gameObject.SetActive(false);
+                break;
+            }
+            menu.gameObject.SetActive(false);
+            counter++;
+        }
+        return counter; 
+    }
+
     // Coroutine to start a new game
     private IEnumerator StartNewGame()
     {
+        _isLoading = true;
         _isInteracting = false;
         _selectedButton = null;
         _canMove = true;
@@ -1075,6 +1418,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable
         GameManager.Instance.LoadNewGame();
         ActivateMenu(_mainMenu, false);
         MenuCanvas.SetActive(false);
+        _isLoading = false;
 
         yield return new WaitForSeconds(1f);
 

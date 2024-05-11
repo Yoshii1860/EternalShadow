@@ -65,6 +65,7 @@ TagManager:
   - MediumQ
   - LowQ
   - Checkbox
+  - Sensitivity
   layers:
   - Default
   - TransparentFX

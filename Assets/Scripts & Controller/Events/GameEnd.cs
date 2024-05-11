@@ -68,6 +68,9 @@ public class GameEnd : MonoBehaviour, ICustomUpdatable
 
         yield return new WaitForSeconds(2f);
 
+        // Set the player to default to prevent any UI from the stats and Audio from the player
+        GameManager.Instance.Player.SetToDefault(false);
+
         // Start the gameplay event
         GameManager.Instance.GameplayEvent();
 

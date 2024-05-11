@@ -142,10 +142,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
         _startFocalLength = CMVirtualCamera.m_Lens.FieldOfView;
 
         if (_camRoot == null) _camRoot = transform.GetChild(0).gameObject;
-        if (_camRoot == null) Debug.LogError("No _camRoot found!");
-
-        int deviceChoice = PlayerPrefs.GetInt("DeviceChoice", 0);
-        SetInputDevice(deviceChoice);
+        if (_camRoot == null) Debug.LogError("No camRoot found!");
     }
 
     // Update is called once per frame
@@ -209,7 +206,7 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
             target = _camRoot.transform;
             CMVirtualCamera.Follow = target;
             //LookAtReset();
-            Debug.Log("Follow target is null, setting to _camRoot");
+            Debug.Log("Follow target is null, setting to camRoot");
         }
         else
         {
@@ -370,8 +367,18 @@ public class PlayerController : MonoBehaviour, ICustomUpdatable
 
     public void SetInputDevice(int deviceChoice)
     {
-        if (deviceChoice == 0) RotationSpeed = BaseRotationSpeed;
-        else RotationSpeed = ControllerRotationSpeed;
+        float value = PlayerPrefs.GetFloat("Sensitivity", 0);
+
+        if (deviceChoice == 0) 
+        {
+            float sensitivity = BaseRotationSpeed * (1f + value);
+            RotationSpeed = sensitivity;
+        }
+        else 
+        {
+            float sensitivity = ControllerRotationSpeed * (1f + value);
+            RotationSpeed = sensitivity;
+        }
     }
 
     #endregion

@@ -110,7 +110,7 @@ public class InputManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("Action map available but not bound: " + actionMap.name);
+                if (_debugMode) Debug.LogWarning("Action map available but not bound: " + actionMap.name);
             }
         }
 
@@ -183,7 +183,7 @@ public class InputManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
+                if (_debugMode) Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
             }
         }
 
@@ -219,9 +219,13 @@ public class InputManager : MonoBehaviour
             {
                 action.performed += _menuController.OnBack;
             }
+            else if (action.name == "Scroll")
+            {
+                action.performed += _menuController.OnScroll;
+            }
             else
             {
-                Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
+                if (_debugMode) Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
             }
         }
 
@@ -275,7 +279,7 @@ public class InputManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
+                if (_debugMode) Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
             }
         }
 
@@ -305,7 +309,7 @@ public class InputManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
+                if (_debugMode) Debug.LogWarning("Action available but not bound on " + actionMap.name + ": " + action.name);
             }
         }
 

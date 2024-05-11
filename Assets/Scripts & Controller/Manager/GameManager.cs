@@ -161,6 +161,9 @@ public class GameManager : MonoBehaviour
         Player = GameObject.FindWithTag("Player").GetComponent<Player>();
         if (PlayerAnimManager == null) PlayerAnimManager = GameObject.FindWithTag("Player").GetComponent<PlayerAnimManager>();
         if (PlayerController == null)  PlayerController = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
+        int deviceChoice = PlayerPrefs.GetInt("InputDevice", 0);
+        PlayerController.SetInputDevice(deviceChoice);
+
         if (PickupCanvas == null) PickupCanvas = GameObject.FindWithTag("PickupCanvas");
         if (PickupName == null) PickupName = PickupCanvas.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
         if (PickupDescription == null) PickupDescription = PickupCanvas.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
@@ -629,6 +632,9 @@ public class GameManager : MonoBehaviour
         {
             yield return null;
         }
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
 
         _progressBar = GameObject.Find("ProgressBar").GetComponent<Image>();
 

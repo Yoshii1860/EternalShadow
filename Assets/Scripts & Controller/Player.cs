@@ -70,6 +70,9 @@ public class Player : MonoBehaviour, ICustomUpdatable
 
     private ChromaticAberration _chromaticAberration;
 
+    [Space(10)]
+    [SerializeField] private bool _debugMode = false;
+
     #endregion
 
 
@@ -146,10 +149,41 @@ public class Player : MonoBehaviour, ICustomUpdatable
 
 
 
+    #region Public Methods
+
+    public void SetToDefault(bool isUpdateable = true)
+    {
+        MaxHealth = 100f;
+        MaxStamina = 100f;
+        Health = MaxHealth;
+        Stamina = MaxStamina;
+        IsDizzy = false;
+        IsPoisoned = false;
+        IsBleeding = false;
+        IsOutOfStamina = false;
+        _isBreathing = false;
+        _isBreathingLouder = false;
+        _isBreathingLoudest = false;
+        _isMoaning = false;
+        _isHeartBeating = false;
+        _bloodOverlayImage.color = new Color(_bloodOverlayImage.color.r, _bloodOverlayImage.color.g, _bloodOverlayImage.color.b, 0f);
+        _poisonOverlayImage.color = new Color(_poisonOverlayImage.color.r, _poisonOverlayImage.color.g, _poisonOverlayImage.color.b, 0f);
+        _dizzyOverlayImage.color = new Color(_dizzyOverlayImage.color.r, _dizzyOverlayImage.color.g, _dizzyOverlayImage.color.b, 0f);
+        _chromaticAberration.intensity.value = 0f;
+        AudioManager.Instance.StopAudioWithDelay(_speakerID);
+        AudioManager.Instance.StopAudioWithDelay(_speaker2ID);
+        if (!isUpdateable) GameManager.Instance.CustomUpdateManager.RemoveCustomUpdatable(this);
+    }
+
+    #endregion
+
+
+
+
     #region Health Methods
 
     // Update the player's blood overlay and play sounds based on health
-    void LowLife()
+    private void LowLife()
     {
         // high health, turn off moaning sound and heartbeat sound, no blood overlay
     	if (Health >= MAX_HEALTH_THRESHOLD)
@@ -332,7 +366,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
         StartCoroutine(PoisonEffect());
 
         yield return new WaitUntil (() => !IsPoisoned);
-        Debug.Log("Poisoned routine ended.");
+        if (_debugMode) Debug.Log("Poisoned routine ended.");
         _poisonOverlayImage.color = new Color(_poisonOverlayImage.color.r, _poisonOverlayImage.color.g, _poisonOverlayImage.color.b, 0f);
     }
 
@@ -536,7 +570,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
                 AudioManager.Instance.SetAudioClip(_speakerID, "breathing");
                 AudioManager.Instance.PlayAudio(_speakerID, 0.4f, 1f, true);
             }
-            Debug.Log("Playing breathing");
+            if (_debugMode) Debug.Log("Playing breathing");
             _isBreathing = true;
             _isBreathingLouder = false;
             _isBreathingLoudest = false;
@@ -553,7 +587,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
                 AudioManager.Instance.SetAudioClip(_speakerID, "breathing");
                 AudioManager.Instance.PlayAudio(_speakerID, 0.7f, 1f, true);
             }
-            Debug.Log("Playing breathing louder");
+            if (_debugMode) Debug.Log("Playing breathing louder");
             _isBreathing = false;
             _isBreathingLouder = true;
             _isBreathingLoudest = false;
@@ -568,7 +602,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
                 AudioManager.Instance.SetAudioClip(_speakerID, "breathing");
                 AudioManager.Instance.PlayAudio(_speakerID, 1.1f, 1f, true);
             }
-            Debug.Log("Playing breathing loudest");
+            if (_debugMode) Debug.Log("Playing breathing loudest");
             _isBreathing = false;
             _isBreathingLouder = false;
             _isBreathingLoudest = true;
@@ -581,7 +615,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
     {
         yield return new WaitUntil(() => Stamina > BREATHING_THRESHOLD);
         AudioManager.Instance.StopAudioWithDelay(_speakerID);
-        Debug.Log("Stopping breathing");
+        if (_debugMode) Debug.Log("Stopping breathing");
         _isBreathing = false;
         _isBreathingLouder = false;
         _isBreathingLoudest = false;
@@ -626,11 +660,11 @@ public class Player : MonoBehaviour, ICustomUpdatable
         {
             Flashlight.enabled = !Flashlight.enabled;
             GameManager.Instance.PlayerAnimManager.Flashlight(Flashlight.transform.parent.gameObject, Flashlight.enabled);
-            Debug.Log("Light is available");
+            if (_debugMode) Debug.Log("Light is available");
         }
         else
         {
-            Debug.Log("Light is not available");
+            if (_debugMode) Debug.Log("Light is not available");
         }
     }
 
@@ -638,7 +672,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
     public bool TakeDamage(float damage)
     {
         Health -= damage;
-        Debug.Log("Player took " + damage + " damage. " + Health + " health left.");
+        if (_debugMode) Debug.Log("Player took " + damage + " damage. " + Health + " health left.");
         bool IsDead = Health <= 0;
         if (IsDead) Die();
         return IsDead;
@@ -653,7 +687,7 @@ public class Player : MonoBehaviour, ICustomUpdatable
         IsPoisoned = false;
         IsBleeding = false;
         StartCoroutine(DieRoutine());
-        Debug.Log("Player died.");
+        if (_debugMode) Debug.Log("Player died.");
     }
 
     // Death routine of the player
@@ -677,17 +711,11 @@ public class Player : MonoBehaviour, ICustomUpdatable
             yield return new WaitForSeconds(0.01f);
         }
 
+        SetToDefault(false);
+
         // play death music and open death screen
         AudioManager.Instance.SetAudioClip(AudioManager.Instance.Environment, "death music", 0.5f, 1f);
         GameManager.Instance.OpenDeathScreen();
-
-        // undo all status effects
-        IsDizzy = false;
-        IsPoisoned = false;
-        IsBleeding = false;
-        _dizzyOverlayImage.color = new Color(_dizzyOverlayImage.color.r, _dizzyOverlayImage.color.g, _dizzyOverlayImage.color.b, 0f);
-        _poisonOverlayImage.color = new Color(_poisonOverlayImage.color.r, _poisonOverlayImage.color.g, _poisonOverlayImage.color.b, 0f);
-        _bloodOverlayImage.color = new Color(_bloodOverlayImage.color.r, _bloodOverlayImage.color.g, _bloodOverlayImage.color.b, 0f);
 
         yield return new WaitForSeconds(0.5f);
 

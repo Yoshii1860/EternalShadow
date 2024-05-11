@@ -100,7 +100,7 @@ public class SummonEvent : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         // Play the summoning sound
-        AudioManager.Instance.PlayClipOneShot(_priest.GetInstanceID(), "summoning", 0.7f, 1f);
+        AudioManager.Instance.PlayClipOneShot(_priest.GetInstanceID(), "summoning", 0.5f, 1f);
 
         yield return new WaitForSeconds(3f);
 
