@@ -355,7 +355,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable, IPointerEnterHand
             return;
         }
         
-        if (_selectedButton == null || _isLoading == false) 
+        if (_selectedButton == null || _isLoading == true) 
         {
             return;
         }
@@ -368,6 +368,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable, IPointerEnterHand
         // Play the woosh sound effect
         if (string.Compare(_selectedButton.gameObject.name, "NewGame") == 0)
         {
+            _isLoading = true;
             _audioSource.PlayOneShot(_wooshClip, 0.5f);
             StartCoroutine(StartNewGame());
             return;
@@ -410,25 +411,26 @@ public class MenuController : MonoBehaviour, ICustomUpdatable, IPointerEnterHand
 
 
 
-    #region Button Navigation Methods
+    #region Mouse Navigation Methods
 
     public void StartNewGameButton()
     {
-        if (_isDeciding) return;
+        if (_isLoading) return;
+        _isLoading = true;
         _audioSource.PlayOneShot(_wooshClip, 0.5f);
         StartCoroutine(StartNewGame());
     }
 
     public void LoadGameButton()
     {
-        if (_isDeciding) return;
+        if (_isLoading) return;
         _audioSource.PlayOneShot(_enterClip, 0.5f);
         ActivateMenu(_loadMenu);
     }
 
     public void OptionsButton()
     {
-        if (_isDeciding) return;
+        if (_isLoading) return;
         _audioSource.PlayOneShot(_enterClip, 0.5f);
         ActivateMenu(_optionsMenu);
     }
@@ -482,21 +484,21 @@ public class MenuController : MonoBehaviour, ICustomUpdatable, IPointerEnterHand
 
     public void ExitGameButton()
     {
-        if (_isDeciding) return;
+        if (_isLoading) return;
         _audioSource.PlayOneShot(_enterClip, 0.5f);
         StartCoroutine(ExitGame());
     }
 
     public void ReturnButton()
     {
-        if (_isDeciding) return;
+        if (_isLoading) return;
         _audioSource.PlayOneShot(_enterClip, 0.5f);
         Return();
     }
 
     public void RetryButton()
     {
-        if (_isDeciding) return;
+        if (_isLoading) return;
         _audioSource.PlayOneShot(_wooshClip, 0.5f);
         LoadAuotsave();
     }
@@ -522,7 +524,6 @@ public class MenuController : MonoBehaviour, ICustomUpdatable, IPointerEnterHand
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("Pointer Enter: " + eventData.hovered[0].name + ", " + eventData.hovered[1].name);
         if (_isLoading) return;
 
         if (_isDeciding)
@@ -963,7 +964,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable, IPointerEnterHand
         {
             case "Controller":
                 OnControllerSelected();
-                if (GameManager.Instance.PlayerController != null) GameManager.Instance.PlayerController.SetInputDevice(1);
+                if (GameManager.Instance.PlayerController != null && Gamepad.current != null) GameManager.Instance.PlayerController.SetInputDevice(1);
                 break;
 
             case "Mouse":
@@ -1005,6 +1006,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable, IPointerEnterHand
 
     private void OnControllerSelected()
     {
+        if (Gamepad.current == null) return;
         PlayerPrefs.SetInt("InputDevice", 1);
         InputSystem.EnableDevice(Gamepad.current);
         InputSystem.DisableDevice(Mouse.current);
@@ -1014,7 +1016,7 @@ public class MenuController : MonoBehaviour, ICustomUpdatable, IPointerEnterHand
     {
         PlayerPrefs.SetInt("InputDevice", 0);
         InputSystem.EnableDevice(Mouse.current);
-        InputSystem.DisableDevice(Gamepad.current);
+        if (Gamepad.current != null) InputSystem.DisableDevice(Gamepad.current);
     }
 
     private void OnLowQualitySelected()
@@ -1402,7 +1404,6 @@ public class MenuController : MonoBehaviour, ICustomUpdatable, IPointerEnterHand
     // Coroutine to start a new game
     private IEnumerator StartNewGame()
     {
-        _isLoading = true;
         _isInteracting = false;
         _selectedButton = null;
         _canMove = true;
