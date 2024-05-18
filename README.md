@@ -78,4 +78,4 @@ Once installed, launch the game´s exe-file from your start menu or applications
 
 ## Thank You for Playing!
 
-We hope you enjoy your terrifying experience in Libertas - The Last Cipher.
+I hope you enjoy your terrifying experience in Libertas - The Last Cipher.
