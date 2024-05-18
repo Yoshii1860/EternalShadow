@@ -1,6 +1,6 @@
 #  Libertas: The Last Cipher - Readme
 
-<a href="https://www.youtube.com/channel/UCtkFZtqfY99xL_QGZQAVpoA">
+<a href="https://www.youtube.com/watch?v=WRkVsdcTb38">
     <img alt="Flaticon" title="Flaticon" src="https://cdn-icons-png.flaticon.com/256/1384/1384060.png" width="30">
 </a>
 
