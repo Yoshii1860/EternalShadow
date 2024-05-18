@@ -39,33 +39,33 @@ Storage: 4 GB
 
 ## Controls
 
-Keyboard & Mouse
-Movement: WASD
-Look: Mouse
-Aim: Right Click
-Fire: Right Click + Left Click
-Sprint: Shift
-Crouch: CTRL
-Interact: Left Click || E
-Light: F
-Weapon Switch: Scroll
-Reload: R
-Inventory: I
-Menu: ESC
+Keyboard & Mouse |
+Movement: WASD -
+Look: Mouse -
+Aim: Right Click -
+Fire: Right Click + Left Click -
+Sprint: Shift -
+Crouch: CTRL -
+Interact: Left Click OR E -
+Light: F -
+Weapon Switch: Scroll -
+Reload: R -
+Inventory: I -
+Menu: ESC -
 
-Gamepad:
-Movement: Left Stick
-Look: Right Stick
-Aim: R2
-Fire: R2 + R1
-Sprint: Left Trigger
-Crouch: Button South
-Interact: Button West
-Light: D-Pad Down
-Weapon Switch: D-Pad Up
-Reload: Button East
-Inventory: Button North
-Menu: Start
+Gamepad: |
+Movement: Left Stick -
+Look: Right Stick -
+Aim: R2 -
+Fire: R2 + R1 -
+Sprint: Left Trigger -
+Crouch: Button South -
+Interact: Button West -
+Light: D-Pad Down -
+Weapon Switch: D-Pad Up -
+Reload: Button East -
+Inventory: Button North -
+Menu: Start -
 
 
 ## Installation
@@ -78,4 +78,4 @@ Once installed, launch the game´s exe-file from your start menu or applications
 
 ## Thank You for Playing!
 
-We hope you enjoy your terrifying experience in [Your Game Title].
+We hope you enjoy your terrifying experience in Libertas - The Last Cipher.
