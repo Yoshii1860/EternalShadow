@@ -43,7 +43,7 @@ Keyboard & Mouse |
 Movement: WASD -
 Look: Mouse -
 Aim: Right Click -
-Fire: Right Click + Left Click -
+Fire: Right Click AND Left Click -
 Sprint: Shift -
 Crouch: CTRL -
 Interact: Left Click OR E -
